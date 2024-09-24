@@ -1,0 +1,201 @@
+import { useState, useEffect } from 'react';
+import DataTable from '../../components/Tables/DataTable';
+import KanbanView from '../../components/KanbanView';
+import NewRecordPopup from '../../components/NewRecordPopup';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import ViewRecordPopup from '../../components/ViewRecordPopup';
+
+interface WorkbookData {
+  id: number;
+  name: string;
+  template: string;
+  templateId: number;
+  reportSubsetId: number;
+  module: string;
+  entity: string;
+  reportingCurrency: string;
+  reportingDate: number;
+  status: string;
+}
+
+const OverviewRegulatoryReports = () => {
+  const [view, setView] = useState<'list' | 'kanban'>('list');
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedModule, setSelectedModule] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>(''); // Search query state
+  const [data, setData] = useState<WorkbookData[]>([]); // API data
+  const [filteredData, setFilteredData] = useState<WorkbookData[]>([]); // Filtered data
+  const [modules, setModules] = useState<string[]>([]); // Dynamic module options
+  const [statuses, setStatuses] = useState<string[]>([]); // Dynamic status options
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState<string | null>(null); // Error state
+  const [isPanelOpen, setPanelOpen] = useState(false);
+
+  const togglePanel = () => {
+    setPanelOpen((prev) => !prev);
+  };
+
+  useEffect(() => {
+    // Fetch data from the API
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          'https://regnxtengined.azurewebsites.net/RI/Workbook',
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const result: WorkbookData[] = await response.json();
+        setData(result);
+        setFilteredData(result); // Set initial filtered data to all data
+
+        // Extract unique modules and statuses from the API data
+        const uniqueModules = Array.from(
+          new Set(result.map((item) => item.module)),
+        );
+        const uniqueStatuses = Array.from(
+          new Set(result.map((item) => item.status)),
+        );
+
+        setModules(uniqueModules); // Populate modules dropdown
+        setStatuses(uniqueStatuses); // Populate statuses dropdown
+
+        setLoading(false);
+      } catch (error) {
+        setError((error as Error).message);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    // Filter data based on selected module, status, and search query
+    let filtered = data;
+
+    if (selectedModule) {
+      filtered = filtered.filter((item) => item.module === selectedModule);
+    }
+
+    if (selectedStatus) {
+      filtered = filtered.filter((item) => item.status === selectedStatus);
+    }
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+
+      filtered = filtered.filter((item) =>
+        Object.values(item).some((value) =>
+          String(value).toLowerCase().includes(query),
+        ),
+      );
+    }
+
+    setFilteredData(filtered);
+  }, [selectedModule, selectedStatus, searchQuery, data]);
+
+  return (
+    <>
+      <div className="flex justify-between mb-4">
+        <div className="flex space-x-4">
+          <button
+            className={`px-4 py-2 ${view === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => setView('list')}
+          >
+            List
+          </button>
+          <button
+            className={`px-4 py-2 ${view === 'kanban' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => setView('kanban')}
+          >
+            Kanban
+          </button>
+        </div>
+        <button
+          className="px-4 py-2 bg-green-500 text-white rounded-md"
+          onClick={() => setShowPopup(true)}
+        >
+          New Record
+        </button>
+      </div>
+
+      <div className="pt-3 px-3 m-0 bg-white rounded-md shadow-md">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">Filters</h2>
+          <button
+            onClick={togglePanel}
+            className="text-blue-500 focus:outline-none w-6 h-6 flex items-center justify-center"
+          >
+            {isPanelOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+          </button>
+        </div>
+
+        <div
+          className={`mt-4 overflow-hidden transition-all duration-300 ease-in-out ${isPanelOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+        >
+          <div className="grid grid-cols-3 gap-4 pb-4">
+            {/* Module Filter */}
+            <div>
+              <select
+                value={selectedModule}
+                onChange={(e) => setSelectedModule(e.target.value)}
+                className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+              >
+                <option value="" disabled>
+                  Select Module
+                </option>
+                {modules.map((module) => (
+                  <option key={module} value={module}>
+                    {module}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+              >
+                <option value="" disabled>
+                  Select Status
+                </option>
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Search Query Filter */}
+            <div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search..."
+                className="relative z-20 w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Render the filtered data */}
+      {view === 'list' ? (
+        <DataTable data={filteredData} />
+      ) : (
+        <KanbanView data={filteredData} />
+      )}
+
+      {showPopup && <NewRecordPopup onClose={() => setShowPopup(false)} />}
+    </>
+  );
+};
+
+export default OverviewRegulatoryReports;
