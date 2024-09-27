@@ -557,6 +557,7 @@ const Sidebar = ({
                         </svg>
                       </NavLink>
                       {/* <!-- Dropdown Menu Start --> */}
+
                       <div
                         className={`translate transform overflow-hidden ${
                           !open && 'hidden'
@@ -572,6 +573,39 @@ const Sidebar = ({
                               }
                             >
                               Entity
+                            </NavLink>
+                          </li>
+                          <li>
+                            <NavLink
+                              to="/template"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                (isActive && '!text-white')
+                              }
+                            >
+                              Template
+                            </NavLink>
+                          </li>
+                          <li>
+                            <NavLink
+                              to="/regulatory-calender"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                (isActive && '!text-white')
+                              }
+                            >
+                              Regulatory Calender
+                            </NavLink>
+                          </li>
+                          <li>
+                            <NavLink
+                              to="/validation"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                (isActive && '!text-white')
+                              }
+                            >
+                              Validation
                             </NavLink>
                           </li>
                         </ul>

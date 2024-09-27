@@ -18,8 +18,10 @@ import AccountingLayer from './pages/AccountingLayer/AccountingLayer';
 import TransactionLayer from './pages/TransactionLayer/TransactionLayer';
 import Messages from './pages/Messages/Messages';
 import Profile from './pages/Profile/Profile';
-import Entity from './pages/Configuration/Configuration';
-
+import Entity from './pages/Configuration/Entity';
+import Template from './pages/Configuration/Template';
+import RegulatoryCalender from './pages/Configuration/RegulatoryCalender';
+import Validation from './pages/Configuration/Validation';
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
@@ -149,8 +151,35 @@ function App() {
           path="/entity"
           element={
             <>
-              <PageTitle title="Configuration | RegNxt" />
+              <PageTitle title="Entity | RegNxt" />
               <Entity />
+            </>
+          }
+        />
+        <Route
+          path="/template"
+          element={
+            <>
+              <PageTitle title="Template | RegNxt" />
+              <Template />
+            </>
+          }
+        />
+        <Route
+          path="/regulatory-calender"
+          element={
+            <>
+              <PageTitle title="Regulatory Calender | RegNxt" />
+              <RegulatoryCalender />
+            </>
+          }
+        />
+        <Route
+          path="/validation"
+          element={
+            <>
+              <PageTitle title="Validation | RegNxt" />
+              <Validation />
             </>
           }
         />
