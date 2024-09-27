@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import DataTable from '../../components/Tables/DataTable';
 import KanbanView from '../../components/KanbanView';
-import NewRecordPopup from '../../components/NewRecordPopup';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ViewRecordPopup from '../../components/ViewRecordPopup';
+import AddWorkbookModel from '../../components/CModels/WordbookModels/AddWorkbookModel';
 
 interface WorkbookData {
   id: number;
@@ -117,7 +117,7 @@ const OverviewRegulatoryReports = () => {
           className="px-4 py-2 bg-green-500 text-white rounded-md"
           onClick={() => setShowPopup(true)}
         >
-          New Record
+          New Wordbook
         </button>
       </div>
 
@@ -193,7 +193,7 @@ const OverviewRegulatoryReports = () => {
         <KanbanView data={filteredData} />
       )}
 
-      {showPopup && <NewRecordPopup onClose={() => setShowPopup(false)} />}
+      {showPopup && <AddWorkbookModel onClose={() => setShowPopup(false)} />}
     </>
   );
 };

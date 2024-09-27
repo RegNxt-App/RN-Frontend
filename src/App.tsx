@@ -16,9 +16,9 @@ import BusinessRules from './pages/BusinessRules/BusinessRules';
 import Processing from './pages/Processing/Processing';
 import AccountingLayer from './pages/AccountingLayer/AccountingLayer';
 import TransactionLayer from './pages/TransactionLayer/TransactionLayer';
-import Configuration from './pages/Configuration/Configuration';
 import Messages from './pages/Messages/Messages';
 import Profile from './pages/Profile/Profile';
+import Entity from './pages/Configuration/Configuration';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -146,11 +146,11 @@ function App() {
           }
         />
         <Route
-          path="/configuration"
+          path="/entity"
           element={
             <>
               <PageTitle title="Configuration | RegNxt" />
-              <Configuration />
+              <Entity />
             </>
           }
         />

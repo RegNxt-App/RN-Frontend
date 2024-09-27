@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Pagination from '../Pagination';
 import ViewRecordPopup from '../ViewRecordPopup';
 
-// Define the type for props
 interface WorkbookData {
   id: number;
   name: string;

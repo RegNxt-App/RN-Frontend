@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Package } from '../types/package';
+import { Package } from '../../../types/package';
 
 interface NewRecordPopupProps {
   onClose: () => void;
 }
 
-const NewRecordPopup: React.FC<NewRecordPopupProps> = ({ onClose }) => {
+const AddWorkbookModel: React.FC<NewRecordPopupProps> = ({ onClose }) => {
   const [formData, setFormData] = useState<Partial<Package>>({
     module: '',
     entity: '',
@@ -30,7 +30,9 @@ const NewRecordPopup: React.FC<NewRecordPopupProps> = ({ onClose }) => {
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="rounded-sm border border-stroke bg-white shadow-default p-6 w-full max-w-md">
         <div className="border-b border-stroke py-4 px-6.5">
-          <h3 className="text-2xl font-extrabold text-black">Add New Record</h3>
+          <h3 className="text-2xl font-extrabold text-black">
+            Add New Workbook
+          </h3>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="p-6.5">
@@ -93,4 +95,4 @@ const NewRecordPopup: React.FC<NewRecordPopupProps> = ({ onClose }) => {
   );
 };
 
-export default NewRecordPopup;
+export default AddWorkbookModel;
