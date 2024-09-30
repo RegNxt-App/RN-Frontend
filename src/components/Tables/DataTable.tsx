@@ -26,7 +26,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
   const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
     null,
-  ); // Added state to hold selected record
+  );
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -105,7 +105,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
                   <div className="flex items-center space-x-3.5">
                     <button
                       className="hover:text-primary"
-                      onClick={() => handleViewClick(item)} // Pass item to handleViewClick
+                      onClick={() => handleViewClick(item)}
                     >
                       View
                     </button>
@@ -124,7 +124,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
       {showWorkbookPopup && selectedRecord && (
         <ViewRecordPopup
           onClose={() => setShowWorkbookPopup(false)}
-          record={selectedRecord} // Pass the selected record to the popup
+          record={selectedRecord}
         />
       )}
     </div>

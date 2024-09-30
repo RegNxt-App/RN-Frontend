@@ -4,6 +4,7 @@ import KanbanView from '../../components/KanbanView';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ViewRecordPopup from '../../components/ViewRecordPopup';
 import AddWorkbookModel from '../../components/CModels/WordbookModels/AddWorkbookModel';
+import Api from '../../components/Api';
 
 interface WorkbookData {
   id: number;
@@ -23,13 +24,13 @@ const OverviewRegulatoryReports = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedModule, setSelectedModule] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState<string>(''); // Search query state
-  const [data, setData] = useState<WorkbookData[]>([]); // API data
-  const [filteredData, setFilteredData] = useState<WorkbookData[]>([]); // Filtered data
-  const [modules, setModules] = useState<string[]>([]); // Dynamic module options
-  const [statuses, setStatuses] = useState<string[]>([]); // Dynamic status options
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [data, setData] = useState<WorkbookData[]>([]);
+  const [filteredData, setFilteredData] = useState<WorkbookData[]>([]);
+  const [modules, setModules] = useState<string[]>([]);
+  const [statuses, setStatuses] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isPanelOpen, setPanelOpen] = useState(false);
 
   const togglePanel = () => {
@@ -37,20 +38,14 @@ const OverviewRegulatoryReports = () => {
   };
 
   useEffect(() => {
-    // Fetch data from the API
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          'https://regnxtengined.azurewebsites.net/RI/Workbook',
-        );
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        const result: WorkbookData[] = await response.json();
-        setData(result);
-        setFilteredData(result); // Set initial filtered data to all data
+        const response = await Api.get('/RI/Workbook');
 
-        // Extract unique modules and statuses from the API data
+        const result: WorkbookData[] = await response.data;
+        setData(result);
+        setFilteredData(result);
+
         const uniqueModules = Array.from(
           new Set(result.map((item) => item.module)),
         );
@@ -58,8 +53,8 @@ const OverviewRegulatoryReports = () => {
           new Set(result.map((item) => item.status)),
         );
 
-        setModules(uniqueModules); // Populate modules dropdown
-        setStatuses(uniqueStatuses); // Populate statuses dropdown
+        setModules(uniqueModules);
+        setStatuses(uniqueStatuses);
 
         setLoading(false);
       } catch (error) {
@@ -72,7 +67,6 @@ const OverviewRegulatoryReports = () => {
   }, []);
 
   useEffect(() => {
-    // Filter data based on selected module, status, and search query
     let filtered = data;
 
     if (selectedModule) {

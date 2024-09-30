@@ -17,7 +17,7 @@ const SignIn = () => {
 
     try {
       const response = await fetch(
-        'https://regnxtengined.azurewebsites.net/Accounts/authenticate',
+        `${import.meta.env.VITE_BASE_URL}/Accounts/authenticate`,
         {
           method: 'POST',
           headers: {
