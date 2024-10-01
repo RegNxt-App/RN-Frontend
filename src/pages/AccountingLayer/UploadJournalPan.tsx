@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, ChevronUp, ChevronDown, Plus, Minus } from 'lucide-react';
 
-const UploadPan: React.FC = () => {
+const UploadPan = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const togglePan = () => {
