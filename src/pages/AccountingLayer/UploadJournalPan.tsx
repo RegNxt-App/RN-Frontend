@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Upload, ChevronUp, ChevronDown, Plus, Minus } from 'lucide-react';
+import { useState } from 'react';
+import { Upload, Plus, Minus } from 'lucide-react';
 
 const UploadPan = () => {
   const [isOpen, setIsOpen] = useState(false);

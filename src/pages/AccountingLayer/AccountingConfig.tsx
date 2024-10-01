@@ -1,25 +1,8 @@
 import React, { useState } from 'react';
 import FdlAccountingConfig from '../../components/Tables/FdlAccountingConfig';
-import PostedJournalsData from '../../components/Tables/PostedJournalsData';
-// Corrected the duplicate import, assuming UnpostedJournalsData is different
-import UnpostedJournalsData from '../../components/Tables/UnpostedJournalsData';
 import AccountCode from './AccountCode';
 import FdlJournalPolicy from '../../components/Tables/FdlJournalPolicy';
 import CurrencyRate from './CurrencyRate';
-
-interface Item {
-  id: string;
-  JournalCode: string;
-  JournalNr: string;
-  Status: string;
-  EntryDate: string;
-  EntityList: string;
-  MinEffectiveDate: string;
-  MaxEffectiveDate: string;
-  ReversalJournalCode: string;
-  ReversalJournalNr: string;
-  Description: string;
-}
 
 interface TabContent {
   id: string;
