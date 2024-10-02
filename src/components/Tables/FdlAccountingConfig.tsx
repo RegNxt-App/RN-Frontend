@@ -3,14 +3,14 @@ import Pagination from '../Pagination';
 import ViewRecordPopup from '../ViewRecordPopup';
 import { Filter } from 'lucide-react';
 
-interface WorkbookData {
+interface AccountingCategory {
   id: string;
-  Name: string;
-  Description: string;
+  name: string;
+  description: string;
 }
 
 interface DataTableProps {
-  data: WorkbookData[];
+  data: AccountingCategory[];
 }
 
 interface FilterState {
@@ -35,10 +35,9 @@ const itemsPerPage = 10;
 const FdlAccountingConfig: React.FC<DataTableProps> = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
-    null,
-  );
-  const [filteredData, setFilteredData] = useState<WorkbookData[]>(data);
+  const [selectedRecord, setSelectedRecord] =
+    useState<AccountingCategory | null>(null);
+  const [filteredData, setFilteredData] = useState<AccountingCategory[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
@@ -50,7 +49,9 @@ const FdlAccountingConfig: React.FC<DataTableProps> = ({ data }) => {
     let result = data;
     Object.entries(filters).forEach(([key, filter]) => {
       result = result.filter((item) => {
-        const itemValue = String(item[key as keyof WorkbookData]).toLowerCase();
+        const itemValue = String(
+          item[key as keyof AccountingCategory],
+        ).toLowerCase();
         const filterValue = filter.value.toLowerCase();
         if (filter.type === 'matchAll') {
           return itemValue.includes(filterValue);
@@ -93,7 +94,7 @@ const FdlAccountingConfig: React.FC<DataTableProps> = ({ data }) => {
     setCurrentPage(pageNumber);
   };
 
-  const handleViewClick = (record: WorkbookData) => {
+  const handleViewClick = (record: AccountingCategory) => {
     setSelectedRecord(record);
     setShowWorkbookPopup(true);
   };
@@ -197,12 +198,12 @@ const FdlAccountingConfig: React.FC<DataTableProps> = ({ data }) => {
               <tr key={item.id}>
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
-                    {item.Name}
+                    {item.name}
                   </h5>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">
-                    {item.Description}
+                    {item.description}
                   </p>
                 </td>
               </tr>

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FdlAccountingConfig from '../../components/Tables/FdlAccountingConfig';
 import AccountCode from './AccountCode';
 import FdlJournalPolicy from '../../components/Tables/FdlJournalPolicy';
 import CurrencyRate from './CurrencyRate';
+import Api from '../../components/Api';
+import Loader from '../../components/loader';
 
 interface TabContent {
   id: string;
@@ -12,8 +14,8 @@ interface TabContent {
 
 interface AccountingCategory {
   id: string;
-  Name: string;
-  Description: string;
+  name: string;
+  description: string;
 }
 interface JournalPolicy {
   id: string;
@@ -31,7 +33,31 @@ interface JournalPolicy {
 
 const AccountingConfig = () => {
   const [activeTab, setActiveTab] = useState<string>('AccountingCategory');
+  const [accountingCategoryData, setAccountingCategoryData] = useState<
+    AccountingCategory[]
+  >([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({ name: '', email: '' });
+
+  useEffect(() => {
+    const fetchAccountingCategories = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await Api.get('/FDL/AccountingCategory');
+        setAccountingCategoryData(response.data);
+        console.log(response.data);
+      } catch (err: any) {
+        setError('Failed to fetch accounting categories');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccountingCategories();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -43,18 +69,6 @@ const AccountingConfig = () => {
     console.log('Form submitted:', formData);
   };
 
-  const accountingCategoryData: AccountingCategory[] = [
-    {
-      id: '1',
-      Name: 'PCOA',
-      Description: 'Primary Chart of Accounts',
-    },
-    {
-      id: '2',
-      Name: 'SCOA',
-      Description: 'Secondary Chart of Accounts',
-    },
-  ];
   const JournalPolicyData: JournalPolicy[] = [
     {
       id: '1',
@@ -88,12 +102,18 @@ const AccountingConfig = () => {
     {
       id: 'AccountingCategory',
       title: 'Accounting Category',
-      content: <FdlAccountingConfig data={accountingCategoryData} />,
+      content: loading ? (
+        <Loader />
+      ) : error ? (
+        <p>{error}</p>
+      ) : (
+        <FdlAccountingConfig data={accountingCategoryData} />
+      ),
     },
     {
       id: 'AccountCode',
       title: 'Account Code',
-      content: <AccountCode />,
+      content: <AccountCode accountingCategories={accountingCategoryData} />,
     },
     {
       id: 'JournalPolicy',
