@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Mail, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import Api from '../../components/Api';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -16,26 +17,12 @@ const SignIn = () => {
     setError(null);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/Accounts/authenticate`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        },
-      );
+      const response = await Api.post('/Accounts/authenticate', {
+        email,
+        password,
+      });
 
-      if (!response.ok) {
-        const { message } = await response.json();
-        throw new Error(message || 'Something went wrong');
-      }
-
-      const data = await response.json();
+      const data = response.data;
       localStorage.setItem('email', data.email);
       localStorage.setItem('id', data.id.toString());
       localStorage.setItem('jwtToken', data.jwtToken);
@@ -43,12 +30,11 @@ const SignIn = () => {
       console.log('Authentication successful', data);
       navigate('/reports-overview');
     } catch (error: any) {
-      setError(error.message || 'Failed to sign in');
+      setError(error.response?.data?.message || 'Failed to sign in');
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="flex flex-wrap items-center">
