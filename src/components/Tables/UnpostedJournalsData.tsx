@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
+import Api from '../Api';
+import FdlJournalDetailsTable from './FdlJournalDetailsTable';
 
-interface WorkbookData {
+interface UnpostedJournalsData {
   id: string;
   journalCode: string;
   journalNr: string;
   status: string;
   entryDate: string;
-  description: string;
   entityList: string;
   minEffectiveDate: string;
   maxEffectiveDate: string;
   reversalJournalCode: string;
   reversalJournalNr: string;
+  description: string;
 }
 
 interface DataTableProps {
-  data: WorkbookData[];
+  data: UnpostedJournalsData[];
 }
 
 interface FilterState {
@@ -39,15 +41,20 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const PostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
+const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
-    null,
-  );
-  const [filteredData, setFilteredData] = useState<WorkbookData[]>(data);
+  const [selectedRecord, setSelectedRecord] =
+    useState<UnpostedJournalsData | null>(null);
+  const [filteredData, setFilteredData] =
+    useState<UnpostedJournalsData[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [journalDetails, setJournalDetails] = useState<any | null>(null);
+  const [clickedjournalCode, setClickedjournalCode] = useState<string | null>(
+    null,
+  );
+  const [clickedjournalNr, setClickedjournalNr] = useState<string | null>(null);
 
   useEffect(() => {
     applyFilters();
@@ -57,7 +64,9 @@ const PostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
     let result = data;
     Object.entries(filters).forEach(([key, filter]) => {
       result = result.filter((item) => {
-        const itemValue = String(item[key as keyof WorkbookData]).toLowerCase();
+        const itemValue = String(
+          item[key as keyof UnpostedJournalsData],
+        ).toLowerCase();
         const filterValue = filter.value.toLowerCase();
         if (filter.type === 'matchAll') {
           return itemValue.includes(filterValue);
@@ -100,9 +109,19 @@ const PostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
     setCurrentPage(pageNumber);
   };
 
-  const handleViewClick = (record: WorkbookData) => {
-    setSelectedRecord(record);
-    setShowWorkbookPopup(true);
+  const handleRowClick = async (journalCode: string, journalNr: string) => {
+    setClickedjournalCode(journalCode);
+    setClickedjournalNr(journalNr);
+
+    try {
+      const response = await Api.get(
+        `/FDL/UnpostedJournal?JournalCode=${journalCode}&JournalNr=${journalNr}`,
+      );
+      setJournalDetails(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error('Failed to fetch journal details:', error);
+    }
   };
 
   const renderFilterDropdown = (column: string) => (
@@ -135,8 +154,8 @@ const PostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
         >
           <option value="startsWith">Starts With</option>
           <option value="Contains">Contains</option>
-          <option value="NotContains">Not contains</option>
-          <option value="EndsWith">Ends with</option>
+          <option value="NotContains">Not Contains</option>
+          <option value="EndsWith">Ends With</option>
           <option value="Equals">Equals</option>
           <option value="NotEquals">Not Equals</option>
         </select>
@@ -212,51 +231,55 @@ const PostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
           </thead>
           <tbody>
             {currentItems.map((item) => (
-              <tr key={item.id}>
+              <tr
+                key={item.id}
+                onClick={() => handleRowClick(item.journalCode, item.journalNr)}
+                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  {/* <h5 className="font-medium text-black dark:text-white">
+                  <h5 className="font-medium text-black dark:text-white">
                     {item.journalCode}
-                  </h5> */}
+                  </h5>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
-                    {/* {item.journalNr} */}
+                    {item.journalNr}
                   </h5>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {/* <p className="text-black dark:text-white">{item.status}</p> */}
+                  <p className="text-black dark:text-white">{item.status}</p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {/* <p className="text-black dark:text-white">{item.entryDate}</p> */}
+                  <p className="text-black dark:text-white">{item.entryDate}</p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {/* {item.entityList} */}
-                  </p>
-                </td>{' '}
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {/* {item.minEffectiveDate} */}
-                  </p>
-                </td>{' '}
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {/* {item.maxEffectiveDate} */}
+                    {item.entityList}
                   </p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {/* {item.reversalJournalCode} */}
-                  </p>
-                </td>{' '}
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {/* {item.reversalJournalNr} */}
+                    {item.minEffectiveDate}
                   </p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {/* {item.description} */}
+                    {item.maxEffectiveDate}
+                  </p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">
+                    {item.reversalJournalCode}
+                  </p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">
+                    {item.reversalJournalNr}
+                  </p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <p className="text-black dark:text-white">
+                    {item.description}
                   </p>
                 </td>
               </tr>
@@ -264,13 +287,26 @@ const PostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
           </tbody>
         </table>
       </div>
+
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
+      {journalDetails &&
+      clickedjournalNr &&
+      clickedjournalCode &&
+      journalDetails.length > 0 ? (
+        <FdlJournalDetailsTable
+          data={journalDetails}
+          clickedjournalNr={clickedjournalNr}
+          clickedjournalCode={clickedjournalCode}
+        />
+      ) : (
+        <div></div>
+      )}
     </div>
   );
 };
 
-export default PostedJournalsData;
+export default UnpostedJournalsData;

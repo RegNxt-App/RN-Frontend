@@ -3,22 +3,26 @@ import Pagination from '../Pagination';
 import ViewRecordPopup from '../ViewRecordPopup';
 import { Filter } from 'lucide-react';
 
-interface WorkbookData {
-  id: string;
-  JournalCode: string;
-  JournalNr: string;
-  Status: string;
-  EntryDate: string;
-  EntityList: string;
-  MinEffectiveDate: string;
-  MaxEffectiveDate: string;
-  ReversalJournalCode: string;
-  ReversalJournalNr: string;
-  Description: string;
+interface JournalEntry {
+  journalCode: string;
+  journalNr: number;
+  journalLineNr: number;
+  entity: string;
+  amountClass: string;
+  domainId: string;
+  counterparty: string;
+  accountCode: string;
+  dealId: string;
+  currency: string;
+  effectiveDate: number;
+  description: string;
+  amountInOrigCCy: number;
 }
 
 interface DataTableProps {
-  data: WorkbookData[];
+  data: JournalEntry[];
+  clickedjournalCode: string;
+  clickedjournalNr: string;
 }
 
 interface FilterState {
@@ -40,13 +44,17 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
+const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
+  data,
+  clickedjournalCode,
+  clickedjournalNr,
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
+  const [selectedRecord, setSelectedRecord] = useState<JournalEntry | null>(
     null,
   );
-  const [filteredData, setFilteredData] = useState<WorkbookData[]>(data);
+  const [filteredData, setFilteredData] = useState<JournalEntry[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
@@ -58,7 +66,7 @@ const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
     let result = data;
     Object.entries(filters).forEach(([key, filter]) => {
       result = result.filter((item) => {
-        const itemValue = String(item[key as keyof WorkbookData]).toLowerCase();
+        const itemValue = String(item[key as keyof JournalEntry]).toLowerCase();
         const filterValue = filter.value.toLowerCase();
         if (filter.type === 'matchAll') {
           return itemValue.includes(filterValue);
@@ -101,7 +109,7 @@ const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
     setCurrentPage(pageNumber);
   };
 
-  const handleViewClick = (record: WorkbookData) => {
+  const handleViewClick = (record: JournalEntry) => {
     setSelectedRecord(record);
     setShowWorkbookPopup(true);
   };
@@ -136,8 +144,8 @@ const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
         >
           <option value="startsWith">Starts With</option>
           <option value="Contains">Contains</option>
-          <option value="NotContains">Not contains</option>
-          <option value="EndsWith">Ends with</option>
+          <option value="NotContains">Not Contains</option>
+          <option value="EndsWith">Ends With</option>
           <option value="Equals">Equals</option>
           <option value="NotEquals">Not Equals</option>
         </select>
@@ -173,21 +181,31 @@ const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
   );
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 mt-8">
       <div className="max-w-full overflow-x-auto">
+        <p className="font-semibold text-gray-700 mb-3">
+          Journal details for {clickedjournalCode} - {clickedjournalNr}
+        </p>
+        <button
+          className="px-4 py-2 bg-green-500 text-white rounded-md mb-4"
+          // onClick={() => setShowPopup(true)}
+        >
+          Post into Balances
+        </button>
+
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-2 text-left dark:bg-meta-4">
               {[
+                'Line Nr',
+                'Domain Id',
+                'Amount Class',
                 'Journal Code',
-                'Journal Nr',
-                'Status',
-                'Entry Date',
-                'Entity List',
-                'Min Effective Date',
-                'Max Effective Date',
-                'Reversal Journal Code',
-                'Reversal Journal Nr',
+                'Entity',
+                'Account Code',
+                'Amount',
+                'Currency',
+                'Effective Date',
                 'Description',
               ].map((header) => (
                 <th
@@ -213,51 +231,49 @@ const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
           </thead>
           <tbody>
             {currentItems.map((item) => (
-              <tr key={item.id}>
+              <tr key={`${item.journalCode}-${item.journalLineNr}`}>
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.JournalCode}
-                  </h5>
+                  <p className="text-black dark:text-white">
+                    {item.journalLineNr}
+                  </p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.JournalNr}
-                  </h5>
+                  <p className="text-black dark:text-white">{item.domainId}</p>
                 </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">{item.Status}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">{item.EntryDate}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">
-                    {item.EntityList}
-                  </p>
-                </td>{' '}
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.MinEffectiveDate}
-                  </p>
-                </td>{' '}
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.MaxEffectiveDate}
+                    {item.amountClass}
                   </p>
                 </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">
-                    {item.ReversalJournalCode}
-                  </p>
-                </td>{' '}
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.ReversalJournalNr}
+                    {item.journalCode}
                   </p>
                 </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                  <p className="text-black dark:text-white">{item.entity}</p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">
-                    {item.Description}
+                    {item.accountCode}
+                  </p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                  <p className="text-black dark:text-white">
+                    {item.amountInOrigCCy}
+                  </p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                  <p className="text-black dark:text-white">{item.currency}</p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                  <p className="text-black dark:text-white">
+                    {item.effectiveDate}
+                  </p>
+                </td>
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                  <p className="text-black dark:text-white">
+                    {item.description}
                   </p>
                 </td>
               </tr>
@@ -280,4 +296,4 @@ const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
   );
 };
 
-export default UnpostedJournalsData;
+export default FdlJournalDetailsTable;
