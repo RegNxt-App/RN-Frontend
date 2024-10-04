@@ -17,6 +17,11 @@ interface AccountingCategory {
   name: string;
   description: string;
 }
+interface AccountingRateType {
+  id: string;
+  name: string;
+  code: string;
+}
 interface JournalPolicy {
   id: string;
   PolicyCode: string;
@@ -35,6 +40,9 @@ const AccountingConfig = () => {
   const [activeTab, setActiveTab] = useState<string>('AccountingCategory');
   const [accountingCategoryData, setAccountingCategoryData] = useState<
     AccountingCategory[]
+  >([]);
+  const [accountingRateTypeData, setAccountingRateTypeData] = useState<
+    AccountingRateType[]
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,8 +63,22 @@ const AccountingConfig = () => {
         setLoading(false);
       }
     };
+    const fetchAccountingRateType = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await Api.get('/FDL/RateType');
+        setAccountingRateTypeData(response.data);
+        console.log(response.data);
+      } catch (err: any) {
+        setError('Failed to fetch accounting RateType');
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchAccountingCategories();
+    fetchAccountingRateType();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,7 +145,7 @@ const AccountingConfig = () => {
     {
       id: 'CurrencyRate',
       title: 'Currency Rate',
-      content: <CurrencyRate />,
+      content: <CurrencyRate data={accountingRateTypeData} />,
     },
   ];
 

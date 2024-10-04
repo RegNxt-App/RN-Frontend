@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import ViewRecordPopup from '../ViewRecordPopup';
 import { Filter } from 'lucide-react';
-
+import Api from '../Api';
 interface JournalEntry {
   journalCode: string;
   journalNr: number;
@@ -180,6 +180,28 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
     </div>
   );
 
+  const handlePostToBalances = async () => {
+    try {
+      const url = `/FDL/AccountingBalance?JournalCode=${clickedjournalCode.toString()}&JournalNr=${clickedjournalNr.toString()}`;
+
+      const response = await Api.post(url, {});
+
+      const isJsonBlob = (data: any) =>
+        data instanceof Blob && data.type === 'application/json';
+      const responseData = isJsonBlob(response?.data)
+        ? await response?.data?.text()
+        : response?.data || {};
+      const responseJson =
+        typeof responseData === 'string'
+          ? JSON.parse(responseData)
+          : responseData;
+
+      console.log('Success:', responseJson);
+    } catch (error) {
+      console.error('Error posting to balances:', error);
+    }
+  };
+
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 mt-8">
       <div className="max-w-full overflow-x-auto">
@@ -188,7 +210,7 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
         </p>
         <button
           className="px-4 py-2 bg-green-500 text-white rounded-md mb-4"
-          // onClick={() => setShowPopup(true)}
+          onClick={handlePostToBalances}
         >
           Post into Balances
         </button>
