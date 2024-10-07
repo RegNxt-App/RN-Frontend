@@ -90,6 +90,7 @@ const getRefreshTokenFromCookies = (): string | null => {
 const Api = {
   get: (url: string, params = {}) => api.get(url, { params }),
   post: (url: string, data: any) => api.post(url, data),
+  delete: (url: string) => api.delete(url),
 };
 
 export default Api;

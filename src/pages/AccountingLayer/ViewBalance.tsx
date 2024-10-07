@@ -1,29 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Select from 'react-select';
+import Api from '../../components/Api'; // Ensure your Api utility is correctly set up
 
 interface Option {
   value: string;
   label: string;
 }
-
-const analyticalKeys: Option[] = [
-  { value: 'AccountCode', label: 'Account Code' },
-  { value: 'AmountClass', label: 'Amount Class' },
-  { value: 'DomainId', label: 'Domain ID' },
-  { value: 'Currency', label: 'Currency' },
-  { value: 'Countryparty', label: 'Countryparty' },
-  { value: 'DealId', label: 'Deal ID' },
-  { value: 'FreeField1', label: 'Free Field 1' },
-  { value: 'FreeField2', label: 'Free Field 2' },
-  { value: 'FreeField3', label: 'Free Field 3' },
-  { value: 'FreeField4', label: 'Free Field 4' },
-  { value: 'FreeField5', label: 'Free Field 5' },
-  { value: 'FreeField6', label: 'Free Field 6' },
-  { value: 'FreeField7', label: 'Free Field 7' },
-  { value: 'FreeField8', label: 'Free Field 8' },
-  { value: 'FreeField9', label: 'Free Field 9' },
-  { value: 'FreeField10', label: 'Free Field 10' },
-];
 
 const balanceAmountFields: Option[] = [
   { value: 'DtdCcyAmount', label: 'DTD CCY Amount' },
@@ -38,12 +20,84 @@ const balanceAmountFields: Option[] = [
 const ViewBalance = () => {
   const [selectedAnalyticalKeys, setSelectedAnalyticalKeys] = useState<
     Option[]
-  >([]);
+  >([
+    { value: 'AccountCode', label: 'Account Code' },
+    { value: 'AmountClass', label: 'Amount Class' },
+    { value: 'DomainId', label: 'Domain ID' },
+    { value: 'Currency', label: 'Currency' },
+  ]);
+
   const [selectedBalanceAmountFields, setSelectedBalanceAmountFields] =
-    useState<Option[]>([]);
-  const handleShowBalances = () => {
-    alert('Show Balances clicked');
+    useState<Option[]>([
+      { value: 'DtdLclAmount', label: 'DTD LCL Amount' },
+      { value: 'YtdLclAmount', label: 'YTD LCL Amount' },
+      { value: 'LtdLclAmount', label: 'LTD LCL Amount' },
+    ]);
+
+  const [analyticalKeys, setAnalyticalKeys] = useState<Option[]>([
+    { value: 'AccountCode', label: 'Account Code' },
+    { value: 'AmountClass', label: 'Amount Class' },
+    { value: 'DomainId', label: 'Domain ID' },
+    { value: 'Currency', label: 'Currency' },
+    { value: 'FreeField1', label: 'Free Field 1' }, // Placeholder for dynamic labels
+    { value: 'FreeField2', label: 'Free Field 2' },
+    { value: 'FreeField3', label: 'Free Field 3' },
+    { value: 'FreeField4', label: 'Free Field 4' },
+    { value: 'FreeField5', label: 'Free Field 5' },
+    { value: 'FreeField6', label: 'Free Field 6' },
+    { value: 'FreeField7', label: 'Free Field 7' },
+    { value: 'FreeField8', label: 'Free Field 8' },
+    { value: 'FreeField9', label: 'Free Field 9' },
+  ]);
+
+  useEffect(() => {
+    const fetchAccountingLabels = async () => {
+      try {
+        const response = await Api.get('/FDL/AccountingLabel');
+        const updatedKeys = analyticalKeys.map((key) => {
+          const field = response.data.find(
+            (item: any) =>
+              item.column.toLowerCase() === key.value.toLowerCase(),
+          );
+          if (field) {
+            return { value: field.column, label: field.label };
+          }
+          return key;
+        });
+        setAnalyticalKeys(updatedKeys);
+      } catch (error) {
+        console.error('Failed to fetch accounting labels:', error);
+      }
+    };
+
+    fetchAccountingLabels();
+  }, []);
+
+  const handleShowBalances = async () => {
+    const granularityFields = selectedAnalyticalKeys
+      .map((key) => key.value)
+      .join(',');
+    const measureFields = selectedBalanceAmountFields
+      .map((field) => field.value)
+      .join(',');
+
+    const lowerBoundary = '20240101';
+    const upperBoundary = '20240331';
+    const frequency = 'daily';
+    const filter = 'f';
+
+    const endpoint = `/FDL/AccountingBalance?lowerboundary=${lowerBoundary}&upperboundary=${upperBoundary}&frequency=${frequency}&granularityFields=${granularityFields}&measureFields=${measureFields}&filter=${filter}`;
+
+    try {
+      const response = await Api.get(endpoint);
+      console.log('Balances:', response.data);
+      alert('Balances fetched successfully! Check console for details.');
+    } catch (error) {
+      console.error('Failed to fetch accounting balances:', error);
+      alert('Failed to fetch balances. Please try again.');
+    }
   };
+
   return (
     <div className="p-4 space-y-4">
       <div>

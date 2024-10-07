@@ -20,6 +20,7 @@ interface UnpostedJournalsData {
 
 interface DataTableProps {
   data: UnpostedJournalsData[];
+  updateUnpostedJournals: (updatedData: UnpostedJournalsData[]) => void;
 }
 
 interface FilterState {
@@ -41,7 +42,10 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
+const UnpostedJournalsData: React.FC<DataTableProps> = ({
+  data,
+  updateUnpostedJournals,
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
   const [selectedRecord, setSelectedRecord] =
@@ -190,6 +194,23 @@ const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
     </div>
   );
 
+  const handleUpdateSuccess = async () => {
+    if (clickedjournalCode && clickedjournalNr) {
+      await handleRowClick(clickedjournalCode, clickedjournalNr);
+
+      // Assuming the fetched `journalDetails` is the updated journal data
+      if (journalDetails) {
+        const updatedData = data.map((journal) =>
+          journal.journalCode === clickedjournalCode &&
+          journal.journalNr === clickedjournalNr
+            ? journalDetails // Replace the updated journal details
+            : journal,
+        );
+        updateUnpostedJournals(updatedData); // Pass the updated list
+      }
+    }
+  };
+
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
@@ -301,6 +322,7 @@ const UnpostedJournalsData: React.FC<DataTableProps> = ({ data }) => {
           data={journalDetails}
           clickedjournalNr={clickedjournalNr}
           clickedjournalCode={clickedjournalCode}
+          onUpdateSuccess={handleUpdateSuccess}
         />
       ) : (
         <div></div>

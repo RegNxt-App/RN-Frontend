@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
 import Api from '../Api';
-
 interface JournalEntry {
   journalCode: string;
   journalNr: number;
@@ -28,19 +27,7 @@ interface JournalEntry {
   freeField9: string;
   freeField10: string;
 }
-interface UnpostedJournalsData {
-  id: string;
-  journalCode: string;
-  journalNr: string;
-  status: string;
-  entryDate: string;
-  entityList: string;
-  minEffectiveDate: string;
-  maxEffectiveDate: string;
-  reversalJournalCode: string;
-  reversalJournalNr: string;
-  description: string;
-}
+
 interface DataTableProps {
   data: JournalEntry[];
   clickedjournalCode: string;
@@ -67,7 +54,7 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
+const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
   data,
   clickedjournalCode,
   clickedjournalNr,
@@ -81,6 +68,7 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
   const [filteredData, setFilteredData] = useState<JournalEntry[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   useEffect(() => {
     applyFilters();
@@ -131,11 +119,6 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-  };
-
-  const handleViewClick = (record: JournalEntry) => {
-    setSelectedRecord(record);
-    setShowWorkbookPopup(true);
   };
 
   const renderFilterDropdown = (column: string) => (
@@ -204,17 +187,12 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
     </div>
   );
 
-  const handlePostToBalances = async () => {
+  const handleUnpostFromBalances = async () => {
     try {
-      const url = `/FDL/AccountingBalance?JournalCode=${clickedjournalCode.toString()}&JournalNr=${clickedjournalNr.toString()}`;
+      const url = `/FDL/AccountingBalance?JournalCode=${clickedjournalCode}&JournalNr=${clickedjournalNr}`;
+      const response = await Api.delete(url);
 
-      const response = await Api.post(url, {});
-
-      const isJsonBlob = (data: any) =>
-        data instanceof Blob && data.type === 'application/json';
-      const responseData = isJsonBlob(response?.data)
-        ? await response?.data?.text()
-        : response?.data || {};
+      const responseData = response.data || {};
       const responseJson =
         typeof responseData === 'string'
           ? JSON.parse(responseData)
@@ -227,6 +205,11 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
     }
   };
 
+  const handleConfirmUnpost = () => {
+    setShowConfirmDialog(false);
+    handleUnpostFromBalances();
+  };
+
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 mt-8">
       <div className="max-w-full overflow-x-auto">
@@ -235,10 +218,35 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
         </p>
         <button
           className="px-4 py-2 bg-green-500 text-white rounded-md mb-4"
-          onClick={handlePostToBalances}
+          onClick={() => setShowConfirmDialog(true)} // Open confirmation dialog
         >
-          Post into Balances
+          Unpost from Balances
         </button>
+        {showConfirmDialog && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow-lg">
+              <p className="mb-4">
+                Are you sure to remove the journal with code{' '}
+                <strong>{clickedjournalCode}</strong> and nr{' '}
+                <strong>{clickedjournalNr}</strong> from the balances?
+              </p>
+              <div className="flex justify-end">
+                <button
+                  className="px-4 py-2 bg-gray-500 text-white rounded-md mr-2"
+                  onClick={() => setShowConfirmDialog(false)} // Close without action
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-red-500 text-white rounded-md"
+                  onClick={handleConfirmUnpost} // Confirm and call the API
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <table className="w-full table-auto">
           <thead>
@@ -409,4 +417,4 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
   );
 };
 
-export default FdlJournalDetailsTable;
+export default FdlPostedJournalDetailsTable;

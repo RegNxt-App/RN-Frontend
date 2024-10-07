@@ -27,29 +27,47 @@ interface TabContent {
 const PostUnpost = () => {
   const [activeTab, setActiveTab] = useState<string>('unposted-journals');
   const [unpostedJournals, setUnpostedJournals] = useState<Item[]>([]);
+  const [postedJournals, setPostedJournals] = useState<Item[]>([]);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUnpostedJournals = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await Api.get('/FDL/UnpostedJournalBatch');
-        setUnpostedJournals(response.data);
-      } catch (err) {
-        setError('Failed to fetch unposted journals.');
-        console.error('Error fetching data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUnpostedJournals();
   }, []);
+  useEffect(() => {
+    fetchPostedJournals();
+  }, []);
+  const fetchUnpostedJournals = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await Api.get('/FDL/UnpostedJournalBatch');
+      setUnpostedJournals(response.data);
+    } catch (err) {
+      setError('Failed to fetch unposted journals.');
+      console.error('Error fetching data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchPostedJournals = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await Api.get('/FDL/PostedJournalBatch');
+      setPostedJournals(response.data);
+    } catch (err) {
+      setError('Failed to fetch posted journals.');
+      console.error('Error fetching data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const handleViewClick = (item: Item) => {
-    console.log('View item:', item);
+  const updateUnpostedJournals = () => {
+    fetchPostedJournals();
+    fetchUnpostedJournals();
   };
 
   const tabs: TabContent[] = [
@@ -64,7 +82,10 @@ const PostUnpost = () => {
           ) : error ? (
             <p>{error}</p>
           ) : (
-            <UnpostedJournalsData data={unpostedJournals} />
+            <UnpostedJournalsData
+              data={unpostedJournals}
+              updateUnpostedJournals={updateUnpostedJournals}
+            />
           )}
         </>
       ),
@@ -72,7 +93,12 @@ const PostUnpost = () => {
     {
       id: 'posted-journals',
       title: 'Posted Journals',
-      content: <PostedJournalsData data={unpostedJournals} />,
+      content: (
+        <PostedJournalsData
+          data={postedJournals}
+          updateUnpostedJournals={updateUnpostedJournals}
+        />
+      ),
     },
   ];
 
