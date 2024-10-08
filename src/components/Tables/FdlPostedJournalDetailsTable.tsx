@@ -25,7 +25,7 @@ interface JournalEntry {
   freeField7: string;
   freeField8: string;
   freeField9: string;
-  freeField10: string;
+  // freeField10: string;
 }
 
 interface DataTableProps {
@@ -69,10 +69,29 @@ const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [fieldLabels, setFieldLabels] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     applyFilters();
   }, [filters, data]);
+  useEffect(() => {
+    const fetchFieldLabels = async () => {
+      try {
+        const response = await Api.get('/FDL/AccountingLabel');
+        const labelData = response.data;
+
+        const labelsMap: { [key: string]: string } = {};
+        labelData.forEach((item: { column: string; label: string }) => {
+          labelsMap[item.column] = item.label;
+        });
+        setFieldLabels(labelsMap);
+      } catch (error) {
+        console.error('Error fetching field labels:', error);
+      }
+    };
+
+    fetchFieldLabels();
+  }, []);
 
   const applyFilters = () => {
     let result = data;
@@ -252,50 +271,76 @@ const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
           <thead>
             <tr className="bg-gray-2 text-left dark:bg-meta-4">
               {[
-                'Line Nr',
-                'Domain Id',
-                'Amount Class',
-                'Entity',
-                'Account Code',
-                'Counterparty',
-                'Currency',
-                'Deal Id',
-                'Effective Date',
-                'Amount In Orig CCy',
-                'Free Field1',
-                'Free Field2',
-                'Free Field3',
-                'Free Field4',
-                'Free Field5',
-                'Free Field6',
-                'Free Field7',
-                'Free Field8',
-                'Free Field9',
-                'Free Field10',
-                'Source',
-                'Description',
-              ].map((header) => (
+                { key: 'journalLineNr', label: 'Line Nr' },
+                { key: 'domainId', label: 'Domain Id' },
+                { key: 'amountClass', label: 'Amount Class' },
+                { key: 'entity', label: 'Entity' },
+                { key: 'accountCode', label: 'Account Code' },
+                { key: 'counterparty', label: 'Counterparty' },
+                { key: 'currency', label: 'Currency' },
+                { key: 'dealId', label: 'Deal Id' },
+                { key: 'effectiveDate', label: 'Effective Date' },
+                { key: 'amountInOrigCCy', label: 'Amount In Orig CCy' },
+                {
+                  key: 'freeField1',
+                  label: fieldLabels.freefield1 || 'Free Field 1',
+                },
+                {
+                  key: 'freeField2',
+                  label: fieldLabels.freefield2 || 'Free Field 2',
+                },
+                {
+                  key: 'freeField3',
+                  label: fieldLabels.freefield3 || 'Free Field 3',
+                },
+                {
+                  key: 'freeField4',
+                  label: fieldLabels.freefield4 || 'Free Field 4',
+                },
+                {
+                  key: 'freeField5',
+                  label: fieldLabels.freefield5 || 'Free Field 5',
+                },
+                {
+                  key: 'freeField6',
+                  label: fieldLabels.freefield6 || 'Free Field 6',
+                },
+                {
+                  key: 'freeField7',
+                  label: fieldLabels.freefield7 || 'Free Field 7',
+                },
+                {
+                  key: 'freeField8',
+                  label: fieldLabels.freefield8 || 'Free Field 8',
+                },
+                {
+                  key: 'freeField9',
+                  label: fieldLabels.freefield9 || 'Free Field 9',
+                },
+                // {
+                //   key: 'freeField10',
+                //   label: fieldLabels.freefield10 || 'Free Field 10',
+                // },
+                { key: 'journalCode', label: 'Source' },
+                { key: 'description', label: 'Description' },
+              ].map(({ key, label }) => (
                 <th
-                  key={header}
-                  className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11"
+                  className="py-4 px-4 font-medium text-black dark:text-white xl:pl-11"
+                  key={key}
                 >
-                  <div className="flex items-center">
-                    {header}
-                    <button
-                      className="ml-2"
-                      onClick={() =>
-                        setActiveFilter(activeFilter === header ? null : header)
-                      }
-                    >
-                      <Filter size={16} strokeWidth={1.5} />
-                    </button>
+                  <div className="flex items-center gap-2">
+                    <span>{label}</span>
+                    <Filter
+                      className="w-4 h-4"
+                      onClick={() => setActiveFilter(key)}
+                    />
                   </div>
-                  {activeFilter === header &&
-                    renderFilterDropdown(header.toLowerCase())}
+                  {activeFilter === key && renderFilterDropdown(key)}
                 </th>
               ))}
             </tr>
           </thead>
+
           <tbody>
             {currentItems.map((item) => (
               <tr key={`${item.journalCode}-${item.journalLineNr}`}>
@@ -386,11 +431,11 @@ const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
                     {item.freeField9}
                   </p>
                 </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                {/* <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">
                     {item.freeField10}
                   </p>
-                </td>
+                </td> */}
 
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">

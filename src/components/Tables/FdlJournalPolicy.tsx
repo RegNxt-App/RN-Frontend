@@ -1,24 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
-import ViewRecordPopup from '../ViewRecordPopup';
-import { Filter } from 'lucide-react';
+import { Filter, CheckCircle, XCircle } from 'lucide-react';
 
-interface WorkbookData {
+interface JournalPolicyData {
   id: string;
-  PolicyCode: string;
-  Name: string;
-  Description: string;
-  allowManualEntries: string;
-  allowAutomatedEntries: string;
-  allowMultipleEntries: string;
-  applyAutoApprove: string;
-  inbalanceThreshold: string;
-  lastJournalNr: string;
-  mustBeReversed: string;
+  code: string;
+  name: string;
+  description: string;
+  allowManualEntries: boolean;
+  allowAutomatedEntries: boolean;
+  allowMultipleEntries: boolean;
+  applyAutoApprove: boolean;
+  inbalanceThreshold: number;
+  lastJournalNr: number;
+  mustBeReversed: boolean;
 }
 
 interface DataTableProps {
-  data: WorkbookData[];
+  data: JournalPolicyData[];
 }
 
 interface FilterState {
@@ -42,11 +41,8 @@ const itemsPerPage = 10;
 
 const FdlJournalPolicy: React.FC<DataTableProps> = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
-    null,
-  );
-  const [filteredData, setFilteredData] = useState<WorkbookData[]>(data);
+
+  const [filteredData, setFilteredData] = useState<JournalPolicyData[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
@@ -58,7 +54,9 @@ const FdlJournalPolicy: React.FC<DataTableProps> = ({ data }) => {
     let result = data;
     Object.entries(filters).forEach(([key, filter]) => {
       result = result.filter((item) => {
-        const itemValue = String(item[key as keyof WorkbookData]).toLowerCase();
+        const itemValue = String(
+          item[key as keyof JournalPolicyData],
+        ).toLowerCase();
         const filterValue = filter.value.toLowerCase();
         if (filter.type === 'matchAll') {
           return itemValue.includes(filterValue);
@@ -99,11 +97,6 @@ const FdlJournalPolicy: React.FC<DataTableProps> = ({ data }) => {
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-  };
-
-  const handleViewClick = (record: WorkbookData) => {
-    setSelectedRecord(record);
-    setShowWorkbookPopup(true);
   };
 
   const renderFilterDropdown = (column: string) => (
@@ -172,6 +165,14 @@ const FdlJournalPolicy: React.FC<DataTableProps> = ({ data }) => {
     </div>
   );
 
+  const renderBooleanIcon = (value: boolean) => {
+    return value ? (
+      <CheckCircle className="text-green-500" size={20} />
+    ) : (
+      <XCircle className="text-red-500" size={20} />
+    );
+  };
+
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
@@ -216,37 +217,37 @@ const FdlJournalPolicy: React.FC<DataTableProps> = ({ data }) => {
               <tr key={item.id}>
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
-                    {item.PolicyCode}
+                    {item.code}
                   </h5>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
-                    {item.Name}
+                    {item.name}
                   </h5>
                 </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                <td className="border-b border-[#eee] py-5 px-4  dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {item.Description}
+                    {item.description}
                   </p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {item.allowManualEntries}
+                    {renderBooleanIcon(item.allowManualEntries)}
                   </p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {item.allowAutomatedEntries}
+                    {renderBooleanIcon(item.allowAutomatedEntries)}
                   </p>
                 </td>{' '}
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {item.allowMultipleEntries}
+                    {renderBooleanIcon(item.allowMultipleEntries)}
                   </p>
                 </td>{' '}
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {item.applyAutoApprove}
+                    {renderBooleanIcon(item.applyAutoApprove)}
                   </p>
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -261,7 +262,7 @@ const FdlJournalPolicy: React.FC<DataTableProps> = ({ data }) => {
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">
-                    {item.mustBeReversed}
+                    {renderBooleanIcon(item.mustBeReversed)}
                   </p>
                 </td>
               </tr>
@@ -274,12 +275,6 @@ const FdlJournalPolicy: React.FC<DataTableProps> = ({ data }) => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-      {showWorkbookPopup && selectedRecord && (
-        <ViewRecordPopup
-          onClose={() => setShowWorkbookPopup(false)}
-          record={selectedRecord}
-        />
-      )}
     </div>
   );
 };

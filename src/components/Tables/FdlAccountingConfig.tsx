@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
-import ViewRecordPopup from '../ViewRecordPopup';
-import { Filter } from 'lucide-react';
+import { Filter, Edit, Trash2 } from 'lucide-react';
 
 interface AccountingCategory {
   id: string;
@@ -94,11 +93,6 @@ const FdlAccountingConfig: React.FC<DataTableProps> = ({ data }) => {
     setCurrentPage(pageNumber);
   };
 
-  const handleViewClick = (record: AccountingCategory) => {
-    setSelectedRecord(record);
-    setShowWorkbookPopup(true);
-  };
-
   const renderFilterDropdown = (column: string) => (
     <div className="absolute z-10 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
       <div className="p-2">
@@ -171,23 +165,28 @@ const FdlAccountingConfig: React.FC<DataTableProps> = ({ data }) => {
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              {['Name', 'Description'].map((header) => (
+              {['Name', 'Description', 'Actions'].map((header) => (
                 <th
                   key={header}
                   className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11"
                 >
                   <div className="flex items-center">
                     {header}
-                    <button
-                      className="ml-2"
-                      onClick={() =>
-                        setActiveFilter(activeFilter === header ? null : header)
-                      }
-                    >
-                      <Filter size={16} strokeWidth={1.5} />
-                    </button>
+                    {header !== 'Actions' && (
+                      <button
+                        className="ml-2"
+                        onClick={() =>
+                          setActiveFilter(
+                            activeFilter === header ? null : header,
+                          )
+                        }
+                      >
+                        <Filter size={16} strokeWidth={1.5} />
+                      </button>
+                    )}
                   </div>
                   {activeFilter === header &&
+                    header !== 'Actions' &&
                     renderFilterDropdown(header.toLowerCase())}
                 </th>
               ))}
@@ -206,6 +205,22 @@ const FdlAccountingConfig: React.FC<DataTableProps> = ({ data }) => {
                     {item.description}
                   </p>
                 </td>
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                  <div className="flex gap-3">
+                    <button
+                      // onClick={() => handleEdit(item)}
+                      className="hover:text-primary"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      // onClick={() => handleDelete(item.id)}
+                      className="hover:text-danger"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -216,12 +231,6 @@ const FdlAccountingConfig: React.FC<DataTableProps> = ({ data }) => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-      {showWorkbookPopup && selectedRecord && (
-        <ViewRecordPopup
-          onClose={() => setShowWorkbookPopup(false)}
-          record={selectedRecord}
-        />
-      )}
     </div>
   );
 };

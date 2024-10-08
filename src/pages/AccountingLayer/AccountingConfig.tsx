@@ -24,16 +24,16 @@ interface AccountingRateType {
 }
 interface JournalPolicy {
   id: string;
-  PolicyCode: string;
-  Name: string;
-  Description: string;
-  allowManualEntries: string;
-  allowAutomatedEntries: string;
-  allowMultipleEntries: string;
-  applyAutoApprove: string;
-  inbalanceThreshold: string;
-  lastJournalNr: string;
-  mustBeReversed: string;
+  code: string;
+  name: string;
+  description: string;
+  allowManualEntries: boolean;
+  allowAutomatedEntries: boolean;
+  allowMultipleEntries: boolean;
+  applyAutoApprove: boolean;
+  inbalanceThreshold: number;
+  lastJournalNr: number;
+  mustBeReversed: boolean;
 }
 
 const AccountingConfig = () => {
@@ -44,10 +44,10 @@ const AccountingConfig = () => {
   const [accountingRateTypeData, setAccountingRateTypeData] = useState<
     AccountingRateType[]
   >([]);
+  const [accountingJournalPolicyData, setAccountingJournalPolicyData] =
+    useState<JournalPolicy[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState({ name: '', email: '' });
 
   useEffect(() => {
     const fetchAccountingCategories = async () => {
@@ -76,49 +76,24 @@ const AccountingConfig = () => {
         setLoading(false);
       }
     };
+    const fetchAccountingJournalPolicy = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await Api.get('/FDL/JournalPolicy');
+        setAccountingJournalPolicyData(response.data);
+        console.log(response.data);
+      } catch (err: any) {
+        setError('Failed to fetch accounting Journal Policy');
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchAccountingCategories();
     fetchAccountingRateType();
+    fetchAccountingJournalPolicy();
   }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({ ...prevState, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-  };
-
-  const JournalPolicyData: JournalPolicy[] = [
-    {
-      id: '1',
-      PolicyCode: 'string',
-      Name: 'string',
-      Description: 'string',
-      allowManualEntries: 'string',
-      allowAutomatedEntries: 'string',
-      allowMultipleEntries: 'string',
-      applyAutoApprove: 'string',
-      inbalanceThreshold: 'string',
-      lastJournalNr: 'string',
-      mustBeReversed: 'string',
-    },
-    {
-      id: '2',
-      PolicyCode: 'string',
-      Name: 'string',
-      Description: 'string',
-      allowManualEntries: 'string',
-      allowAutomatedEntries: 'string',
-      allowMultipleEntries: 'string',
-      applyAutoApprove: 'string',
-      inbalanceThreshold: 'string',
-      lastJournalNr: 'string',
-      mustBeReversed: 'string',
-    },
-  ];
 
   const tabs: TabContent[] = [
     {
@@ -140,7 +115,7 @@ const AccountingConfig = () => {
     {
       id: 'JournalPolicy',
       title: 'Journal Policy',
-      content: <FdlJournalPolicy data={JournalPolicyData} />,
+      content: <FdlJournalPolicy data={accountingJournalPolicyData} />,
     },
     {
       id: 'CurrencyRate',
