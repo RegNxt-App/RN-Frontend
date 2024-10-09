@@ -26,7 +26,7 @@ interface JournalEntry {
   freeField7: string;
   freeField8: string;
   freeField9: string;
-  // freeField10: string;
+  freeField10: string;
 }
 
 interface DataTableProps {
@@ -291,10 +291,10 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
                   key: 'freeField9',
                   label: fieldLabels.freefield9 || 'Free Field 9',
                 },
-                // {
-                //   key: 'freeField10',
-                //   label: fieldLabels.freefield10 || 'Free Field 10',
-                // },
+                {
+                  key: 'freeField10',
+                  label: fieldLabels.freefield10 || 'Free Field 10',
+                },
                 { key: 'journalCode', label: 'Source' },
                 { key: 'description', label: 'Description' },
               ].map(({ key, label }) => (
@@ -405,11 +405,11 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
                     {item.freeField9}
                   </p>
                 </td>
-                {/* <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">
                     {item.freeField10}
                   </p>
-                </td> */}
+                </td>
 
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">

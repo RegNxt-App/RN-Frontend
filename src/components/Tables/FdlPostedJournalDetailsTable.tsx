@@ -25,7 +25,7 @@ interface JournalEntry {
   freeField7: string;
   freeField8: string;
   freeField9: string;
-  // freeField10: string;
+  freeField10: string;
 }
 
 interface DataTableProps {
@@ -252,13 +252,13 @@ const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
               <div className="flex justify-end">
                 <button
                   className="px-4 py-2 bg-gray-500 text-white rounded-md mr-2"
-                  onClick={() => setShowConfirmDialog(false)} // Close without action
+                  onClick={() => setShowConfirmDialog(false)}
                 >
                   Cancel
                 </button>
                 <button
                   className="px-4 py-2 bg-red-500 text-white rounded-md"
-                  onClick={handleConfirmUnpost} // Confirm and call the API
+                  onClick={handleConfirmUnpost}
                 >
                   Confirm
                 </button>
@@ -317,10 +317,10 @@ const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
                   key: 'freeField9',
                   label: fieldLabels.freefield9 || 'Free Field 9',
                 },
-                // {
-                //   key: 'freeField10',
-                //   label: fieldLabels.freefield10 || 'Free Field 10',
-                // },
+                {
+                  key: 'freeField10',
+                  label: fieldLabels.freefield10 || 'Free Field 10',
+                },
                 { key: 'journalCode', label: 'Source' },
                 { key: 'description', label: 'Description' },
               ].map(({ key, label }) => (
@@ -431,11 +431,11 @@ const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
                     {item.freeField9}
                   </p>
                 </td>
-                {/* <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">
                     {item.freeField10}
                   </p>
-                </td> */}
+                </td>
 
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <p className="text-black dark:text-white">

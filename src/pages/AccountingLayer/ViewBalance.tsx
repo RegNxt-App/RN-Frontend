@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Select from 'react-select';
-import Api from '../../components/Api'; // Ensure your Api utility is correctly set up
+import Api from '../../components/Api';
+import ViewBalanceData from '../../components/Tables/ViewBalancesTable';
 
 interface Option {
   value: string;
@@ -39,7 +40,7 @@ const ViewBalance = () => {
     { value: 'AmountClass', label: 'Amount Class' },
     { value: 'DomainId', label: 'Domain ID' },
     { value: 'Currency', label: 'Currency' },
-    { value: 'FreeField1', label: 'Free Field 1' }, // Placeholder for dynamic labels
+    { value: 'FreeField1', label: 'Free Field 1' },
     { value: 'FreeField2', label: 'Free Field 2' },
     { value: 'FreeField3', label: 'Free Field 3' },
     { value: 'FreeField4', label: 'Free Field 4' },
@@ -49,6 +50,8 @@ const ViewBalance = () => {
     { value: 'FreeField8', label: 'Free Field 8' },
     { value: 'FreeField9', label: 'Free Field 9' },
   ]);
+  const [balancesData, setBalancesData] = useState<any[]>([]);
+  const [showBalances, setShowBalances] = useState(false);
 
   useEffect(() => {
     const fetchAccountingLabels = async () => {
@@ -90,8 +93,8 @@ const ViewBalance = () => {
 
     try {
       const response = await Api.get(endpoint);
-      console.log('Balances:', response.data);
-      alert('Balances fetched successfully! Check console for details.');
+      setBalancesData(response.data);
+      setShowBalances(true);
     } catch (error) {
       console.error('Failed to fetch accounting balances:', error);
       alert('Failed to fetch balances. Please try again.');
@@ -138,6 +141,7 @@ const ViewBalance = () => {
       >
         Show Balances
       </button>
+      {showBalances && <ViewBalanceData data={balancesData} />}
     </div>
   );
 };
