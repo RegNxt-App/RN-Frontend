@@ -3,7 +3,7 @@ import FdlAccountingConfig from '../../components/Tables/FdlAccountingConfig';
 import AccountCode from './AccountCode';
 import FdlJournalPolicy from '../../components/Tables/FdlJournalPolicy';
 import CurrencyRate from './CurrencyRate';
-import Api from '../../components/Api';
+import Api from '../../utils/Api';
 import Loader from '../../components/loader';
 
 interface TabContent {

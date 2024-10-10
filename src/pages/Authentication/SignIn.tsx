@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Mail, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import Api from '../../components/Api';
+import Api from '../../utils/Api';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
-import Api from '../Api';
+import Api from '../../utils/Api';
 
 interface JournalEntry {
   journalCode: string;
@@ -62,10 +62,7 @@ const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
   onUpdateSuccess,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<JournalEntry | null>(
-    null,
-  );
+
   const [filteredData, setFilteredData] = useState<JournalEntry[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);

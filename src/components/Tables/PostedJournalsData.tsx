@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
 import FdlPostedJournalDetailsTable from './FdlPostedJournalDetailsTable';
-import Api from '../Api';
+import Api from '../../utils/Api';
 
 interface PostedJournalData {
   id: string;
@@ -112,11 +112,6 @@ const PostedJournalsData: React.FC<DataTableProps> = ({
     setCurrentPage(pageNumber);
   };
 
-  const handleViewClick = (record: PostedJournalData) => {
-    setSelectedRecord(record);
-    setShowWorkbookPopup(true);
-  };
-
   const handleRowClick = async (journalCode: string, journalNr: string) => {
     setClickedjournalCode(journalCode);
     setClickedjournalNr(journalNr);
@@ -202,15 +197,14 @@ const PostedJournalsData: React.FC<DataTableProps> = ({
     if (clickedjournalCode && clickedjournalNr) {
       await handleRowClick(clickedjournalCode, clickedjournalNr);
 
-      // Assuming the fetched `journalDetails` is the updated journal data
       if (journalDetails) {
         const updatedData = data.map((journal) =>
           journal.journalCode === clickedjournalCode &&
           journal.journalNr === clickedjournalNr
-            ? journalDetails // Replace the updated journal details
+            ? journalDetails
             : journal,
         );
-        updateUnpostedJournals(updatedData); // Pass the updated list
+        updateUnpostedJournals(updatedData);
       }
     }
   };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PostedJournalsData from '../../components/Tables/PostedJournalsData';
 import UnpostedJournalsData from '../../components/Tables/UnpostedJournalsData';
 import UploadPan from './UploadJournalPan';
-import Api from '../../components/Api';
+import Api from '../../utils/Api';
 import Loader from '../../components/loader';
 interface Item {
   id: string;

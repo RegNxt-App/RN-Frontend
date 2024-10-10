@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Select from 'react-select';
-import Api from '../../components/Api';
+import Api from '../../utils/Api';
 import ViewBalanceData from '../../components/Tables/ViewBalancesTable';
 
 interface Option {

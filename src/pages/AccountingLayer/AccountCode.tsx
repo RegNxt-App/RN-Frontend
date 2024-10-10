@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import AccountCodeTable from '../../components/Tables/AccountCodeTable';
-import Api from '../../components/Api';
+import Api from '../../utils/Api';
 import Loader from '../../components/loader';
 interface AccountingCategory {
   id: string;

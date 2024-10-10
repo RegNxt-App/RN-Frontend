@@ -4,7 +4,7 @@ import KanbanView from '../../components/KanbanView';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ViewRecordPopup from '../../components/ViewRecordPopup';
 import AddWorkbookModel from '../../components/CModels/WordbookModels/AddWorkbookModel';
-import Api from '../../components/Api';
+import Api from '../../utils/Api';
 
 interface WorkbookData {
   id: number;

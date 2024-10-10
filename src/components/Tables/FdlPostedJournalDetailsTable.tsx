@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
-import Api from '../Api';
+import Api from '../../utils/Api';
 interface JournalEntry {
   journalCode: string;
   journalNr: number;
@@ -61,10 +61,6 @@ const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
   onUpdateSuccess,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<JournalEntry | null>(
-    null,
-  );
   const [filteredData, setFilteredData] = useState<JournalEntry[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -237,7 +233,7 @@ const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
         </p>
         <button
           className="px-4 py-2 bg-green-500 text-white rounded-md mb-4"
-          onClick={() => setShowConfirmDialog(true)} // Open confirmation dialog
+          onClick={() => setShowConfirmDialog(true)}
         >
           Unpost from Balances
         </button>
