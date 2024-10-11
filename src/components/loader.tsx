@@ -1,14 +1,9 @@
-import React from 'react';
-
 interface LoaderProps {
   size?: number;
   color?: string;
 }
 
-const Loader: React.FC<LoaderProps> = ({
-  size = 32,
-  color = 'text-surface',
-}) => {
+const Loader = ({ size = 32, color = 'text-surface' }: LoaderProps) => {
   return (
     <div
       className={`inline-block animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite] ${color}`}

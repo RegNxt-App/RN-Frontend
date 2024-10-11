@@ -23,12 +23,12 @@ interface DataTableProps {
 
 const itemsPerPage = 10;
 
-const EntityTable: React.FC<DataTableProps> = ({ data }) => {
+const EntityTable = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
     null,
-  ); // Added state to hold selected record
+  );
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;

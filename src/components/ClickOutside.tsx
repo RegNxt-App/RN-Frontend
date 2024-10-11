@@ -7,12 +7,12 @@ interface Props {
   className?: string;
 }
 
-const ClickOutside: React.FC<Props> = ({
+const ClickOutside = ({
   children,
   exceptionRef,
   onClick,
   className,
-}) => {
+}: Props) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

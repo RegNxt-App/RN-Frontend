@@ -17,7 +17,7 @@ interface AccountCodeProps {
   accountingCategories: AccountingCategory[];
 }
 
-const AccountCode: React.FC<AccountCodeProps> = ({ accountingCategories }) => {
+const AccountCode = ({ accountingCategories }: AccountCodeProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [tableData, setTableData] = useState<LedgerData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);

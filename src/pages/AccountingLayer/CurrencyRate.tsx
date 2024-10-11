@@ -20,7 +20,7 @@ interface CurrencyRateProps {
   data: AccountingRateType[];
 }
 
-const CurrencyRate: React.FC<CurrencyRateProps> = ({ data }) => {
+const CurrencyRate = ({ data }: CurrencyRateProps) => {
   const [selectedType, setSelectedType] = useState<string>('');
   const [currencyRates, setCurrencyRates] = useState<CurrencyRate[]>([]);
   const [loading, setLoading] = useState<boolean>(false);

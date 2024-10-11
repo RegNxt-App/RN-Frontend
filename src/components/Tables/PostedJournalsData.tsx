@@ -42,14 +42,12 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const PostedJournalsData: React.FC<DataTableProps> = ({
+const PostedJournalsData = ({
   data,
   updateUnpostedJournals,
-}) => {
+}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] =
-    useState<PostedJournalData | null>(null);
+
   const [filteredData, setFilteredData] = useState<PostedJournalData[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);

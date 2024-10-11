@@ -21,7 +21,7 @@ interface DataTableProps {
 
 const itemsPerPage = 10;
 
-const DataTable: React.FC<DataTableProps> = ({ data }) => {
+const DataTable = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(

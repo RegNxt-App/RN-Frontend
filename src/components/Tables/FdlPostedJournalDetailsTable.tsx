@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
 import Api from '../../utils/Api';
@@ -54,12 +54,12 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const FdlPostedJournalDetailsTable: React.FC<DataTableProps> = ({
+const FdlPostedJournalDetailsTable = ({
   data,
   clickedjournalCode,
   clickedjournalNr,
   onUpdateSuccess,
-}) => {
+}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredData, setFilteredData] = useState<JournalEntry[]>(data);
   const [filters, setFilters] = useState<FilterState>({});

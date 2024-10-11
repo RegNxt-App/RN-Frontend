@@ -1,4 +1,3 @@
-import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
@@ -8,12 +7,12 @@ interface PaginationProps {
   siblingCount?: number;
 }
 
-const Pagination: React.FC<PaginationProps> = ({
+const Pagination = ({
   currentPage,
   totalPages,
   onPageChange,
   siblingCount = 1,
-}) => {
+}: PaginationProps) => {
   const range = (start: number, end: number) => {
     const length = end - start + 1;
     return Array.from({ length }, (_, idx) => idx + start);

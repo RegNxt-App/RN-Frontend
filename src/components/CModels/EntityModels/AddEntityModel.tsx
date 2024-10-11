@@ -4,7 +4,7 @@ interface NewRecordPopupProps {
   onClose: () => void;
 }
 
-const AddEntityModel: React.FC<NewRecordPopupProps> = ({ onClose }) => {
+const AddEntityModel = ({ onClose }: NewRecordPopupProps) => {
   const [formData, setFormData] = useState({
     entityCode: '',
     entityLabel: '',

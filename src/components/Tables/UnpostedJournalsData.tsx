@@ -42,10 +42,10 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const UnpostedJournalsData: React.FC<DataTableProps> = ({
+const UnpostedJournalsData = ({
   data,
   updateUnpostedJournals,
-}) => {
+}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredData, setFilteredData] =
     useState<UnpostedJournalsData[]>(data);

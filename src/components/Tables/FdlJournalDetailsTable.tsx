@@ -55,12 +55,12 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const FdlJournalDetailsTable: React.FC<DataTableProps> = ({
+const FdlJournalDetailsTable = ({
   data,
   clickedjournalCode,
   clickedjournalNr,
   onUpdateSuccess,
-}) => {
+}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filteredData, setFilteredData] = useState<JournalEntry[]>(data);

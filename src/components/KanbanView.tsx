@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Define the type for props
 interface WorkbookData {
   id: number;
   name: string;
@@ -15,10 +14,10 @@ interface WorkbookData {
 }
 
 interface KanbanViewProps {
-  data: WorkbookData[]; // Data is passed as a prop
+  data: WorkbookData[];
 }
 
-const KanbanView: React.FC<KanbanViewProps> = ({ data }) => {
+const KanbanView = ({ data }: KanbanViewProps) => {
   const groupedData = data.reduce(
     (acc, item) => {
       if (!acc[item.status]) {

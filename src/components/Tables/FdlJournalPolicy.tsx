@@ -39,7 +39,7 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const FdlJournalPolicy: React.FC<DataTableProps> = ({ data }) => {
+const FdlJournalPolicy = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filteredData, setFilteredData] = useState<JournalPolicyData[]>(data);

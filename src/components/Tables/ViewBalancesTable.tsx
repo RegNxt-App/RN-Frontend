@@ -18,7 +18,7 @@ interface DataTableProps {
 
 const itemsPerPage = 10;
 
-const ViewBalanceData: React.FC<DataTableProps> = ({ data }) => {
+const ViewBalanceData = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const indexOfLastItem = currentPage * itemsPerPage;

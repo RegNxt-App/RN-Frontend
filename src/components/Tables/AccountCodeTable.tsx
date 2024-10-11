@@ -13,7 +13,7 @@ interface DataTableProps {
 
 const itemsPerPage = 10;
 
-const AccountCodeTable: React.FC<DataTableProps> = ({ data }) => {
+const AccountCodeTable = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const indexOfLastItem = currentPage * itemsPerPage;

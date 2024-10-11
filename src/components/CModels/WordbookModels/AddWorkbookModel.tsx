@@ -5,7 +5,7 @@ interface NewRecordPopupProps {
   onClose: () => void;
 }
 
-const AddWorkbookModel: React.FC<NewRecordPopupProps> = ({ onClose }) => {
+const AddWorkbookModel = ({ onClose }: NewRecordPopupProps) => {
   const [formData, setFormData] = useState<Partial<Package>>({
     module: '',
     entity: '',

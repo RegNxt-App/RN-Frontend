@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter, Edit, Trash2 } from 'lucide-react';
 
@@ -31,11 +31,9 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const FdlAccountingConfig: React.FC<DataTableProps> = ({ data }) => {
+const FdlAccountingConfig = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] =
-    useState<AccountingCategory | null>(null);
+
   const [filteredData, setFilteredData] = useState<AccountingCategory[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
