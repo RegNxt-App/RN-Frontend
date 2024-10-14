@@ -1,33 +1,28 @@
 import { useState } from 'react';
 import Pagination from '../Pagination';
-import UpdateEntityModel from '../CModels/EntityModels/UpdateEntityModel';
+import UpdateTemplateModel from '../CModels/TemplateModels/UpdateTemplateModel';
 
-interface WorkbookData {
+interface TemplateData {
   id: number;
-  code: string;
-  label: string;
-  country: string;
-  city: string;
-  identificationType: string;
-  vat: string;
-  bicCode: string;
-  kboCode: string;
-  lei: string;
-  reportingCurrency: string;
-  significantCurrencies?: string[];
-  email: string;
+  name: string;
+  reportGroupId: number;
+  reportGroupCode: string;
+  reportSetId: number;
+  reportSetCode: string;
+  reportSubsetId: number;
+  reportSubsetCode: string;
 }
 
 interface DataTableProps {
-  data: WorkbookData[];
+  data: TemplateData[];
 }
 
 const itemsPerPage = 10;
 
-const EntityTable = ({ data }: DataTableProps) => {
+const TemplateTable = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
+  const [selectedRecord, setSelectedRecord] = useState<TemplateData | null>(
     null,
   );
 
@@ -41,7 +36,7 @@ const EntityTable = ({ data }: DataTableProps) => {
     setCurrentPage(pageNumber);
   };
 
-  const handleEditClick = (record: WorkbookData) => {
+  const handleEditClick = (record: TemplateData) => {
     setSelectedRecord(record);
     setShowUpdatePopup(true);
   };
@@ -60,41 +55,17 @@ const EntityTable = ({ data }: DataTableProps) => {
               <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                 Id
               </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Code
+              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
+                Name
               </th>
               <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Label
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                Country
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                City
+                Report Group
               </th>
               <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Identification Type
-              </th>
-              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                VAT
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                BIC Code
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                KBO Code
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                LEI Code
+                Report Set
               </th>
               <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Reporting Currency
-              </th>
-              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Significant Currencies
-              </th>
-              <th className="min-w-[250px] py-4 px-4 font-medium text-black dark:text-white">
-                Email
+                Report Subset
               </th>
               <th className="py-4 px-4 font-medium text-black dark:text-white">
                 Actions
@@ -108,44 +79,17 @@ const EntityTable = ({ data }: DataTableProps) => {
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   {item.id}
                 </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  {item.code}
+                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  {item.name || 'N/A'}
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.label}
+                  {item.reportGroupCode}
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.country}
+                  {item.reportSetCode}
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.city}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.identificationType}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.vat}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.bicCode}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.kboCode}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.lei}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.reportingCurrency}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.significantCurrencies &&
-                  Array.isArray(item.significantCurrencies)
-                    ? item.significantCurrencies.join(', ')
-                    : 'N/A'}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.email}
+                  {item.reportSubsetCode}
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <div className="flex items-center space-x-3.5">
@@ -169,9 +113,8 @@ const EntityTable = ({ data }: DataTableProps) => {
         onPageChange={handlePageChange}
       />
 
-      {/* Render UpdateEntityModel when showUpdatePopup is true */}
       {showUpdatePopup && selectedRecord && (
-        <UpdateEntityModel
+        <UpdateTemplateModel
           existingData={selectedRecord}
           onClose={handleCloseUpdatePopup}
         />
@@ -180,4 +123,4 @@ const EntityTable = ({ data }: DataTableProps) => {
   );
 };
 
-export default EntityTable;
+export default TemplateTable;

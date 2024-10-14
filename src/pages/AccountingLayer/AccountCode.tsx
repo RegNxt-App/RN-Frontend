@@ -3,6 +3,7 @@ import { useState } from 'react';
 import AccountCodeTable from '../../components/Tables/AccountCodeTable';
 import Api from '../../utils/Api';
 import Loader from '../../components/loader';
+
 interface AccountingCategory {
   id: string;
   name: string;
@@ -21,6 +22,7 @@ const AccountCode = ({ accountingCategories }: AccountCodeProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [tableData, setTableData] = useState<LedgerData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
   const fetchAccountCodes = async (ledger: string) => {
     setLoading(true);
     try {
@@ -44,6 +46,21 @@ const AccountCode = ({ accountingCategories }: AccountCodeProps) => {
       fetchAccountCodes(selectedValue);
     }
   };
+
+  const handleDelete = (id: string) => {
+    setTableData((prevData) =>
+      prevData.filter((item) => item.ledgerCode !== id),
+    );
+  };
+
+  const handleUpdate = (updatedRecord: LedgerData) => {
+    setTableData((prevData) =>
+      prevData.map((item) =>
+        item.ledgerCode === updatedRecord.ledgerCode ? updatedRecord : item,
+      ),
+    );
+  };
+
   return (
     <div>
       <div className="block w-full py-8">
@@ -66,7 +83,13 @@ const AccountCode = ({ accountingCategories }: AccountCodeProps) => {
       {loading ? (
         <Loader />
       ) : (
-        tableData.length > 0 && <AccountCodeTable data={tableData} />
+        tableData.length > 0 && (
+          <AccountCodeTable
+            data={tableData}
+            onDelete={handleDelete}
+            onUpdate={handleUpdate}
+          />
+        )
       )}
     </div>
   );

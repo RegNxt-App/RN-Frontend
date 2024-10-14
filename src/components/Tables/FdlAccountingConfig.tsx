@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter, Edit, Trash2 } from 'lucide-react';
+import Swal from 'sweetalert2';
+import EditAccountingCat from '../EditAccountingCat';
 
 interface AccountingCategory {
   id: string;
@@ -37,6 +39,10 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
   const [filteredData, setFilteredData] = useState<AccountingCategory[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const [recordToEdit, setRecordToEdit] = useState<AccountingCategory | null>(
+    null,
+  );
 
   useEffect(() => {
     applyFilters();
@@ -89,6 +95,46 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handleDelete = (id: string) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You want to Delete Accounting Category Record!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        fetch(`/api/delete/${id}`, {
+          method: 'DELETE',
+        })
+          .then((response) => response.json())
+          .then(() => {
+            Swal.fire('Deleted!', 'Your record has been deleted.', 'success');
+            setFilteredData(filteredData.filter((item) => item.id !== id));
+          })
+          .catch(() => {
+            Swal.fire(
+              'Error!',
+              'There was an error deleting the record.',
+              'error',
+            );
+          });
+      }
+    });
+  };
+
+  const handleEdit = (record: AccountingCategory) => {
+    setRecordToEdit(record);
+    setIsEditPopupOpen(true);
+  };
+
+  const closeEditPopup = () => {
+    setIsEditPopupOpen(false);
+    setRecordToEdit(null);
   };
 
   const renderFilterDropdown = (column: string) => (
@@ -206,14 +252,14 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
                 <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <div className="flex gap-3">
                     <button
-                      // onClick={() => handleEdit(item)}
-                      className="hover:text-primary"
+                      onClick={() => handleEdit(item)}
+                      className="text-blue-500 hover:text-blue-700"
                     >
                       <Edit size={18} />
                     </button>
                     <button
-                      // onClick={() => handleDelete(item.id)}
-                      className="hover:text-danger"
+                      onClick={() => handleDelete(item.id)}
+                      className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -229,6 +275,9 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
+      {isEditPopupOpen && recordToEdit && (
+        <EditAccountingCat onClose={closeEditPopup} record={recordToEdit} />
+      )}
     </div>
   );
 };

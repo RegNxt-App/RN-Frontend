@@ -1,119 +1,30 @@
 import { useState, useEffect } from 'react';
-
 import EntityTable from '../../components/Tables/EntityTable';
 import AddEntityModel from '../../components/CModels/EntityModels/AddEntityModel';
 import { ArrowDownToLine, ArrowUpFromLine, Download, Plus } from 'lucide-react';
+import Api from '../../utils/Api';
+
 function Entity() {
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const [showPopup, setShowPopup] = useState(false);
+  const [entityData, setEntityData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const sampleData = [
-    {
-      id: 1,
-      code: 'A123',
-      label: 'Entity 1',
-      country: 'USA',
-      city: 'New York',
-      identificationType: 'ID',
-      vat: '123456',
-      bicCode: 'BIC001',
-      kboCode: 'KBO001',
-      leiCode: 'LEI001',
-      reportingCurrency: 'USD',
-      significantCurrencies: ['USD', 'EUR'],
-      email: 'entity1@example.com',
-    },
-    {
-      id: 2,
-      code: 'B456',
-      label: 'Entity 2',
-      country: 'UK',
-      city: 'London',
-      identificationType: 'Passport',
-      vat: '654321',
-      bicCode: 'BIC002',
-      kboCode: 'KBO002',
-      leiCode: 'LEI002',
-      reportingCurrency: 'GBP',
-      significantCurrencies: ['GBP', 'EUR'],
-      email: 'entity2@example.com',
-    },
-    {
-      id: 3,
-      code: 'B456',
-      label: 'Entity 2',
-      country: 'UK',
-      city: 'London',
-      identificationType: 'Passport',
-      vat: '654321',
-      bicCode: 'BIC002',
-      kboCode: 'KBO002',
-      leiCode: 'LEI002',
-      reportingCurrency: 'GBP',
-      significantCurrencies: ['GBP', 'EUR'],
-      email: 'entity2@example.com',
-    },
-    {
-      id: 4,
-      code: 'B456',
-      label: 'Entity 2',
-      country: 'UK',
-      city: 'London',
-      identificationType: 'Passport',
-      vat: '654321',
-      bicCode: 'BIC002',
-      kboCode: 'KBO002',
-      leiCode: 'LEI002',
-      reportingCurrency: 'GBP',
-      significantCurrencies: ['GBP', 'EUR'],
-      email: 'entity2@example.com',
-    },
-    {
-      id: 5,
-      code: 'B456',
-      label: 'Entity 2',
-      country: 'UK',
-      city: 'London',
-      identificationType: 'Passport',
-      vat: '654321',
-      bicCode: 'BIC002',
-      kboCode: 'KBO002',
-      leiCode: 'LEI002',
-      reportingCurrency: 'GBP',
-      significantCurrencies: ['GBP', 'EUR'],
-      email: 'entity2@example.com',
-    },
-    {
-      id: 6,
-      code: 'B456',
-      label: 'Entity 2',
-      country: 'UK',
-      city: 'London',
-      identificationType: 'Passport',
-      vat: '654321',
-      bicCode: 'BIC002',
-      kboCode: 'KBO002',
-      leiCode: 'LEI002',
-      reportingCurrency: 'GBP',
-      significantCurrencies: ['GBP', 'EUR'],
-      email: 'entity2@example.com',
-    },
-    {
-      id: 7,
-      code: 'B456',
-      label: 'Entity 2',
-      country: 'UK',
-      city: 'London',
-      identificationType: 'Passport',
-      vat: '654321',
-      bicCode: 'BIC002',
-      kboCode: 'KBO002',
-      leiCode: 'LEI002',
-      reportingCurrency: 'GBP',
-      significantCurrencies: ['GBP', 'EUR'],
-      email: 'entity2@example.com',
-    },
-  ];
+  useEffect(() => {
+    Api.get('/RI/Entity')
+      .then((response) => {
+        setEntityData(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching entity data:', error);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -143,7 +54,8 @@ function Entity() {
           <span>Add Entity</span>
         </button>
       </div>
-      <EntityTable data={sampleData} />
+      {/* Pass the fetched entityData to EntityTable */}
+      <EntityTable data={entityData} />
       {showPopup && <AddEntityModel onClose={() => setShowPopup(false)} />}
     </>
   );

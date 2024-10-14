@@ -117,7 +117,9 @@ span.flatpickr-weekday,
 }
 .flatpickr-day.inRange {
   @apply dark:!shadow-7;
-  box-shadow: -5px 0 0 #EFF4FB, 5px 0 0 #EFF4FB;
+  box-shadow:
+    -5px 0 0 #eff4fb,
+    5px 0 0 #eff4fb;
 }
 .flatpickr-day.inRange,
 .flatpickr-day.prevMonthDay.inRange,
@@ -166,7 +168,6 @@ span.flatpickr-weekday,
   box-shadow: -10px 0 0 #3c50e0;
 }
 
-
 .taskCheckbox:checked ~ .box span {
   @apply opacity-100;
 }
@@ -191,4 +192,16 @@ span.flatpickr-weekday,
 
 [x-cloak] {
   display: none !important;
+}
+.swal2-popup .swal2-styled {
+  border: 0;
+  border-radius: 3px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 500;
+  margin: 0px 5px 0 !important;
+  padding: 10px 32px;
 }
