@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Pagination from '../Pagination';
 import ViewRecordPopup from '../ViewRecordPopup';
-
+import WorkbookView from '../WorkbookView';
 interface WorkbookData {
   id: number;
   name: string;
@@ -103,6 +103,11 @@ const DataTable = ({ data }: DataTableProps) => {
                 </td>
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <div className="flex items-center space-x-3.5">
+                    <WorkbookView workbook={item} />
+                  </div>
+                </td>
+                {/* <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                  <div className="flex items-center space-x-3.5">
                     <button
                       className="hover:text-primary"
                       onClick={() => handleViewClick(item)}
@@ -110,7 +115,7 @@ const DataTable = ({ data }: DataTableProps) => {
                       View
                     </button>
                   </div>
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>

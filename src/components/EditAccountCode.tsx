@@ -17,7 +17,6 @@ const EditAccountCode = ({ onClose, record }: EditRecordPopupProps) => {
   const [description, setDescription] = useState(record.description);
 
   const handleSave = () => {
-    // Make API call to save the updated record
     fetch(`/api/update/${record.ledgerCode}`, {
       method: 'PUT',
       headers: {
@@ -27,11 +26,9 @@ const EditAccountCode = ({ onClose, record }: EditRecordPopupProps) => {
     })
       .then((response) => response.json())
       .then(() => {
-        // Handle success (e.g., close popup and refresh the list)
         onClose();
       })
       .catch(() => {
-        // Handle error
         console.error('Error updating record');
       });
   };
