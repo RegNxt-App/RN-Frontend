@@ -15,11 +15,12 @@ interface TemplateData {
 
 interface DataTableProps {
   data: TemplateData[];
+  onDataChange: () => void;
 }
 
 const itemsPerPage = 10;
 
-const TemplateTable = ({ data }: DataTableProps) => {
+const TemplateTable = ({ data, onDataChange }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<TemplateData | null>(
@@ -45,7 +46,9 @@ const TemplateTable = ({ data }: DataTableProps) => {
     setShowUpdatePopup(false);
     setSelectedRecord(null);
   };
-
+  const handleUpdateRecord = () => {
+    onDataChange();
+  };
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
@@ -117,6 +120,7 @@ const TemplateTable = ({ data }: DataTableProps) => {
         <UpdateTemplateModel
           existingData={selectedRecord}
           onClose={handleCloseUpdatePopup}
+          onUpdate={handleUpdateRecord}
         />
       )}
     </div>

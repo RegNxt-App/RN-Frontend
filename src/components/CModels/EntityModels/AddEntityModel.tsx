@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import Api from '../../../utils/Api';
 
-interface NewRecordPopupProps {
+interface AddEntityModelProps {
   onClose: () => void;
+  onSuccess: () => void;
 }
 
-const AddEntityModel = ({ onClose }: NewRecordPopupProps) => {
+const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
   const [formData, setFormData] = useState({
     entityCode: '',
     entityLabel: '',
@@ -52,7 +53,7 @@ const AddEntityModel = ({ onClose }: NewRecordPopupProps) => {
       const response = await Api.post('/RI/Entity', payload);
 
       console.log('Entity created successfully:', response.data);
-
+      onSuccess();
       onClose();
     } catch (error) {
       console.error('Error creating entity:', error);
@@ -60,7 +61,7 @@ const AddEntityModel = ({ onClose }: NewRecordPopupProps) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50  z-[9999]">
       <div className="rounded-sm border border-stroke bg-white shadow-default p-6 w-full max-w-4xl">
         <div className="border-b border-stroke py-4 px-6.5">
           <h3 className="text-2xl font-extrabold text-black">Add New Entity</h3>

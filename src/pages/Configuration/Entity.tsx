@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import EntityTable from '../../components/Tables/EntityTable';
 import AddEntityModel from '../../components/CModels/EntityModels/AddEntityModel';
-import { ArrowDownToLine, ArrowUpFromLine, Download, Plus } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpFromLine, Plus } from 'lucide-react';
 import Api from '../../utils/Api';
+import Loader from '../../components/loader';
 
 function Entity() {
   const [view, setView] = useState<'list' | 'kanban'>('list');
@@ -10,7 +11,8 @@ function Entity() {
   const [entityData, setEntityData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchEntityData = () => {
+    setLoading(true);
     Api.get('/RI/Entity')
       .then((response) => {
         setEntityData(response.data);
@@ -20,10 +22,23 @@ function Entity() {
         console.error('Error fetching entity data:', error);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchEntityData();
   }, []);
 
+  const handleAddEntitySuccess = () => {
+    fetchEntityData();
+    setShowPopup(false);
+  };
+  const handleUpdateEntitySuccess = () => {
+    fetchEntityData();
+    setShowPopup(false);
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   return (
@@ -54,9 +69,13 @@ function Entity() {
           <span>Add Entity</span>
         </button>
       </div>
-      {/* Pass the fetched entityData to EntityTable */}
-      <EntityTable data={entityData} />
-      {showPopup && <AddEntityModel onClose={() => setShowPopup(false)} />}
+      <EntityTable data={entityData} onDataChange={handleUpdateEntitySuccess} />
+      {showPopup && (
+        <AddEntityModel
+          onClose={() => setShowPopup(false)}
+          onSuccess={handleAddEntitySuccess}
+        />
+      )}
     </>
   );
 }

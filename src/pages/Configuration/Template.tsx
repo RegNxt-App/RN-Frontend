@@ -1,30 +1,41 @@
 import { useState, useEffect } from 'react';
-import AddEntityModel from '../../components/CModels/EntityModels/AddEntityModel';
 import AddTemplateModel from '../../components/CModels/TemplateModels/AddTemplateModel';
 import { ArrowDownToLine, ArrowUpFromLine, Plus } from 'lucide-react';
 import Api from '../../utils/Api';
 import TemplateTable from '../../components/Tables/TemplateTable';
-
+import Loader from '../../components/loader';
 function Template() {
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const [showPopup, setShowPopup] = useState(false);
-  const [entityData, setEntityData] = useState([]);
+  const [templateData, setTemplateData] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
+  const fetchTemplateData = () => {
+    setLoading(true);
     Api.get('/RI/Template')
       .then((response) => {
-        setEntityData(response.data);
+        setTemplateData(response.data);
         setLoading(false);
       })
       .catch((error) => {
         console.error('Error fetching entity data:', error);
         setLoading(false);
       });
+  };
+  useEffect(() => {
+    fetchTemplateData();
   }, []);
 
+  const handleAddTemplateSuccess = () => {
+    fetchTemplateData();
+    setShowPopup(false);
+  };
+  const handleUpdateTemplateSuccess = () => {
+    fetchTemplateData();
+    setShowPopup(false);
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   return (
@@ -55,8 +66,16 @@ function Template() {
           <span>Add Template</span>
         </button>
       </div>
-      <TemplateTable data={entityData} />
-      {showPopup && <AddTemplateModel onClose={() => setShowPopup(false)} />}
+      <TemplateTable
+        data={templateData}
+        onDataChange={handleUpdateTemplateSuccess}
+      />
+      {showPopup && (
+        <AddTemplateModel
+          onClose={() => setShowPopup(false)}
+          onSuccess={handleAddTemplateSuccess}
+        />
+      )}
     </>
   );
 }

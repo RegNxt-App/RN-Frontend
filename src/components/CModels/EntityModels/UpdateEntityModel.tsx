@@ -3,12 +3,15 @@ import Api from '../../../utils/Api';
 
 interface UpdateRecordPopupProps {
   onClose: () => void;
+  onUpdate: () => void;
+
   existingData: any;
 }
 
 const UpdateEntityModel = ({
   onClose,
   existingData,
+  onUpdate,
 }: UpdateRecordPopupProps) => {
   const [formData, setFormData] = useState({
     entityCode: '',
@@ -58,6 +61,7 @@ const UpdateEntityModel = ({
 
     try {
       const payload = {
+        entityid: existingData.id,
         code: formData.entityCode,
         label: formData.entityLabel,
         country: formData.country,
@@ -73,12 +77,10 @@ const UpdateEntityModel = ({
         consolidationscope: formData.consolidationScope,
       };
 
-      const entityId = existingData.id;
+      const response = await Api.post(`/RI/Entity/`, payload);
 
-      //   const response = await Api.put(`/RI/Entity/${entityId}`, payload);
-
-      //   console.log('Entity updated successfully:', response.data);
-
+      console.log('Entity updated successfully:', response.data);
+      onUpdate();
       onClose();
     } catch (error) {
       console.error('Error updating entity:', error);

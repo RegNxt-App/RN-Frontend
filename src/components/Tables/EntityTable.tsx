@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import Pagination from '../Pagination';
 import UpdateEntityModel from '../CModels/EntityModels/UpdateEntityModel';
 
@@ -20,22 +21,26 @@ interface WorkbookData {
 
 interface DataTableProps {
   data: WorkbookData[];
+  onDataChange: () => void;
 }
 
 const itemsPerPage = 10;
 
-const EntityTable = ({ data }: DataTableProps) => {
+const EntityTable = ({ data, onDataChange }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
     null,
   );
-
+  const [tableData, setTableData] = useState<WorkbookData[]>(data);
+  useEffect(() => {
+    setTableData(data);
+  }, [data]);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = tableData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.ceil(tableData.length / itemsPerPage);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -49,6 +54,9 @@ const EntityTable = ({ data }: DataTableProps) => {
   const handleCloseUpdatePopup = () => {
     setShowUpdatePopup(false);
     setSelectedRecord(null);
+  };
+  const handleUpdateRecord = () => {
+    onDataChange();
   };
 
   return (
@@ -169,11 +177,11 @@ const EntityTable = ({ data }: DataTableProps) => {
         onPageChange={handlePageChange}
       />
 
-      {/* Render UpdateEntityModel when showUpdatePopup is true */}
       {showUpdatePopup && selectedRecord && (
         <UpdateEntityModel
           existingData={selectedRecord}
           onClose={handleCloseUpdatePopup}
+          onUpdate={handleUpdateRecord}
         />
       )}
     </div>
