@@ -1,32 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Api from '../../../utils/Api';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface UpdateTemplateModelProps {
-  existingData: { id: number };
+  existingData: { id: number; reportSubsetId?: number };
   onClose: () => void;
   onUpdate: () => void;
 }
 
-const UpdateTemplateModel = ({
+interface Item {
+  key: string;
+  label: string;
+  status: string;
+  children?: Item[];
+}
+
+interface CheckboxState {
+  checked: boolean;
+  indeterminate: boolean;
+}
+
+const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
   existingData,
   onClose,
   onUpdate,
-}: UpdateTemplateModelProps) => {
+}) => {
   const [formData, setFormData] = useState({
     templateName: '',
-    selectedItems: {} as Record<
-      string,
-      { checked: boolean; partialChecked: boolean }
-    >,
+    selectedItems: {} as Record<string, CheckboxState>,
   });
+
+  const [tableFields, setTableFields] = useState<Item[]>([]);
+  const [expandedParents, setExpandedParents] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchTemplateDetails = async () => {
       try {
         const response = await Api.get(`/RI/Template/${existingData.id}`);
         const templateDetails = response.data;
-
-        // Parse the selectedItems JSON string
         const parsedSelectedItems = JSON.parse(templateDetails.selectedItems);
 
         setFormData({
@@ -41,24 +52,159 @@ const UpdateTemplateModel = ({
     fetchTemplateDetails();
   }, [existingData.id]);
 
-  // Handle input change for template name
+  useEffect(() => {
+    if (existingData.reportSubsetId) {
+      const fetchTableFields = async () => {
+        try {
+          const response = await Api.get(
+            `/RD/Table?reportSubsetId=${existingData.reportSubsetId}&refReportSubsetId=0`,
+          );
+          setTableFields(response.data);
+        } catch (error) {
+          console.error('Error fetching table fields:', error);
+        }
+      };
+
+      fetchTableFields();
+    }
+  }, [existingData.reportSubsetId]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle checkbox changes for selected items
-  const handleCheckboxChange = (key: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedItems: {
-        ...prev.selectedItems,
-        [key]: {
-          ...prev.selectedItems[key],
-          checked: !prev.selectedItems[key].checked,
-        },
-      },
-    }));
+  const handleCheckboxChange = (key: string, hasChildren: boolean = false) => {
+    setFormData((prev) => {
+      const newSelectedItems = { ...prev.selectedItems };
+
+      const updateItemAndChildren = (itemKey: string, checked: boolean) => {
+        newSelectedItems[itemKey] = { checked, indeterminate: false };
+        const item = findItemByKey(tableFields, itemKey);
+        if (item?.children) {
+          item.children.forEach((child) =>
+            updateItemAndChildren(child.key, checked),
+          );
+        }
+      };
+
+      const currentState = newSelectedItems[key] || {
+        checked: false,
+        indeterminate: false,
+      };
+      const newCheckedState = !currentState.checked;
+
+      updateItemAndChildren(key, newCheckedState);
+
+      // Update parent states
+      const updateParentState = (items: Item[]) => {
+        items.forEach((item) => {
+          if (item.children) {
+            const childStates = item.children.map(
+              (child) => newSelectedItems[child.key],
+            );
+            const allChecked = childStates.every((state) => state?.checked);
+            const someChecked = childStates.some(
+              (state) => state?.checked || state?.indeterminate,
+            );
+
+            newSelectedItems[item.key] = {
+              checked: allChecked,
+              indeterminate: !allChecked && someChecked,
+            };
+
+            updateParentState(item.children);
+          }
+        });
+      };
+
+      updateParentState(tableFields);
+
+      return {
+        ...prev,
+        selectedItems: newSelectedItems,
+      };
+    });
+  };
+
+  const findItemByKey = (items: Item[], key: string): Item | undefined => {
+    for (const item of items) {
+      if (item.key === key) return item;
+      if (item.children) {
+        const found = findItemByKey(item.children, key);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  };
+
+  const toggleExpand = (key: string) => {
+    setExpandedParents((prevExpanded) =>
+      prevExpanded.includes(key)
+        ? prevExpanded.filter((item) => item !== key)
+        : [...prevExpanded, key],
+    );
+  };
+
+  const CheckboxWithRef: React.FC<{
+    item: Item;
+    state: CheckboxState;
+    onChange: () => void;
+  }> = React.memo(({ item, state, onChange }) => {
+    const checkboxRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      if (checkboxRef.current) {
+        checkboxRef.current.indeterminate = state.indeterminate;
+      }
+    }, [state.indeterminate]);
+
+    return (
+      <input
+        ref={checkboxRef}
+        type="checkbox"
+        id={item.key}
+        checked={state.checked}
+        onChange={onChange}
+        className="ml-2"
+      />
+    );
+  });
+
+  const renderItems = (items: Item[]) => {
+    return items.map((item) => {
+      const state = formData.selectedItems[item.key] || {
+        checked: false,
+        indeterminate: false,
+      };
+
+      return (
+        <div key={item.key}>
+          <div className="flex items-center">
+            {item.children && (
+              <span onClick={() => toggleExpand(item.key)}>
+                {expandedParents.includes(item.key) ? (
+                  <ChevronDown className="cursor-pointer" />
+                ) : (
+                  <ChevronRight className="cursor-pointer" />
+                )}
+              </span>
+            )}
+            <CheckboxWithRef
+              item={item}
+              state={state}
+              onChange={() => handleCheckboxChange(item.key, !!item.children)}
+            />
+            <label htmlFor={item.key} className="ml-2">
+              {item.label}
+            </label>
+          </div>
+          {expandedParents.includes(item.key) && item.children && (
+            <div className="ml-6 mt-2">{renderItems(item.children)}</div>
+          )}
+        </div>
+      );
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,7 +235,6 @@ const UpdateTemplateModel = ({
         </div>
         <form onSubmit={handleSubmit}>
           <div className="p-6.5 grid grid-cols-1 gap-4">
-            {/* Template Name */}
             <input
               type="text"
               name="templateName"
@@ -102,24 +247,8 @@ const UpdateTemplateModel = ({
           </div>
 
           <div className="p-6.5">
-            <h4 className="text-xl font-bold mb-4">Select Items</h4>
-            {/* Render checkboxes from selectedItems */}
-            <div>
-              {Object.keys(formData.selectedItems).map((key) => (
-                <div key={key} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={key}
-                    checked={formData.selectedItems[key].checked}
-                    onChange={() => handleCheckboxChange(key)}
-                    className="ml-2"
-                  />
-                  <label htmlFor={key} className="ml-2">
-                    {key}
-                  </label>
-                </div>
-              ))}
-            </div>
+            <h4 className="text-xl font-bold mb-4">Select Tables</h4>
+            <div>{renderItems(tableFields)}</div>
           </div>
 
           <div className="border-t border-stroke bg-gray p-4 text-right">
