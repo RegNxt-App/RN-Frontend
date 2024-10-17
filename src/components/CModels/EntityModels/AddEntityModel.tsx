@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Api from '../../../utils/Api';
 
 interface AddEntityModelProps {
@@ -22,6 +22,22 @@ const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
     email: '',
     consolidationScope: '',
   });
+  const [identificationTypes, setIdentificationTypes] = useState<
+    { name: string; code: number }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchIdentificationTypes = async () => {
+      try {
+        const response = await Api.get('/RI/UIInput?type=IdentificationType');
+        setIdentificationTypes(response.data);
+      } catch (error) {
+        console.error('Error fetching identification types:', error);
+      }
+    };
+
+    fetchIdentificationTypes();
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -104,15 +120,22 @@ const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
               value={formData.city}
               required
             />
-            <input
-              type="text"
+            <select
               name="identificationType"
-              placeholder="Identification Type"
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
               onChange={handleInputChange}
               value={formData.identificationType}
               required
-            />
+            >
+              <option value="" disabled>
+                Select Identification Type
+              </option>
+              {identificationTypes.map((type) => (
+                <option key={type.code} value={type.code}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               name="vat"
