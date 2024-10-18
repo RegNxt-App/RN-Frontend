@@ -64,6 +64,7 @@ const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
         significantcurrencies: formData.significantCurrencies,
         email: formData.email,
         consolidationscope: formData.consolidationScope,
+        entityid: 0,
       };
 
       const response = await Api.post('/RI/Entity', payload);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-
+import { Provider } from 'react-redux';
+import { store } from './app/store';
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import SignIn from './pages/Authentication/SignIn';
@@ -43,220 +44,222 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route path="/auth/signin" element={<SignIn />} />
-      <Route path="/auth/signup" element={<SignUp />} />
+    <Provider store={store}>
+      <Routes>
+        <Route path="/auth/signin" element={<SignIn />} />
+        <Route path="/auth/signup" element={<SignUp />} />
 
-      <Route
-        index
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="RegNxt" />
-              <Dashboard />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/overview"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="RegNxt" />
-              <Overview />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/view-balance"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="RegNxt View- Balance" />
-              <ViewBalance />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/post-unpost"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="RegNxt - Post Unpost" />
-              <PostUnpost />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/accounting-configuration"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="RegNxt - Accounting Config" />
-              <AccountingConfig />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/messages"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="RegNxt" />
-              <Messages />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/inspect"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="RegNxt" />
-              <Inspect />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="RegNxt" />
-              <Profile />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/reports-overview"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="RegNxt" />
-              <OverviewRegulatoryReports />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/data"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Data | RegNxt" />
-              <Data />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/business-rules"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Business Rules | RegNxt" />
-              <BusinessRules />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/reconciliations"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Reconciliations | RegNxt" />
-              <Reconciliations />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/processing"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Processing | RegNxt" />
-              <Processing />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/accounting-layer"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Accounting Layer | RegNxt" />
-              <AccountingLayer />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/transaction-layer"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Transaction Layer | RegNxt" />
-              <TransactionLayer />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/entity"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Entity | RegNxt" />
-              <Entity />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/template"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Template | RegNxt" />
-              <Template />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/regulatory-calender"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Regulatory Calender | RegNxt" />
-              <RegulatoryCalender />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-      <Route
-        path="/validation"
-        element={
-          <DefaultLayout>
-            <PrivateRoute>
-              <PageTitle title="Validation | RegNxt" />
-              <Validation />
-            </PrivateRoute>
-          </DefaultLayout>
-        }
-      />
-    </Routes>
+        <Route
+          index
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt" />
+                <Dashboard />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/overview"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt" />
+                <Overview />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/view-balance"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt View- Balance" />
+                <ViewBalance />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/post-unpost"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt - Post Unpost" />
+                <PostUnpost />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/accounting-configuration"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt - Accounting Config" />
+                <AccountingConfig />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt" />
+                <Messages />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/inspect"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt" />
+                <Inspect />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt" />
+                <Profile />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/reports-overview"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt" />
+                <OverviewRegulatoryReports />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/data"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Data | RegNxt" />
+                <Data />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/business-rules"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Business Rules | RegNxt" />
+                <BusinessRules />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/reconciliations"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Reconciliations | RegNxt" />
+                <Reconciliations />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/processing"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Processing | RegNxt" />
+                <Processing />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/accounting-layer"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Accounting Layer | RegNxt" />
+                <AccountingLayer />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/transaction-layer"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Transaction Layer | RegNxt" />
+                <TransactionLayer />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/entity"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Entity | RegNxt" />
+                <Entity />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/template"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Template | RegNxt" />
+                <Template />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/regulatory-calender"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Regulatory Calender | RegNxt" />
+                <RegulatoryCalender />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/validation"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="Validation | RegNxt" />
+                <Validation />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+      </Routes>
+    </Provider>
   );
 }
 

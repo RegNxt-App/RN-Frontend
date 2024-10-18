@@ -21,8 +21,8 @@ const UpdateEntityModel = ({
     identificationType: '',
     vat: '',
     bicCode: '',
-    kboCode: '',
-    leiCode: '',
+    kbo: '',
+    lei: '',
     reportingCurrency: '',
     significantCurrencies: '',
     email: '',
@@ -31,8 +31,9 @@ const UpdateEntityModel = ({
   const [identificationTypes, setIdentificationTypes] = useState<
     { name: string; code: number }[]
   >([]);
-
+  console.log('Existing Data Final:', existingData);
   useEffect(() => {
+    // Fetch identification types
     const fetchIdentificationTypes = async () => {
       try {
         const response = await Api.get('/RI/UIInput?type=IdentificationType');
@@ -46,24 +47,28 @@ const UpdateEntityModel = ({
   }, []);
 
   useEffect(() => {
-    if (existingData) {
+    if (existingData && identificationTypes.length > 0) {
+      const matchingType = identificationTypes.find(
+        (type) => type.name === existingData.identificationType,
+      );
+
       setFormData({
         entityCode: existingData.code || '',
         entityLabel: existingData.label || '',
         country: existingData.country || '',
         city: existingData.city || '',
-        identificationType: existingData.identificationtype || '',
+        identificationType: matchingType ? matchingType.code.toString() : '',
         vat: existingData.vat || '',
         bicCode: existingData.biccode || '',
-        kboCode: existingData.kbo || '',
-        leiCode: existingData.leiCode || '',
+        kbo: existingData.kbo || '',
+        lei: existingData.lei || '',
         reportingCurrency: existingData.reportingcurrency || '',
         significantCurrencies: existingData.significantcurrencies || '',
         email: existingData.email || '',
         consolidationScope: existingData.consolidationscope || '',
       });
     }
-  }, [existingData]);
+  }, [existingData, identificationTypes]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -75,6 +80,10 @@ const UpdateEntityModel = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const selectedType = identificationTypes.find(
+      (type) => type.code.toString() === formData.identificationType,
+    );
+
     try {
       const payload = {
         entityid: existingData.id,
@@ -82,11 +91,11 @@ const UpdateEntityModel = ({
         label: formData.entityLabel,
         country: formData.country,
         city: formData.city,
-        identificationtype: formData.identificationType,
+        identificationtype: selectedType ? selectedType.name : '',
         vat: formData.vat,
         biccode: formData.bicCode,
-        kbo: formData.kboCode,
-        lei: formData.leiCode,
+        kbo: formData.kbo,
+        lei: formData.lei,
         reportingcurrency: formData.reportingCurrency,
         significantcurrencies: formData.significantCurrencies,
         email: formData.email,
@@ -104,7 +113,7 @@ const UpdateEntityModel = ({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
       <div className="rounded-sm border border-stroke bg-white shadow-default p-6 w-full max-w-4xl">
         <div className="border-b border-stroke py-4 px-6.5">
           <h3 className="text-2xl font-extrabold text-black">Update Entity</h3>
@@ -158,7 +167,7 @@ const UpdateEntityModel = ({
                 Select Identification Type
               </option>
               {identificationTypes.map((type) => (
-                <option key={type.id} value={type.id}>
+                <option key={type.code} value={type.code.toString()}>
                   {type.name}
                 </option>
               ))}
@@ -183,20 +192,20 @@ const UpdateEntityModel = ({
             />
             <input
               type="text"
-              name="kboCode"
+              name="kbo"
               placeholder="KBO Code"
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
               onChange={handleInputChange}
-              value={formData.kboCode}
+              value={formData.kbo}
               required
             />
             <input
               type="text"
-              name="leiCode"
+              name="lei"
               placeholder="LEI Code"
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
               onChange={handleInputChange}
-              value={formData.leiCode}
+              value={formData.lei}
               required
             />
             <input
