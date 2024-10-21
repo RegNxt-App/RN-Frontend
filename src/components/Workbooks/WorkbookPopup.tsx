@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { LayoutGrid, Undo2 } from 'lucide-react';
-import { ReactGrid, Column, Row, CellChange, Id } from '@silevis/reactgrid';
+import {
+  ReactGrid,
+  Column,
+  Row,
+  CellChange,
+  Id,
+  CellStyle,
+} from '@silevis/reactgrid';
 import '@silevis/reactgrid/styles.css';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import { RootState } from '../../app/store';
@@ -57,6 +64,39 @@ const WorkbookPopup: React.FC<{
     (state: RootState) => state.sheetData.selectedSheet,
   );
 
+  const isValueCell = (cell: SheetCell, columnIndex: number) => {
+    return cell.type === 'number' && columnIndex > 1;
+  };
+
+  const getCellStyle = (
+    cell: SheetCell,
+    rowIndex: number,
+    columnIndex: number,
+  ): CellStyle => {
+    const isHeader = rowIndex < 2;
+    const isFirstTwoColumns = columnIndex < 2;
+    const isEditable = isValueCell(cell, columnIndex);
+
+    return {
+      background: isHeader
+        ? '#e0e0e0'
+        : isFirstTwoColumns
+          ? '#f0f0f0'
+          : isEditable
+            ? 'white'
+            : '#f5f5f5',
+      color: isEditable ? 'black' : '#666',
+      cursor: isEditable ? 'default' : 'not-allowed',
+    };
+  };
+  const mapCell = (cell: SheetCell, rowIndex: number, columnIndex: number) => ({
+    type: cell.type === 'number' ? 'number' : 'text',
+    text: decodeHtmlEntities(cell.text),
+    value: cell.type === 'number' ? cell.value : undefined,
+    nonEditable: !isValueCell(cell, columnIndex),
+    style: getCellStyle(cell, rowIndex, columnIndex),
+  });
+
   const columns: Column[] = sheetData?.columns
     ? sheetData.columns.map((col: SheetColumn) => ({
         columnId: col.columnId.toString(),
@@ -76,23 +116,21 @@ const WorkbookPopup: React.FC<{
     }
   };
 
-  const mapCell = (cell: SheetCell) => ({
-    type: mapCellType(cell.type),
-    text: decodeHtmlEntities(cell.text),
-    value: cell.type === 'number' ? cell.value : undefined,
-  });
-
   const headerRows: Row[] = sheetData?.headerRows
-    ? sheetData.headerRows.map((row: SheetRow) => ({
+    ? sheetData.headerRows.map((row: SheetRow, rowIndex: number) => ({
         rowId: row.rowId.toString(),
-        cells: row.cells.map(mapCell),
+        cells: row.cells.map((cell, columnIndex) =>
+          mapCell(cell, rowIndex, columnIndex),
+        ),
       }))
     : [];
 
   const valueRows: Row[] = sheetData?.valueRows
-    ? sheetData.valueRows.map((row: SheetRow) => ({
+    ? sheetData.valueRows.map((row: SheetRow, rowIndex: number) => ({
         rowId: row.rowId.toString(),
-        cells: row.cells.map(mapCell),
+        cells: row.cells.map((cell, columnIndex) =>
+          mapCell(cell, rowIndex + headerRows.length, columnIndex),
+        ),
       }))
     : [];
 
@@ -135,10 +173,6 @@ const WorkbookPopup: React.FC<{
           </button>
         </div>
         <div className="p-4">
-          {/* <p>
-            <strong>Table:</strong>
-          </p> */}
-
           <p>
             <strong>Table:</strong> {selectedSheet.table}
           </p>
@@ -146,10 +180,6 @@ const WorkbookPopup: React.FC<{
           <p>
             <strong>Sheet:</strong> {selectedSheet.label}
           </p>
-
-          {/* <p>
-            <strong>Sheet:</strong>
-          </p> */}
         </div>
         {sheetData &&
         sheetData.columns &&

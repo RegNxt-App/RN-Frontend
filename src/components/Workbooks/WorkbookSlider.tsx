@@ -1,5 +1,5 @@
 import { ChevronLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import LayersTab from './LayersTab';
 import ActionsTab from './ActionsTab';
 import StructureTab from './StructureTab';
@@ -24,9 +24,29 @@ const WorkbookSlider: React.FC<{
     'save' | 'allocate' | 'validate' | 'import' | 'export' | 'transmission'
   >('save');
 
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node)
+      ) {
+        onClose(); // Close the sidebar if click is outside
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex justify-end">
-      <div className="w-4/6 bg-white h-full shadow-lg flex flex-col">
+      <div
+        ref={sidebarRef}
+        className="w-4/6 bg-white h-full shadow-lg flex flex-col"
+      >
         <div className="flex justify-between items-center p-4 border-b">
           <button
             onClick={onClose}
