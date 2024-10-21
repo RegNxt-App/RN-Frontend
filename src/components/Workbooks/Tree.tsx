@@ -1,8 +1,9 @@
+import React from 'react';
 import TreeNode from './TreeNode';
-import Api from '../../utils/Api';
 import { useAppDispatch } from '../../app/hooks';
 import { fetchSheetData } from '../../features/sheetData/sheetDataSlice';
-import { setSelection } from '../../features/sheetData/selectionSlice';
+import { updateSelectedSheet } from '../../features/sheetData/sheetDataSlice';
+
 interface ApiResponse {
   key: string;
   label: string;
@@ -16,19 +17,24 @@ interface TreeProps {
   workbookId: number;
 }
 
-const Tree = ({ data, workbookId }: TreeProps) => {
+const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
   const dispatch = useAppDispatch();
 
-  const handleClick = async (key: string) => {
-    const sheetIdMatch = key.match(/s-(\d+)/);
+  const handleClick = (node: ApiResponse) => {
+    const sheetIdMatch = node.key.match(/s-(\d+)/);
     const sheetId = sheetIdMatch ? sheetIdMatch[1] : null;
 
     if (sheetId) {
       console.log('Sheet ID:', sheetId);
       dispatch(fetchSheetData({ workbookId, sheetId }));
-    } else {
-      console.error('Invalid key format, could not extract sheetId');
     }
+
+    dispatch(
+      updateSelectedSheet({
+        table: node.table || node.data,
+        label: node.label,
+      }),
+    );
   };
 
   return (

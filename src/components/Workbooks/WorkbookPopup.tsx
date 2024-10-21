@@ -57,12 +57,11 @@ const WorkbookPopup: React.FC<{
   const dispatch = useAppDispatch();
 
   const sheetData = useAppSelector((state: RootState) => state.sheetData.data);
-  const loading = useAppSelector((state: RootState) => state.sheetData.loading);
-  const error = useAppSelector((state: RootState) => state.sheetData.error);
-
-  const selectedSheet = useAppSelector(
+  const selectedSheetNew = useAppSelector(
     (state: RootState) => state.sheetData.selectedSheet,
   );
+  const loading = useAppSelector((state: RootState) => state.sheetData.loading);
+  const error = useAppSelector((state: RootState) => state.sheetData.error);
 
   const isValueCell = (cell: SheetCell, columnIndex: number) => {
     return cell.type === 'number' && columnIndex > 1;
@@ -142,8 +141,8 @@ const WorkbookPopup: React.FC<{
         updateSelectedCell({
           rowId: change.rowId,
           columnId: change.columnId,
-          label: selectedSheet.label,
-          table: selectedSheet.table,
+          label: selectedSheetNew.label,
+          table: selectedSheetNew.table,
         }),
       );
     });
@@ -174,11 +173,11 @@ const WorkbookPopup: React.FC<{
         </div>
         <div className="p-4">
           <p>
-            <strong>Table:</strong> {selectedSheet.table}
+            <strong>Table:</strong> {selectedSheetNew.table}
           </p>
 
           <p>
-            <strong>Sheet:</strong> {selectedSheet.label}
+            <strong>Sheet:</strong> {selectedSheetNew.label}
           </p>
         </div>
         {sheetData &&

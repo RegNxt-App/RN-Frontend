@@ -2,6 +2,9 @@ import { AlertTriangle, Database, Save } from 'lucide-react';
 import Tree from './Tree';
 import { useState, useEffect } from 'react';
 import Api from '../../utils/Api';
+import { useDispatch } from 'react-redux';
+
+import { updateSelectedSheet } from '../../features/sheetData/sheetDataSlice';
 interface StructureTabProps {
   workbookId: number;
 }
@@ -14,6 +17,7 @@ interface ApiResponse {
 }
 
 const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
+  const dispatch = useDispatch();
   const [data, setData] = useState<ApiResponse[]>([]);
   const [filteredData, setFilteredData] = useState<ApiResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -29,6 +33,15 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
         setData(response.data);
         setFilteredData(response.data);
         setLoading(false);
+        if (response.data.length > 0) {
+          const firstItem = response.data[0];
+          dispatch(
+            updateSelectedSheet({
+              table: firstItem.data,
+              label: firstItem.label,
+            }),
+          );
+        }
       } catch (err) {
         setError('Failed to load data');
         setLoading(false);
@@ -36,16 +49,14 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
     };
 
     fetchData();
-  }, [workbookId]);
+  }, [workbookId, dispatch]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setSearchTerm(term);
     if (term === '') {
-      // If search is cleared, reset to original data
       setFilteredData(data);
     } else {
-      // Filter the tree data based on the search term
       const filtered = filterTree(data, term.toLowerCase());
       setFilteredData(filtered);
     }
@@ -54,12 +65,10 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   const filterTree = (nodes: ApiResponse[], term: string): ApiResponse[] => {
     return nodes
       .map((node) => {
-        // Check if node label or any children's labels match the search term
         const matches =
           node.label.toLowerCase().includes(term) ||
           (node.children && filterTree(node.children, term).length > 0);
 
-        // If it matches, return the node with filtered children
         if (matches) {
           return {
             ...node,
@@ -67,9 +76,9 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
           };
         }
 
-        return null; // If no match, return null
+        return null;
       })
-      .filter((node) => node !== null) as ApiResponse[]; // Remove null entries
+      .filter((node) => node !== null) as ApiResponse[];
   };
 
   if (loading) return <div>Loading...</div>;
