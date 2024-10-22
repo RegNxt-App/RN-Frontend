@@ -28,7 +28,7 @@ import {
   updateSheetData,
 } from '../../features/sheetData/sheetDataSlice';
 import { addChangedRows } from '../../features/sheetData/sheetDataSlice';
-
+import Api from '../../utils/Api';
 interface WorkbookData {
   id: number;
   name: string;
@@ -59,6 +59,37 @@ interface SheetCell {
 interface SheetRow {
   rowId: string;
   cells: SheetCell[];
+}
+interface CellInfoParams {
+  workbookid: number;
+  sheetid: number;
+  rowid: string | number;
+  colid: string | number;
+}
+
+interface CellInfoResponse {
+  cellId: number;
+  datapointVID: number;
+  dataType: string;
+  isKey: boolean;
+  keyType: string;
+  isInvalid: boolean;
+  members: any[];
+  metric: {
+    regulatorId: number;
+    metricId: number;
+    memberId: number;
+    dataType: string;
+    domainId: number;
+    subdomainId: number;
+    unit: string;
+    decimals: number;
+    origMeasureField: string;
+  };
+  rowDimensions: any[];
+  columnDimensions: any[];
+  sheetDimensions: any[];
+  validationRules: any[];
 }
 
 interface ChangedCell {
@@ -175,34 +206,82 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     [getCellStyle],
   );
 
-  const getCell = useCallback(
-    (location: { rowid: Id; colid: Id }): SheetCell | null => {
-      console.log('Location in getCell:', location);
-      const row = localRows.find(
-        (row) => row.rowId.toString() === location.rowid.toString(),
+  const getCellId = async (params: CellInfoParams): Promise<number> => {
+    try {
+      const response = await Api.get<CellInfoResponse>(
+        `/RI/Workbook/CellInfo?workbookId=${params.workbookid}&sheetId=${params.sheetid}&rowId=${params.rowid}&colId=${params.colid}`,
       );
-      console.log('Row found in getCell:', row);
-      if (row) {
-        const colidx = columns.findIndex(
-          (col) => col.columnId.toString() === location.colid.toString(),
+
+      return response.data.cellId;
+    } catch (error) {
+      console.error('Failed to fetch cell info:', error);
+      throw new Error('Failed to fetch cell ID');
+    }
+  };
+
+  const getCell = useCallback(
+    async (location: {
+      rowid: Id;
+      colid: Id;
+      sheetid: Id;
+      workbookid: Id;
+    }): Promise<(SheetCell & { cellid?: number }) | null> => {
+      console.log('Location in getCell:', location);
+
+      try {
+        // Await the cell_id
+        const cell_id = await getCellId({
+          workbookid: location.workbookid,
+          sheetid: location.sheetid,
+          rowid: location.rowid,
+          colid: location.colid,
+        });
+
+        console.log('Cell ID is:', cell_id); // Now this will show the actual number
+
+        const row = localRows.find(
+          (row) => row.rowId.toString() === location.rowid.toString(),
         );
-        console.log('Column index:', colidx);
-        if (colidx !== -1) {
-          const cell = row.cells[colidx];
-          console.log('Cell found:', cell);
-          return cell || null;
+        console.log('Row found in getCell:', row);
+
+        if (row) {
+          const colidx = columns.findIndex(
+            (col) => col.columnId.toString() === location.colid.toString(),
+          );
+          console.log('Column index:', colidx);
+
+          if (colidx !== -1) {
+            const baseCell = row.cells[colidx];
+            if (baseCell) {
+              // Create mapped cell with cellid
+              const mappedCell = {
+                ...baseCell, // Spread the baseCell first
+                cellid: cell_id, // Explicitly set/overwrite properties here
+                type: baseCell.type === 'number' ? 'number' : 'text',
+                text: decodeHtmlEntities(baseCell.text),
+                value: baseCell.value,
+                nonEditable: baseCell.nonEditable,
+                style: getCellStyle(baseCell),
+              };
+
+              return mappedCell;
+            }
+          } else {
+            console.warn('Column not found for colid:', location.colid);
+          }
         } else {
-          console.warn('Column not found for colid:', location.colid);
+          console.warn('Row not found for rowid:', location.rowid);
         }
-      } else {
-        console.warn('Row not found for rowid:', location.rowid);
+      } catch (error) {
+        console.error('Error fetching cell ID:', error);
       }
+
       return null;
     },
     [localRows, columns],
   );
 
-  const handleChanges = (changes: CellChange[]) => {
+  const handleChanges = async (changes: CellChange[]) => {
     console.log('Changes received:', changes);
 
     const newChanges: ChangedCell[] = [];
@@ -215,126 +294,142 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
         cells: [...row.cells],
       }));
 
-      changes.forEach((change) => {
-        const rowIndex = newRows.findIndex(
-          (row) => row.rowId.toString() === change.rowId.toString(),
-        );
-
-        if (rowIndex !== -1) {
-          const row = { ...newRows[rowIndex] };
-          const originalRow = { ...prevRows[rowIndex] };
-          const colidx = columns.findIndex(
-            (col) => col.columnId.toString() === change.columnId.toString(),
+      const processChanges = async () => {
+        for (const change of changes) {
+          const rowIndex = newRows.findIndex(
+            (row) => row.rowId.toString() === change.rowId.toString(),
           );
 
-          if (colidx !== -1 && colidx < row.cells.length) {
-            const oldCell = { ...row.cells[colidx] };
-            const newValue = (change.newCell as any).value;
+          if (rowIndex !== -1) {
+            const row = { ...newRows[rowIndex] };
+            const originalRow = { ...prevRows[rowIndex] };
+            const colidx = columns.findIndex(
+              (col) => col.columnId.toString() === change.columnId.toString(),
+            );
 
-            const newCell: SheetCell = {
-              ...oldCell,
-              value: newValue,
-              text: newValue !== null ? newValue.toString() : '',
-            };
+            if (colidx !== -1 && colidx < row.cells.length) {
+              const oldCell = { ...row.cells[colidx] };
+              const newValue = (change.newCell as any).value;
 
-            const newRowCells = [...row.cells];
-            newRowCells[colidx] = newCell;
-            row.cells = newRowCells;
-            newRows[rowIndex] = row;
+              try {
+                const cell_id = await getCellId({
+                  workbookid: workbook.id,
+                  sheetid: sheetid,
+                  rowid: change.rowId,
+                  colid: change.columnId,
+                });
 
-            const changedCell: ChangedCell = {
-              sheetid,
-              cellid: oldCell.cellid,
-              prevvalue: getCellValue(oldCell),
-              newvalue: getCellValue(newCell),
-              comment: '',
-              cellCode: '',
-              rowNr: getRowNumber(change.rowId),
-              colNr: colidx + 1,
-            };
+                const newCell: SheetCell = {
+                  ...oldCell,
+                  value: newValue,
+                  text: newValue !== null ? newValue.toString() : '',
+                  cellid: cell_id,
+                };
 
-            newChanges.push(changedCell);
+                const newRowCells = [...row.cells];
+                newRowCells[colidx] = newCell;
+                row.cells = newRowCells;
+                newRows[rowIndex] = row;
 
-            // Track row-level changes
-            if (newRowChanges.has(row.rowId)) {
-              const existingChange = newRowChanges.get(row.rowId)!;
-              newRowChanges.set(row.rowId, {
-                ...existingChange,
-                changedCells: [...existingChange.changedCells, changedCell],
-                updatedRow: { ...row },
-                timestamp: Date.now(),
-              });
-            } else {
-              newRowChanges.set(row.rowId, {
-                rowId: row.rowId,
-                originalRow: { ...originalRow },
-                updatedRow: { ...row },
-                changedCells: [changedCell],
-                timestamp: Date.now(),
-              });
+                const changedCell: ChangedCell = {
+                  sheetid,
+                  cellid: cell_id,
+                  prevvalue: getCellValue(oldCell),
+                  newvalue: getCellValue(newCell),
+                  comment: '',
+                  cellCode: '',
+                  rowNr: getRowNumber(change.rowId),
+                  colNr: colidx + 1,
+                };
+
+                newChanges.push(changedCell);
+
+                // Track row-level changes
+                if (newRowChanges.has(row.rowId)) {
+                  const existingChange = newRowChanges.get(row.rowId)!;
+                  newRowChanges.set(row.rowId, {
+                    ...existingChange,
+                    changedCells: [...existingChange.changedCells, changedCell],
+                    updatedRow: { ...row },
+                    timestamp: Date.now(),
+                  });
+                } else {
+                  newRowChanges.set(row.rowId, {
+                    rowId: row.rowId,
+                    originalRow: { ...originalRow },
+                    updatedRow: { ...row },
+                    changedCells: [changedCell],
+                    timestamp: Date.now(),
+                  });
+                }
+              } catch (error) {
+                console.error('Error fetching cell ID:', error);
+              }
             }
           }
         }
-      });
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
 
-      // Handle all state updates after the changes are processed
-      const changedRowsArray = Array.from(newRowChanges.values());
+        // Handle all state updates after the changes are processed
+        const changedRowsArray = Array.from(newRowChanges.values());
 
-      // Schedule state updates
-      setTimeout(() => {
-        setChangedRows((prev) => {
-          const combined = [...prev];
-          changedRowsArray.forEach((newRow) => {
-            const existingIndex = combined.findIndex(
-              (row) => row.rowId === newRow.rowId,
-            );
-            if (existingIndex !== -1) {
-              combined[existingIndex] = {
-                ...combined[existingIndex],
-                updatedRow: newRow.updatedRow,
-                changedCells: [
-                  ...combined[existingIndex].changedCells,
-                  ...newRow.changedCells,
-                ],
-              };
-            } else {
-              combined.push({ ...newRow });
-            }
+        // Schedule state updates
+        setTimeout(() => {
+          setChangedRows((prev) => {
+            const combined = [...prev];
+            changedRowsArray.forEach((newRow) => {
+              const existingIndex = combined.findIndex(
+                (row) => row.rowId === newRow.rowId,
+              );
+              if (existingIndex !== -1) {
+                combined[existingIndex] = {
+                  ...combined[existingIndex],
+                  updatedRow: newRow.updatedRow,
+                  changedCells: [
+                    ...combined[existingIndex].changedCells,
+                    ...newRow.changedCells,
+                  ],
+                };
+              } else {
+                combined.push({ ...newRow });
+              }
+            });
+            return combined;
           });
-          return combined;
-        });
 
-        setCellChanges((prevCellChanges) => [
-          ...prevCellChanges,
-          ...newChanges,
-        ]);
+          setCellChanges((prevCellChanges) => [
+            ...prevCellChanges,
+            ...newChanges,
+          ]);
 
-        // Dispatch Redux actions
-        dispatch(addChangedRows(changedRowsArray));
-        dispatch(updateSheetData(newRows));
+          // Dispatch Redux actions
+          dispatch(addChangedRows(changedRowsArray));
+          dispatch(updateSheetData(newRows));
 
-        // Call onRowChange prop if provided
-        if (onRowChange) {
-          onRowChange(changedRowsArray);
-        }
+          // Call onRowChange prop if provided
+          if (onRowChange) {
+            onRowChange(changedRowsArray);
+          }
 
-        // Update selected cell
-        changes.forEach((change) => {
-          dispatch(
-            updateSelectedCell({
-              rowId: change.rowId,
-              columnId: change.columnId,
-              label: selectedSheet.label,
-              table: selectedSheet.table,
-            }),
-          );
-        });
+          // Update selected cell
+          changes.forEach((change) => {
+            dispatch(
+              updateSelectedCell({
+                rowId: change.rowId,
+                columnId: change.columnId,
+                label: selectedSheet.label,
+                table: selectedSheet.table,
+              }),
+            );
+          });
 
-        // Log changed rows to console
-        console.log('Changed Rows:', changedRowsArray);
-      }, 0);
+          // Log changed rows to console
+          console.log('Changed Rows:', changedRowsArray);
+        }, 0);
+      };
+
+      processChanges(); // Run the async process
 
       return newRows;
     });
@@ -360,18 +455,21 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     return menuOptions;
   };
 
-  const handleFocusChange = (cell: CellLocation) => {
+  const handleFocusChange = async (cell: CellLocation) => {
     console.log('Cell in Focus:', cell);
     const newLocation = {
       workbookid: workbook.id,
       sheetid: Number(selectedSheet.sheetId),
-      rowid: cell.rowId,
-      colid: cell.columnId,
+      rowid: Number(cell.rowId),
+      colid: Number(cell.columnId),
     };
     setCurLocation(newLocation);
-
-    const cellDetails = getCell(newLocation);
-    console.log('Cell Details:', cellDetails);
+    try {
+      const cellDetails = await getCell(newLocation);
+      console.log('Cell Details:', cellDetails);
+    } catch (error) {
+      console.error('Error getting cell details:', error);
+    }
   };
 
   const handleUndo = () => {
