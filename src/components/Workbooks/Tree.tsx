@@ -1,8 +1,10 @@
 import React from 'react';
 import TreeNode from './TreeNode';
 import { useAppDispatch } from '../../app/hooks';
-import { fetchSheetData } from '../../features/sheetData/sheetDataSlice';
-import { updateSelectedSheet } from '../../features/sheetData/sheetDataSlice';
+import {
+  fetchSheetData,
+  updateSelectedSheet,
+} from '../../features/sheetData/sheetDataSlice';
 
 interface ApiResponse {
   key: string;
@@ -27,14 +29,15 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
     if (sheetId) {
       console.log('Sheet ID:', sheetId);
       dispatch(fetchSheetData({ workbookId, sheetId }));
-    }
 
-    dispatch(
-      updateSelectedSheet({
-        table: node.table || node.data,
-        label: node.label,
-      }),
-    );
+      dispatch(
+        updateSelectedSheet({
+          table: node.table || node.data,
+          label: node.label,
+          sheetId: sheetId,
+        }),
+      );
+    }
   };
 
   return (

@@ -18,7 +18,7 @@ interface ApiResponse {
 
 const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   const dispatch = useDispatch();
-  const [data, setData] = useState<ApiResponse[]>([]);
+  const [data, setData] = useState<ApiResponse[]>([]); //sheets
   const [filteredData, setFilteredData] = useState<ApiResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,12 +31,14 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
           `/RI/Workbook/Tables?workbookId=${workbookId}&includeSheets=true`,
         );
         setData(response.data);
+        console.log('Sheet.key:', response.data.key, response.data);
         setFilteredData(response.data);
         setLoading(false);
         if (response.data.length > 0) {
           const firstItem = response.data[0];
           dispatch(
             updateSelectedSheet({
+              sheetId: firstItem.id,
               table: firstItem.data,
               label: firstItem.label,
             }),
@@ -87,9 +89,24 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   return (
     <div>
       <div className="flex mb-4">
-        <Database className="mr-2 text-blue-500 cursor-pointer" size={32} />
-        <Save className="mr-2 text-orange-500 cursor-pointer" size={32} />
-        <AlertTriangle className="mr-2 text-red-500 cursor-pointer" size={32} />
+        <div className="relative mr-2">
+          <Database className="text-blue-500 cursor-pointer" size={32} />
+          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+            1
+          </span>
+        </div>
+        <div className="relative mr-2">
+          <Save className="text-orange-500 cursor-pointer" size={32} />
+          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+            2
+          </span>
+        </div>
+        <div className="relative mr-2">
+          <AlertTriangle className="text-red-500 cursor-pointer" size={32} />
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+            20
+          </span>
+        </div>
       </div>
       <div className="mb-4">
         <input

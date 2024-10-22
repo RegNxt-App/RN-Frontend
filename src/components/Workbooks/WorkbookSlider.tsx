@@ -13,10 +13,34 @@ interface WorkbookData {
   status: string;
 }
 
-const WorkbookSlider: React.FC<{
+interface SheetCell {
+  cellid: number;
+  colspan: number;
+  format: string;
+  nonEditable: boolean;
+  rownr: number;
+  rowspan: number;
+  text: string;
+  type: 'header' | 'number' | 'empty';
+  value: number | null;
+}
+
+interface SheetRow {
+  rowId: string | number;
+  cells: SheetCell[];
+}
+
+interface WorkbookSliderProps {
   workbook: WorkbookData;
   onClose: () => void;
-}> = ({ workbook, onClose }) => {
+  changedRows: SheetRow[];
+}
+
+const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
+  workbook,
+  onClose,
+  changedRows,
+}) => {
   const [activeTab, setActiveTab] = useState<
     'structure' | 'actions' | 'layers'
   >('structure');
@@ -25,6 +49,7 @@ const WorkbookSlider: React.FC<{
   >('save');
 
   const sidebarRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -40,6 +65,10 @@ const WorkbookSlider: React.FC<{
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [onClose]);
+
+  useEffect(() => {
+    console.log('Changed Rows in WorkbookSlider:', changedRows);
+  }, [changedRows]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex justify-end">

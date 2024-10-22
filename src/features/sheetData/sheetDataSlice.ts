@@ -1,14 +1,68 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import Api from '../../utils/Api';
 
-// Define the initial state
+interface SheetCell {
+  cellid: number;
+  colspan: number;
+  format: string;
+  nonEditable: boolean;
+  rownr: number;
+  rowspan: number;
+  text: string;
+  type: 'header' | 'number' | 'empty';
+  value: number | null;
+}
+
+interface SheetRow {
+  rowId: string | number;
+  cells: SheetCell[];
+}
+
+interface SheetColumn {
+  columnId: string | number;
+  width: number;
+}
+
+interface SheetData {
+  headerRows: SheetRow[];
+  valueRows: SheetRow[];
+  columns: SheetColumn[];
+}
+
+// New interfaces for changed rows
+interface ChangedCell {
+  sheetid: number;
+  cellid: number | undefined;
+  prevvalue: string;
+  newvalue: string;
+  comment: string;
+  cellCode: string;
+  rowNr: number;
+  colNr: number;
+}
+
+interface ChangedRow {
+  rowId: string;
+  originalRow: {
+    rowId: string;
+    cells: SheetCell[];
+  };
+  updatedRow: {
+    rowId: string;
+    cells: SheetCell[];
+  };
+  changedCells: ChangedCell[];
+  timestamp: number;
+}
+
 interface SheetDataState {
-  data: any | null;
+  data: SheetData | null;
   loading: boolean;
   error: string | null;
   selectedSheet: {
     label: string;
     table: string;
+    sheetId: string | null;
   };
   selectedCell: {
     rowId: string;
@@ -16,6 +70,9 @@ interface SheetDataState {
     label: string;
     table: string;
   } | null;
+  // New state for changed rows
+  changedRows: ChangedRow[];
+  lastChangeTimestamp: number | null;
 }
 
 const initialState: SheetDataState = {
@@ -25,26 +82,30 @@ const initialState: SheetDataState = {
   selectedSheet: {
     label: '',
     table: '',
+    sheetId: null,
   },
   selectedCell: null,
+  // Initialize new state properties
+  changedRows: [],
+  lastChangeTimestamp: null,
 };
 
-// Thunk for fetching sheet data
-export const fetchSheetData = createAsyncThunk(
+export const fetchSheetData = createAsyncThunk<
+  SheetData,
+  { workbookId: number; sheetId: string },
+  { rejectValue: string }
+>(
   'sheetData/fetchSheetData',
-  async (
-    { workbookId, sheetId }: { workbookId: number; sheetId: string },
-    { rejectWithValue },
-  ) => {
+  async ({ workbookId, sheetId }, { rejectWithValue }) => {
     try {
-      console.log('Fetching sheet data with:', { workbookId, sheetId }); // Debug log
-      const response = await Api.get(
+      console.log('Fetching sheet data with:', { workbookId, sheetId });
+      const response = await Api.get<SheetData>(
         `/RI/Workbook/SheetData?workbookId=${workbookId}&sheetId=${sheetId}`,
       );
-      console.log('API response:', response.data); // Debug log
+      console.log('API response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('API call failed:', error); // Debug log
+      console.error('API call failed:', error);
       return rejectWithValue('Failed to fetch sheet data');
     }
   },
@@ -55,15 +116,11 @@ const sheetDataSlice = createSlice({
   initialState,
   reducers: {
     clearSheetData: (state) => {
-      state.data = null;
-      state.error = null;
-      state.loading = false;
-      state.selectedSheet = { label: '', table: '' };
-      state.selectedCell = null;
+      return { ...initialState };
     },
     updateSelectedSheet: (
       state,
-      action: PayloadAction<{ label: string; table: string }>,
+      action: PayloadAction<{ label: string; table: string; sheetId: string }>,
     ) => {
       state.selectedSheet = action.payload;
     },
@@ -78,6 +135,59 @@ const sheetDataSlice = createSlice({
     ) => {
       state.selectedCell = action.payload;
     },
+    updateSheetData: (state, action: PayloadAction<SheetRow[]>) => {
+      if (state.data) {
+        const headerRowsCount = state.data.headerRows.length;
+        return {
+          ...state,
+          data: {
+            ...state.data,
+            headerRows: action.payload.slice(0, headerRowsCount),
+            valueRows: action.payload.slice(headerRowsCount),
+          },
+        };
+      }
+      return state;
+    },
+    // New reducers for changed rows
+    addChangedRows: (state, action: PayloadAction<ChangedRow[]>) => {
+      action.payload.forEach((newRow) => {
+        const existingRowIndex = state.changedRows.findIndex(
+          (row) => row.rowId === newRow.rowId,
+        );
+
+        if (existingRowIndex !== -1) {
+          // Update existing row
+          state.changedRows[existingRowIndex] = {
+            ...state.changedRows[existingRowIndex],
+            updatedRow: newRow.updatedRow,
+            changedCells: [
+              ...state.changedRows[existingRowIndex].changedCells,
+              ...newRow.changedCells,
+            ],
+            timestamp: newRow.timestamp,
+          };
+        } else {
+          // Add new row
+          state.changedRows.push(newRow);
+        }
+      });
+      state.lastChangeTimestamp = Date.now();
+    },
+    clearChangedRows: (state) => {
+      state.changedRows = [];
+      state.lastChangeTimestamp = null;
+    },
+    // Optional: Add a reducer to update a single changed row
+    updateChangedRow: (state, action: PayloadAction<ChangedRow>) => {
+      const index = state.changedRows.findIndex(
+        (row) => row.rowId === action.payload.rowId,
+      );
+      if (index !== -1) {
+        state.changedRows[index] = action.payload;
+        state.lastChangeTimestamp = Date.now();
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -87,18 +197,34 @@ const sheetDataSlice = createSlice({
       })
       .addCase(
         fetchSheetData.fulfilled,
-        (state, action: PayloadAction<any>) => {
+        (state, action: PayloadAction<SheetData>) => {
           state.data = action.payload;
           state.loading = false;
         },
       )
       .addCase(fetchSheetData.rejected, (state, action) => {
-        state.error = action.error.message || 'Failed to fetch sheet data';
+        state.error = action.payload || 'Failed to fetch sheet data';
         state.loading = false;
       });
   },
 });
 
-export const { clearSheetData, updateSelectedSheet, updateSelectedCell } =
-  sheetDataSlice.actions;
+// Export all actions
+export const {
+  clearSheetData,
+  updateSelectedSheet,
+  updateSelectedCell,
+  updateSheetData,
+  addChangedRows,
+  clearChangedRows,
+  updateChangedRow,
+} = sheetDataSlice.actions;
+
+// Export selectors
+export const selectChangedRows = (state: { sheetData: SheetDataState }) =>
+  state.sheetData.changedRows;
+export const selectLastChangeTimestamp = (state: {
+  sheetData: SheetDataState;
+}) => state.sheetData.lastChangeTimestamp;
+
 export default sheetDataSlice.reducer;

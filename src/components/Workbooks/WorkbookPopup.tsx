@@ -1,4 +1,10 @@
-import React, { useState } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from 'react';
 import { LayoutGrid, Undo2 } from 'lucide-react';
 import {
   ReactGrid,
@@ -7,6 +13,10 @@ import {
   CellChange,
   Id,
   CellStyle,
+  MenuOption,
+  GridSelection,
+  Cell,
+  CellLocation,
 } from '@silevis/reactgrid';
 import '@silevis/reactgrid/styles.css';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
@@ -15,7 +25,9 @@ import WorkbookSlider from './WorkbookSlider';
 import {
   clearSheetData,
   updateSelectedCell,
+  updateSheetData,
 } from '../../features/sheetData/sheetDataSlice';
+import { addChangedRows } from '../../features/sheetData/sheetDataSlice';
 
 interface WorkbookData {
   id: number;
@@ -27,20 +39,52 @@ interface WorkbookData {
 }
 
 interface SheetColumn {
-  columnId: number | string;
+  columnId: string;
   width: number;
 }
 
 interface SheetCell {
-  type: 'header' | 'number' | 'empty';
+  cellid: number;
+  columnId: string;
+  colspan: number;
+  format: string;
+  nonEditable: boolean;
+  rownr: number;
+  rowspan: number;
   text: string;
-  value?: number | null;
+  type: 'header' | 'number' | 'empty' | 'text';
+  value: number | null;
 }
 
 interface SheetRow {
-  rowId: string | number;
+  rowId: string;
   cells: SheetCell[];
 }
+
+interface ChangedCell {
+  sheetid: number;
+  cellid: number;
+  prevvalue: string;
+  newvalue: string;
+  comment: string;
+  cellCode: string;
+  rowNr: number;
+  colNr: number;
+}
+interface ChangedRow {
+  rowId: string;
+  originalRow: SheetRow;
+  updatedRow: SheetRow;
+  changedCells: ChangedCell[];
+  timestamp: number;
+}
+interface WorkbookPopupProps {
+  workbook: WorkbookData;
+  onClose: () => void;
+  onShowSlider: () => void;
+  onRowChange?: (changedRows: ChangedRow[]) => void;
+}
+const STORAGE_KEY = 'workbookData';
 
 const decodeHtmlEntities = (text: string): string => {
   const textarea = document.createElement('textarea');
@@ -48,107 +92,290 @@ const decodeHtmlEntities = (text: string): string => {
   return textarea.value;
 };
 
-const WorkbookPopup: React.FC<{
-  workbook: WorkbookData;
-  onClose: () => void;
-  onShowSlider: () => void;
-}> = ({ workbook, onClose, onShowSlider }) => {
+const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
+  workbook,
+  onClose,
+  onShowSlider,
+  onRowChange,
+}) => {
   const [showSlider, setShowSlider] = useState(false);
+  const [curLocation, setCurLocation] = useState<{
+    workbookid: number;
+    sheetid: number;
+    rowid: Id;
+    colid: Id;
+  } | null>(null);
+
   const dispatch = useAppDispatch();
+  const gridRef = useRef<ReactGrid>(null);
 
   const sheetData = useAppSelector((state: RootState) => state.sheetData.data);
-  const selectedSheetNew = useAppSelector(
+  const selectedSheet = useAppSelector(
     (state: RootState) => state.sheetData.selectedSheet,
   );
-  const loading = useAppSelector((state: RootState) => state.sheetData.loading);
-  const error = useAppSelector((state: RootState) => state.sheetData.error);
 
-  const isValueCell = (cell: SheetCell, columnIndex: number) => {
-    return cell.type === 'number' && columnIndex > 1;
-  };
+  const [localRows, setLocalRows] = useState<SheetRow[]>([]);
+  const [cellChanges, setCellChanges] = useState<ChangedCell[]>([]);
+  const [changedRows, setChangedRows] = useState<ChangedRow[]>([]);
+  const columns: Column[] = useMemo(
+    () =>
+      sheetData?.columns
+        ? sheetData.columns.map((col: SheetColumn) => ({
+            columnId: col.columnId.toString(),
+            width: col.width,
+          }))
+        : [],
+    [sheetData],
+  );
 
-  const getCellStyle = (
-    cell: SheetCell,
-    rowIndex: number,
-    columnIndex: number,
-  ): CellStyle => {
-    const isHeader = rowIndex < 2;
-    const isFirstTwoColumns = columnIndex < 2;
-    const isEditable = isValueCell(cell, columnIndex);
-
-    return {
-      background: isHeader
-        ? '#e0e0e0'
-        : isFirstTwoColumns
-          ? '#f0f0f0'
-          : isEditable
-            ? 'white'
-            : '#f5f5f5',
-      color: isEditable ? 'black' : '#666',
-      cursor: isEditable ? 'default' : 'not-allowed',
-    };
-  };
-  const mapCell = (cell: SheetCell, rowIndex: number, columnIndex: number) => ({
-    type: cell.type === 'number' ? 'number' : 'text',
-    text: decodeHtmlEntities(cell.text),
-    value: cell.type === 'number' ? cell.value : undefined,
-    nonEditable: !isValueCell(cell, columnIndex),
-    style: getCellStyle(cell, rowIndex, columnIndex),
-  });
-
-  const columns: Column[] = sheetData?.columns
-    ? sheetData.columns.map((col: SheetColumn) => ({
-        columnId: col.columnId.toString(),
-        width: col.width,
-      }))
-    : [];
-
-  const mapCellType = (type: string) => {
-    switch (type) {
-      case 'header':
-      case 'empty':
-        return 'text';
-      case 'number':
-        return 'number';
-      default:
-        return 'text';
+  useEffect(() => {
+    if (sheetData) {
+      const storedData = localStorage.getItem(STORAGE_KEY);
+      if (storedData) {
+        setLocalRows(JSON.parse(storedData));
+      } else {
+        const allRows = [
+          ...(sheetData.headerRows || []),
+          ...(sheetData.valueRows || []),
+        ];
+        const mappedRows = allRows.map((row) => ({
+          rowId: row.rowId.toString(),
+          cells: row.cells.map(mapCell),
+        }));
+        setLocalRows(mappedRows);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(mappedRows));
+      }
     }
-  };
+  }, [sheetData]);
 
-  const headerRows: Row[] = sheetData?.headerRows
-    ? sheetData.headerRows.map((row: SheetRow, rowIndex: number) => ({
-        rowId: row.rowId.toString(),
-        cells: row.cells.map((cell, columnIndex) =>
-          mapCell(cell, rowIndex, columnIndex),
-        ),
-      }))
-    : [];
+  const isValueCell = useCallback((cell: SheetCell): boolean => {
+    return cell.type === 'number' && !cell.nonEditable;
+  }, []);
 
-  const valueRows: Row[] = sheetData?.valueRows
-    ? sheetData.valueRows.map((row: SheetRow, rowIndex: number) => ({
-        rowId: row.rowId.toString(),
-        cells: row.cells.map((cell, columnIndex) =>
-          mapCell(cell, rowIndex + headerRows.length, columnIndex),
-        ),
-      }))
-    : [];
+  const getCellStyle = useCallback(
+    (cell: SheetCell): CellStyle => {
+      const editable = isValueCell(cell);
+      return {
+        background: cell.type === 'header' ? '#e0e0e0' : 'white',
+        color: editable ? 'black' : '#666',
+        cursor: editable ? 'default' : 'not-allowed',
+      };
+    },
+    [isValueCell],
+  );
 
-  const rows = [...headerRows, ...valueRows];
+  const mapCell = useCallback(
+    (cell: SheetCell): Cell => ({
+      type: cell.type === 'number' ? 'number' : 'text',
+      text: decodeHtmlEntities(cell.text),
+      value: cell.value,
+      nonEditable: cell.nonEditable,
+      style: getCellStyle(cell),
+    }),
+    [getCellStyle],
+  );
+
+  const getCell = useCallback(
+    (location: { rowid: Id; colid: Id }): SheetCell | null => {
+      console.log('Location in getCell:', location);
+      const row = localRows.find(
+        (row) => row.rowId.toString() === location.rowid.toString(),
+      );
+      console.log('Row found in getCell:', row);
+      if (row) {
+        const colidx = columns.findIndex(
+          (col) => col.columnId.toString() === location.colid.toString(),
+        );
+        console.log('Column index:', colidx);
+        if (colidx !== -1) {
+          const cell = row.cells[colidx];
+          console.log('Cell found:', cell);
+          return cell || null;
+        } else {
+          console.warn('Column not found for colid:', location.colid);
+        }
+      } else {
+        console.warn('Row not found for rowid:', location.rowid);
+      }
+      return null;
+    },
+    [localRows, columns],
+  );
 
   const handleChanges = (changes: CellChange[]) => {
-    changes.forEach((change) => {
-      dispatch(
-        updateSelectedCell({
-          rowId: change.rowId,
-          columnId: change.columnId,
-          label: selectedSheetNew.label,
-          table: selectedSheetNew.table,
-        }),
-      );
+    console.log('Changes received:', changes);
+
+    const newChanges: ChangedCell[] = [];
+    const newRowChanges: Map<string, ChangedRow> = new Map();
+    const sheetid = Number(selectedSheet.sheetId);
+
+    setLocalRows((prevRows) => {
+      const newRows = prevRows.map((row) => ({
+        ...row,
+        cells: [...row.cells],
+      }));
+
+      changes.forEach((change) => {
+        const rowIndex = newRows.findIndex(
+          (row) => row.rowId.toString() === change.rowId.toString(),
+        );
+
+        if (rowIndex !== -1) {
+          const row = { ...newRows[rowIndex] };
+          const originalRow = { ...prevRows[rowIndex] };
+          const colidx = columns.findIndex(
+            (col) => col.columnId.toString() === change.columnId.toString(),
+          );
+
+          if (colidx !== -1 && colidx < row.cells.length) {
+            const oldCell = { ...row.cells[colidx] };
+            const newValue = (change.newCell as any).value;
+
+            const newCell: SheetCell = {
+              ...oldCell,
+              value: newValue,
+              text: newValue !== null ? newValue.toString() : '',
+            };
+
+            const newRowCells = [...row.cells];
+            newRowCells[colidx] = newCell;
+            row.cells = newRowCells;
+            newRows[rowIndex] = row;
+
+            const changedCell: ChangedCell = {
+              sheetid,
+              cellid: oldCell.cellid,
+              prevvalue: getCellValue(oldCell),
+              newvalue: getCellValue(newCell),
+              comment: '',
+              cellCode: '',
+              rowNr: getRowNumber(change.rowId),
+              colNr: colidx + 1,
+            };
+
+            newChanges.push(changedCell);
+
+            // Track row-level changes
+            if (newRowChanges.has(row.rowId)) {
+              const existingChange = newRowChanges.get(row.rowId)!;
+              newRowChanges.set(row.rowId, {
+                ...existingChange,
+                changedCells: [...existingChange.changedCells, changedCell],
+                updatedRow: { ...row },
+                timestamp: Date.now(),
+              });
+            } else {
+              newRowChanges.set(row.rowId, {
+                rowId: row.rowId,
+                originalRow: { ...originalRow },
+                updatedRow: { ...row },
+                changedCells: [changedCell],
+                timestamp: Date.now(),
+              });
+            }
+          }
+        }
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
+
+      // Handle all state updates after the changes are processed
+      const changedRowsArray = Array.from(newRowChanges.values());
+
+      // Schedule state updates
+      setTimeout(() => {
+        setChangedRows((prev) => {
+          const combined = [...prev];
+          changedRowsArray.forEach((newRow) => {
+            const existingIndex = combined.findIndex(
+              (row) => row.rowId === newRow.rowId,
+            );
+            if (existingIndex !== -1) {
+              combined[existingIndex] = {
+                ...combined[existingIndex],
+                updatedRow: newRow.updatedRow,
+                changedCells: [
+                  ...combined[existingIndex].changedCells,
+                  ...newRow.changedCells,
+                ],
+              };
+            } else {
+              combined.push({ ...newRow });
+            }
+          });
+          return combined;
+        });
+
+        setCellChanges((prevCellChanges) => [
+          ...prevCellChanges,
+          ...newChanges,
+        ]);
+
+        // Dispatch Redux actions
+        dispatch(addChangedRows(changedRowsArray));
+        dispatch(updateSheetData(newRows));
+
+        // Call onRowChange prop if provided
+        if (onRowChange) {
+          onRowChange(changedRowsArray);
+        }
+
+        // Update selected cell
+        changes.forEach((change) => {
+          dispatch(
+            updateSelectedCell({
+              rowId: change.rowId,
+              columnId: change.columnId,
+              label: selectedSheet.label,
+              table: selectedSheet.table,
+            }),
+          );
+        });
+
+        // Log changed rows to console
+        console.log('Changed Rows:', changedRowsArray);
+      }, 0);
+
+      return newRows;
     });
   };
 
+  const getCellValue = (cell: SheetCell): string => {
+    return cell.type === 'text' ? String(cell.text) : String(cell.value);
+  };
+
+  const getRowNumber = (rowId: Id): number => {
+    const idx = rowId.toString().indexOf('-');
+    return idx === -1 ? 1 : parseInt(rowId.substring(idx + 1), 10);
+  };
+
+  const handleContextMenu = (
+    selectedRowIds: Id[],
+    selectedColIds: Id[],
+    selectionMode: 'row' | 'column' | 'cell',
+    menuOptions: MenuOption[],
+    selectedRanges: GridSelection,
+  ) => {
+    // Implement context menu options as needed
+    return menuOptions;
+  };
+
+  const handleFocusChange = (cell: CellLocation) => {
+    console.log('Cell in Focus:', cell);
+    const newLocation = {
+      workbookid: workbook.id,
+      sheetid: Number(selectedSheet.sheetId),
+      rowid: cell.rowId,
+      colid: cell.columnId,
+    };
+    setCurLocation(newLocation);
+
+    const cellDetails = getCell(newLocation);
+    console.log('Cell Details:', cellDetails);
+  };
+
   const handleUndo = () => {
+    localStorage.removeItem(STORAGE_KEY);
     dispatch(clearSheetData());
     onClose();
   };
@@ -173,24 +400,25 @@ const WorkbookPopup: React.FC<{
         </div>
         <div className="p-4">
           <p>
-            <strong>Table:</strong> {selectedSheetNew.table}
+            <strong>Table:</strong> {selectedSheet.table}
           </p>
-
           <p>
-            <strong>Sheet:</strong> {selectedSheetNew.label}
+            <strong>Sheet:</strong> {selectedSheet.label}
           </p>
         </div>
-        {sheetData &&
-        sheetData.columns &&
-        sheetData.headerRows &&
-        sheetData.valueRows ? (
+        {localRows.length > 0 ? (
           <div className="p-4" style={{ height: '80%', overflowY: 'auto' }}>
             <ReactGrid
+              ref={gridRef}
+              rows={localRows}
               columns={columns}
-              rows={rows}
               onCellsChanged={handleChanges}
+              onContextMenu={handleContextMenu}
+              onFocusLocationChanged={handleFocusChange}
               enableFillHandle
               enableRangeSelection
+              stickyLeftColumns={2}
+              stickyTopRows={sheetData?.headerRows?.length || 0}
             />
           </div>
         ) : (
@@ -201,6 +429,7 @@ const WorkbookPopup: React.FC<{
         <WorkbookSlider
           workbook={workbook}
           onClose={() => setShowSlider(false)}
+          changedRows={cellChanges}
         />
       )}
     </div>
