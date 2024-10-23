@@ -9,13 +9,13 @@ import ActionsImport from '../Tables/workbooks/actions/ActionsImport';
 import ActionsTransmission from '../Tables/workbooks/actions/ActionsTransmission';
 
 interface SaveTableData {
-  cellId: number;
+  cellid: number;
   cellCode: string;
-  sheetId: number;
+  sheetid: number;
   rowNr: number;
   colNr: number;
-  previousValue: string;
-  newValue: string;
+  prevvalue: string;
+  newvalue: string;
   comment: string;
 }
 
@@ -30,7 +30,8 @@ const ActionsTab: React.FC<{
       | 'export'
       | 'transmission',
   ) => void;
-}> = ({ activeActionTab, setActiveActionTab }) => {
+  workbookId: string;
+}> = ({ activeActionTab, setActiveActionTab, workbookId }) => {
   // Get changed rows from Redux store
   const changedRows = useAppSelector(selectChangedRows);
 
@@ -41,14 +42,14 @@ const ActionsTab: React.FC<{
     changedRows.forEach((row) => {
       row.changedCells.forEach((cell) => {
         transformedData.push({
-          cellId: cell.cellid || 0,
-          cellCode: cell.cellCode || `R${cell.rowNr}C${cell.colNr}`,
-          sheetId: cell.sheetid,
+          sheetid: cell.sheetid,
+          cellid: cell.cellid || 0,
+          prevvalue: cell.prevvalue,
+          newvalue: cell.newvalue,
+          comment: cell.comment || '',
+          cellCode: cell.cellCode || '',
           rowNr: cell.rowNr,
           colNr: cell.colNr,
-          previousValue: cell.prevvalue,
-          newValue: cell.newvalue,
-          comment: cell.comment || '',
         });
       });
     });
@@ -100,7 +101,7 @@ const ActionsTab: React.FC<{
             <p className="mb-4 text-sm text-gray-600">
               {saveData.length} changes pending
             </p>
-            <SaveTable data={saveData} />
+            <SaveTable data={saveData} workbookId={workbookId} />
           </div>
         )}
         {activeActionTab === 'allocate' && <ActionsAllocate />}

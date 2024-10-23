@@ -1,25 +1,28 @@
 import { useState } from 'react';
 import Pagination from '../../../Pagination';
+import Api from '../../../../utils/Api';
 
 interface SaveTableData {
-  cellId: number;
-  cellCode: string;
-  sheetId: number;
+  cellid: number;
+  cellcode: string;
+  sheetid: number;
   rowNr: number;
   colNr: number;
-  previousValue: string;
-  newValue: string;
+  prevvalue: string;
+  newvalue: string;
   comment: string;
 }
 
 interface DataTableProps {
   data: SaveTableData[];
+  workbookId: string;
 }
 
 const itemsPerPage = 10;
 
-const SaveTable = ({ data }: DataTableProps) => {
+const SaveTable = ({ data, workbookId }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -31,13 +34,38 @@ const SaveTable = ({ data }: DataTableProps) => {
     setCurrentPage(pageNumber);
   };
 
+  const handleSaveToDb = async () => {
+    try {
+      setIsLoading(true);
+      const payload = {
+        cells: data,
+        workbookId: workbookId,
+        reason: 'User update',
+      };
+
+      const response = await Api.post('RI/Workbook/Data', payload);
+
+      // Show success message
+      alert('Data saved successfully!');
+    } catch (error) {
+      // Handle error appropriately
+      console.error('Error saving data:', error);
+      alert('Failed to save data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <button
-        className="px-4 py-2 bg-green-500 text-white rounded-md mb-4"
-        //   onClick={() => setShowConfirmDialog(true)}
+        className={`px-4 py-2 bg-green-500 text-white rounded-md mb-4 ${
+          isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
+        }`}
+        onClick={handleSaveToDb}
+        disabled={isLoading}
       >
-        Save to DB
+        {isLoading ? 'Saving...' : 'Save to DB'}
       </button>
       <div className="max-w-full">
         <div className="overflow-x-auto">
@@ -74,20 +102,20 @@ const SaveTable = ({ data }: DataTableProps) => {
               </thead>
               <tbody>
                 {currentItems.map((item) => (
-                  <tr key={item.cellId}>
+                  <tr key={item.cellid}>
                     <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                       <h5 className="font-medium text-black dark:text-white">
-                        {item.cellId}
+                        {item.cellid}
                       </h5>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                       <h5 className="font-medium text-black dark:text-white">
-                        {item.cellCode}
+                        {item.cellcode}
                       </h5>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <p className="text-black dark:text-white">
-                        {item.sheetId}
+                        {item.sheetid}
                       </p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -98,12 +126,12 @@ const SaveTable = ({ data }: DataTableProps) => {
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <p className="text-black dark:text-white">
-                        {item.previousValue}
+                        {item.prevvalue}
                       </p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <p className="text-black dark:text-white">
-                        {item.newValue}
+                        {item.newvalue}
                       </p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">

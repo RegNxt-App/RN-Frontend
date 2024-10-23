@@ -109,6 +109,7 @@ const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
               <ActionsTab
                 activeActionTab={activeActionTab}
                 setActiveActionTab={setActiveActionTab}
+                workbookId={workbook.id}
               />
             )}
             {activeTab === 'layers' && <LayersTab />}
