@@ -3,7 +3,8 @@ import Tree from './Tree';
 import { useState, useEffect } from 'react';
 import Api from '../../utils/Api';
 import { useDispatch } from 'react-redux';
-
+import { useAppSelector } from '../../app/hooks';
+import { selectChangedRows } from '../../features/sheetData/sheetDataSlice';
 import { updateSelectedSheet } from '../../features/sheetData/sheetDataSlice';
 interface StructureTabProps {
   workbookId: number;
@@ -18,11 +19,13 @@ interface ApiResponse {
 
 const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   const dispatch = useDispatch();
-  const [data, setData] = useState<ApiResponse[]>([]); //sheets
+  const [data, setData] = useState<ApiResponse[]>([]);
   const [filteredData, setFilteredData] = useState<ApiResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const changedRows = useAppSelector(selectChangedRows);
+  const changedRowsNr = changedRows.length;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,7 +101,7 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
         <div className="relative mr-2">
           <Save className="text-orange-500 cursor-pointer" size={32} />
           <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-            2
+            {changedRowsNr}
           </span>
         </div>
         <div className="relative mr-2">

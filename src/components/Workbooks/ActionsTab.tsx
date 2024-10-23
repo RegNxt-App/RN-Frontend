@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useAppSelector } from '../../app/hooks';
+import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import { selectChangedRows } from '../../features/sheetData/sheetDataSlice';
 import SaveTable from '../Tables/workbooks/actions/SaveTable';
 import ActionsAllocate from '../Tables/workbooks/actions/ActionsAllocate';
@@ -7,10 +7,11 @@ import ActionsExport from '../Tables/workbooks/actions/ActionsExport';
 import ActionsValidate from '../Tables/workbooks/actions/ActionsValidate';
 import ActionsImport from '../Tables/workbooks/actions/ActionsImport';
 import ActionsTransmission from '../Tables/workbooks/actions/ActionsTransmission';
+import { clearChangedRows } from '../../features/sheetData/sheetDataSlice';
 
 interface SaveTableData {
   cellid: number;
-  cellCode: string;
+  cellcode: string;
   sheetid: number;
   rowNr: number;
   colNr: number;
@@ -30,36 +31,54 @@ const ActionsTab: React.FC<{
       | 'export'
       | 'transmission',
   ) => void;
-  workbookId: string;
+  workbookId: number;
 }> = ({ activeActionTab, setActiveActionTab, workbookId }) => {
-  // Get changed rows from Redux store
+  const dispatch = useAppDispatch();
   const changedRows = useAppSelector(selectChangedRows);
 
-  // Transform changed rows into SaveTableData format
+  const handleSaveSuccess = () => {
+    // Clear the changed rows from Redux store
+    dispatch(clearChangedRows());
+  };
+
   const saveData: SaveTableData[] = useMemo(() => {
+    // Create a Set to track unique cell IDs
+    const processedCells = new Set<number>();
     const transformedData: SaveTableData[] = [];
 
     changedRows.forEach((row) => {
       row.changedCells.forEach((cell) => {
-        transformedData.push({
-          sheetid: cell.sheetid,
-          cellid: cell.cellid || 0,
-          prevvalue: cell.prevvalue,
-          newvalue: cell.newvalue,
-          comment: cell.comment || '',
-          cellCode: cell.cellCode || '',
-          rowNr: cell.rowNr,
-          colNr: cell.colNr,
-        });
+        // Only add the cell if we haven't processed it yet
+        if (!processedCells.has(cell.cellid)) {
+          processedCells.add(cell.cellid);
+          transformedData.push({
+            sheetid: cell.sheetid,
+            cellid: cell.cellid || 0,
+            prevvalue: cell.prevvalue || 'null',
+            newvalue: cell.newvalue || '',
+            comment: cell.comment || '',
+            cellcode: cell.cellCode || '',
+            rowNr: cell.rowNr,
+            colNr: cell.colNr,
+          });
+        }
       });
     });
 
-    return transformedData;
+    // Optional: Sort the data by rowNr and colNr for consistent display
+    return transformedData.sort((a, b) => {
+      if (a.rowNr === b.rowNr) {
+        return a.colNr - b.colNr;
+      }
+      return a.rowNr - b.rowNr;
+    });
   }, [changedRows]);
 
-  // Debug log
-  console.log('Changed Rows from Redux:', changedRows);
-  console.log('Transformed Save Data:', saveData);
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Changed Rows from Redux:', changedRows);
+    console.log('Transformed Save Data:', saveData);
+  }
 
   return (
     <div>
@@ -98,10 +117,11 @@ const ActionsTab: React.FC<{
       <div className="p-4">
         {activeActionTab === 'save' && (
           <div>
-            <p className="mb-4 text-sm text-gray-600">
-              {saveData.length} changes pending
-            </p>
-            <SaveTable data={saveData} workbookId={workbookId} />
+            <SaveTable
+              data={saveData}
+              workbookId={workbookId}
+              onSuccess={handleSaveSuccess}
+            />
           </div>
         )}
         {activeActionTab === 'allocate' && <ActionsAllocate />}

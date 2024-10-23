@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Pagination from '../../../Pagination';
 import Api from '../../../../utils/Api';
+import Swal from 'sweetalert2';
 
 interface SaveTableData {
   cellid: number;
@@ -15,12 +16,13 @@ interface SaveTableData {
 
 interface DataTableProps {
   data: SaveTableData[];
-  workbookId: string;
+  workbookId: number;
+  onSuccess?: () => void;
 }
 
 const itemsPerPage = 10;
 
-const SaveTable = ({ data, workbookId }: DataTableProps) => {
+const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,43 +37,117 @@ const SaveTable = ({ data, workbookId }: DataTableProps) => {
   };
 
   const handleSaveToDb = async () => {
+    if (!data.length) return;
+
+    setIsLoading(true);
+
+    Swal.fire({
+      title: 'Saving Data',
+      text: 'Please wait...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      willOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
     try {
-      setIsLoading(true);
       const payload = {
         cells: data,
         workbookId: workbookId,
         reason: 'User update',
       };
 
-      const response = await Api.post('RI/Workbook/Data', payload);
+      console.log('Sending payload:', JSON.stringify(payload, null, 2));
 
-      // Show success message
-      alert('Data saved successfully!');
-    } catch (error) {
-      // Handle error appropriately
-      console.error('Error saving data:', error);
-      alert('Failed to save data. Please try again.');
+      const response = await Api.post('RI/Workbook/Data', payload);
+      console.log('API Response:', response);
+
+      if (response.status === 200) {
+        // Close loading dialog
+        Swal.close();
+
+        // Show success message
+        // Swal.fire({
+        //   icon: 'success',
+        //   title: 'Success!',
+        //   text: 'Data has been saved successfully',
+        //   confirmButtonColor: '#22C55E',
+        //   allowOutsideClick: false,
+        //   customClass: {
+        //     popup: 'z-999999',
+        //     backdrop: 'swal2-backdrop-show z-99999',
+        //     container: 'z-999999',
+        //   },
+        // });
+
+        // Call success callback
+        onSuccess?.();
+      } else {
+        throw new Error('Unexpected response status');
+      }
+    } catch (error: any) {
+      // Close loading dialog
+      Swal.close();
+
+      console.error('Save Error:', error);
+
+      // Show error message
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text:
+          error.response?.data?.message ||
+          'Failed to save data. Please try again.',
+        confirmButtonColor: '#EF4444',
+        allowOutsideClick: false,
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const isButtonDisabled = isLoading || data.length === 0;
+  const buttonText = isLoading
+    ? 'Saving...'
+    : data.length === 0
+      ? 'No Data to Save'
+      : 'Save to DB';
+
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <button
-        className={`px-4 py-2 bg-green-500 text-white rounded-md mb-4 ${
-          isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
-        }`}
+        className={`
+          px-4 py-2 rounded-md mb-4 transition-all duration-200 flex items-center justify-center min-w-[120px]
+          ${
+            isButtonDisabled
+              ? 'bg-red-500 cursor-not-allowed opacity-60'
+              : 'bg-green-500 hover:bg-green-600'
+          } text-white
+        `}
         onClick={handleSaveToDb}
-        disabled={isLoading}
+        disabled={isButtonDisabled}
+        title={
+          data.length === 0
+            ? 'No data available to save'
+            : 'Save data to database'
+        }
       >
-        {isLoading ? 'Saving...' : 'Save to DB'}
+        {isLoading ? (
+          <div className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+            <span>{buttonText}</span>
+          </div>
+        ) : (
+          buttonText
+        )}
       </button>
+
       <div className="max-w-full">
         <div className="overflow-x-auto">
           <div className="max-h-[600px] overflow-y-auto">
             <table className="w-full table-auto">
-              {/* Fixed header */}
               <thead className="sticky top-0 bg-gray-2 dark:bg-meta-4">
                 <tr className="text-left">
                   <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">

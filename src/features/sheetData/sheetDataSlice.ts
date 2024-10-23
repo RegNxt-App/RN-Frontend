@@ -177,6 +177,7 @@ const sheetDataSlice = createSlice({
     clearChangedRows: (state) => {
       state.changedRows = [];
       state.lastChangeTimestamp = null;
+      state.selectedCell = null;
     },
     // Optional: Add a reducer to update a single changed row
     updateChangedRow: (state, action: PayloadAction<ChangedRow>) => {

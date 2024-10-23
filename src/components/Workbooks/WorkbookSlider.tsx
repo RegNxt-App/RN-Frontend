@@ -56,7 +56,7 @@ const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target as Node)
       ) {
-        onClose(); // Close the sidebar if click is outside
+        onClose();
       }
     };
 
@@ -112,7 +112,7 @@ const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
                 workbookId={workbook.id}
               />
             )}
-            {activeTab === 'layers' && <LayersTab />}
+            {activeTab === 'layers' && <LayersTab workbookId={workbook.id} />}
           </div>
         </div>
       </div>

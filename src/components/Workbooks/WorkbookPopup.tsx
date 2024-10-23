@@ -177,6 +177,9 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
         localStorage.setItem(STORAGE_KEY, JSON.stringify(mappedRows));
       }
     }
+    return () => {
+      localStorage.removeItem(STORAGE_KEY);
+    };
   }, [sheetData]);
 
   const isValueCell = useCallback((cell: SheetCell): boolean => {
@@ -229,7 +232,6 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
       console.log('Location in getCell:', location);
 
       try {
-        // Await the cell_id
         const cell_id = await getCellId({
           workbookid: location.workbookid,
           sheetid: location.sheetid,
@@ -237,7 +239,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           colid: location.colid,
         });
 
-        console.log('Cell ID is:', cell_id); // Now this will show the actual number
+        console.log('Cell ID is:', cell_id);
 
         const row = localRows.find(
           (row) => row.rowId.toString() === location.rowid.toString(),
@@ -253,10 +255,9 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           if (colidx !== -1) {
             const baseCell = row.cells[colidx];
             if (baseCell) {
-              // Create mapped cell with cellid
               const mappedCell = {
-                ...baseCell, // Spread the baseCell first
-                cellid: cell_id, // Explicitly set/overwrite properties here
+                ...baseCell,
+                cellid: cell_id,
                 type: baseCell.type === 'number' ? 'number' : 'text',
                 text: decodeHtmlEntities(baseCell.text),
                 value: baseCell.value,
@@ -344,7 +345,6 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
 
                 newChanges.push(changedCell);
 
-                // Track row-level changes
                 if (newRowChanges.has(row.rowId)) {
                   const existingChange = newRowChanges.get(row.rowId)!;
                   newRowChanges.set(row.rowId, {
@@ -371,10 +371,8 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
 
-        // Handle all state updates after the changes are processed
         const changedRowsArray = Array.from(newRowChanges.values());
 
-        // Schedule state updates
         setTimeout(() => {
           setChangedRows((prev) => {
             const combined = [...prev];
@@ -403,16 +401,13 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
             ...newChanges,
           ]);
 
-          // Dispatch Redux actions
           dispatch(addChangedRows(changedRowsArray));
           dispatch(updateSheetData(newRows));
 
-          // Call onRowChange prop if provided
           if (onRowChange) {
             onRowChange(changedRowsArray);
           }
 
-          // Update selected cell
           changes.forEach((change) => {
             dispatch(
               updateSelectedCell({
@@ -424,12 +419,11 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
             );
           });
 
-          // Log changed rows to console
           console.log('Changed Rows:', changedRowsArray);
         }, 0);
       };
 
-      processChanges(); // Run the async process
+      processChanges();
 
       return newRows;
     });
@@ -451,7 +445,6 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     menuOptions: MenuOption[],
     selectedRanges: GridSelection,
   ) => {
-    // Implement context menu options as needed
     return menuOptions;
   };
 
@@ -520,7 +513,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
             />
           </div>
         ) : (
-          <p>No data available</p>
+          <></>
         )}
       </div>
       {showSlider && (
