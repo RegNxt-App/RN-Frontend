@@ -39,7 +39,7 @@ interface WorkbookData {
 }
 
 interface SheetColumn {
-  columnId: string;
+  columnId: string | number;
   width: number;
 }
 
@@ -152,7 +152,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     () =>
       sheetData?.columns
         ? sheetData.columns.map((col: SheetColumn) => ({
-            columnId: col.columnId.toString(),
+            columnId: col.columnId,
             width: col.width,
           }))
         : [],
@@ -471,6 +471,46 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     onClose();
   };
 
+  const isGridDataValid = () => {
+    try {
+      if (!columns || !Array.isArray(columns)) {
+        console.error('Columns is not an array');
+        return false;
+      }
+
+      if (columns.length === 0) {
+        console.error('Columns array is empty');
+        return false;
+      }
+
+      for (let i = 0; i < columns.length; i++) {
+        const col = columns[i];
+        if (!col) {
+          console.error(`Column at index ${i} is undefined`);
+          return false;
+        }
+        if (typeof col.width !== 'number') {
+          console.error(`Column width at index ${i} is not a number`);
+          return false;
+        }
+        if (!col.columnId) {
+          console.error(`Column ID at index ${i} is missing`);
+          return false;
+        }
+      }
+
+      if (localRows.some((row) => row.cells.length !== columns.length)) {
+        console.error('Row cells length does not match columns length');
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error in isGridDataValid:', error);
+      return false;
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-end">
       <div className="bg-white rounded-lg shadow-lg w-[80%] h-full">
@@ -497,21 +537,35 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
             <strong>Sheet:</strong> {selectedSheet.label}
           </p>
         </div>
+
         {localRows.length > 0 ? (
-          <div className="p-4" style={{ height: '80%', overflowY: 'auto' }}>
-            <ReactGrid
-              ref={gridRef}
-              rows={localRows}
-              columns={columns}
-              onCellsChanged={handleChanges}
-              onContextMenu={handleContextMenu}
-              onFocusLocationChanged={handleFocusChange}
-              enableFillHandle
-              enableRangeSelection
-              stickyLeftColumns={2}
-              stickyTopRows={sheetData?.headerRows?.length || 0}
-            />
-          </div>
+          isGridDataValid() ? (
+            <div className="p-4" style={{ height: '80%', overflowY: 'auto' }}>
+              <ReactGrid
+                ref={gridRef}
+                rows={localRows}
+                columns={columns}
+                onCellsChanged={handleChanges}
+                onContextMenu={handleContextMenu}
+                onFocusLocationChanged={handleFocusChange}
+                enableFillHandle
+                enableRangeSelection
+                stickyLeftColumns={2}
+                stickyTopRows={sheetData?.headerRows?.length || 0}
+              />
+            </div>
+          ) : (
+            <div className="p-4">
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                <strong className="font-bold">Error:</strong>
+                <span className="block sm:inline">
+                  {' '}
+                  Unable to display grid due to data validation errors. Please
+                  check the console for details.
+                </span>
+              </div>
+            </div>
+          )
         ) : (
           <></>
         )}

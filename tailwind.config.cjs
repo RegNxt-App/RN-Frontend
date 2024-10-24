@@ -240,6 +240,18 @@ module.exports = {
           '0%, 100%': { transform: 'rotate(360deg)' },
           '50%': { transform: 'rotate(0deg)' },
         },
+        'fade-in': {
+          from: { opacity: 0 },
+          to: { opacity: 1 },
+        },
+        'slide-in-from-top': {
+          from: { transform: 'translateY(-100%)' },
+          to: { transform: 'translateY(0)' },
+        },
+        'slide-in-from-bottom': {
+          from: { transform: 'translateY(100%)' },
+          to: { transform: 'translateY(0)' },
+        },
       },
       animation: {
         'ping-once': 'ping 5s cubic-bezier(0, 0, 0.2, 1)',
@@ -247,8 +259,11 @@ module.exports = {
         'spin-1.5': 'spin 1.5s linear infinite',
         'spin-2': 'spin 2s linear infinite',
         'spin-3': 'spin 3s linear infinite',
+        'fade-in': 'fade-in 200ms ease-out',
+        'slide-in-from-top': 'slide-in-from-top 200ms ease-out',
+        'slide-in-from-bottom': 'slide-in-from-bottom 200ms ease-out',
       },
     },
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animate')],
 };

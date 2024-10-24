@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../app/hooks';
 import { selectChangedRows } from '../../features/sheetData/sheetDataSlice';
 import { updateSelectedSheet } from '../../features/sheetData/sheetDataSlice';
+import { Tooltip as ReactTooltip } from 'react-tooltip';
+
 interface StructureTabProps {
   workbookId: number;
 }
@@ -92,24 +94,47 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   return (
     <div>
       <div className="flex mb-4">
-        <div className="relative mr-2">
+        <div className="relative mr-2" id="total-rows-tooltip">
           <Database className="text-blue-500 cursor-pointer" size={32} />
           <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
             1
           </span>
         </div>
-        <div className="relative mr-2">
+
+        <div className="relative mr-2" id="changed-rows-tooltip">
           <Save className="text-orange-500 cursor-pointer" size={32} />
           <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
             {changedRowsNr}
           </span>
         </div>
-        <div className="relative mr-2">
+
+        <div className="relative mr-2" id="invalid-cells-tooltip">
           <AlertTriangle className="text-red-500 cursor-pointer" size={32} />
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             20
           </span>
         </div>
+
+        <ReactTooltip
+          anchorId="total-rows-tooltip"
+          content="Persisted Cells"
+          place="top"
+          className="z-50"
+        />
+
+        <ReactTooltip
+          anchorId="changed-rows-tooltip"
+          content="Unsaved Cells"
+          place="top"
+          className="z-50"
+        />
+
+        <ReactTooltip
+          anchorId="invalid-cells-tooltip"
+          content="Invalid Cells"
+          place="top"
+          className="z-50"
+        />
       </div>
       <div className="mb-4">
         <input
