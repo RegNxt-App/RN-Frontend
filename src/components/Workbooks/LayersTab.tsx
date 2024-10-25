@@ -29,34 +29,34 @@ const LayersTab: React.FC<LayersTabProps> = ({ workbookId }) => {
   const [versions, setVersions] = useState<LayersTableData[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchVersions = async () => {
+    try {
+      setIsLoading(true);
+      const response = await Api.get(
+        `/RI/Workbook/version?workbookId=${workbookId}`,
+      );
+
+      const transformedData: LayersTableData[] = response.data.map(
+        (version: VersionResponse) => ({
+          versionId: version.versionId,
+          from: new Date(version.fromDate).toLocaleString(),
+          to: new Date(version.toDate).toLocaleString(),
+          reason: version.reason,
+          modifier: `User ${version.modifierId}`,
+        }),
+      );
+
+      setVersions(transformedData);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch version data');
+      console.error('Error fetching versions:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchVersions = async () => {
-      try {
-        setIsLoading(true);
-        const response = await Api.get(
-          `/RI/Workbook/version?workbookId=${workbookId}`,
-        );
-
-        const transformedData: LayersTableData[] = response.data.map(
-          (version: VersionResponse) => ({
-            versionId: version.versionId,
-            from: new Date(version.fromDate).toLocaleString(),
-            to: new Date(version.toDate).toLocaleString(),
-            reason: version.reason,
-            modifier: `User ${version.modifierId}`,
-          }),
-        );
-
-        setVersions(transformedData);
-        setError(null);
-      } catch (err) {
-        setError('Failed to fetch version data');
-        console.error('Error fetching versions:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchVersions();
   }, [workbookId]);
 
@@ -70,7 +70,13 @@ const LayersTab: React.FC<LayersTabProps> = ({ workbookId }) => {
     return <div className="text-red-500 p-4">{error}</div>;
   }
 
-  return <LayersTable data={versions} workbookId={workbookId} />;
+  return (
+    <LayersTable
+      data={versions}
+      workbookId={workbookId}
+      onDataChange={fetchVersions}
+    />
+  );
 };
 
 export default LayersTab;

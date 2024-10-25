@@ -125,7 +125,9 @@ const ActionsTab: React.FC<{
           </div>
         )}
         {activeActionTab === 'allocate' && <ActionsAllocate />}
-        {activeActionTab === 'validate' && <ActionsValidate />}
+        {activeActionTab === 'validate' && (
+          <ActionsValidate workbookId={workbookId} />
+        )}
         {activeActionTab === 'import' && <ActionsImport />}
         {activeActionTab === 'export' && <ActionsExport />}
         {activeActionTab === 'transmission' && <ActionsTransmission />}
