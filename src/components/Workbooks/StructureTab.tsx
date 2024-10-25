@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import Api from '../../utils/Api';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '../../app/hooks';
-import { selectChangedRows } from '../../features/sheetData/sheetDataSlice';
-import { updateSelectedSheet } from '../../features/sheetData/sheetDataSlice';
+import {
+  selectChangedRows,
+  updateSelectedSheet,
+  selectTotalCounts,
+} from '../../features/sheetData/sheetDataSlice';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 
 interface StructureTabProps {
@@ -16,6 +19,8 @@ interface ApiResponse {
   key: string;
   label: string;
   data: string;
+  cellcount?: number;
+  invalidcount?: number;
   children?: ApiResponse[];
 }
 
@@ -27,6 +32,11 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const changedRows = useAppSelector(selectChangedRows);
+  const selectedSheet = useAppSelector(
+    (state) => state.sheetData.selectedSheet,
+  );
+  const totalCounts = useAppSelector(selectTotalCounts);
+
   const changedRowsNr = changedRows.length;
 
   useEffect(() => {
@@ -46,6 +56,8 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
               sheetId: firstItem.id,
               table: firstItem.data,
               label: firstItem.label,
+              cellcount: firstItem.cellcount || 0,
+              invalidcount: firstItem.invalidcount || 0,
             }),
           );
         }
@@ -96,14 +108,14 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
       <div className="flex mb-4">
         <div className="relative mr-2" id="total-rows-tooltip">
           <Database className="text-blue-500 cursor-pointer" size={32} />
-          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-            1
+          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+            {totalCounts.totalCellCount}
           </span>
         </div>
 
         <div className="relative mr-2" id="changed-rows-tooltip">
           <Save className="text-orange-500 cursor-pointer" size={32} />
-          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             {changedRowsNr}
           </span>
         </div>
@@ -111,7 +123,7 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
         <div className="relative mr-2" id="invalid-cells-tooltip">
           <AlertTriangle className="text-red-500 cursor-pointer" size={32} />
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-            20
+            {selectedSheet.invalidcount || 0}
           </span>
         </div>
 

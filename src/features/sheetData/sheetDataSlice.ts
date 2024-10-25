@@ -59,10 +59,16 @@ interface SheetDataState {
   data: SheetData | null;
   loading: boolean;
   error: string | null;
+  totalCounts: {
+    totalCellCount: number;
+    totalInvalidCount: number;
+  };
   selectedSheet: {
     label: string;
     table: string;
     sheetId: string | null;
+    cellcount: number;
+    invalidcount: number;
   };
   selectedCell: {
     rowId: string;
@@ -70,7 +76,6 @@ interface SheetDataState {
     label: string;
     table: string;
   } | null;
-  // New state for changed rows
   changedRows: ChangedRow[];
   lastChangeTimestamp: number | null;
 }
@@ -83,9 +88,14 @@ const initialState: SheetDataState = {
     label: '',
     table: '',
     sheetId: null,
+    cellcount: 0,
+    invalidcount: 0,
+  },
+  totalCounts: {
+    totalCellCount: 0,
+    totalInvalidCount: 0,
   },
   selectedCell: null,
-  // Initialize new state properties
   changedRows: [],
   lastChangeTimestamp: null,
 };
@@ -120,7 +130,13 @@ const sheetDataSlice = createSlice({
     },
     updateSelectedSheet: (
       state,
-      action: PayloadAction<{ label: string; table: string; sheetId: string }>,
+      action: PayloadAction<{
+        label: string;
+        table: string;
+        sheetId: string;
+        cellcount: number;
+        invalidcount: number;
+      }>,
     ) => {
       state.selectedSheet = action.payload;
     },
@@ -148,6 +164,15 @@ const sheetDataSlice = createSlice({
         };
       }
       return state;
+    },
+    updateTotalCounts: (
+      state,
+      action: PayloadAction<{
+        totalCellCount: number;
+        totalInvalidCount: number;
+      }>,
+    ) => {
+      state.totalCounts = action.payload;
     },
     // New reducers for changed rows
     addChangedRows: (state, action: PayloadAction<ChangedRow[]>) => {
@@ -219,6 +244,7 @@ export const {
   addChangedRows,
   clearChangedRows,
   updateChangedRow,
+  updateTotalCounts,
 } = sheetDataSlice.actions;
 
 // Export selectors
@@ -227,5 +253,7 @@ export const selectChangedRows = (state: { sheetData: SheetDataState }) =>
 export const selectLastChangeTimestamp = (state: {
   sheetData: SheetDataState;
 }) => state.sheetData.lastChangeTimestamp;
+export const selectTotalCounts = (state: { sheetData: SheetDataState }) =>
+  state.sheetData.totalCounts;
 
 export default sheetDataSlice.reducer;

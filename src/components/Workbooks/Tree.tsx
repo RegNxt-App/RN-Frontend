@@ -4,6 +4,7 @@ import { useAppDispatch } from '../../app/hooks';
 import {
   fetchSheetData,
   updateSelectedSheet,
+  updateTotalCounts,
 } from '../../features/sheetData/sheetDataSlice';
 
 interface ApiResponse {
@@ -12,6 +13,8 @@ interface ApiResponse {
   data: string;
   table?: string;
   children?: ApiResponse[];
+  cellcount?: number;
+  invalidcount?: number;
 }
 
 interface TreeProps {
@@ -21,6 +24,61 @@ interface TreeProps {
 
 const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
   const dispatch = useAppDispatch();
+
+  const calculateNodeCounts = (node: ApiResponse): ApiResponse => {
+    if (!node.children || node.children.length === 0) {
+      return {
+        ...node,
+        cellcount: node.cellcount || 0,
+        invalidcount: node.invalidcount || 0,
+      };
+    }
+
+    const processedChildren = node.children.map(calculateNodeCounts);
+
+    const totalCellCount = processedChildren.reduce(
+      (sum, child) => sum + (child.cellcount || 0),
+      0,
+    );
+    const totalInvalidCount = processedChildren.reduce(
+      (sum, child) => sum + (child.invalidcount || 0),
+      0,
+    );
+
+    return {
+      ...node,
+      children: processedChildren,
+      cellcount: totalCellCount,
+      invalidcount: totalInvalidCount,
+    };
+  };
+
+  const processTreeData = (treeData: ApiResponse[]): ApiResponse[] => {
+    return treeData.map(calculateNodeCounts);
+  };
+
+  const calculateTotalCounts = (nodes: ApiResponse[]) => {
+    let totalCellCount = 0;
+    let totalInvalidCount = 0;
+
+    const processNode = (node: ApiResponse) => {
+      if (node.key.startsWith('tg-')) {
+        totalCellCount += node.cellcount || 0;
+        totalInvalidCount += node.invalidcount || 0;
+      }
+
+      if (node.children) {
+        node.children.forEach(processNode);
+      }
+    };
+
+    nodes.forEach(processNode);
+
+    return {
+      totalCellCount,
+      totalInvalidCount,
+    };
+  };
 
   const findFirstTableNode = (nodes: ApiResponse[]): ApiResponse | null => {
     for (const node of nodes) {
@@ -56,13 +114,26 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
           table: node.table || node.data,
           label: node.label,
           sheetId: sheetId,
+          cellcount: node.cellcount || 0,
+          invalidcount: node.invalidcount || 0,
         }),
       );
     }
   };
 
   useEffect(() => {
-    const firstTableNode = findFirstTableNode(data);
+    const processedData = processTreeData(data);
+
+    const { totalCellCount, totalInvalidCount } =
+      calculateTotalCounts(processedData);
+    dispatch(
+      updateTotalCounts({
+        totalCellCount,
+        totalInvalidCount,
+      }),
+    );
+
+    const firstTableNode = findFirstTableNode(processedData);
     if (
       firstTableNode &&
       firstTableNode.children &&
@@ -79,15 +150,19 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
             table: firstTableNode.label,
             label: firstSheet.label,
             sheetId: sheetId,
+            cellcount: firstSheet.cellcount || 0,
+            invalidcount: firstSheet.invalidcount || 0,
           }),
         );
       }
     }
   }, [data, workbookId, dispatch]);
 
+  const processedData = processTreeData(data);
+
   return (
     <div>
-      {data.map((item) => (
+      {processedData.map((item) => (
         <TreeNode key={item.key} node={item} onClick={handleClick} />
       ))}
     </div>
