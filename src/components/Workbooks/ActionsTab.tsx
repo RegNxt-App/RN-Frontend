@@ -130,7 +130,9 @@ const ActionsTab: React.FC<{
         )}
         {activeActionTab === 'import' && <ActionsImport />}
         {activeActionTab === 'export' && <ActionsExport />}
-        {activeActionTab === 'transmission' && <ActionsTransmission />}
+        {activeActionTab === 'transmission' && (
+          <ActionsTransmission workbookId={workbookId} />
+        )}
       </div>
     </div>
   );

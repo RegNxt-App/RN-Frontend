@@ -41,8 +41,12 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, onClick }) => {
         )}
         <div className="flex items-center gap-2">
           <strong onClick={handleClick}>{node.label}</strong>
-          {node.cellcount !== undefined && (
-            <span className="text-sm text-gray-500">({node.cellcount})</span>
+          {node.cellcount !== undefined && node.invalidcount !== undefined && (
+            <>
+              <span className="text-sm text-gray-500">
+                ( {node.cellcount} | {node.invalidcount} | {node.invalidcount} )
+              </span>
+            </>
           )}
         </div>
       </div>
