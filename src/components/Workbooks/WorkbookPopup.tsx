@@ -1,5 +1,3 @@
-//new component code
-
 import React, {
   useState,
   useEffect,
@@ -36,6 +34,7 @@ import { HeaderCellTemplate } from '../ReactGrid/HeaderCellTemplate';
 import { EmptyCellTemplate } from '../ReactGrid/EmptyCellTemplate';
 import { FormulaCellTemplate } from '../ReactGrid/FormulaCellTemplate';
 import { InvalidTextCellTemplate } from '../ReactGrid/InvalidTextCellTemplate';
+import { InvalidNumberCellTemplate } from '../ReactGrid/InvalidNumberCellTemplate';
 
 interface WorkbookData {
   id: number;
@@ -60,9 +59,9 @@ interface SheetCell {
   rownr: number;
   rowspan: number;
   text: string;
-  type: 'header' | 'number' | 'empty' | 'text';
+  type: 'header' | 'number' | 'empty' | 'text' | 'shaded' | 'formula';
   value: number | null;
-  style?: CellStyle;
+  // style?: CellStyle;
 }
 
 interface SheetRow {
@@ -191,18 +190,76 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     [isValueCell],
   );
 
-  const createCellContent = useCallback(
-    (cell: SheetCell): Cell => {
-      return {
-        type: cell.type === 'number' ? 'number' : 'text',
-        text: decodeHtmlEntities(cell.text || ''),
-        value: cell.value,
-        nonEditable: cell.nonEditable,
-        style: getCellStyle(cell),
-      };
-    },
-    [getCellStyle],
-  );
+  const createCellContent = useCallback((cell: SheetCell): Cell => {
+    // Base style for all cells - include grid styling
+    const baseStyle = {
+      background: '#fff',
+      padding: '4px 8px',
+      borderRight: '1px solid #e2e8f0',
+      borderBottom: '1px solid #e2e8f0',
+    };
+
+    // Function to determine if it's an alternate row
+    const isAlternateRow = (rownr: number) => rownr % 2 === 0;
+
+    // Set background color based on cell type and row number
+    const getBackground = (cellType: string, rownr: number) => {
+      if (cellType === 'header') return '#e5e7eb'; // Gray background for headers
+      if (cellType === 'shaded') return '#f3f4f6'; // Light gray for shaded cells
+      return isAlternateRow(rownr) ? '#f8fafc' : '#fff'; // Alternate row colors
+    };
+
+    const cellStyle = {
+      ...baseStyle,
+      background: getBackground(cell.type, cell.rownr),
+    };
+
+    switch (cell.type) {
+      case 'header':
+        return {
+          type: 'header',
+          text: decodeHtmlEntities(cell.text || ''),
+          nonEditable: true,
+          style: cellStyle,
+        };
+      case 'shaded':
+        return {
+          type: 'shaded',
+          text: decodeHtmlEntities(cell.text || ''),
+          nonEditable: true,
+          style: cellStyle,
+        };
+      case 'empty':
+        return {
+          type: 'empty',
+          text: decodeHtmlEntities(cell.text || ''),
+          nonEditable: true,
+          style: cellStyle,
+        };
+      case 'formula':
+        return {
+          type: 'formula',
+          text: decodeHtmlEntities(cell.text || ''),
+          nonEditable: true,
+          style: { ...cellStyle, color: '#2563eb' }, // Blue color for formulas
+        };
+      case 'number':
+        return {
+          type: cell.nonEditable ? 'invalidnumber' : 'number',
+          text: decodeHtmlEntities(cell.text || ''),
+          value: cell.value,
+          nonEditable: cell.nonEditable,
+          style: cellStyle,
+        };
+      default:
+        return {
+          type: cell.nonEditable ? 'invalidtext' : 'text',
+          text: decodeHtmlEntities(cell.text || ''),
+          nonEditable: cell.nonEditable,
+          style: cellStyle,
+        };
+    }
+  }, []);
 
   const processRow = useCallback(
     (row: any): Row => {
@@ -427,6 +484,14 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
                 enableRangeSelection
                 stickyLeftColumns={2}
                 stickyTopRows={sheetData?.headerRows?.length || 0}
+                customCellTemplates={{
+                  header: new HeaderCellTemplate(),
+                  shaded: new ShadedCellTemplate(),
+                  empty: new EmptyCellTemplate(),
+                  formula: new FormulaCellTemplate(),
+                  invalidtext: new InvalidTextCellTemplate(),
+                  invalidnumber: new InvalidNumberCellTemplate(),
+                }}
               />
             </div>
           ) : (
