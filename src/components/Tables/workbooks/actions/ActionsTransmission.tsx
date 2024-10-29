@@ -1,21 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import Api from '../../../../utils/Api';
 
-const ActionsTransmission = ({ workbookId }) => {
-  const [transmissionfileReady, setTransmissionfileReady] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
+interface ActionsTransmissionProps {
+  workbookId: string | number;
+}
+
+interface ApiResponse {
+  data: boolean;
+  headers: {
+    'content-disposition'?: string;
+  };
+}
+
+const ActionsTransmission: React.FC<ActionsTransmissionProps> = ({
+  workbookId,
+}) => {
+  const [transmissionfileReady, setTransmissionfileReady] =
+    useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkFileStatus = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         const response = await Api.get(
           `/RT/xbrl/filecheck?workbookId=${workbookId}`,
         );
         setTransmissionfileReady(response.data);
       } catch (error) {
         console.error('Error checking file status:', error);
+        setError('Failed to check file status');
         setTransmissionfileReady(false);
       } finally {
         setIsLoading(false);
@@ -27,6 +44,7 @@ const ActionsTransmission = ({ workbookId }) => {
   const handleButtonClick = async () => {
     try {
       setIsProcessing(true);
+      setError(null);
 
       if (transmissionfileReady) {
         const response = await Api.get(
@@ -55,14 +73,22 @@ const ActionsTransmission = ({ workbookId }) => {
         document.body.appendChild(link);
         link.click();
 
-        link.parentNode.removeChild(link);
+        link.parentNode?.removeChild(link);
         window.URL.revokeObjectURL(url);
       } else {
         const response = await Api.get(`/RT/xbrl?workbookId=${workbookId}`);
-        setTransmissionfileReady(response);
+
+        if (response.status === 200) {
+          setTransmissionfileReady(true);
+        } else {
+          setError('File generation failed');
+          setTransmissionfileReady(false);
+        }
       }
     } catch (error) {
       console.error('Error handling transmission file:', error);
+      setError('Failed to process file');
+      setTransmissionfileReady(false);
     } finally {
       setIsProcessing(false);
     }
@@ -86,6 +112,7 @@ const ActionsTransmission = ({ workbookId }) => {
       >
         {getButtonText()}
       </button>
+      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
     </div>
   );
 };

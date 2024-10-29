@@ -111,7 +111,7 @@ const OverviewRegulatoryReports = () => {
           className="px-4 py-2 bg-green-500 text-white rounded-md"
           onClick={() => setShowPopup(true)}
         >
-          New Wordbook
+          New Workbook
         </button>
       </div>
 
