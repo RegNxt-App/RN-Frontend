@@ -59,7 +59,7 @@ const ActionsTab: React.FC<{
             comment: cell.comment || '',
             cellcode: cell.cellCode || '',
             rowNr: cell.rowNr,
-            colNr: cell.colNr,
+            colNr: 1,
           });
         }
       });
