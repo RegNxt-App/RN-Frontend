@@ -1,5 +1,4 @@
-// components/LayersTable.tsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Pagination from '../../../Pagination';
 import ViewLayer from './ViewLayer';
 import Api from '../../../../utils/Api';
@@ -44,10 +43,13 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
   const [selectedVersion, setSelectedVersion] =
     useState<LayersTableData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const sortedData = useMemo(() => {
+    return [...data].sort((a, b) => a.versionId - b.versionId);
+  }, [data]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = sortedData.slice(indexOfFirstItem, indexOfLastItem);
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
@@ -165,13 +167,15 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
                           >
                             View
                           </button>
-                          <button
-                            className="inline-flex items-center justify-center rounded-md border border-red-500 py-1 text-center font-medium text-red-500 hover:bg-red-500 hover:text-white lg:px-4 xl:px-6"
-                            onClick={() => handleDelete(item)}
-                            disabled={isDeleting}
-                          >
-                            {isDeleting ? 'Removing...' : 'Remove'}
-                          </button>
+                          {item.versionId !== 1 && (
+                            <button
+                              className="inline-flex items-center justify-center rounded-md border border-red-500 py-1 text-center font-medium text-red-500 hover:bg-red-500 hover:text-white lg:px-4 xl:px-6"
+                              onClick={() => handleDelete(item)}
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? 'Removing...' : 'Remove'}
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

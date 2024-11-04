@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import DataTable from '../../components/Tables/DataTable';
 import KanbanView from '../../components/KanbanView';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import ViewRecordPopup from '../../components/ViewRecordPopup';
 import AddWorkbookModel from '../../components/CModels/WordbookModels/AddWorkbookModel';
 import Api from '../../utils/Api';
 
@@ -33,37 +32,8 @@ const OverviewRegulatoryReports = () => {
   const [error, setError] = useState<string | null>(null);
   const [isPanelOpen, setPanelOpen] = useState(false);
 
-  const togglePanel = () => {
-    setPanelOpen((prev) => !prev);
-  };
-
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Api.get('/RI/Workbook');
-
-        const result: WorkbookData[] = await response.data;
-        setData(result);
-        setFilteredData(result);
-
-        const uniqueModules = Array.from(
-          new Set(result.map((item) => item.module)),
-        );
-        const uniqueStatuses = Array.from(
-          new Set(result.map((item) => item.status)),
-        );
-
-        setModules(uniqueModules);
-        setStatuses(uniqueStatuses);
-
-        setLoading(false);
-      } catch (error) {
-        setError((error as Error).message);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchWorkbooks();
   }, []);
 
   useEffect(() => {
@@ -90,6 +60,38 @@ const OverviewRegulatoryReports = () => {
     setFilteredData(filtered);
   }, [selectedModule, selectedStatus, searchQuery, data]);
 
+  const togglePanel = () => {
+    setPanelOpen((prev) => !prev);
+  };
+  const fetchWorkbooks = async () => {
+    try {
+      const response = await Api.get('/RI/Workbook');
+
+      const result: WorkbookData[] = await response.data;
+      setData(result);
+      setFilteredData(result);
+
+      const uniqueModules = Array.from(
+        new Set(result.map((item) => item.module)),
+      );
+      const uniqueStatuses = Array.from(
+        new Set(result.map((item) => item.status)),
+      );
+
+      setModules(uniqueModules);
+      setStatuses(uniqueStatuses);
+
+      setLoading(false);
+    } catch (error) {
+      setError((error as Error).message);
+      setLoading(false);
+    }
+  };
+  const handleWorkbookAdded = () => {
+    fetchWorkbooks();
+    setShowPopup(false);
+  };
+
   return (
     <>
       <div className="flex justify-between mb-4">
@@ -114,7 +116,6 @@ const OverviewRegulatoryReports = () => {
           New Workbook
         </button>
       </div>
-
       <div className="pt-3 px-3 m-0 bg-white rounded-md shadow-md">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold">Filters</h2>
@@ -130,7 +131,6 @@ const OverviewRegulatoryReports = () => {
           className={`mt-4 overflow-hidden transition-all duration-300 ease-in-out ${isPanelOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
         >
           <div className="grid grid-cols-3 gap-4 pb-4">
-            {/* Module Filter */}
             <div>
               <select
                 value={selectedModule}
@@ -148,7 +148,6 @@ const OverviewRegulatoryReports = () => {
               </select>
             </div>
 
-            {/* Status Filter */}
             <div>
               <select
                 value={selectedStatus}
@@ -166,7 +165,6 @@ const OverviewRegulatoryReports = () => {
               </select>
             </div>
 
-            {/* Search Query Filter */}
             <div>
               <input
                 type="text"
@@ -179,15 +177,17 @@ const OverviewRegulatoryReports = () => {
           </div>
         </div>
       </div>
-
-      {/* Render the filtered data */}
       {view === 'list' ? (
         <DataTable data={filteredData} />
       ) : (
         <KanbanView data={filteredData} />
       )}
-
-      {showPopup && <AddWorkbookModel onClose={() => setShowPopup(false)} />}
+      {showPopup && (
+        <AddWorkbookModel
+          onClose={() => setShowPopup(false)}
+          onWorkbookAdded={handleWorkbookAdded}
+        />
+      )}{' '}
     </>
   );
 };
