@@ -4,8 +4,12 @@ import Api from '../../../utils/Api';
 interface UpdateRecordPopupProps {
   onClose: () => void;
   onUpdate: () => void;
-
   existingData: any;
+}
+
+interface CurrencyOption {
+  name: string;
+  code: string;
 }
 
 const UpdateEntityModel = ({
@@ -31,44 +35,56 @@ const UpdateEntityModel = ({
   const [identificationTypes, setIdentificationTypes] = useState<
     { name: string; code: number }[]
   >([]);
-  console.log('Existing Data Final:', existingData);
+  const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch identification types and currencies
   useEffect(() => {
-    // Fetch identification types
-    const fetchIdentificationTypes = async () => {
+    const fetchData = async () => {
       try {
-        const response = await Api.get('/RI/UIInput?type=IdentificationType');
-        setIdentificationTypes(response.data);
+        setIsLoading(true);
+        const [identificationResponse, currencyResponse] = await Promise.all([
+          Api.get('/RI/UIInput?type=IdentificationType'),
+          Api.get<CurrencyOption[]>('RI/UIInput?type=Currency'),
+        ]);
+        setIdentificationTypes(identificationResponse.data);
+        setCurrencies(currencyResponse.data);
       } catch (error) {
-        console.error('Error fetching identification types:', error);
+        console.error('Error fetching data:', error);
+        setError('Failed to fetch required data');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchIdentificationTypes();
+    fetchData();
   }, []);
 
+  // Set form data when existing data and dependencies are available
   useEffect(() => {
-    if (existingData && identificationTypes.length > 0) {
-      const matchingType = identificationTypes.find(
-        (type) => type.name === existingData.identificationType,
-      );
-
+    if (
+      existingData &&
+      identificationTypes.length > 0 &&
+      currencies.length > 0
+    ) {
       setFormData({
         entityCode: existingData.code || '',
         entityLabel: existingData.label || '',
         country: existingData.country || '',
         city: existingData.city || '',
-        identificationType: matchingType ? matchingType.code.toString() : '',
+        identificationType: existingData.identificationType || '',
         vat: existingData.vat || '',
-        bicCode: existingData.biccode || '',
+        bicCode: existingData.bicCode || '',
         kbo: existingData.kbo || '',
         lei: existingData.lei || '',
-        reportingCurrency: existingData.reportingcurrency || '',
-        significantCurrencies: existingData.significantcurrencies || '',
+        reportingCurrency: existingData.reportingCurrency || '',
+        significantCurrencies: existingData.significantCurrencies || '',
         email: existingData.email || '',
-        consolidationScope: existingData.consolidationscope || '',
+        consolidationScope: existingData.consolidationScope || '',
       });
     }
-  }, [existingData, identificationTypes]);
+  }, [existingData, identificationTypes, currencies]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -80,10 +96,6 @@ const UpdateEntityModel = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const selectedType = identificationTypes.find(
-      (type) => type.code.toString() === formData.identificationType,
-    );
-
     try {
       const payload = {
         entityid: existingData.id,
@@ -91,7 +103,7 @@ const UpdateEntityModel = ({
         label: formData.entityLabel,
         country: formData.country,
         city: formData.city,
-        identificationtype: selectedType ? selectedType.name : '',
+        identificationtype: formData.identificationType,
         vat: formData.vat,
         biccode: formData.bicCode,
         kbo: formData.kbo,
@@ -103,7 +115,6 @@ const UpdateEntityModel = ({
       };
 
       const response = await Api.post(`/RI/Entity/`, payload);
-
       console.log('Entity updated successfully:', response.data);
       onUpdate();
       onClose();
@@ -112,12 +123,27 @@ const UpdateEntityModel = ({
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
+        <div className="bg-white p-6 rounded-sm">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
       <div className="rounded-sm border border-stroke bg-white shadow-default p-6 w-full max-w-4xl">
         <div className="border-b border-stroke py-4 px-6.5">
           <h3 className="text-2xl font-extrabold text-black">Update Entity</h3>
         </div>
+        {error && (
+          <div className="p-6.5">
+            <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+              {error}
+            </div>
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="p-6.5 grid grid-cols-3 gap-4">
             <input
@@ -167,7 +193,7 @@ const UpdateEntityModel = ({
                 Select Identification Type
               </option>
               {identificationTypes.map((type) => (
-                <option key={type.code} value={type.code.toString()}>
+                <option key={type.code} value={type.code}>
                   {type.name}
                 </option>
               ))}
@@ -208,15 +234,22 @@ const UpdateEntityModel = ({
               value={formData.lei}
               required
             />
-            <input
-              type="text"
+            <select
               name="reportingCurrency"
-              placeholder="Reporting Currency"
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
               onChange={handleInputChange}
               value={formData.reportingCurrency}
               required
-            />
+            >
+              <option value="" disabled>
+                Select Reporting Currency
+              </option>
+              {currencies.map((currency) => (
+                <option key={currency.code} value={currency.code}>
+                  {currency.name}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               name="significantCurrencies"

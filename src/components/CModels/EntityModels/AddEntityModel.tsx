@@ -5,6 +5,10 @@ interface AddEntityModelProps {
   onClose: () => void;
   onSuccess: () => void;
 }
+interface CurrencyOption {
+  name: string;
+  code: string;
+}
 
 const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
   const [formData, setFormData] = useState({
@@ -25,6 +29,9 @@ const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
   const [identificationTypes, setIdentificationTypes] = useState<
     { name: string; code: number }[]
   >([]);
+  const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchIdentificationTypes = async () => {
@@ -37,6 +44,28 @@ const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
     };
 
     fetchIdentificationTypes();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const currencyResponse = await Api.get<CurrencyOption[]>(
+          'RI/UIInput?type=Currency',
+        );
+        setCurrencies(currencyResponse.data);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'An error occurred while fetching data',
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleInputChange = (
@@ -173,15 +202,22 @@ const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
               value={formData.leiCode}
               required
             />
-            <input
-              type="text"
+            <select
               name="reportingCurrency"
-              placeholder="Reporting Currency"
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
               onChange={handleInputChange}
               value={formData.reportingCurrency}
               required
-            />
+            >
+              <option value="" disabled>
+                Select Reporting Currency
+              </option>
+              {currencies.map((currency) => (
+                <option key={currency.code} value={currency.code}>
+                  {currency.name}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               name="significantCurrencies"
