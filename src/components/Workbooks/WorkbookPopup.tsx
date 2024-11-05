@@ -1,3 +1,4 @@
+//Current Component
 import React, {
   useState,
   useEffect,
@@ -35,6 +36,7 @@ import { EmptyCellTemplate } from '../ReactGrid/EmptyCellTemplate';
 import { FormulaCellTemplate } from '../ReactGrid/FormulaCellTemplate';
 import { InvalidTextCellTemplate } from '../ReactGrid/InvalidTextCellTemplate';
 import { InvalidNumberCellTemplate } from '../ReactGrid/InvalidNumberCellTemplate';
+import { Dialog } from '@headlessui/react';
 
 interface WorkbookData {
   id: number;
@@ -126,6 +128,19 @@ interface WorkbookPopupProps {
   onShowSlider: () => void;
   onRowChange?: (changedRows: ChangedRow[]) => void;
 }
+interface HistoryColumn {
+  field: string;
+  header: string;
+}
+
+const historyColumns: HistoryColumn[] = [
+  { field: 'versionId', header: 'Version Id' },
+  { field: 'cellValue', header: 'Cell Value' },
+  { field: 'isInvalid', header: 'Is Invalid' },
+  { field: 'invalidReason', header: 'Invalid Reason' },
+  { field: 'modifierId', header: 'Modifier' },
+  { field: 'modificationTime', header: 'Modification Time' },
+];
 
 const STORAGE_KEY = 'workbookData';
 
@@ -160,6 +175,16 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
   const [localRows, setLocalRows] = useState<Row[]>([]);
   const [cellChanges, setCellChanges] = useState<ChangedCell[]>([]);
   const [changedRows, setChangedRows] = useState<ChangedRow[]>([]);
+  const [cellInfo, setCellInfo] = useState<CellInfoResponse | null>(null);
+  const [showCellInfo, setShowCellInfo] = useState(false);
+  const [cellHistory, setCellHistory] = useState<any[] | null>(null);
+  const [cellHistoryHeader, setCellHistoryHeader] = useState<string | null>(
+    null,
+  );
+  const [showCellHistory, setShowCellHistory] = useState(false);
+  const [cellAudit, setCellAudit] = useState<any | null>(null);
+  const [cellAuditHeader, setCellAuditHeader] = useState<string | null>(null);
+  const [showCellAudit, setShowCellAudit] = useState(false);
 
   const columns: Column[] = useMemo(
     () =>
@@ -269,6 +294,117 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
       };
     },
     [createCellContent],
+  );
+  const showCellDetails = async () => {
+    if (!curLocation) return;
+
+    try {
+      const response = await Api.get<CellInfoResponse>(
+        `/RI/Workbook/CellInfo?workbookId=${curLocation.workbookid}&sheetId=${curLocation.sheetid}&rowId=${curLocation.rowid}&colId=${curLocation.colid}`,
+      );
+      setCellInfo(response.data);
+      setShowCellInfo(true);
+    } catch (error) {
+      console.error('Error fetching cell info:', error);
+    }
+  };
+  const showCellHistoryVersions = async () => {
+    if (!curLocation) return;
+
+    try {
+      const response = await Api.get(
+        `/RI/Workbook/CellHistory?workbookId=${curLocation.workbookid}&sheetId=${curLocation.sheetid}&rowId=${curLocation.rowid}&colId=${curLocation.colid}`,
+      );
+      setCellHistory(response.data);
+      setCellHistoryHeader(
+        `Cell history for col ${curLocation.colid} and row ${curLocation.rowid}`,
+      );
+      setShowCellHistory(true);
+    } catch (error) {
+      console.error('Error fetching cell history:', error);
+    }
+  };
+
+  const showCellAuditWindow = () => {
+    if (!curLocation) return;
+
+    setCellAudit({}); // Replace with actual audit data fetch
+    setCellAuditHeader(
+      `Cell Audit for col ${curLocation.colid} and row ${curLocation.rowid}`,
+    );
+    setShowCellAudit(true);
+  };
+  const handleContextMenu = useCallback(
+    (
+      selectedRowIds: Id[],
+      selectedColIds: Id[],
+      selectionMode: 'row' | 'column' | 'cell',
+      menuOptions: MenuOption[],
+      selectedRanges: GridSelection,
+    ): MenuOption[] => {
+      console.log('Context Menu Location:', curLocation);
+      const newMenuOptions: MenuOption[] = [];
+
+      if (curLocation) {
+        // Find the row
+        const row = localRows.find(
+          (row) => row.rowId.toString() === curLocation.rowid.toString(),
+        );
+
+        if (row) {
+          // Find the cell by matching columnId with the curLocation.colid
+          const cellIndex = columns.findIndex(
+            (col) => col.columnId.toString() === curLocation.colid.toString(),
+          );
+
+          console.log('Found Row:', row);
+          console.log('Cell Index:', cellIndex);
+
+          if (cellIndex !== -1) {
+            const cell = row.cells[cellIndex];
+            console.log('Found Cell:', cell);
+
+            // Check if it's a value cell that can be edited
+            if (cell && cell.type === 'number' && !cell.nonEditable) {
+              newMenuOptions.push(
+                {
+                  id: 'cellDetails',
+                  label: 'Show Details',
+                  handler: () => {
+                    showCellDetails();
+                  },
+                },
+                {
+                  id: 'cellHistory',
+                  label: 'Show Historical values',
+                  handler: () => {
+                    showCellHistoryVersions();
+                  },
+                },
+                {
+                  id: 'cellAudit',
+                  label: 'Show Audit',
+                  handler: () => {
+                    showCellAuditWindow();
+                  },
+                },
+              );
+            }
+          }
+        }
+      }
+
+      console.log('Menu Options:', newMenuOptions);
+      return newMenuOptions;
+    },
+    [
+      curLocation,
+      localRows,
+      columns,
+      showCellDetails,
+      showCellHistoryVersions,
+      showCellAuditWindow,
+    ],
   );
 
   useEffect(() => {
@@ -408,19 +544,6 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     });
   };
 
-  const handleContextMenu = useCallback(
-    (
-      selectedRowIds: Id[],
-      selectedColIds: Id[],
-      selectionMode: 'row' | 'column' | 'cell',
-      menuOptions: MenuOption[],
-      selectedRanges: GridSelection,
-    ) => {
-      return menuOptions;
-    },
-    [],
-  );
-
   const handleFocusChange = async (cell: CellLocation) => {
     const newLocation = {
       workbookid: workbook.id,
@@ -507,7 +630,81 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           )
         ) : null}
       </div>
+      <Dialog open={showCellInfo} onClose={() => setShowCellInfo(false)}>
+        <div className="fixed inset-0 z-[9999] overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-lg bg-white p-6 shadow-xl">
+              <div className="p-4">
+                <h2 className="text-xl font-bold mb-4">Cell Information</h2>
+                {cellInfo && (
+                  <div>
+                    <p>Cell ID: {cellInfo.cellId}</p>
+                    <p>Datapoint VID: {cellInfo.datapointVID}</p>
+                    <p>Data Type: {cellInfo.dataType}</p>
+                    {/* Add more cell info display as needed */}
+                  </div>
+                )}
+              </div>
+            </Dialog.Panel>
+          </div>
+        </div>
+      </Dialog>
 
+      <Dialog open={showCellHistory} onClose={() => setShowCellHistory(false)}>
+        <div className="fixed inset-0 z-[9999] overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Dialog.Panel className="w-full max-w-5xl transform overflow-hidden rounded-lg bg-white p-6 shadow-xl">
+              <div className="p-4">
+                <h2 className="text-xl font-bold mb-4">{cellHistoryHeader}</h2>
+                {cellHistory && (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          {historyColumns.map((column) => (
+                            <th
+                              key={column.field}
+                              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            >
+                              {column.header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {cellHistory.map((row, rowIndex) => (
+                          <tr key={rowIndex}>
+                            {historyColumns.map((column) => (
+                              <td
+                                key={column.field}
+                                className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                              >
+                                {row[column.field]}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </Dialog.Panel>
+          </div>
+        </div>
+      </Dialog>
+      <Dialog open={showCellAudit} onClose={() => setShowCellAudit(false)}>
+        <div className="fixed inset-0 z-[9999] overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-lg bg-white p-6 shadow-xl">
+              <div className="p-4">
+                <h2 className="text-xl font-bold mb-4">{cellAuditHeader}</h2>
+                {cellAudit && <div>{/* Add audit information display */}</div>}
+              </div>
+            </Dialog.Panel>
+          </div>
+        </div>
+      </Dialog>
       {showSlider && (
         <WorkbookSlider
           workbook={workbook}
