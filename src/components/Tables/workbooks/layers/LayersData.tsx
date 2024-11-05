@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Pagination from '../../../Pagination';
 import ViewLayer from './ViewLayer';
 import Api from '../../../../utils/Api';
@@ -31,7 +31,10 @@ interface DataTableProps {
   onRemove?: (versionId: number) => void;
   onDataChange?: () => void;
 }
-
+interface DeleteConfirmationData {
+  version: LayersTableData;
+  cellCount: number;
+}
 const itemsPerPage = 5;
 
 const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
@@ -43,15 +46,25 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
   const [selectedVersion, setSelectedVersion] =
     useState<LayersTableData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteConfirmationData, setDeleteConfirmationData] =
+    useState<DeleteConfirmationData | null>(null);
+
   const sortedData = useMemo(() => {
     return [...data].sort((a, b) => a.versionId - b.versionId);
   }, [data]);
 
+  useEffect(() => {
+    const maxPage = Math.ceil(sortedData.length / itemsPerPage);
+    if (currentPage > maxPage && maxPage > 0) {
+      setCurrentPage(maxPage);
+    }
+  }, [sortedData.length, currentPage]);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = sortedData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -86,27 +99,75 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
     setVersionDetails([]);
     setError(null);
   };
-
   const handleDelete = async (version: LayersTableData) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await Api.get(
+        `/RI/Workbook/version/data?workbookId=${workbookId}&versionId=${version.versionId}`,
+      );
+
+      const versionData = Array.isArray(response.data)
+        ? response.data
+        : [response.data];
+
+      setDeleteConfirmationData({
+        version,
+        cellCount: versionData.length,
+      });
+      setIsDeleteDialogOpen(true);
+    } catch (err) {
+      console.error('Error fetching version details:', err);
+      setError('Failed to fetch version details for deletion');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmationData) return;
+
     try {
       setIsDeleting(true);
       setError(null);
 
       await Api.delete(
-        `/RI/Workbook/version?workbookId=${workbookId}&versionId=${version.versionId}`,
+        `/RI/Workbook/version?workbookId=${workbookId}&versionId=${deleteConfirmationData.version.versionId}`,
       );
 
-      onDataChange?.();
+      // Close the dialog before refreshing data
+      setIsDeleteDialogOpen(false);
+      setDeleteConfirmationData(null);
+
+      // Refresh the data
+      if (onDataChange) {
+        await onDataChange();
+      }
     } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete version');
       console.error('Error deleting version:', err);
     } finally {
       setIsDeleting(false);
     }
   };
 
+  // Close delete dialog if there's an error
+  useEffect(() => {
+    if (error) {
+      setIsDeleteDialogOpen(false);
+      setDeleteConfirmationData(null);
+    }
+  }, [error]);
+
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+            {error}
+          </div>
+        )}
         <div className="max-w-full">
           <div className="overflow-x-auto">
             <div className="max-h-[580px] overflow-y-auto">
@@ -219,6 +280,50 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
             onRemove={() => {}}
           />
         )}
+      </Dialog>
+      <Dialog
+        open={isDeleteDialogOpen}
+        onClose={() => {
+          if (!isDeleting) {
+            setIsDeleteDialogOpen(false);
+            setDeleteConfirmationData(null);
+          }
+        }}
+        title="Confirm Delete"
+      >
+        <div className="p-6">
+          <p className="text-base text-gray-700 dark:text-gray-300">
+            Are you sure you want to remove the changes related to version{' '}
+            <span className="font-semibold">
+              {deleteConfirmationData?.version.versionId}
+            </span>
+            ? This will reverse{' '}
+            <span className="font-semibold">
+              {deleteConfirmationData?.cellCount}
+            </span>{' '}
+            cells!
+          </p>
+
+          <div className="mt-6 flex justify-end space-x-4">
+            <button
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setDeleteConfirmationData(null);
+              }}
+              disabled={isDeleting}
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:bg-red-300"
+            >
+              {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+            </button>
+          </div>
+        </div>
       </Dialog>
     </>
   );

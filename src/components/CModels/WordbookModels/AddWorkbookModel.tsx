@@ -13,6 +13,11 @@ interface TemplateOption {
   code: number;
 }
 
+interface CurrencyOption {
+  name: string;
+  code: string;
+}
+
 interface WorkbookFormData {
   name: string;
   entityId: number | null;
@@ -32,6 +37,7 @@ const AddWorkbookModel = ({
 }: AddWorkbookModelProps) => {
   const [entities, setEntities] = useState<EntityOption[]>([]);
   const [templates, setTemplates] = useState<TemplateOption[]>([]);
+  const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,13 +63,16 @@ const AddWorkbookModel = ({
       try {
         setIsLoading(true);
 
-        const [entityResponse, templateResponse] = await Promise.all([
-          Api.get<EntityOption[]>('RI/UIInput?type=Entity'),
-          Api.get<TemplateOption[]>('RI/UIInput?type=Template'),
-        ]);
+        const [entityResponse, templateResponse, currencyResponse] =
+          await Promise.all([
+            Api.get<EntityOption[]>('RI/UIInput?type=Entity'),
+            Api.get<TemplateOption[]>('RI/UIInput?type=Template'),
+            Api.get<CurrencyOption[]>('RI/UIInput?type=Currency'),
+          ]);
 
         setEntities(entityResponse.data);
         setTemplates(templateResponse.data);
+        setCurrencies(currencyResponse.data);
       } catch (err) {
         setError(
           err instanceof Error
@@ -200,14 +209,19 @@ const AddWorkbookModel = ({
             </div>
 
             <div className="mb-4">
-              <input
-                type="text"
+              <select
                 name="reportingCurrency"
-                placeholder="Reporting Currency (Optional)"
                 value={formData.reportingCurrency}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
                 onChange={handleInputChange}
-              />
+              >
+                <option value="">Select Reporting Currency (Optional)</option>
+                {currencies.map((currency) => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="relative mb-4">
