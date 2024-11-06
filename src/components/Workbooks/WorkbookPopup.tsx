@@ -6,7 +6,7 @@ import React, {
   useRef,
   useMemo,
 } from 'react';
-import { LayoutGrid, Undo2 } from 'lucide-react';
+import { Expand, LayoutGrid, Minimize, Undo2 } from 'lucide-react';
 import {
   ReactGrid,
   Column,
@@ -185,6 +185,11 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
   const [cellAudit, setCellAudit] = useState<any | null>(null);
   const [cellAuditHeader, setCellAuditHeader] = useState<string | null>(null);
   const [showCellAudit, setShowCellAudit] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<{
+    name: string;
+    value: any;
+  } | null>(null);
 
   const columns: Column[] = useMemo(
     () =>
@@ -365,7 +370,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
             console.log('Found Cell:', cell);
 
             // Check if it's a value cell that can be edited
-            if (cell && cell.type === 'number' && !cell.nonEditable) {
+            if (cell && !cell.nonEditable) {
               newMenuOptions.push(
                 {
                   id: 'cellDetails',
@@ -406,7 +411,61 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
       showCellAuditWindow,
     ],
   );
+  const onSselectedOptionChange = (event: { value: { name: string } }) => {
+    setSelectedOption(event.value);
+  };
+  const _grabCellValue = () => {
+    if (!curLocation || !selectedOption) return;
 
+    const sheetid = Number(selectedSheet.sheetId);
+    const newChanges: ChangedCell[] = [];
+
+    setLocalRows((prevRows) => {
+      const newRows = [...prevRows];
+      const rowIndex = newRows.findIndex(
+        (row) => row.rowId.toString() === curLocation.rowid.toString(),
+      );
+
+      if (rowIndex !== -1) {
+        const row = newRows[rowIndex];
+        const colIndex = columns.findIndex(
+          (col) => col.columnId.toString() === curLocation.colid.toString(),
+        );
+
+        if (colIndex !== -1) {
+          const oldCell = row.cells[colIndex];
+          const newCell = {
+            ...oldCell,
+            value: Number(selectedOption.name),
+            text: selectedOption.name,
+          };
+
+          const updatedCells = [...row.cells];
+          updatedCells[colIndex] = newCell;
+          row.cells = updatedCells;
+          newRows[rowIndex] = row;
+
+          const changedCell: ChangedCell = {
+            sheetid,
+            cellid: oldCell.cellid,
+            prevvalue: oldCell.text,
+            newvalue: selectedOption.name,
+            comment: '',
+            cellCode: '',
+            rowNr: rowIndex + 1,
+            colNr: colIndex + 1,
+          };
+
+          newChanges.push(changedCell);
+        }
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
+      return newRows;
+    });
+
+    setCellChanges((prev) => [...prev, ...newChanges]);
+  };
   useEffect(() => {
     if (!sheetData) return;
 
@@ -633,15 +692,194 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
       <Dialog open={showCellInfo} onClose={() => setShowCellInfo(false)}>
         <div className="fixed inset-0 z-[9999] overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
-            <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-lg bg-white p-6 shadow-xl">
-              <div className="p-4">
-                <h2 className="text-xl font-bold mb-4">Cell Information</h2>
+            <Dialog.Panel
+              className={`transform overflow-hidden rounded-lg bg-white shadow-xl transition-all duration-200 ${
+                isFullScreen
+                  ? 'fixed inset-0 m-0 rounded-none'
+                  : 'w-full max-w-4xl'
+              }`}
+            >
+              <div className="absolute right-4 top-4 flex items-center space-x-2">
+                <button
+                  onClick={() => setIsFullScreen(!isFullScreen)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  {isFullScreen ? <Minimize size={20} /> : <Expand size={20} />}
+                </button>
+
+                <button
+                  onClick={() => setShowCellInfo(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <span className="sr-only">Close</span>
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div
+                className={`${isFullScreen ? 'p-8 h-[calc(100vh-60px)] overflow-y-auto' : 'p-6'}`}
+              >
                 {cellInfo && (
-                  <div>
-                    <p>Cell ID: {cellInfo.cellId}</p>
-                    <p>Datapoint VID: {cellInfo.datapointVID}</p>
-                    <p>Data Type: {cellInfo.dataType}</p>
-                    {/* Add more cell info display as needed */}
+                  <div className="space-y-4">
+                    <div>
+                      <div className="border-b border-gray-200 pb-2 mb-4 flex justify-center">
+                        <span className="p-tag">General Information</span>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="m-0">
+                          Current location:
+                          {curLocation && (
+                            <>
+                              Row {curLocation.rowid} - Col {curLocation.colid}
+                            </>
+                          )}
+                        </p>
+                        <p className="m-0">CellId: {cellInfo.cellId}</p>
+                        <p className="m-0">
+                          Datapoint VID: {cellInfo.datapointVID}
+                        </p>
+                        <p className="m-0">Datatype: {cellInfo.dataType}</p>
+                        <p className="m-0">
+                          Is key ?: {cellInfo.isKey ? 'Yes' : 'No'} (
+                          {cellInfo.keyType})
+                        </p>
+                      </div>
+                    </div>
+
+                    {cellInfo.members?.length > 0 && (
+                      <div>
+                        <div className="border-b border-gray-200 pb-2 mb-4 flex justify-center">
+                          <span className="p-tag">Possible values</span>
+                        </div>
+                        <button
+                          onClick={() => _grabCellValue()}
+                          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-2"
+                        >
+                          Copy value into cell
+                        </button>
+                        <select
+                          value={selectedOption?.name}
+                          onChange={(e) =>
+                            onSselectedOptionChange({
+                              value: { name: e.target.value },
+                            })
+                          }
+                          className="w-full border border-gray-300 rounded-md p-2"
+                        >
+                          {cellInfo.members.map((member: any) => (
+                            <option key={member.name} value={member.name}>
+                              {member.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="border-b border-gray-200 pb-2 mb-4 flex justify-center">
+                        <span className="p-tag">Metric/Dimensions</span>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <div className="font-medium mb-2">Metric</div>
+                          <div className="font-bold">
+                            {cellInfo.metric?.origMeasureField}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="font-medium mb-2">Sheet ordinate</div>
+                          {cellInfo.sheetDimensions?.map((dimension: any) => (
+                            <div key={dimension.memberId} className="mb-1">
+                              <span className="font-bold">
+                                {dimension.origLeftOperand}
+                              </span>
+                              &nbsp;{dimension.origOperand}&nbsp;
+                              {dimension.origRightOperand}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div>
+                          <div className="font-medium mb-2">
+                            Column ordinate
+                          </div>
+                          {cellInfo.columnDimensions?.map((dimension: any) => (
+                            <div key={dimension.memberId} className="mb-1">
+                              <span className="font-bold">
+                                {dimension.origLeftOperand}
+                              </span>
+                              &nbsp;{dimension.origOperand}&nbsp;
+                              {dimension.origRightOperand}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div>
+                          <div className="font-medium mb-2">Row ordinate</div>
+                          {cellInfo.rowDimensions?.map((dimension: any) => (
+                            <div key={dimension.memberId} className="mb-1">
+                              <span className="font-bold">
+                                {dimension.origLeftOperand}
+                              </span>
+                              &nbsp;{dimension.origOperand}&nbsp;
+                              {dimension.origRightOperand}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="border-b border-gray-200 pb-2 mb-4 flex justify-center">
+                        <span className="p-tag">Validation rules</span>
+                      </div>
+
+                      {cellInfo.validationRules?.length > 0 ? (
+                        <div className="space-y-6">
+                          {cellInfo.validationRules.map((rule: any) => (
+                            <div key={rule.validationId}>
+                              <div className="border-b border-gray-200 pb-2 mb-2">
+                                <div className="font-bold">
+                                  Rule Id: {rule.validationId} - Rule Code:{' '}
+                                  {rule.validationCode}
+                                </div>
+                              </div>
+                              <div className="space-y-2 pl-4">
+                                <div>Explanation: {rule.explanation}</div>
+                                <div>Expression: {rule.logicalExpression}</div>
+                                <div>Formula: {rule.tableFormula}</div>
+                                <div className="font-medium">Status: </div>
+                                <div
+                                  className={
+                                    rule.isInvalid ? 'invalidrule' : 'validrule'
+                                  }
+                                >
+                                  {rule.isInvalid
+                                    ? 'Invalid'
+                                    : 'Valid / Not executed'}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div>No validation rules for this cell</div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

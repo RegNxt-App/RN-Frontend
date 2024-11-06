@@ -205,3 +205,17 @@ span.flatpickr-weekday,
   margin: 0px 5px 0 !important;
   padding: 10px 32px;
 }
+
+/* in your global CSS file */
+@layer components {
+  .p-tag {
+    @apply bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm text-center block mx-auto w-fit;
+  }
+  .validrule {
+    @apply text-green-600 font-medium;
+  }
+
+  .invalidrule {
+    @apply text-red-600 font-medium;
+  }
+}
