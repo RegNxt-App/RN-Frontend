@@ -161,7 +161,10 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
   const processedData = processTreeData(data);
 
   return (
-    <div>
+    <div
+      className=" rounded-lg shadow-sm overflow-y-auto p-4"
+      style={{ maxHeight: '440px' }}
+    >
       {processedData.map((item) => (
         <TreeNode key={item.key} node={item} onClick={handleClick} />
       ))}

@@ -104,60 +104,62 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div>
-      <div className="flex mb-4">
-        <div className="relative mr-2" id="total-rows-tooltip">
-          <Database className="text-blue-500 cursor-pointer" size={32} />
-          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-            {totalCounts.totalCellCount}
-          </span>
+    <div className="flex flex-col h-full">
+      <div className="flex-none">
+        <div className="flex mb-4 ">
+          <div className="relative mr-2" id="total-rows-tooltip">
+            <Database className="text-blue-500 cursor-pointer" size={32} />
+            <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {totalCounts.totalCellCount}
+            </span>
+          </div>
+
+          <div className="relative mr-2" id="changed-rows-tooltip">
+            <Save className="text-orange-500 cursor-pointer" size={32} />
+            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {changedRowsNr}
+            </span>
+          </div>
+
+          <div className="relative mr-2" id="invalid-cells-tooltip">
+            <AlertTriangle className="text-red-500 cursor-pointer" size={32} />
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {selectedSheet.invalidcount || 0}
+            </span>
+          </div>
+
+          <ReactTooltip
+            anchorId="total-rows-tooltip"
+            content="Persisted Cells"
+            place="top"
+            className="z-50"
+          />
+
+          <ReactTooltip
+            anchorId="changed-rows-tooltip"
+            content="Unsaved Cells"
+            place="top"
+            className="z-50"
+          />
+
+          <ReactTooltip
+            anchorId="invalid-cells-tooltip"
+            content="Invalid Cells"
+            place="top"
+            className="z-50"
+          />
         </div>
-
-        <div className="relative mr-2" id="changed-rows-tooltip">
-          <Save className="text-orange-500 cursor-pointer" size={32} />
-          <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-            {changedRowsNr}
-          </span>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="w-full p-2 border rounded"
+            value={searchTerm}
+            onChange={handleSearch}
+          />
         </div>
-
-        <div className="relative mr-2" id="invalid-cells-tooltip">
-          <AlertTriangle className="text-red-500 cursor-pointer" size={32} />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-            {selectedSheet.invalidcount || 0}
-          </span>
-        </div>
-
-        <ReactTooltip
-          anchorId="total-rows-tooltip"
-          content="Persisted Cells"
-          place="top"
-          className="z-50"
-        />
-
-        <ReactTooltip
-          anchorId="changed-rows-tooltip"
-          content="Unsaved Cells"
-          place="top"
-          className="z-50"
-        />
-
-        <ReactTooltip
-          anchorId="invalid-cells-tooltip"
-          content="Invalid Cells"
-          place="top"
-          className="z-50"
-        />
+        <Tree data={filteredData} workbookId={workbookId} />
       </div>
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="w-full p-2 border rounded"
-          value={searchTerm}
-          onChange={handleSearch}
-        />
-      </div>
-      <Tree data={filteredData} workbookId={workbookId} />
     </div>
   );
 };
