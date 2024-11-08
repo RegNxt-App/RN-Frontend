@@ -245,9 +245,9 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
 
     // Set background color based on cell type and row number
     const getBackground = (cellType: string, rownr: number) => {
-      if (cellType === 'header') return '#e5e7eb'; // Gray background for headers
-      if (cellType === 'shaded') return '#969696'; // Light gray for shaded cells
-      return isAlternateRow(rownr) ? '#f8fafc' : '#fff'; // Alternate row colors
+      if (cellType === 'header') return '#e5e7eb';
+      if (cellType === 'shaded') return '#969696';
+      return isAlternateRow(rownr) ? '#f8fafc' : '#fff';
     };
 
     const cellStyle = {
@@ -683,62 +683,91 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     setSelectedOption(event.value);
   };
 
-  const _grabCellValue = () => {
+  const _grabCellValue = async () => {
     console.log('_grabCellValue called:', curLocation, selectedOption);
     if (!curLocation || !selectedOption) return;
 
     const sheetid = Number(selectedSheet.sheetId);
-    console.log('_grabCellValue sheetid:', sheetid);
-
     const newChanges: ChangedCell[] = [];
+    const updatedRows = new Map<string, ChangedRow>();
 
-    setLocalRows((prevRows) => {
-      const newRows = [...prevRows];
-      const rowIndex = newRows.findIndex(
-        (row) => row.rowId.toString() === curLocation.rowid.toString(),
-      );
-      console.log('_grabCellValue rowIndex:', rowIndex);
-
-      if (rowIndex === -1) return newRows;
-
-      const row = newRows[rowIndex];
-      const colIndex = columns.findIndex(
-        (col) => col.columnId.toString() === curLocation.colid.toString(),
-      );
-
-      console.log('_grabCellValue colIndex:', colIndex);
-
-      if (colIndex === -1) return newRows;
-
-      const oldCell = row.cells[colIndex];
-      const newCell = {
-        ...oldCell,
-        value: Number(selectedOption.name),
-        text: selectedOption.name,
-      };
-
-      const updatedCells = [...row.cells];
-      updatedCells[colIndex] = newCell;
-      row.cells = updatedCells;
-      newRows[rowIndex] = row;
-
-      const changedCell: ChangedCell = {
+    try {
+      // Get cell ID first
+      const cell_id = await getCellId({
+        workbookid: workbook.id,
         sheetid,
-        cellid: oldCell.cellid,
-        prevvalue: oldCell.text,
-        newvalue: selectedOption.name,
-        comment: '',
-        cellCode: '',
-        rowNr: rowIndex + 1,
-        colNr: colIndex + 1,
-      };
+        rowid: curLocation.rowid,
+        colid: curLocation.colid,
+      });
 
-      newChanges.push(changedCell);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
-      return newRows;
-    });
+      setLocalRows((prevRows) => {
+        const newRows = [...prevRows];
+        const rowIndex = newRows.findIndex(
+          (row) => row.rowId.toString() === curLocation.rowid.toString(),
+        );
 
-    setCellChanges((prev) => [...prev, ...newChanges]);
+        if (rowIndex === -1) return prevRows;
+
+        const currentRow = { ...newRows[rowIndex] };
+        const colIndex = columns.findIndex(
+          (col) => col.columnId.toString() === curLocation.colid.toString(),
+        );
+
+        if (colIndex === -1) return prevRows;
+
+        const originalCell = currentRow.cells[colIndex];
+        const newCell = {
+          ...originalCell,
+          value: Number(selectedOption.name),
+          text: selectedOption.name,
+        };
+
+        const updatedCells = [...currentRow.cells];
+        updatedCells[colIndex] = newCell;
+        currentRow.cells = updatedCells;
+        newRows[rowIndex] = currentRow;
+
+        const changedCell: ChangedCell = {
+          sheetid,
+          cellid: cell_id,
+          prevvalue: originalCell.text,
+          newvalue: selectedOption.name,
+          comment: '',
+          cellCode: '',
+          rowNr: rowIndex + 1,
+          colNr: colIndex + 1,
+        };
+
+        newChanges.push(changedCell);
+
+        // Create ChangedRow record
+        updatedRows.set(currentRow.rowId, {
+          rowId: currentRow.rowId,
+          originalRow: newRows[rowIndex],
+          updatedRow: currentRow,
+          changedCells: [changedCell],
+          timestamp: Date.now(),
+        });
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
+        return newRows;
+      });
+
+      // Update all states after row update
+      const changedRowsArray = Array.from(updatedRows.values());
+      setChangedRows((prev) => [...prev, ...changedRowsArray]);
+      setCellChanges((prev) => [...prev, ...newChanges]);
+      dispatch(addChangedRows(changedRowsArray));
+
+      if (onRowChange) {
+        onRowChange(changedRowsArray);
+      }
+
+      setShowCellInfo(false);
+      setSelectedOption(null);
+    } catch (error) {
+      console.error('Error in _grabCellValue:', error);
+    }
   };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-end">
