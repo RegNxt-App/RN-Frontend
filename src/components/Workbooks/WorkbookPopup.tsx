@@ -149,6 +149,17 @@ const decodeHtmlEntities = (text: string): string => {
   textarea.innerHTML = text;
   return textarea.value;
 };
+const createEmptyCell = (props = {}): Cell => ({
+  type: 'empty',
+  text: '',
+  nonEditable: true,
+  style: {
+    background: 'transparent',
+    border: 'none',
+    padding: '4px 8px',
+  },
+  ...props,
+});
 
 const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
   workbook,
@@ -190,6 +201,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     name: string;
     value: any;
   } | null>(null);
+
   const columns: Column[] = useMemo(
     () =>
       sheetData?.columns
@@ -234,7 +246,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     // Set background color based on cell type and row number
     const getBackground = (cellType: string, rownr: number) => {
       if (cellType === 'header') return '#e5e7eb'; // Gray background for headers
-      if (cellType === 'shaded') return '#f3f4f6'; // Light gray for shaded cells
+      if (cellType === 'shaded') return '#969696'; // Light gray for shaded cells
       return isAlternateRow(rownr) ? '#f8fafc' : '#fff'; // Alternate row colors
     };
 
@@ -299,6 +311,63 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     },
     [createCellContent],
   );
+  const normalizeRow = useCallback(
+    (row: any, expectedColumns: number): Row => {
+      try {
+        if (!row || !row.rowId || !Array.isArray(row.cells)) {
+          throw new Error(`Invalid row structure for row ${row?.rowId}`);
+        }
+
+        let normalizedCells: Cell[] = [];
+        let currentColumnIndex = 0;
+
+        for (const cell of row.cells) {
+          if (currentColumnIndex >= expectedColumns) break;
+          if (!cell) continue;
+
+          const colspan = Math.min(
+            cell.colspan || 1,
+            expectedColumns - currentColumnIndex,
+          );
+
+          const processedCell = createCellContent(cell);
+          if (colspan > 1) {
+            processedCell.colspan = colspan;
+          }
+
+          normalizedCells.push(processedCell);
+          currentColumnIndex++;
+
+          // Handle colspan by adding empty cells
+          for (let i = 1; i < colspan; i++) {
+            if (currentColumnIndex < expectedColumns) {
+              normalizedCells.push(createEmptyCell());
+              currentColumnIndex++;
+            }
+          }
+        }
+
+        // Fill remaining columns with empty cells
+        while (currentColumnIndex < expectedColumns) {
+          normalizedCells.push(createEmptyCell());
+          currentColumnIndex++;
+        }
+
+        return {
+          rowId: row.rowId.toString(),
+          cells: normalizedCells,
+        };
+      } catch (error) {
+        console.error('Row normalization error:', error);
+        return {
+          rowId: row?.rowId?.toString() || 'error',
+          cells: Array(expectedColumns).fill(createEmptyCell()),
+        };
+      }
+    },
+    [createCellContent],
+  );
+
   const showCellDetails = async () => {
     if (!curLocation) return;
 
@@ -566,8 +635,49 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
 
   const isGridDataValid = useCallback(() => {
     if (!columns?.length || !localRows?.length) return false;
-    return !localRows.some((row) => row.cells.length !== columns.length);
+
+    // With normalization, all rows should have exactly the same number of cells as columns
+    return localRows.every((row) => row.cells.length === columns.length);
   }, [columns, localRows]);
+  useEffect(() => {
+    if (!sheetData) return;
+
+    const processData = () => {
+      const expectedColumns = (sheetData.columns || []).length;
+      const allRows = [
+        ...(sheetData.headerRows || []),
+        ...(sheetData.valueRows || []),
+      ];
+
+      // Use normalizeRow for each row
+      const processedRows = allRows.map((row) =>
+        normalizeRow(row, expectedColumns),
+      );
+      setLocalRows(processedRows);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(processedRows));
+    };
+
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        const expectedColumns = (sheetData.columns || []).length;
+        // Normalize stored data as well
+        setLocalRows(
+          parsedData.map((row) => normalizeRow(row, expectedColumns)),
+        );
+      } catch (error) {
+        console.error('Error parsing stored data:', error);
+        processData();
+      }
+    } else {
+      processData();
+    }
+
+    return () => {
+      localStorage.removeItem(STORAGE_KEY);
+    };
+  }, [sheetData, normalizeRow]);
 
   const onSselectedOptionChange = (event: { value: { name: string } }) => {
     setSelectedOption(event.value);
