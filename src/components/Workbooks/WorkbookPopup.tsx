@@ -688,11 +688,8 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     if (!curLocation || !selectedOption) return;
 
     const sheetid = Number(selectedSheet.sheetId);
-    const newChanges: ChangedCell[] = [];
-    const updatedRows = new Map<string, ChangedRow>();
 
     try {
-      // Get cell ID first
       const cell_id = await getCellId({
         workbookid: workbook.id,
         sheetid,
@@ -700,69 +697,85 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
         colid: curLocation.colid,
       });
 
-      setLocalRows((prevRows) => {
-        const newRows = [...prevRows];
-        const rowIndex = newRows.findIndex(
-          (row) => row.rowId.toString() === curLocation.rowid.toString(),
-        );
+      // Find current row and cell indices
+      const rowIndex = localRows.findIndex(
+        (row) => row.rowId.toString() === curLocation.rowid.toString(),
+      );
+      const colIndex = columns.findIndex(
+        (col) => col.columnId.toString() === curLocation.colid.toString(),
+      );
 
-        if (rowIndex === -1) return prevRows;
-
-        const currentRow = { ...newRows[rowIndex] };
-        const colIndex = columns.findIndex(
-          (col) => col.columnId.toString() === curLocation.colid.toString(),
-        );
-
-        if (colIndex === -1) return prevRows;
-
-        const originalCell = currentRow.cells[colIndex];
-        const newCell = {
-          ...originalCell,
-          value: Number(selectedOption.name),
-          text: selectedOption.name,
-        };
-
-        const updatedCells = [...currentRow.cells];
-        updatedCells[colIndex] = newCell;
-        currentRow.cells = updatedCells;
-        newRows[rowIndex] = currentRow;
-
-        const changedCell: ChangedCell = {
-          sheetid,
-          cellid: cell_id,
-          prevvalue: originalCell.text,
-          newvalue: selectedOption.name,
-          comment: '',
-          cellCode: '',
-          rowNr: rowIndex + 1,
-          colNr: colIndex + 1,
-        };
-
-        newChanges.push(changedCell);
-
-        // Create ChangedRow record
-        updatedRows.set(currentRow.rowId, {
-          rowId: currentRow.rowId,
-          originalRow: newRows[rowIndex],
-          updatedRow: currentRow,
-          changedCells: [changedCell],
-          timestamp: Date.now(),
-        });
-
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
-        return newRows;
-      });
-
-      // Update all states after row update
-      const changedRowsArray = Array.from(updatedRows.values());
-      setChangedRows((prev) => [...prev, ...changedRowsArray]);
-      setCellChanges((prev) => [...prev, ...newChanges]);
-      dispatch(addChangedRows(changedRowsArray));
-
-      if (onRowChange) {
-        onRowChange(changedRowsArray);
+      if (rowIndex === -1 || colIndex === -1) {
+        console.error('Invalid row or column index');
+        return;
       }
 
+      // Create new cell and row data
+      const currentRow = { ...localRows[rowIndex] };
+      const originalCell = currentRow.cells[colIndex];
+
+      // Create new cell with updated value
+      const newCell = {
+        ...originalCell,
+        value: Number(selectedOption.name),
+        text: selectedOption.name,
+        style: {
+          ...originalCell.style,
+          // Remove conflicting border styles
+          borderRight: undefined,
+          borderRightColor: '#e2e8f0',
+          borderRightWidth: '1px',
+          borderRightStyle: 'solid',
+        },
+      };
+
+      // Update cells array
+      const updatedCells = [...currentRow.cells];
+      updatedCells[colIndex] = newCell;
+
+      // Create updated row
+      const updatedRow = {
+        ...currentRow,
+        cells: updatedCells,
+      };
+
+      // Create changed cell record
+      const changedCell: ChangedCell = {
+        sheetid,
+        cellid: cell_id,
+        prevvalue: originalCell.text,
+        newvalue: selectedOption.name,
+        comment: '',
+        cellCode: '',
+        rowNr: rowIndex + 1,
+        colNr: colIndex + 1,
+      };
+
+      // Create changed row record
+      const changedRowRecord: ChangedRow = {
+        rowId: currentRow.rowId,
+        originalRow: localRows[rowIndex] as SheetRow,
+        updatedRow: updatedRow as SheetRow,
+        changedCells: [changedCell],
+        timestamp: Date.now(),
+      };
+
+      // Update all states
+      const newRows = [...localRows];
+      newRows[rowIndex] = updatedRow;
+
+      // Update state in order
+      setLocalRows(newRows);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
+      dispatch(addChangedRows([changedRowRecord]));
+      setCellChanges((prev) => [...prev, changedCell]);
+      setChangedRows((prev) => [...prev, changedRowRecord]);
+
+      if (onRowChange) {
+        onRowChange([changedRowRecord]);
+      }
+
+      // Close dialog and reset selection
       setShowCellInfo(false);
       setSelectedOption(null);
     } catch (error) {
