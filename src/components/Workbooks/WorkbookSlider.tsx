@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from 'react';
 import LayersTab from './LayersTab';
 import ActionsTab from './ActionsTab';
 import StructureTab from './StructureTab';
+import { useSelector } from 'react-redux';
+import { selectDialogState } from '../../features/sheetData/sheetDataSlice';
 
 interface WorkbookData {
   id: number;
@@ -49,9 +51,13 @@ const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
   >('save');
 
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const dialogState = useSelector(selectDialogState);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Don't close if dialog is open
+      if (dialogState.isOpen) return;
+
       if (
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target as Node)
@@ -64,7 +70,7 @@ const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [onClose]);
+  }, [onClose, dialogState.isOpen]);
 
   useEffect(() => {
     console.log('Changed Rows in WorkbookSlider:', changedRows);

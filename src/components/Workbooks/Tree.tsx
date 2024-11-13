@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import TreeNode from './TreeNode';
 import { useAppDispatch } from '../../app/hooks';
 import {
@@ -24,6 +24,18 @@ interface TreeProps {
 
 const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
   const dispatch = useAppDispatch();
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const handleToggleExpand = (nodeKey: string) => {
+    setExpandedNodes((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeKey)) {
+        newSet.delete(nodeKey);
+      } else {
+        newSet.add(nodeKey);
+      }
+      return newSet;
+    });
+  };
 
   const calculateNodeCounts = (node: ApiResponse): ApiResponse => {
     if (!node.children || node.children.length === 0) {
@@ -122,43 +134,57 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
   };
 
   useEffect(() => {
-    const processedData = processTreeData(data);
+    if (data.length > 0) {
+      const processedData = processTreeData(data);
+      const { totalCellCount, totalInvalidCount } =
+        calculateTotalCounts(processedData);
 
-    const { totalCellCount, totalInvalidCount } =
-      calculateTotalCounts(processedData);
-    dispatch(
-      updateTotalCounts({
-        totalCellCount,
-        totalInvalidCount,
-      }),
-    );
+      dispatch(
+        updateTotalCounts({
+          totalCellCount,
+          totalInvalidCount,
+        }),
+      );
 
-    const firstTableNode = findFirstTableNode(processedData);
-    if (
-      firstTableNode &&
-      firstTableNode.children &&
-      firstTableNode.children.length > 0
-    ) {
-      const firstSheet = firstTableNode.children[0];
-      const sheetIdMatch = firstSheet.key.match(/s-(\d+)/);
-      const sheetId = sheetIdMatch ? sheetIdMatch[1] : null;
+      // Find and select first sheet only if no sheet is currently selected
+      const firstTableNode = findFirstTableNode(processedData);
+      if (firstTableNode?.children?.length > 0) {
+        const firstSheet = firstTableNode.children[0];
+        const sheetIdMatch = firstSheet.key.match(/s-(\d+)/);
+        const sheetId = sheetIdMatch ? sheetIdMatch[1] : null;
 
-      if (sheetId) {
-        dispatch(fetchSheetData({ workbookId, sheetId }));
-        dispatch(
-          updateSelectedSheet({
-            table: firstTableNode.label,
-            label: firstSheet.label,
-            sheetId: sheetId,
-            cellcount: firstSheet.cellcount || 0,
-            invalidcount: firstSheet.invalidcount || 0,
-          }),
-        );
+        if (sheetId) {
+          dispatch(fetchSheetData({ workbookId, sheetId }));
+          dispatch(
+            updateSelectedSheet({
+              table: firstTableNode.label,
+              label: firstSheet.label,
+              sheetId,
+              cellcount: firstSheet.cellcount || 0,
+              invalidcount: firstSheet.invalidcount || 0,
+            }),
+          );
+        }
       }
     }
   }, [data, workbookId, dispatch]);
+  useEffect(() => {
+    const savedExpanded = localStorage.getItem('treeExpandedNodes');
+    if (savedExpanded) {
+      setExpandedNodes(new Set(JSON.parse(savedExpanded)));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'treeExpandedNodes',
+      JSON.stringify([...expandedNodes]),
+    );
+  }, [expandedNodes]);
 
   const processedData = processTreeData(data);
+
+  console.log('Table id in Tree Com:', data);
 
   return (
     <div
@@ -166,7 +192,14 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
       style={{ maxHeight: '440px' }}
     >
       {processedData.map((item) => (
-        <TreeNode key={item.key} node={item} onClick={handleClick} />
+        <TreeNode
+          key={item.key}
+          node={item}
+          onClick={handleClick}
+          workbookId={workbookId}
+          expandedNodes={expandedNodes}
+          onToggleExpand={handleToggleExpand}
+        />
       ))}
     </div>
   );

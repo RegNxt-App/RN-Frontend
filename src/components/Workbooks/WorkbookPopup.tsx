@@ -776,8 +776,8 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
       }
 
       // Close dialog and reset selection
-      setShowCellInfo(false);
-      setSelectedOption(null);
+      // setShowCellInfo(false);
+      // setSelectedOption(null);
     } catch (error) {
       console.error('Error in _grabCellValue:', error);
     }

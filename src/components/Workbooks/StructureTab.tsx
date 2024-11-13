@@ -1,83 +1,61 @@
+// StructureTab.tsx
+import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Database, Save } from 'lucide-react';
 import Tree from './Tree';
-import { useState, useEffect } from 'react';
-import Api from '../../utils/Api';
-import { useDispatch } from 'react-redux';
-import { useAppSelector } from '../../app/hooks';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   selectChangedRows,
-  updateSelectedSheet,
   selectTotalCounts,
+  fetchTableStructure,
+  selectTableStructure,
+  selectTableStructureLoading,
+  selectStructureError,
 } from '../../features/sheetData/sheetDataSlice';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 
-interface StructureTabProps {
-  workbookId: number;
-}
-
-interface ApiResponse {
-  key: string;
-  label: string;
-  data: string;
-  cellcount?: number;
-  invalidcount?: number;
-  children?: ApiResponse[];
-}
-
 const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
-  const dispatch = useDispatch();
-  const [data, setData] = useState<ApiResponse[]>([]);
-  const [filteredData, setFilteredData] = useState<ApiResponse[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filteredData, setFilteredData] = useState<ApiResponse[]>([]);
+
+  // Redux selectors
+  const tableStructure = useAppSelector(selectTableStructure);
+  const isLoading = useAppSelector(selectTableStructureLoading);
+  const error = useAppSelector(selectStructureError);
   const changedRows = useAppSelector(selectChangedRows);
   const selectedSheet = useAppSelector(
     (state) => state.sheetData.selectedSheet,
   );
   const totalCounts = useAppSelector(selectTotalCounts);
 
-  const changedRowsNr = changedRows.length;
-
+  // Initial data fetch
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Api.get(
-          `/RI/Workbook/Tables?workbookId=${workbookId}&includeSheets=true`,
-        );
-        setData(response.data);
-        console.log('Sheet.key:', response.data.key, response.data);
-        setFilteredData(response.data);
-        setLoading(false);
-        if (response.data.length > 0) {
-          const firstItem = response.data[0];
-          dispatch(
-            updateSelectedSheet({
-              sheetId: firstItem.id,
-              table: firstItem.data,
-              label: firstItem.label,
-              cellcount: firstItem.cellcount || 0,
-              invalidcount: firstItem.invalidcount || 0,
-            }),
-          );
-        }
-      } catch (err) {
-        setError('Failed to load data');
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    dispatch(fetchTableStructure(workbookId));
   }, [workbookId, dispatch]);
+
+  // Handle filtering when tableStructure or searchTerm changes
+  useEffect(() => {
+    if (tableStructure) {
+      if (searchTerm) {
+        const filtered = filterTree(tableStructure, searchTerm.toLowerCase());
+        setFilteredData(filtered);
+      } else {
+        setFilteredData(tableStructure);
+      }
+    }
+  }, [tableStructure, searchTerm]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setSearchTerm(term);
-    if (term === '') {
-      setFilteredData(data);
-    } else {
-      const filtered = filterTree(data, term.toLowerCase());
-      setFilteredData(filtered);
+
+    if (tableStructure) {
+      if (term === '') {
+        setFilteredData(tableStructure);
+      } else {
+        const filtered = filterTree(tableStructure, term.toLowerCase());
+        setFilteredData(filtered);
+      }
     }
   };
 
@@ -94,19 +72,32 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
             children: node.children ? filterTree(node.children, term) : [],
           };
         }
-
         return null;
       })
-      .filter((node) => node !== null) as ApiResponse[];
+      .filter((node): node is ApiResponse => node !== null);
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-4">
+        Loading structure...
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 p-4">{error}</div>;
+  }
+
+  if (!tableStructure) {
+    return <div className="p-4">No structure data available</div>;
+  }
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-none">
-        <div className="flex mb-4 ">
+        <div className="flex mb-4">
+          {/* Stats section */}
           <div className="relative mr-2" id="total-rows-tooltip">
             <Database className="text-blue-500 cursor-pointer" size={32} />
             <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -117,7 +108,7 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
           <div className="relative mr-2" id="changed-rows-tooltip">
             <Save className="text-orange-500 cursor-pointer" size={32} />
             <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-              {changedRowsNr}
+              {changedRows.length}
             </span>
           </div>
 
@@ -128,20 +119,19 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
             </span>
           </div>
 
+          {/* Tooltips */}
           <ReactTooltip
             anchorId="total-rows-tooltip"
             content="Persisted Cells"
             place="top"
             className="z-50"
           />
-
           <ReactTooltip
             anchorId="changed-rows-tooltip"
             content="Unsaved Cells"
             place="top"
             className="z-50"
           />
-
           <ReactTooltip
             anchorId="invalid-cells-tooltip"
             content="Invalid Cells"
@@ -149,6 +139,8 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
             className="z-50"
           />
         </div>
+
+        {/* Search section */}
         <div className="mb-4">
           <input
             type="text"
@@ -158,7 +150,15 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
             onChange={handleSearch}
           />
         </div>
-        <Tree data={filteredData} workbookId={workbookId} />
+
+        {/* Tree section */}
+        {filteredData.length > 0 ? (
+          <Tree data={filteredData} workbookId={workbookId} />
+        ) : (
+          <div className="text-gray-500 p-4">
+            {searchTerm ? 'No matching items found' : 'No data available'}
+          </div>
+        )}
       </div>
     </div>
   );
