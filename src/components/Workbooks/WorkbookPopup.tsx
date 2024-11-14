@@ -6,7 +6,7 @@ import React, {
   useRef,
   useMemo,
 } from 'react';
-import { Expand, LayoutGrid, Minimize, Undo2 } from 'lucide-react';
+import { Expand, LayoutGrid, Minimize, Plus, Undo2 } from 'lucide-react';
 import {
   ReactGrid,
   Column,
@@ -132,6 +132,12 @@ interface HistoryColumn {
   field: string;
   header: string;
 }
+interface SheetData {
+  headerRows: SheetRow[];
+  valueRows: SheetRow[];
+  columns: SheetColumn[];
+  hasOpenRows: boolean;
+}
 
 const historyColumns: HistoryColumn[] = [
   { field: 'versionId', header: 'Version Id' },
@@ -201,6 +207,21 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     name: string;
     value: any;
   } | null>(null);
+  const [hasOpenRows, setHasOpenRows] = useState(false);
+  const [nrOfInserts, setNrOfInserts] = useState<{
+    name: string;
+    code: number;
+  }>({
+    name: '1',
+    code: 1,
+  });
+
+  const insertOptions = [
+    { name: '1', code: 1 },
+    { name: '10', code: 10 },
+    { name: '100', code: 100 },
+    { name: '1000', code: 1000 },
+  ];
 
   const columns: Column[] = useMemo(
     () =>
@@ -212,6 +233,64 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
         : [],
     [sheetData],
   );
+  const handleAddRows = () => {
+    if (!sheetData) return;
+
+    const clonedValues = [...localRows];
+    const headerRowsCount = sheetData.headerRows.length;
+    const lastDataRowIndex = clonedValues.length - 1;
+
+    // Get the template row (last row) to copy its cell structure
+    const templateRow = clonedValues[lastDataRowIndex];
+
+    for (let i = 0; i < nrOfInserts.code; i++) {
+      // Create new row by properly cloning the template row's structure
+      const newRow = {
+        rowId: `999-${clonedValues.length - headerRowsCount + 1}`,
+        cells: templateRow.cells.map((cell, cellIndex) => {
+          // For the first two columns (heading and code), keep the original values
+          if (cellIndex === 0) {
+            return {
+              ...cell,
+              text: templateRow.cells[0].text, // Keep the heading text
+              value: templateRow.cells[0].value,
+              type: templateRow.cells[0].type,
+              nonEditable: templateRow.cells[0].nonEditable,
+            };
+          } else if (cellIndex === 1) {
+            return {
+              ...cell,
+              text: '999', // Keep the code
+              value: 999,
+              type: templateRow.cells[1].type,
+              nonEditable: templateRow.cells[1].nonEditable,
+            };
+          } else {
+            // For other cells, reset the values
+            return {
+              ...cell,
+              text: '',
+              value: null,
+              type: cell.type,
+              nonEditable: cell.nonEditable,
+              style: {
+                ...cell.style,
+                borderRight: undefined,
+                borderRightColor: '#e2e8f0',
+                borderRightWidth: '1px',
+                borderRightStyle: 'solid',
+              },
+            };
+          }
+        }),
+      };
+
+      clonedValues.push(newRow);
+    }
+
+    setLocalRows(clonedValues);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clonedValues));
+  };
 
   const isValueCell = useCallback((cell: SheetCell): boolean => {
     return cell.type === 'number' && !cell.nonEditable;
@@ -812,28 +891,59 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
 
         {localRows.length > 0 ? (
           isGridDataValid() ? (
-            <div className="p-4" style={{ height: '80%', overflowY: 'auto' }}>
-              <ReactGrid
-                ref={gridRef}
-                rows={localRows}
-                columns={columns}
-                onCellsChanged={handleChanges}
-                onContextMenu={handleContextMenu}
-                onFocusLocationChanged={handleFocusChange}
-                enableFillHandle
-                enableRangeSelection
-                stickyLeftColumns={2}
-                stickyTopRows={sheetData?.headerRows?.length || 0}
-                customCellTemplates={{
-                  header: new HeaderCellTemplate(),
-                  shaded: new ShadedCellTemplate(),
-                  empty: new EmptyCellTemplate(),
-                  formula: new FormulaCellTemplate(),
-                  invalidtext: new InvalidTextCellTemplate(),
-                  invalidnumber: new InvalidNumberCellTemplate(),
-                }}
-              />
-            </div>
+            <>
+              <div className="p-4" style={{ height: '80%', overflowY: 'auto' }}>
+                <ReactGrid
+                  ref={gridRef}
+                  rows={localRows}
+                  columns={columns}
+                  onCellsChanged={handleChanges}
+                  onContextMenu={handleContextMenu}
+                  onFocusLocationChanged={handleFocusChange}
+                  enableFillHandle
+                  enableRangeSelection
+                  stickyLeftColumns={2}
+                  stickyTopRows={sheetData?.headerRows?.length || 0}
+                  customCellTemplates={{
+                    header: new HeaderCellTemplate(),
+                    shaded: new ShadedCellTemplate(),
+                    empty: new EmptyCellTemplate(),
+                    formula: new FormulaCellTemplate(),
+                    invalidtext: new InvalidTextCellTemplate(),
+                    invalidnumber: new InvalidNumberCellTemplate(),
+                  }}
+                />
+              </div>{' '}
+              <div className="fixed bottom-0 left-84 p-4 max-w-sm">
+                {sheetData?.hasOpenRows && (
+                  <div className="flex items-center gap-4 px-4 mb-4">
+                    <button
+                      onClick={handleAddRows}
+                      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 rounded-full p-2 hover:bg-blue-50"
+                      title="Add rows"
+                    >
+                      <Plus size={22} />
+                    </button>
+                    <select
+                      value={nrOfInserts.code}
+                      onChange={(e) =>
+                        setNrOfInserts({
+                          name: e.target.value,
+                          code: parseInt(e.target.value),
+                        })
+                      }
+                      className="rounded-md border border-gray-300 px-3 py-2"
+                    >
+                      {insertOptions.map((option) => (
+                        <option key={option.code} value={option.code}>
+                          Add {option.name} row{option.code > 1 ? 's' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
             <div className="p-4">
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
@@ -847,6 +957,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           )
         ) : null}
       </div>
+
       <Dialog open={showCellInfo} onClose={() => setShowCellInfo(false)}>
         <div className="fixed inset-0 z-[9999] overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
