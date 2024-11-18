@@ -1,4 +1,3 @@
-//Current Component
 import React, {
   useState,
   useEffect,
@@ -239,53 +238,103 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     const clonedValues = [...localRows];
     const headerRowsCount = sheetData.headerRows.length;
     const lastDataRowIndex = clonedValues.length - 1;
-
-    // Get the template row (last row) to copy its cell structure
     const templateRow = clonedValues[lastDataRowIndex];
 
+    const expectedColumns = sheetData.columns.length;
+
     for (let i = 0; i < nrOfInserts.code; i++) {
-      // Create new row by properly cloning the template row's structure
-      const newRow = {
-        rowId: `999-${clonedValues.length - headerRowsCount + 1}`,
-        cells: templateRow.cells.map((cell, cellIndex) => {
-          // For the first two columns (heading and code), keep the original values
-          if (cellIndex === 0) {
+      const newCells = Array(expectedColumns)
+        .fill(null)
+        .map((_, index) => {
+          const baseCell = {
+            cellid: 0,
+            colspan: 0,
+            rowspan: 0,
+            rownr: lastDataRowIndex + i + 1,
+            format: '',
+          };
+
+          if (index === 0) {
             return {
-              ...cell,
-              text: templateRow.cells[0].text, // Keep the heading text
-              value: templateRow.cells[0].value,
-              type: templateRow.cells[0].type,
-              nonEditable: templateRow.cells[0].nonEditable,
+              type: 'header',
+              text: 'PD Range',
+              nonEditable: true,
+              value: null,
+              style: {
+                background: '#e5e7eb',
+                padding: '4px 8px',
+                borderRight: '1px solid #e2e8f0',
+                borderBottom: '1px solid #e2e8f0',
+              },
+              ...baseCell,
             };
-          } else if (cellIndex === 1) {
+          } else if (index === 1) {
             return {
-              ...cell,
-              text: '999', // Keep the code
-              value: 999,
-              type: templateRow.cells[1].type,
-              nonEditable: templateRow.cells[1].nonEditable,
+              type: 'header',
+              text: '999',
+              nonEditable: true,
+              value: null,
+              style: {
+                background: '#e5e7eb',
+                padding: '4px 8px',
+                borderRight: '1px solid #e2e8f0',
+                borderBottom: '1px solid #e2e8f0',
+              },
+              ...baseCell,
             };
-          } else {
-            // For other cells, reset the values
+          } else if (index >= 2 && index <= 4) {
             return {
-              ...cell,
+              type: 'number',
               text: '',
               value: null,
-              type: cell.type,
-              nonEditable: cell.nonEditable,
+              nonEditable: false,
               style: {
-                ...cell.style,
-                borderRight: undefined,
-                borderRightColor: '#e2e8f0',
-                borderRightWidth: '1px',
-                borderRightStyle: 'solid',
+                background: '#fff',
+                padding: '4px 8px',
+                borderRight: '1px solid #e2e8f0',
+                borderBottom: '1px solid #e2e8f0',
+                textAlign: 'right',
               },
+              ...baseCell,
+            };
+          } else if (index >= 5 && index <= 6) {
+            return {
+              type: 'number',
+              text: '',
+              value: null,
+              nonEditable: false,
+              style: {
+                background: '#fff',
+                padding: '4px 8px',
+                borderRight: '1px solid #e2e8f0',
+                borderBottom: '1px solid #e2e8f0',
+                textAlign: 'right',
+              },
+              ...baseCell,
+            };
+          } else {
+            return {
+              type: 'empty',
+              text: '',
+              nonEditable: true,
+              value: null,
+              style: {
+                background: 'transparent',
+                padding: '4px 8px',
+                border: 'none',
+              },
+              ...baseCell,
             };
           }
-        }),
+        });
+
+      const newRow = {
+        rowId: `999-${clonedValues.length - headerRowsCount + 1}`,
+        cells: newCells,
       };
 
-      clonedValues.push(newRow);
+      const normalizedNewRow = normalizeRow(newRow, expectedColumns);
+      clonedValues.push(normalizedNewRow);
     }
 
     setLocalRows(clonedValues);
@@ -311,21 +360,31 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
   );
 
   const createCellContent = useCallback((cell: SheetCell): Cell => {
-    // Base style for all cells - include grid styling
     const baseStyle = {
-      background: '#fff',
       padding: '4px 8px',
       borderRight: '1px solid #e2e8f0',
       borderBottom: '1px solid #e2e8f0',
     };
 
-    // Function to determine if it's an alternate row
+    if (!cell || !cell.type) {
+      return {
+        type: 'empty',
+        text: '',
+        nonEditable: true,
+        style: {
+          ...baseStyle,
+          background: 'transparent',
+          border: 'none',
+        },
+      };
+    }
+
     const isAlternateRow = (rownr: number) => rownr % 2 === 0;
 
-    // Set background color based on cell type and row number
     const getBackground = (cellType: string, rownr: number) => {
       if (cellType === 'header') return '#e5e7eb';
       if (cellType === 'shaded') return '#969696';
+      if (cellType === 'empty') return 'transparent';
       return isAlternateRow(rownr) ? '#f8fafc' : '#fff';
     };
 
@@ -342,34 +401,27 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           nonEditable: true,
           style: cellStyle,
         };
-      case 'shaded':
-        return {
-          type: 'shaded',
-          text: decodeHtmlEntities(cell.text || ''),
-          nonEditable: true,
-          style: cellStyle,
-        };
-      case 'empty':
-        return {
-          type: 'empty',
-          text: decodeHtmlEntities(cell.text || ''),
-          nonEditable: true,
-          style: cellStyle,
-        };
-      case 'formula':
-        return {
-          type: 'formula',
-          text: decodeHtmlEntities(cell.text || ''),
-          nonEditable: true,
-          style: { ...cellStyle, color: '#2563eb' }, // Blue color for formulas
-        };
       case 'number':
         return {
           type: cell.nonEditable ? 'invalidnumber' : 'number',
           text: decodeHtmlEntities(cell.text || ''),
           value: cell.value,
           nonEditable: cell.nonEditable,
-          style: cellStyle,
+          style: {
+            ...cellStyle,
+            textAlign: 'right',
+          },
+        };
+      case 'empty':
+        return {
+          type: 'empty',
+          text: '',
+          nonEditable: true,
+          style: {
+            ...cellStyle,
+            background: 'transparent',
+            border: 'none',
+          },
         };
       default:
         return {
@@ -381,15 +433,6 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     }
   }, []);
 
-  const processRow = useCallback(
-    (row: any): Row => {
-      return {
-        rowId: row.rowId.toString(),
-        cells: row.cells.map((cell: SheetCell) => createCellContent(cell)),
-      };
-    },
-    [createCellContent],
-  );
   const normalizeRow = useCallback(
     (row: any, expectedColumns: number): Row => {
       try {
@@ -400,36 +443,38 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
         let normalizedCells: Cell[] = [];
         let currentColumnIndex = 0;
 
-        for (const cell of row.cells) {
-          if (currentColumnIndex >= expectedColumns) break;
-          if (!cell) continue;
+        for (let i = 0; i < expectedColumns; i++) {
+          const cell = row.cells[i];
 
-          const colspan = Math.min(
-            cell.colspan || 1,
-            expectedColumns - currentColumnIndex,
-          );
+          if (!cell) {
+            normalizedCells.push({
+              type: 'empty',
+              text: '',
+              nonEditable: true,
+              style: {
+                background: 'transparent',
+                padding: '4px 8px',
+                border: 'none',
+              },
+            });
+            continue;
+          }
 
           const processedCell = createCellContent(cell);
-          if (colspan > 1) {
-            processedCell.colspan = colspan;
+          if (processedCell) {
+            normalizedCells.push(processedCell);
+          } else {
+            normalizedCells.push({
+              type: 'empty',
+              text: '',
+              nonEditable: true,
+              style: {
+                background: 'transparent',
+                padding: '4px 8px',
+                border: 'none',
+              },
+            });
           }
-
-          normalizedCells.push(processedCell);
-          currentColumnIndex++;
-
-          // Handle colspan by adding empty cells
-          for (let i = 1; i < colspan; i++) {
-            if (currentColumnIndex < expectedColumns) {
-              normalizedCells.push(createEmptyCell());
-              currentColumnIndex++;
-            }
-          }
-        }
-
-        // Fill remaining columns with empty cells
-        while (currentColumnIndex < expectedColumns) {
-          normalizedCells.push(createEmptyCell());
-          currentColumnIndex++;
         }
 
         return {
@@ -447,6 +492,13 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     [createCellContent],
   );
 
+  const processRow = useCallback(
+    (row: any): Row => {
+      const expectedColumns = sheetData?.columns?.length || 0;
+      return normalizeRow(row, expectedColumns);
+    },
+    [normalizeRow, sheetData?.columns?.length],
+  );
   const showCellDetails = async () => {
     if (!curLocation) return;
 
@@ -563,32 +615,25 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     if (!sheetData) return;
 
     const processData = () => {
-      const allRows = [
-        ...(sheetData.headerRows || []),
-        ...(sheetData.valueRows || []),
-      ];
-      const processedRows = allRows.map(processRow);
-      setLocalRows(processedRows);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(processedRows));
+      const expectedColumns = (sheetData.columns || []).length;
+      const headerRows = (sheetData.headerRows || []).map((row) =>
+        normalizeRow(row, expectedColumns),
+      );
+      const valueRows = (sheetData.valueRows || []).map((row) =>
+        normalizeRow(row, expectedColumns),
+      );
+
+      const allRows = [...headerRows, ...valueRows];
+      setLocalRows(allRows);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allRows));
     };
 
-    const storedData = localStorage.getItem(STORAGE_KEY);
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        setLocalRows(parsedData.map(processRow));
-      } catch (error) {
-        console.error('Error parsing stored data:', error);
-        processData();
-      }
-    } else {
-      processData();
-    }
+    processData();
 
     return () => {
       localStorage.removeItem(STORAGE_KEY);
     };
-  }, [sheetData, processRow]);
+  }, [sheetData, normalizeRow]);
 
   const getCellId = async (params: CellInfoParams): Promise<number> => {
     try {
@@ -601,7 +646,19 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
       throw new Error('Failed to fetch cell ID');
     }
   };
-
+  const getRowNumber = (rowId: string | number): number => {
+    const str = rowId.toString();
+    const idx = str.indexOf('-');
+    if (idx === -1) return 1;
+    return parseInt(str.substring(idx + 1), 10);
+  };
+  const getCellValue = (cell: any): string => {
+    if (!cell) return '';
+    if (cell.type === 'text' || cell.type.endsWith('text')) {
+      return String(cell.text || '');
+    }
+    return String(cell.value || '');
+  };
   const handleChanges = async (changes: CellChange[]) => {
     if (!changes.length) return;
 
@@ -609,10 +666,11 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     const newChanges: ChangedCell[] = [];
     const updatedRows = new Map<string, ChangedRow>();
 
+    // First update the rows/cells immediately for UI responsiveness
     setLocalRows((prevRows) => {
       const newRows = [...prevRows];
 
-      const processChange = async (change: CellChange) => {
+      changes.forEach((change) => {
         const rowIndex = newRows.findIndex(
           (row) => row.rowId.toString() === change.rowId.toString(),
         );
@@ -624,76 +682,89 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
         );
         if (colIndex === -1) return;
 
-        try {
-          const cell_id = await getCellId({
-            workbookid: workbook.id,
-            sheetid,
-            rowid: change.rowId,
-            colid: change.columnId,
-          });
-
-          const originalCell = currentRow.cells[colIndex];
-          const newCell = {
+        const originalCell = currentRow.cells[colIndex];
+        const newCell = {
+          ...originalCell,
+          value: (change.newCell as any).value,
+          text: (change.newCell as any).value?.toString() || '',
+          style: getCellStyle({
             ...originalCell,
             value: (change.newCell as any).value,
-            text: (change.newCell as any).value?.toString() || '',
-            style: getCellStyle({
-              ...originalCell,
-              value: (change.newCell as any).value,
-            } as SheetCell),
-          };
+          } as SheetCell),
+        };
 
-          const updatedCells = [...currentRow.cells];
-          updatedCells[colIndex] = newCell;
-          currentRow.cells = updatedCells;
-          newRows[rowIndex] = currentRow;
+        const updatedCells = [...currentRow.cells];
+        updatedCells[colIndex] = newCell;
+        currentRow.cells = updatedCells;
+        newRows[rowIndex] = currentRow;
 
-          const changedCell: ChangedCell = {
-            sheetid,
-            cellid: cell_id,
-            prevvalue: originalCell.text,
-            newvalue: newCell.text,
-            comment: '',
-            cellCode: '',
-            rowNr: rowIndex + 1,
-            colNr: colIndex + 1,
-          };
-
-          newChanges.push(changedCell);
-
-          if (updatedRows.has(currentRow.rowId)) {
-            const existing = updatedRows.get(currentRow.rowId)!;
-            existing.changedCells.push(changedCell);
-            existing.updatedRow = currentRow;
-          } else {
-            updatedRows.set(currentRow.rowId, {
-              rowId: currentRow.rowId,
-              originalRow: newRows[rowIndex],
-              updatedRow: currentRow,
-              changedCells: [changedCell],
-              timestamp: Date.now(),
-            });
-          }
-        } catch (error) {
-          console.error('Error processing cell change:', error);
-        }
-      };
-
-      Promise.all(changes.map(processChange)).then(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
-        const changedRowsArray = Array.from(updatedRows.values());
-
-        setChangedRows((prev) => [...prev, ...changedRowsArray]);
-        setCellChanges((prev) => [...prev, ...newChanges]);
-        dispatch(addChangedRows(changedRowsArray));
-
-        if (onRowChange) {
-          onRowChange(changedRowsArray);
+        // Track changed rows for state updates
+        if (!updatedRows.has(currentRow.rowId)) {
+          updatedRows.set(currentRow.rowId, {
+            rowId: currentRow.rowId,
+            originalRow: prevRows[rowIndex] as SheetRow,
+            updatedRow: currentRow as SheetRow,
+            changedCells: [],
+            timestamp: Date.now(),
+          });
         }
       });
 
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newRows));
       return newRows;
     });
+
+    // Process cell IDs and update tracking states
+    try {
+      await Promise.all(
+        changes.map(async (change) => {
+          try {
+            const cell_id = await getCellId({
+              workbookid: workbook.id,
+              sheetid,
+              rowid: change.rowId,
+              colid: change.columnId,
+            });
+
+            const changedCell: ChangedCell = {
+              sheetid,
+              cellid: cell_id,
+              prevvalue: getCellValue(change.previousCell),
+              newvalue: getCellValue(change.newCell),
+              comment: '',
+              cellCode: '',
+              rowNr: getRowNumber(change.rowId),
+              colNr:
+                columns.findIndex(
+                  (col) =>
+                    col.columnId.toString() === change.columnId.toString(),
+                ) + 1,
+            };
+
+            newChanges.push(changedCell);
+
+            const rowEntry = updatedRows.get(change.rowId.toString());
+            if (rowEntry) {
+              rowEntry.changedCells.push(changedCell);
+            }
+          } catch (error) {
+            console.error('Error processing cell change:', error);
+          }
+        }),
+      );
+
+      // Update all tracking states
+      const changedRowsArray = Array.from(updatedRows.values());
+      setChangedRows((prev) => [...prev, ...changedRowsArray]);
+      setCellChanges((prev) => [...prev, ...newChanges]);
+      dispatch(addChangedRows(changedRowsArray));
+
+      if (onRowChange) {
+        onRowChange(changedRowsArray);
+      }
+    } catch (error) {
+      console.error('Error in handleChanges:', error);
+    }
   };
 
   const handleFocusChange = async (cell: CellLocation) => {
