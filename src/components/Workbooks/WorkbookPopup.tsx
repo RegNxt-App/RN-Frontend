@@ -36,7 +36,7 @@ import { FormulaCellTemplate } from '../ReactGrid/FormulaCellTemplate';
 import { InvalidTextCellTemplate } from '../ReactGrid/InvalidTextCellTemplate';
 import { InvalidNumberCellTemplate } from '../ReactGrid/InvalidNumberCellTemplate';
 import { Dialog } from '@headlessui/react';
-
+import { removeLastSelectedSheetItems } from '../../utils/localStorage';
 interface WorkbookData {
   id: number;
   name: string;
@@ -779,6 +779,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
 
   const handleUndo = () => {
     localStorage.removeItem(STORAGE_KEY);
+    removeLastSelectedSheetItems();
     dispatch(clearSheetData());
     onClose();
   };
@@ -789,45 +790,45 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     // With normalization, all rows should have exactly the same number of cells as columns
     return localRows.every((row) => row.cells.length === columns.length);
   }, [columns, localRows]);
-  useEffect(() => {
-    if (!sheetData) return;
+  // useEffect(() => {
+  //   if (!sheetData) return;
 
-    const processData = () => {
-      const expectedColumns = (sheetData.columns || []).length;
-      const allRows = [
-        ...(sheetData.headerRows || []),
-        ...(sheetData.valueRows || []),
-      ];
+  //   const processData = () => {
+  //     const expectedColumns = (sheetData.columns || []).length;
+  //     const allRows = [
+  //       ...(sheetData.headerRows || []),
+  //       ...(sheetData.valueRows || []),
+  //     ];
 
-      // Use normalizeRow for each row
-      const processedRows = allRows.map((row) =>
-        normalizeRow(row, expectedColumns),
-      );
-      setLocalRows(processedRows);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(processedRows));
-    };
+  //     // Use normalizeRow for each row
+  //     const processedRows = allRows.map((row) =>
+  //       normalizeRow(row, expectedColumns),
+  //     );
+  //     setLocalRows(processedRows);
+  //     localStorage.setItem(STORAGE_KEY, JSON.stringify(processedRows));
+  //   };
 
-    const storedData = localStorage.getItem(STORAGE_KEY);
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData);
-        const expectedColumns = (sheetData.columns || []).length;
-        // Normalize stored data as well
-        setLocalRows(
-          parsedData.map((row) => normalizeRow(row, expectedColumns)),
-        );
-      } catch (error) {
-        console.error('Error parsing stored data:', error);
-        processData();
-      }
-    } else {
-      processData();
-    }
+  //   const storedData = localStorage.getItem(STORAGE_KEY);
+  //   if (storedData) {
+  //     try {
+  //       const parsedData = JSON.parse(storedData);
+  //       const expectedColumns = (sheetData.columns || []).length;
+  //       // Normalize stored data as well
+  //       setLocalRows(
+  //         parsedData.map((row) => normalizeRow(row, expectedColumns)),
+  //       );
+  //     } catch (error) {
+  //       console.error('Error parsing stored data:', error);
+  //       processData();
+  //     }
+  //   } else {
+  //     processData();
+  //   }
 
-    return () => {
-      localStorage.removeItem(STORAGE_KEY);
-    };
-  }, [sheetData, normalizeRow]);
+  //   return () => {
+  //     localStorage.removeItem(STORAGE_KEY);
+  //   };
+  // }, [sheetData, normalizeRow]);
 
   const onSselectedOptionChange = (event: { value: { name: string } }) => {
     setSelectedOption(event.value);

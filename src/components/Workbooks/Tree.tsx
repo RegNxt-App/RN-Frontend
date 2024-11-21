@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import TreeNode from './TreeNode';
-import { useAppDispatch } from '../../app/hooks';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   fetchSheetData,
   updateSelectedSheet,
   updateTotalCounts,
+  selectSelectedSheet,
 } from '../../features/sheetData/sheetDataSlice';
 
 interface ApiResponse {
@@ -25,6 +26,7 @@ interface TreeProps {
 const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
   const dispatch = useAppDispatch();
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const selectedSheet = useAppSelector(selectSelectedSheet);
   const handleToggleExpand = (nodeKey: string) => {
     setExpandedNodes((prev) => {
       const newSet = new Set(prev);
@@ -130,6 +132,16 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
           invalidcount: node.invalidcount || 0,
         }),
       );
+      localStorage.setItem(
+        `lastSelectedSheet-${workbookId}`,
+        JSON.stringify({
+          table: node.table || node.data,
+          label: node.label,
+          sheetId: sheetId,
+          cellcount: node.cellcount || 0,
+          invalidcount: node.invalidcount || 0,
+        }),
+      );
     }
   };
 
@@ -146,28 +158,41 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
         }),
       );
 
-      // Find and select first sheet only if no sheet is currently selected
-      const firstTableNode = findFirstTableNode(processedData);
-      if (firstTableNode?.children?.length > 0) {
-        const firstSheet = firstTableNode.children[0];
-        const sheetIdMatch = firstSheet.key.match(/s-(\d+)/);
-        const sheetId = sheetIdMatch ? sheetIdMatch[1] : null;
+      // Check if there's a stored selected sheet
+      const storedSheet = localStorage.getItem(
+        `lastSelectedSheet-${workbookId}`,
+      );
 
-        if (sheetId) {
-          dispatch(fetchSheetData({ workbookId, sheetId }));
-          dispatch(
-            updateSelectedSheet({
-              table: firstTableNode.label,
-              label: firstSheet.label,
-              sheetId,
-              cellcount: firstSheet.cellcount || 0,
-              invalidcount: firstSheet.invalidcount || 0,
-            }),
-          );
+      // Only select first sheet if no sheet is currently selected AND no stored sheet exists
+      if (!selectedSheet?.sheetId && !storedSheet) {
+        const firstTableNode = findFirstTableNode(processedData);
+        if (firstTableNode?.children?.length > 0) {
+          const firstSheet = firstTableNode.children[0];
+          const sheetIdMatch = firstSheet.key.match(/s-(\d+)/);
+          const sheetId = sheetIdMatch ? sheetIdMatch[1] : null;
+
+          if (sheetId) {
+            dispatch(fetchSheetData({ workbookId, sheetId }));
+            dispatch(
+              updateSelectedSheet({
+                table: firstTableNode.label,
+                label: firstSheet.label,
+                sheetId,
+                cellcount: firstSheet.cellcount || 0,
+                invalidcount: firstSheet.invalidcount || 0,
+              }),
+            );
+          }
         }
+      } else if (!selectedSheet?.sheetId && storedSheet) {
+        // If there's a stored sheet but no currently selected sheet, restore the stored selection
+        const lastSheet = JSON.parse(storedSheet);
+        dispatch(fetchSheetData({ workbookId, sheetId: lastSheet.sheetId }));
+        dispatch(updateSelectedSheet(lastSheet));
       }
     }
-  }, [data, workbookId, dispatch]);
+  }, [data, workbookId, dispatch, selectedSheet]);
+
   useEffect(() => {
     const savedExpanded = localStorage.getItem('treeExpandedNodes');
     if (savedExpanded) {

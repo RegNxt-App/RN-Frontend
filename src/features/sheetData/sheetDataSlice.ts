@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import Api from '../../utils/Api';
-
+import { RootState } from '../../app/store';
 // Keep all existing interfaces
 interface SheetCell {
   cellid: number;
@@ -334,5 +334,6 @@ export const selectTableStructureLoading = (state: {
 }) => state.sheetData.tableStructureLoading;
 export const selectStructureError = (state: { sheetData: SheetDataState }) =>
   state.sheetData.structureError;
-
+export const selectSelectedSheet = (state: RootState) =>
+  state.sheetData.selectedSheet;
 export default sheetDataSlice.reducer;

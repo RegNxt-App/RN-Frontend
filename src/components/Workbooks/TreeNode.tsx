@@ -7,12 +7,19 @@ import {
   selectDialogState,
 } from '../../features/sheetData/sheetDataSlice';
 import ManageSheetsDialog from '../ManageSheetsDialog';
+interface ApiResponse {
+  key: string;
+  label: string;
+  children?: ApiResponse[];
+  cellcount?: number;
+  invalidcount?: number;
+}
 interface TreeNodeProps {
   node: ApiResponse;
   onClick: (node: ApiResponse) => void;
   workbookId: number;
-  expandedNodes: Set<string>; // Add this prop
-  onToggleExpand: (nodeKey: string) => void; // Add this prop
+  expandedNodes: Set<string>;
+  onToggleExpand: (nodeKey: string) => void;
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
