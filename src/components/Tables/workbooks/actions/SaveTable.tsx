@@ -116,39 +116,41 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
       : 'Save to DB';
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <button
-        className={`
-          px-4 py-2 rounded-md mb-4 transition-all duration-200 flex items-center justify-center min-w-[120px]
-          ${
-            isButtonDisabled
-              ? 'bg-red-500 cursor-not-allowed opacity-60'
-              : 'bg-green-500 hover:bg-green-600'
-          } text-white
-        `}
-        onClick={handleSaveToDb}
-        disabled={isButtonDisabled}
-        title={
-          data.length === 0
-            ? 'No data available to save'
-            : 'Save data to database'
-        }
-      >
-        {isLoading ? (
-          <div className="flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-            <span>{buttonText}</span>
-          </div>
-        ) : (
-          buttonText
-        )}
-      </button>
+    <div className="flex flex-col h-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="px-5 py-4 sm:px-7.5">
+        <button
+          className={`
+            px-4 py-2 rounded-md mb-4 transition-all duration-200 flex items-center justify-center min-w-[120px]
+            ${
+              isButtonDisabled
+                ? 'bg-red-500 cursor-not-allowed opacity-60'
+                : 'bg-green-500 hover:bg-green-600'
+            } text-white
+          `}
+          onClick={handleSaveToDb}
+          disabled={isButtonDisabled}
+          title={
+            data.length === 0
+              ? 'No data available to save'
+              : 'Save data to database'
+          }
+        >
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+              <span>{buttonText}</span>
+            </div>
+          ) : (
+            buttonText
+          )}
+        </button>
+      </div>
 
-      <div className="max-w-full">
-        <div className="overflow-x-auto">
-          <div className="max-h-[600px] overflow-y-auto">
+      <div className="flex-1 overflow-hidden px-5 sm:px-7.5">
+        <div className="relative h-full">
+          <div className="absolute inset-0 overflow-auto">
             <table className="w-full table-auto">
-              <thead className="sticky top-0 bg-gray-2 dark:bg-meta-4">
+              <thead className="sticky top-0 z-10 bg-gray-2 dark:bg-meta-4">
                 <tr className="text-left">
                   <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                     Cell Id
@@ -223,11 +225,13 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
         </div>
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      <div className="px-5 py-4 sm:px-7.5">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 };

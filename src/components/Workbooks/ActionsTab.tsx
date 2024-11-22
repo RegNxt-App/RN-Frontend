@@ -81,8 +81,8 @@ const ActionsTab: React.FC<{
   }
 
   return (
-    <div>
-      <div className="flex">
+    <div className="flex flex-col h-full">
+      <div className="flex border-b border-stroke">
         {[
           'save',
           'allocate',
@@ -114,25 +114,25 @@ const ActionsTab: React.FC<{
           </button>
         ))}
       </div>
-      <div className="p-4">
-        {activeActionTab === 'save' && (
-          <div>
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full overflow-auto">
+          {activeActionTab === 'save' && (
             <SaveTable
               data={saveData}
               workbookId={workbookId}
               onSuccess={handleSaveSuccess}
             />
-          </div>
-        )}
-        {activeActionTab === 'allocate' && <ActionsAllocate />}
-        {activeActionTab === 'validate' && (
-          <ActionsValidate workbookId={workbookId} />
-        )}
-        {activeActionTab === 'import' && <ActionsImport />}
-        {activeActionTab === 'export' && <ActionsExport />}
-        {activeActionTab === 'transmission' && (
-          <ActionsTransmission workbookId={workbookId} />
-        )}
+          )}
+          {activeActionTab === 'allocate' && <ActionsAllocate />}
+          {activeActionTab === 'validate' && (
+            <ActionsValidate workbookId={workbookId} />
+          )}
+          {activeActionTab === 'import' && <ActionsImport />}
+          {activeActionTab === 'export' && <ActionsExport />}
+          {activeActionTab === 'transmission' && (
+            <ActionsTransmission workbookId={workbookId} />
+          )}
+        </div>
       </div>
     </div>
   );

@@ -219,3 +219,7 @@ span.flatpickr-weekday,
     @apply text-red-600 font-medium;
   }
 }
+
+.parent-container {
+  height: 60vh;
+}
