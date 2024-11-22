@@ -238,20 +238,53 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     const clonedValues = [...localRows];
     const headerRowsCount = sheetData.headerRows.length;
     const lastDataRowIndex = clonedValues.length - 1;
-    const templateRow = clonedValues[lastDataRowIndex];
 
     const expectedColumns = sheetData.columns.length;
+    const actualColumnsToProcess = 5;
 
     for (let i = 0; i < nrOfInserts.code; i++) {
       const newCells = Array(expectedColumns)
         .fill(null)
         .map((_, index) => {
+          // Only process the first 5 columns, make others empty and hidden
+          if (index >= actualColumnsToProcess) {
+            return {
+              type: 'empty',
+              text: '',
+              nonEditable: true,
+              value: null,
+              cellid: 0,
+              colspan: 0,
+              rowspan: 0,
+              rownr: lastDataRowIndex + i + 1,
+              format: '',
+              style: {
+                display: 'none',
+                visibility: 'hidden',
+                pointerEvents: 'none',
+                userSelect: 'none',
+                width: '0px',
+                padding: '0px',
+                border: 'none',
+                background: 'transparent',
+              },
+            };
+          }
+
           const baseCell = {
             cellid: 0,
             colspan: 0,
             rowspan: 0,
             rownr: lastDataRowIndex + i + 1,
             format: '',
+          };
+
+          // Base style for all visible cells
+          const baseStyle = {
+            padding: '4px 8px',
+            borderRight: '1px solid #e2e8f0',
+            borderBottom: '1px solid #e2e8f0',
+            background: 'white', // Set all rows to white background
           };
 
           if (index === 0) {
@@ -261,10 +294,8 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
               nonEditable: true,
               value: null,
               style: {
+                ...baseStyle,
                 background: '#e5e7eb',
-                padding: '4px 8px',
-                borderRight: '1px solid #e2e8f0',
-                borderBottom: '1px solid #e2e8f0',
               },
               ...baseCell,
             };
@@ -275,53 +306,20 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
               nonEditable: true,
               value: null,
               style: {
+                ...baseStyle,
                 background: '#e5e7eb',
-                padding: '4px 8px',
-                borderRight: '1px solid #e2e8f0',
-                borderBottom: '1px solid #e2e8f0',
               },
               ...baseCell,
             };
-          } else if (index >= 2 && index <= 4) {
+          } else if (index >= 2 && index < actualColumnsToProcess) {
             return {
               type: 'number',
               text: '',
               value: null,
               nonEditable: false,
               style: {
-                background: '#fff',
-                padding: '4px 8px',
-                borderRight: '1px solid #e2e8f0',
-                borderBottom: '1px solid #e2e8f0',
+                ...baseStyle,
                 textAlign: 'right',
-              },
-              ...baseCell,
-            };
-          } else if (index >= 5 && index <= 6) {
-            return {
-              type: 'number',
-              text: '',
-              value: null,
-              nonEditable: false,
-              style: {
-                background: '#fff',
-                padding: '4px 8px',
-                borderRight: '1px solid #e2e8f0',
-                borderBottom: '1px solid #e2e8f0',
-                textAlign: 'right',
-              },
-              ...baseCell,
-            };
-          } else {
-            return {
-              type: 'empty',
-              text: '',
-              nonEditable: true,
-              value: null,
-              style: {
-                background: 'transparent',
-                padding: '4px 8px',
-                border: 'none',
               },
               ...baseCell,
             };
@@ -379,16 +377,27 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
       };
     }
 
-    const isAlternateRow = (rownr: number) => rownr % 2 === 0;
+    // Get the actual row number for alternating colors
+    const rowNr = parseInt(String(cell.rownr));
 
     const getBackground = (cellType: string, rownr: number) => {
       if (cellType === 'header') return '#e5e7eb';
       if (cellType === 'shaded') return '#969696';
       if (cellType === 'empty') return 'transparent';
-      return isAlternateRow(rownr) ? '#f8fafc' : '#fff';
+      // Only alternate colors for non-header rows
+      return 'white'; // Remove alternating colors
     };
 
-    const cellStyle = {
+    // Special styles for header cells
+    const headerStyle = {
+      ...baseStyle,
+      borderRight: '1px solid #1e88e5', // Blue border for headers
+      borderBottom: '1px solid #1e88e5', // Blue border for headers
+      background: '#e5e7eb',
+    };
+
+    // Regular cell style
+    const regularStyle = {
       ...baseStyle,
       background: getBackground(cell.type, cell.rownr),
     };
@@ -399,7 +408,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           type: 'header',
           text: decodeHtmlEntities(cell.text || ''),
           nonEditable: true,
-          style: cellStyle,
+          style: headerStyle,
         };
       case 'number':
         return {
@@ -408,7 +417,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           value: cell.value,
           nonEditable: cell.nonEditable,
           style: {
-            ...cellStyle,
+            ...regularStyle,
             textAlign: 'right',
           },
         };
@@ -418,7 +427,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           text: '',
           nonEditable: true,
           style: {
-            ...cellStyle,
+            ...regularStyle,
             background: 'transparent',
             border: 'none',
           },
@@ -428,7 +437,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           type: cell.nonEditable ? 'invalidtext' : 'text',
           text: decodeHtmlEntities(cell.text || ''),
           nonEditable: cell.nonEditable,
-          style: cellStyle,
+          style: regularStyle,
         };
     }
   }, []);
@@ -440,10 +449,37 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           throw new Error(`Invalid row structure for row ${row?.rowId}`);
         }
 
+        const isPDRangeRow = row.cells.some(
+          (cell) => cell?.type === 'header' && cell?.text === 'PD Range',
+        );
+
         let normalizedCells: Cell[] = [];
-        let currentColumnIndex = 0;
+
+        // Process only the first 5 columns for PD Range rows (adjust number as needed)
+        const actualColumnsToProcess = isPDRangeRow ? 5 : expectedColumns;
 
         for (let i = 0; i < expectedColumns; i++) {
+          // Skip processing after actual columns for PD Range rows
+          if (isPDRangeRow && i >= actualColumnsToProcess) {
+            normalizedCells.push({
+              type: 'empty',
+              text: '',
+              nonEditable: true,
+              value: null,
+              style: {
+                display: 'none',
+                visibility: 'hidden',
+                pointerEvents: 'none', // Prevent interactions
+                userSelect: 'none', // Prevent selection
+                width: '0px', // Collapse width
+                padding: '0px',
+                border: 'none',
+                background: 'transparent',
+              },
+            });
+            continue;
+          }
+
           const cell = row.cells[i];
 
           if (!cell) {
@@ -461,10 +497,8 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           }
 
           const processedCell = createCellContent(cell);
-          if (processedCell) {
-            normalizedCells.push(processedCell);
-          } else {
-            normalizedCells.push({
+          normalizedCells.push(
+            processedCell || {
               type: 'empty',
               text: '',
               nonEditable: true,
@@ -473,8 +507,8 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
                 padding: '4px 8px',
                 border: 'none',
               },
-            });
-          }
+            },
+          );
         }
 
         return {
@@ -491,7 +525,6 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     },
     [createCellContent],
   );
-
   const processRow = useCallback(
     (row: any): Row => {
       const expectedColumns = sheetData?.columns?.length || 0;
