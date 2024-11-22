@@ -644,14 +644,36 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     ],
   );
 
+  const processHeaderRows = (rows: SheetRow[]): Row[] => {
+    return rows.map((row) => ({
+      rowId: row.rowId,
+      cells: row.cells.map((cell) => {
+        if (cell.type === 'header') {
+          return {
+            type: 'header',
+            text: cell.text,
+            colspan: cell.colspan || 1,
+            rowspan: cell.rowspan || 1,
+            nonEditable: cell.nonEditable,
+            style: {
+              background: '#e5e7eb',
+              padding: '4px 8px',
+              border: '1px solid #1e88e5',
+              borderCollapse: 'collapse',
+            },
+          };
+        }
+        return cell;
+      }),
+    }));
+  };
+
   useEffect(() => {
     if (!sheetData) return;
 
     const processData = () => {
       const expectedColumns = (sheetData.columns || []).length;
-      const headerRows = (sheetData.headerRows || []).map((row) =>
-        normalizeRow(row, expectedColumns),
-      );
+      const headerRows = processHeaderRows(sheetData.headerRows || []);
       const valueRows = (sheetData.valueRows || []).map((row) =>
         normalizeRow(row, expectedColumns),
       );
