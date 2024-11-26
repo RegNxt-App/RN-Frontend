@@ -1,7 +1,24 @@
 import { useState } from 'react';
-import Pagination from '../Pagination';
-import ViewRecordPopup from '../ViewRecordPopup';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import WorkbookView from '../WorkbookView';
+import ViewRecordPopup from '../ViewRecordPopup';
+import { cn } from '@/lib/utils';
+
 interface WorkbookData {
   id: number;
   name: string;
@@ -19,24 +36,18 @@ interface DataTableProps {
   data: WorkbookData[];
 }
 
-const itemsPerPage = 10;
-
 const DataTable = ({ data }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
     null,
   );
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
+  const pageCount = Math.ceil(data.length / pageSize);
+  const start = currentPage * pageSize;
+  const end = start + pageSize;
+  const currentItems = data.slice(start, end);
 
   const handleViewClick = (record: WorkbookData) => {
     setSelectedRecord(record);
@@ -44,88 +55,144 @@ const DataTable = ({ data }: DataTableProps) => {
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+    <div className="space-y-4 rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      <div className="rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-gray-2 dark:bg-meta-4">
+              <TableHead className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                 Module
-              </th>
-              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+              </TableHead>
+              <TableHead className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                 Entity
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
+              </TableHead>
+              <TableHead className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
                 Reporting Date
-              </th>
-              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+              </TableHead>
+              <TableHead className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                 Name
-              </th>
-              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
+              </TableHead>
+              <TableHead className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
                 Status
-              </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
+              </TableHead>
+              <TableHead className="py-4 px-4 font-medium text-black dark:text-white">
                 Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentItems.map((item) => (
-              <tr key={item.id}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+              <TableRow key={item.id}>
+                <TableCell className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
                     {item.module}
                   </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                </TableCell>
+                <TableCell className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
                     {item.entity}
                   </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                </TableCell>
+                <TableCell className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">
                     {item.reportingDate}
                   </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                </TableCell>
+                <TableCell className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p className="text-black dark:text-white">{item.name}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                </TableCell>
+                <TableCell className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <p
-                    className={`inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium ${
+                    className={cn(
+                      'inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium',
                       item.status === 'Initial'
                         ? 'bg-warning text-warning'
-                        : 'bg-success text-success'
-                    }`}
+                        : 'bg-success text-success',
+                    )}
                   >
                     {item.status}
                   </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                </TableCell>
+                <TableCell className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                   <div className="flex items-center space-x-3.5">
                     <WorkbookView workbook={item} />
                   </div>
-                </td>
-                {/* <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <div className="flex items-center space-x-3.5">
-                    <button
-                      className="hover:text-primary"
-                      onClick={() => handleViewClick(item)}
-                    >
-                      View
-                    </button>
-                  </div>
-                </td> */}
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center space-x-6 lg:space-x-8">
+          <div className="flex items-center space-x-2">
+            <p className="text-sm font-medium">Rows per page</p>
+            <Select
+              value={`${pageSize}`}
+              onValueChange={(value) => {
+                setPageSize(Number(value));
+                setCurrentPage(0);
+              }}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue placeholder={pageSize} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 20, 30, 50, 100].map((size) => (
+                  <SelectItem key={size} value={`${size}`}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+            Page {currentPage + 1} of {pageCount}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => setCurrentPage(0)}
+              disabled={currentPage === 0}
+            >
+              {'<<'}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() =>
+                setCurrentPage((current) => Math.max(0, current - 1))
+              }
+              disabled={currentPage === 0}
+            >
+              {'<'}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() =>
+                setCurrentPage((current) =>
+                  Math.min(pageCount - 1, current + 1),
+                )
+              }
+              disabled={currentPage === pageCount - 1}
+            >
+              {'>'}
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => setCurrentPage(pageCount - 1)}
+              disabled={currentPage === pageCount - 1}
+            >
+              {'>>'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {showWorkbookPopup && selectedRecord && (
         <ViewRecordPopup
           onClose={() => setShowWorkbookPopup(false)}

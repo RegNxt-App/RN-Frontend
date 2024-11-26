@@ -1,25 +1,47 @@
 import { useState } from 'react';
-import { Mail, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import Api from '../../utils/Api';
+import AuthLayout from '@/components/AuthLayout';
+import { useToast } from '@/hooks/use-toast';
+
+const formSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
 const SignIn = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
 
-  const navigate = useNavigate();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setError(null);
 
     try {
       const response = await Api.post('/Accounts/authenticate', {
-        email,
-        password,
+        email: values.email,
+        password: values.password,
       });
 
       const data = response.data;
@@ -27,100 +49,100 @@ const SignIn = () => {
       localStorage.setItem('id', data.id.toString());
       localStorage.setItem('jwtToken', data.jwtToken);
 
+      toast({
+        title: 'Success',
+        description: 'You have been successfully signed in.',
+      });
+
       console.log('Authentication successful', data);
       navigate('/reports-overview');
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to sign in');
-    } finally {
-      setLoading(false);
+      const errorMessage = error.response?.data?.message || 'Failed to sign in';
+      setError(errorMessage);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      });
     }
   };
+
   return (
-    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-10 my-5 mx-40">
-      <div className="flex flex-wrap items-center">
-        <div className="hidden w-full xl:block xl:w-1/2">
-          <div className="py-17.5 px-26 text-center">
-            <Link className="mb-5.5 inline-block text-4xl	" to="#">
-              RegNxt
-            </Link>
-          </div>
-        </div>
+    <AuthLayout
+      title="Sign In to RegNxt"
+      subtitle="Welcome back! Please enter your details"
+      logo={
+        <Link className="mb-8 inline-block" to="#">
+          <img
+            src="/white-logo.svg"
+            alt="RegNxt Logo"
+            className="h-26 w-auto"
+          />
+        </Link>
+      }
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-black">Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter your email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
-          <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-            <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-              Sign In to RegNxt
-            </h2>
-
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="mb-2.5 block font-medium text-black dark:text-white">
-                  Email
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  />
-                  <span className="absolute right-4 top-4">
-                    <Mail size={20} strokeWidth={1.75} />
-                  </span>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="mb-2.5 block font-medium text-black dark:text-white">
-                  Enter Password
-                </label>
-                <div className="relative">
-                  <input
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-black">Password</FormLabel>
+                <FormControl>
+                  <Input
                     type="password"
                     placeholder="6+ Characters, 1 Capital letter"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    {...field}
                   />
-                  <span className="absolute right-4 top-4">
-                    <Lock size={20} strokeWidth={1.75} />
-                  </span>
-                </div>
-              </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-              <div className="m-3 text-right">
-                <p>
-                  <Link to="/auth/signup" className="text-primary">
-                    Forgot Password?
-                  </Link>
-                </p>
-              </div>
+          {error && <div className="text-destructive text-sm">{error}</div>}
 
-              {error && <div className="text-red-500 mb-4">{error}</div>}
-
-              <div className="mb-5">
-                <input
-                  type="submit"
-                  value={loading ? 'Signing In...' : 'Sign In'}
-                  disabled={loading}
-                  className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                />
-              </div>
-
-              <div className="mt-6 text-center">
-                <p>
-                  Don’t have any account?{' '}
-                  <Link to="/auth/signup" className="text-primary">
-                    Sign Up
-                  </Link>
-                </p>
-              </div>
-            </form>
+          <div className="text-right">
+            <Link
+              to="/auth/signup"
+              className="text-sm text-primary hover:underline"
+            >
+              Forgot Password?
+            </Link>
           </div>
-        </div>
+
+          <Button
+            className="w-full text-white	"
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? 'Signing In...' : 'Sign In'}
+          </Button>
+        </form>
+      </Form>
+
+      <div className="mt-6 text-center text-sm">
+        <span className="text-muted-foreground">Don't have any account? </span>
+        <Link to="/auth/signup" className="text-primary hover:underline">
+          Sign Up
+        </Link>
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

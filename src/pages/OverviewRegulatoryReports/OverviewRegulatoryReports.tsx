@@ -4,6 +4,7 @@ import KanbanView from '../../components/KanbanView';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import AddWorkbookModel from '../../components/CModels/WordbookModels/AddWorkbookModel';
 import Api from '../../utils/Api';
+import { Button } from '@/components/ui/button';
 
 interface WorkbookData {
   id: number;
@@ -31,6 +32,7 @@ const OverviewRegulatoryReports = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPanelOpen, setPanelOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchWorkbooks();
@@ -109,12 +111,9 @@ const OverviewRegulatoryReports = () => {
             Kanban
           </button>
         </div>
-        <button
-          className="px-4 py-2 bg-green-500 text-white rounded-md"
-          onClick={() => setShowPopup(true)}
-        >
-          New Workbook
-        </button>
+        <Button className="text-white" onClick={() => setIsOpen(true)}>
+          Add Workbook
+        </Button>
       </div>
       <div className="pt-3 px-3 m-0 bg-white rounded-md shadow-md">
         <div className="flex justify-between items-center">
@@ -184,10 +183,11 @@ const OverviewRegulatoryReports = () => {
       )}
       {showPopup && (
         <AddWorkbookModel
-          onClose={() => setShowPopup(false)}
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
           onWorkbookAdded={handleWorkbookAdded}
         />
-      )}{' '}
+      )}
     </>
   );
 };

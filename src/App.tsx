@@ -27,6 +27,7 @@ import PrivateRoute from './components/PrivateRoute';
 import AccountingConfig from './pages/AccountingLayer/AccountingConfig';
 import PostUnpost from './pages/AccountingLayer/PostUnpost';
 import ViewBalance from './pages/AccountingLayer/ViewBalance';
+import { Toaster } from '@/components/ui/toaster';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -45,6 +46,7 @@ function App() {
 
   return (
     <Provider store={store}>
+      <Toaster />
       <Routes>
         <Route path="/auth/signin" element={<SignIn />} />
         <Route path="/auth/signup" element={<SignUp />} />
