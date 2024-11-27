@@ -106,6 +106,7 @@ const AddWorkbookModel = ({
             err instanceof Error
               ? err.message
               : 'An error occurred while fetching data',
+          duration: 3000,
         });
       } finally {
         setIsLoading(false);
@@ -134,6 +135,7 @@ const AddWorkbookModel = ({
       toast({
         title: 'Success',
         description: 'Workbook created successfully',
+        duration: 3000,
       });
 
       onWorkbookAdded();
@@ -144,6 +146,7 @@ const AddWorkbookModel = ({
         title: 'Error',
         description:
           err instanceof Error ? err.message : 'Failed to create workbook',
+        duration: 3000,
       });
     }
   };

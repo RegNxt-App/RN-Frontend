@@ -23,6 +23,7 @@ module.exports = {
     extend: {
       colors: {
         current: 'currentColor',
+        purple: '#6419E6',
         transparent: 'transparent',
         white: '#FFFFFF',
         black: '#1C2434',

@@ -4,12 +4,14 @@ import AddEntityModel from '../../components/CModels/EntityModels/AddEntityModel
 import { ArrowDownToLine, ArrowUpFromLine, Plus } from 'lucide-react';
 import Api from '../../utils/Api';
 import Loader from '../../components/loader';
+import { Button } from '@/components/ui/button';
 
 function Entity() {
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const [showPopup, setShowPopup] = useState(false);
   const [entityData, setEntityData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const fetchEntityData = () => {
     setLoading(true);
@@ -45,37 +47,38 @@ function Entity() {
     <>
       <div className="flex justify-between mb-4">
         <div className="flex space-x-4">
-          <button
-            className={`flex items-center space-x-2 px-4 py-2 rounded bg-blue-500 text-white`}
+          <Button
             onClick={() => setView('list')}
+            className="flex items-center gap-2 bg-purple text-white"
           >
-            <span>Import</span>
+            Import
             <ArrowUpFromLine size={20} strokeWidth={1.75} />
-          </button>
-          <button
-            className={`flex items-center space-x-2 px-4 py-2 rounded bg-blue-500 text-white`}
+          </Button>
+
+          <Button
             onClick={() => setView('kanban')}
+            className="flex items-center gap-2 bg-purple text-white"
           >
-            <span>Export</span>
+            Export
             <ArrowDownToLine size={20} strokeWidth={1.75} />
-          </button>
+          </Button>
         </div>
 
-        <button
-          className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md"
-          onClick={() => setShowPopup(true)}
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="flex items-center gap-2 bg-purple text-white"
         >
           <Plus size={20} strokeWidth={1.75} />
-          <span>Add Entity</span>
-        </button>
+          Add Entity
+        </Button>
       </div>
       <EntityTable data={entityData} onDataChange={handleUpdateEntitySuccess} />
-      {showPopup && (
-        <AddEntityModel
-          onClose={() => setShowPopup(false)}
-          onSuccess={handleAddEntitySuccess}
-        />
-      )}
+
+      <AddEntityModel
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onSuccess={handleAddEntitySuccess}
+      />
     </>
   );
 }

@@ -272,3 +272,11 @@ span.flatpickr-weekday,
 .focus-visible\:ring-offset-2:focus-visible {
   --tw-ring-offset-width: -1px !important;
 }
+.focus\:ring-ring:focus {
+  /* --tw-ring-color: hsl(var(--ring)); */
+  --tw-ring-color: none !important;
+}
+.ring-offset-background {
+  /* --tw-ring-offset-color: hsl(var(--background)); */
+  --tw-ring-offset-color: none !important;
+}

@@ -4,11 +4,14 @@ import { ArrowDownToLine, ArrowUpFromLine, Plus } from 'lucide-react';
 import Api from '../../utils/Api';
 import TemplateTable from '../../components/Tables/TemplateTable';
 import Loader from '../../components/loader';
+import { Button } from '@/components/ui/button';
 function Template() {
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const [showPopup, setShowPopup] = useState(false);
   const [templateData, setTemplateData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+
   const fetchTemplateData = () => {
     setLoading(true);
     Api.get('/RI/Template')
@@ -42,40 +45,40 @@ function Template() {
     <>
       <div className="flex justify-between mb-4">
         <div className="flex space-x-4">
-          <button
-            className={`flex items-center space-x-2 px-4 py-2 rounded bg-blue-500 text-white`}
+          <Button
             onClick={() => setView('list')}
+            className="flex items-center gap-2 bg-purple text-white"
           >
-            <span>Import</span>
+            Import
             <ArrowUpFromLine size={20} strokeWidth={1.75} />
-          </button>
-          <button
-            className={`flex items-center space-x-2 px-4 py-2 rounded bg-blue-500 text-white`}
+          </Button>
+          <Button
             onClick={() => setView('kanban')}
+            className="flex items-center gap-2 bg-purple text-white"
           >
-            <span>Export</span>
+            Export
             <ArrowDownToLine size={20} strokeWidth={1.75} />
-          </button>
+          </Button>
         </div>
 
-        <button
-          className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md"
-          onClick={() => setShowPopup(true)}
+        <Button
+          className="flex items-center gap-2 bg-purple text-white"
+          onClick={() => setIsOpen(true)}
         >
           <Plus size={20} strokeWidth={1.75} />
-          <span>Add Template</span>
-        </button>
+          Add Template
+        </Button>
       </div>
       <TemplateTable
         data={templateData}
         onDataChange={handleUpdateTemplateSuccess}
       />
-      {showPopup && (
-        <AddTemplateModel
-          onClose={() => setShowPopup(false)}
-          onSuccess={handleAddTemplateSuccess}
-        />
-      )}
+
+      <AddTemplateModel
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onSuccess={handleAddTemplateSuccess}
+      />
     </>
   );
 }

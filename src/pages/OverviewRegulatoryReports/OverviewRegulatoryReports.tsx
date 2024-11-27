@@ -5,6 +5,14 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import AddWorkbookModel from '../../components/CModels/WordbookModels/AddWorkbookModel';
 import Api from '../../utils/Api';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 interface WorkbookData {
   id: number;
@@ -41,17 +49,16 @@ const OverviewRegulatoryReports = () => {
   useEffect(() => {
     let filtered = data;
 
-    if (selectedModule) {
+    if (selectedModule && selectedModule !== 'all_modules') {
       filtered = filtered.filter((item) => item.module === selectedModule);
     }
 
-    if (selectedStatus) {
+    if (selectedStatus && selectedStatus !== 'all_statuses') {
       filtered = filtered.filter((item) => item.status === selectedStatus);
     }
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-
       filtered = filtered.filter((item) =>
         Object.values(item).some((value) =>
           String(value).toLowerCase().includes(query),
@@ -127,50 +134,55 @@ const OverviewRegulatoryReports = () => {
         </div>
 
         <div
-          className={`mt-4 overflow-hidden transition-all duration-300 ease-in-out ${isPanelOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+          className={`mt-4 overflow-hidden transition-all duration-300 ease-in-out ${
+            isPanelOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          }`}
         >
           <div className="grid grid-cols-3 gap-4 pb-4">
             <div>
-              <select
-                value={selectedModule}
-                onChange={(e) => setSelectedModule(e.target.value)}
-                className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+              <Select
+                value={selectedModule || 'all_modules'}
+                onValueChange={setSelectedModule}
               >
-                <option value="" disabled>
-                  Select Module
-                </option>
-                {modules.map((module) => (
-                  <option key={module} value={module}>
-                    {module}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Module" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_modules">All Modules</SelectItem>
+                  {modules.map((module) => (
+                    <SelectItem key={module} value={module}>
+                      {module}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+              <Select
+                value={selectedStatus || 'all_statuses'}
+                onValueChange={setSelectedStatus}
               >
-                <option value="" disabled>
-                  Select Status
-                </option>
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_statuses">All Statuses</SelectItem>
+                  {statuses.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
-              <input
+              <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
-                className="relative z-20 w-full rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
               />
             </div>
           </div>

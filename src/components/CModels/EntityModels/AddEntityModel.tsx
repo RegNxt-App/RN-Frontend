@@ -1,37 +1,95 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import Api from '../../../utils/Api';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/Dialog';
 
 interface AddEntityModelProps {
   onClose: () => void;
   onSuccess: () => void;
+  isOpen: boolean;
 }
+
 interface CurrencyOption {
   name: string;
   code: string;
 }
 
-const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
-  const [formData, setFormData] = useState({
-    entityCode: '',
-    entityLabel: '',
-    country: '',
-    city: '',
-    identificationType: '',
-    vat: '',
-    bicCode: '',
-    kboCode: '',
-    leiCode: '',
-    reportingCurrency: '',
-    significantCurrencies: '',
-    email: '',
-    consolidationScope: '',
-  });
+const formSchema = z.object({
+  entityCode: z.string().min(1, 'Entity code is required'),
+  entityLabel: z.string().min(1, 'Entity label is required'),
+  country: z.string().min(1, 'Country is required'),
+  city: z.string().min(1, 'City is required'),
+  identificationType: z.string().min(1, 'Identification type is required'),
+  vat: z.string().min(1, 'VAT is required'),
+  bicCode: z.string().min(1, 'BIC code is required'),
+  kboCode: z.string().min(1, 'KBO code is required'),
+  leiCode: z.string().min(1, 'LEI code is required'),
+  reportingCurrency: z.string().min(1, 'Reporting currency is required'),
+  significantCurrencies: z
+    .string()
+    .min(1, 'Significant currencies are required'),
+  email: z.string().email('Invalid email address'),
+  consolidationScope: z.string().min(1, 'Consolidation scope is required'),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+const AddEntityModel = ({
+  onClose,
+  onSuccess,
+  isOpen,
+}: AddEntityModelProps) => {
   const [identificationTypes, setIdentificationTypes] = useState<
     { name: string; code: number }[]
   >([]);
   const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      entityCode: '',
+      entityLabel: '',
+      country: '',
+      city: '',
+      identificationType: '',
+      vat: '',
+      bicCode: '',
+      kboCode: '',
+      leiCode: '',
+      reportingCurrency: '',
+      significantCurrencies: '',
+      email: '',
+      consolidationScope: '',
+    },
+  });
 
   useEffect(() => {
     const fetchIdentificationTypes = async () => {
@@ -39,231 +97,312 @@ const AddEntityModel = ({ onClose, onSuccess }: AddEntityModelProps) => {
         const response = await Api.get('/RI/UIInput?type=IdentificationType');
         setIdentificationTypes(response.data);
       } catch (error) {
-        console.error('Error fetching identification types:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to fetch identification types',
+        });
       }
     };
 
-    fetchIdentificationTypes();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
+    const fetchCurrencies = async () => {
       try {
-        setIsLoading(true);
-        const currencyResponse = await Api.get<CurrencyOption[]>(
+        const response = await Api.get<CurrencyOption[]>(
           'RI/UIInput?type=Currency',
         );
-        setCurrencies(currencyResponse.data);
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'An error occurred while fetching data',
-        );
-      } finally {
-        setIsLoading(false);
+        setCurrencies(response.data);
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to fetch currencies',
+        });
       }
     };
 
-    fetchData();
-  }, []);
+    if (isOpen) {
+      fetchIdentificationTypes();
+      fetchCurrencies();
+    }
+  }, [isOpen, toast]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = async (data: FormValues) => {
     try {
       const payload = {
-        code: formData.entityCode,
-        label: formData.entityLabel,
-        country: formData.country,
-        city: formData.city,
-        identificationtype: formData.identificationType,
-        vat: formData.vat,
-        biccode: formData.bicCode,
-        kbo: formData.kboCode,
-        lei: formData.leiCode,
-        reportingcurrency: formData.reportingCurrency,
-        significantcurrencies: formData.significantCurrencies,
-        email: formData.email,
-        consolidationscope: formData.consolidationScope,
+        code: data.entityCode,
+        label: data.entityLabel,
+        country: data.country,
+        city: data.city,
+        identificationtype: data.identificationType,
+        vat: data.vat,
+        biccode: data.bicCode,
+        kbo: data.kboCode,
+        lei: data.leiCode,
+        reportingcurrency: data.reportingCurrency,
+        significantcurrencies: data.significantCurrencies,
+        email: data.email,
+        consolidationscope: data.consolidationScope,
         entityid: 0,
       };
 
-      const response = await Api.post('/RI/Entity', payload);
+      await Api.post('/RI/Entity', payload);
 
-      console.log('Entity created successfully:', response.data);
+      toast({
+        title: 'Success',
+        description: 'Entity created successfully',
+      });
+
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating entity:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to create entity',
+      });
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50  z-[9999]">
-      <div className="rounded-sm border border-stroke bg-white shadow-default p-6 w-full max-w-4xl">
-        <div className="border-b border-stroke py-4 px-6.5">
-          <h3 className="text-2xl font-extrabold text-black">Add New Entity</h3>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="p-6.5 grid grid-cols-3 gap-4">
-            <input
-              type="text"
-              name="entityCode"
-              placeholder="Entity Code"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.entityCode}
-              required
-            />
-            <input
-              type="text"
-              name="entityLabel"
-              placeholder="Entity Label"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.entityLabel}
-              required
-            />
-            <input
-              type="text"
-              name="country"
-              placeholder="Country"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.country}
-              required
-            />
-            <input
-              type="text"
-              name="city"
-              placeholder="City"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.city}
-              required
-            />
-            <select
-              name="identificationType"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.identificationType}
-              required
-            >
-              <option value="" disabled>
-                Select Identification Type
-              </option>
-              {identificationTypes.map((type) => (
-                <option key={type.code} value={type.code}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              name="vat"
-              placeholder="VAT"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.vat}
-              required
-            />
-            <input
-              type="text"
-              name="bicCode"
-              placeholder="BIC Code"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.bicCode}
-              required
-            />
-            <input
-              type="text"
-              name="kboCode"
-              placeholder="KBO Code"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.kboCode}
-              required
-            />
-            <input
-              type="text"
-              name="leiCode"
-              placeholder="LEI Code"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.leiCode}
-              required
-            />
-            <select
-              name="reportingCurrency"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.reportingCurrency}
-              required
-            >
-              <option value="" disabled>
-                Select Reporting Currency
-              </option>
-              {currencies.map((currency) => (
-                <option key={currency.code} value={currency.code}>
-                  {currency.name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              name="significantCurrencies"
-              placeholder="Significant Currencies"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.significantCurrencies}
-              required
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.email}
-              required
-            />
-            <input
-              type="text"
-              name="consolidationScope"
-              placeholder="Consolidation Scope"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              onChange={handleInputChange}
-              value={formData.consolidationScope}
-              required
-            />
-          </div>
-          <div className="flex justify-end p-6.5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="mr-2 px-4 py-2 bg-gray-300 rounded-md"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex justify-center rounded bg-primary p-3 font-medium text-white"
-            >
-              Submit
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[780px]">
+        <DialogHeader>
+          <DialogTitle>Add New Entity</DialogTitle>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="entityCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Entity Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter entity code" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="entityLabel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Entity Label</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter entity label" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter country" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter city" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="identificationType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Identification Type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select identification type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {identificationTypes.map((type) => (
+                          <SelectItem
+                            key={type.code}
+                            value={type.code.toString()}
+                          >
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="vat"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>VAT</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter VAT" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="bicCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>BIC Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter BIC code" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="kboCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>KBO Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter KBO code" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="leiCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LEI Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter LEI code" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="reportingCurrency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reporting Currency</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {currencies.map((currency) => (
+                          <SelectItem key={currency.code} value={currency.code}>
+                            {currency.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="significantCurrencies"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Significant Currencies</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter significant currencies"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="Enter email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="consolidationScope"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Consolidation Scope</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter consolidation scope"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button className="bg-purple text-white" type="submit">
+                Create Entity
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

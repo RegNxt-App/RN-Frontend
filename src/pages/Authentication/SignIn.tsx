@@ -45,13 +45,16 @@ const SignIn = () => {
       });
 
       const data = response.data;
+      const username = data.firstName + ' ' + data.lastName;
       localStorage.setItem('email', data.email);
       localStorage.setItem('id', data.id.toString());
       localStorage.setItem('jwtToken', data.jwtToken);
+      localStorage.setItem('username', username);
 
       toast({
         title: 'Success',
-        description: 'You have been successfully signed in.',
+        description: 'You have been successfully signed in',
+        duration: 3000,
       });
 
       console.log('Authentication successful', data);
@@ -63,6 +66,7 @@ const SignIn = () => {
         variant: 'destructive',
         title: 'Error',
         description: errorMessage,
+        duration: 3000,
       });
     }
   };

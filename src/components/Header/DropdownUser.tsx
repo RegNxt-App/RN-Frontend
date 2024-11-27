@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
 import UserOne from '../../images/user/user-01.png';
@@ -8,6 +8,20 @@ const DropdownUser = () => {
   const navigate = useNavigate();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [username, setUsername] = useState('');
+  const [email, setUserEmail] = useState('');
+
+  useEffect(() => {
+    const username = localStorage.getItem('username');
+    const email = localStorage.getItem('email');
+
+    if (username) {
+      setUsername(username);
+    }
+    if (email) {
+      setUserEmail(email);
+    }
+  }, []);
   const handleLogout = () => {
     localStorage.removeItem('email');
     localStorage.removeItem('id');
@@ -25,11 +39,10 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            User Name
+            {username || 'User Name'}
           </span>
-          <span className="block text-xs">Software Engineer</span>
+          <span className="block text-xs">{email || 'Software Engineer'}</span>
         </span>
-
         <span className="h-12 w-12 rounded-full">
           <img src={UserOne} alt="User" />
         </span>
