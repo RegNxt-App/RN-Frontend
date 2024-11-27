@@ -181,13 +181,12 @@ const OverviewRegulatoryReports = () => {
       ) : (
         <KanbanView data={filteredData} />
       )}
-      {showPopup && (
-        <AddWorkbookModel
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          onWorkbookAdded={handleWorkbookAdded}
-        />
-      )}
+
+      <AddWorkbookModel
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onWorkbookAdded={handleWorkbookAdded}
+      />
     </>
   );
 };

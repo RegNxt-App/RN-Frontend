@@ -164,7 +164,7 @@ const AddWorkbookModel = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Workbook</DialogTitle>
+          <DialogTitle className="text-black">Add New Workbook</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -288,7 +288,9 @@ const AddWorkbookModel = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit">Create Report</Button>
+              <Button className="text-white" type="submit">
+                Create Report
+              </Button>
             </DialogFooter>
           </form>
         </Form>
