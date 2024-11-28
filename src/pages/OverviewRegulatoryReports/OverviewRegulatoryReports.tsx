@@ -104,19 +104,30 @@ const OverviewRegulatoryReports = () => {
   return (
     <>
       <div className="flex justify-between mb-4">
-        <div className="flex space-x-4">
-          <button
-            className={`px-4 py-2 ${view === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+        <div className="inline-flex items-center rounded-none border border-input">
+          <Button
+            variant="ghost"
+            className={`rounded-none px-4 ${
+              view === 'list'
+                ? 'bg-primary text-white hover:bg-primary/90'
+                : 'hover:bg-accent hover:text-accent-foreground'
+            }`}
             onClick={() => setView('list')}
           >
             List
-          </button>
-          <button
-            className={`px-4 py-2 ${view === 'kanban' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          </Button>
+          <div className="h-full w-[1px] bg-input" />
+          <Button
+            variant="ghost"
+            className={`rounded-none px-4 ${
+              view === 'kanban'
+                ? 'bg-primary text-white hover:bg-primary/90'
+                : 'hover:bg-accent hover:text-accent-foreground'
+            }`}
             onClick={() => setView('kanban')}
           >
             Kanban
-          </button>
+          </Button>
         </div>
         <Button className="text-white" onClick={() => setIsOpen(true)}>
           Add Workbook

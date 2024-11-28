@@ -59,49 +59,23 @@ const DataTable = ({ data }: DataTableProps) => {
       <div className="rounded-md">
         <Table>
           <TableHeader>
-            <TableRow className="bg-gray-2 dark:bg-meta-4">
-              <TableHead className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Module
-              </TableHead>
-              <TableHead className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Entity
-              </TableHead>
-              <TableHead className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                Reporting Date
-              </TableHead>
-              <TableHead className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Name
-              </TableHead>
-              <TableHead className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                Status
-              </TableHead>
-              <TableHead className="py-4 px-4 font-medium text-black dark:text-white">
-                Actions
-              </TableHead>
+            <TableRow>
+              <TableHead>Module</TableHead>
+              <TableHead>Entity</TableHead>
+              <TableHead>Reporting Date</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {currentItems.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.module}
-                  </h5>
-                </TableCell>
-                <TableCell className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.entity}
-                  </h5>
-                </TableCell>
-                <TableCell className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.reportingDate}
-                  </p>
-                </TableCell>
-                <TableCell className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">{item.name}</p>
-                </TableCell>
-                <TableCell className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                <TableCell>{item.module}</TableCell>
+                <TableCell>{item.entity}</TableCell>
+                <TableCell>{item.reportingDate}</TableCell>
+                <TableCell>{item.name}</TableCell>
+                <TableCell>
                   <p
                     className={cn(
                       'inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium',
@@ -113,7 +87,7 @@ const DataTable = ({ data }: DataTableProps) => {
                     {item.status}
                   </p>
                 </TableCell>
-                <TableCell className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                <TableCell>
                   <div className="flex items-center space-x-3.5">
                     <WorkbookView workbook={item} />
                   </div>

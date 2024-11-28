@@ -1,5 +1,20 @@
 import { useState } from 'react';
-import Pagination from '../Pagination';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import UpdateTemplateModel from '../CModels/TemplateModels/UpdateTemplateModel';
 
 interface TemplateData {
@@ -18,109 +33,136 @@ interface DataTableProps {
   onDataChange: () => void;
 }
 
-const itemsPerPage = 10;
-
 const TemplateTable = ({ data, onDataChange }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [showUpdatePopup, setShowUpdatePopup] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<TemplateData | null>(
     null,
   );
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfLastItem = currentPage * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
+  const totalPages = Math.ceil(data.length / pageSize);
 
   const handleEditClick = (record: TemplateData) => {
     setSelectedRecord(record);
-    setShowUpdatePopup(true);
+    setIsUpdateModalOpen(true);
   };
 
-  const handleCloseUpdatePopup = () => {
-    setShowUpdatePopup(false);
-    setSelectedRecord(null);
-  };
-  const handleUpdateRecord = () => {
-    onDataChange();
-  };
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Id
-              </th>
-              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Name
-              </th>
-              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Report Group
-              </th>
-              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Report Set
-              </th>
-              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Report Subset
-              </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
-                Actions
-              </th>
-            </tr>
-          </thead>
+    <div className="space-y-4">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Id</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Report Group</TableHead>
+            <TableHead>Report Set</TableHead>
+            <TableHead>Report Subset</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {currentItems.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell>{item.id}</TableCell>
+              <TableCell>{item.name || 'N/A'}</TableCell>
+              <TableCell>{item.reportGroupCode}</TableCell>
+              <TableCell>{item.reportSetCode}</TableCell>
+              <TableCell>{item.reportSubsetCode}</TableCell>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  className="text-blue-600 hover:text-blue-800 p-0 h-auto font-normal"
+                  onClick={() => handleEditClick(item)}
+                >
+                  Edit
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
-          <tbody>
-            {currentItems.map((item) => (
-              <tr key={item.id}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  {item.id}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.name || 'N/A'}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.reportGroupCode}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.reportSetCode}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.reportSubsetCode}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <div className="flex items-center space-x-3.5">
-                    <button
-                      className="hover:text-primary"
-                      onClick={() => handleEditClick(item)}
-                    >
-                      Edit
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex items-center justify-between px-2">
+        <div className="flex-1 text-sm text-muted-foreground">
+          Showing {indexOfFirstItem + 1} to{' '}
+          {Math.min(indexOfLastItem, data.length)} of {data.length} entries
+        </div>
+        <div className="flex items-center space-x-6 lg:space-x-8">
+          <div className="flex items-center space-x-2">
+            <p className="text-sm font-medium">Rows per page</p>
+            <Select
+              value={`${pageSize}`}
+              onValueChange={(value) => {
+                setPageSize(Number(value));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue placeholder={pageSize} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 20, 30, 50, 100].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+            >
+              {'<<'}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() =>
+                setCurrentPage((current) => Math.max(1, current - 1))
+              }
+              disabled={currentPage === 1}
+            >
+              {'<'}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() =>
+                setCurrentPage((current) => Math.min(totalPages, current + 1))
+              }
+              disabled={currentPage === totalPages}
+            >
+              {'>'}
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+            >
+              {'>>'}
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
-
-      {showUpdatePopup && selectedRecord && (
+      {selectedRecord && (
         <UpdateTemplateModel
           existingData={selectedRecord}
-          onClose={handleCloseUpdatePopup}
-          onUpdate={handleUpdateRecord}
+          onClose={() => setIsUpdateModalOpen(false)}
+          onUpdate={onDataChange}
+          isOpen={isUpdateModalOpen}
         />
       )}
     </div>

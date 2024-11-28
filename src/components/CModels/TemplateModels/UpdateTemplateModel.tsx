@@ -1,11 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+
 import Api from '../../../utils/Api';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/Dialog';
 
 interface UpdateTemplateModelProps {
   existingData: { id: number; reportSubsetId?: number };
   onClose: () => void;
   onUpdate: () => void;
+  isOpen: boolean;
 }
 
 interface Item {
@@ -24,6 +35,7 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
   existingData,
   onClose,
   onUpdate,
+  isOpen,
 }) => {
   const [formData, setFormData] = useState({
     templateName: '',
@@ -96,7 +108,6 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
 
       updateItemAndChildren(key, newCheckedState);
 
-      // Update parent states
       const updateParentState = (items: Item[]) => {
         items.forEach((item) => {
           if (item.children) {
@@ -228,47 +239,44 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
-      <div className="rounded-sm border border-stroke bg-white shadow-default p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="border-b border-stroke py-4 px-6.5">
-          <h3 className="text-2xl font-extrabold text-black">Edit Template</h3>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Template</DialogTitle>
+        </DialogHeader>
+
         <form onSubmit={handleSubmit}>
-          <div className="p-6.5 grid grid-cols-1 gap-4">
-            <input
-              type="text"
-              name="templateName"
-              value={formData.templateName}
-              onChange={handleInputChange}
-              placeholder="Template Name"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-              required
-            />
-          </div>
+          <div className="p-6.5 space-y-6">
+            <div>
+              <Input
+                type="text"
+                name="templateName"
+                value={formData.templateName}
+                onChange={handleInputChange}
+                placeholder="Template Name"
+                required
+              />
+            </div>
 
-          <div className="p-6.5">
-            <h4 className="text-xl font-bold mb-4">Select Tables</h4>
-            <div>{renderItems(tableFields)}</div>
-          </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Select Tables</h4>
+              <div className="border rounded-lg p-4">
+                {renderItems(tableFields)}
+              </div>
+            </div>
 
-          <div className="border-t border-stroke bg-gray p-4 text-right">
-            <button
-              type="submit"
-              className="inline-flex justify-center rounded-md border border-transparent bg-success px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              className="ml-2 inline-flex justify-center rounded-md border border-transparent bg-danger px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button className="text-white" type="submit">
+                Save Changes
+              </Button>
+            </DialogFooter>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

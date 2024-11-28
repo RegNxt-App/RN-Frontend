@@ -80,15 +80,22 @@ const Sidebar = ({
     >
       {/* <!-- SIDEBAR HEADER --> */}
       <div
-        className={`flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5 ${
-          sidebarCollapsed ? 'justify-center' : ''
+        className={`flex items-center px-6 py-5.5 lg:py-6.5 ${
+          sidebarCollapsed ? 'justify-center' : 'justify-between'
         }`}
       >
-        <NavLink to="/">
+        <NavLink
+          to="/"
+          className={sidebarCollapsed ? 'w-full flex justify-center' : 'w-full'}
+        >
           {sidebarCollapsed ? (
-            <h1 className="text-2xl font-bold text-white">R</h1>
+            <img src="/vite.svg" alt="R" className="h-10 w-10" />
           ) : (
-            <h1 className="text-4xl font-bold text-white">RegNxt</h1>
+            <img
+              src="/white-logo.svg"
+              alt="RegNxt"
+              className="h-14 w-auto px-6"
+            />
           )}
         </NavLink>
         <button

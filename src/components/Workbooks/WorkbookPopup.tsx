@@ -238,57 +238,32 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     const clonedValues = [...localRows];
     const headerRowsCount = sheetData.headerRows.length;
     const lastDataRowIndex = clonedValues.length - 1;
-
     const expectedColumns = sheetData.columns.length;
-    const actualColumnsToProcess = 5;
 
     for (let i = 0; i < nrOfInserts.code; i++) {
-      const newCells = Array(expectedColumns)
-        .fill(null)
-        .map((_, index) => {
-          // Only process the first 5 columns, make others empty and hidden
-          if (index >= actualColumnsToProcess) {
+      const newCells = sheetData.columns.map((column, index) => {
+        // Base cell properties
+        const baseCell = {
+          cellid: 0,
+          colspan: 0,
+          rowspan: 0,
+          rownr: lastDataRowIndex + i + 1,
+          format: '',
+        };
+
+        // Base style for all visible cells
+        const baseStyle = {
+          padding: '4px 8px',
+          borderRight: '1px solid #e2e8f0',
+          borderBottom: '1px solid #e2e8f0',
+          background: 'white',
+        };
+
+        // Handle each column based on its index
+        switch (index) {
+          case 0: // First column - PD Range
             return {
-              type: 'empty',
-              text: '',
-              nonEditable: true,
-              value: null,
-              cellid: 0,
-              colspan: 0,
-              rowspan: 0,
-              rownr: lastDataRowIndex + i + 1,
-              format: '',
-              style: {
-                display: 'none',
-                visibility: 'hidden',
-                pointerEvents: 'none',
-                userSelect: 'none',
-                width: '0px',
-                padding: '0px',
-                border: 'none',
-                background: 'transparent',
-              },
-            };
-          }
-
-          const baseCell = {
-            cellid: 0,
-            colspan: 0,
-            rowspan: 0,
-            rownr: lastDataRowIndex + i + 1,
-            format: '',
-          };
-
-          // Base style for all visible cells
-          const baseStyle = {
-            padding: '4px 8px',
-            borderRight: '1px solid #e2e8f0',
-            borderBottom: '1px solid #e2e8f0',
-            background: 'white', // Set all rows to white background
-          };
-
-          if (index === 0) {
-            return {
+              ...baseCell,
               type: 'header',
               text: 'PD Range',
               nonEditable: true,
@@ -296,23 +271,29 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
               style: {
                 ...baseStyle,
                 background: '#e5e7eb',
+                borderRight: '1px solid #1e88e5',
+                borderBottom: '1px solid #1e88e5',
               },
-              ...baseCell,
             };
-          } else if (index === 1) {
+
+          case 1: // Second column - Row ID
             return {
+              ...baseCell,
               type: 'header',
-              text: '999',
+              text: `999-${clonedValues.length - headerRowsCount + 1}`,
               nonEditable: true,
               value: null,
               style: {
                 ...baseStyle,
                 background: '#e5e7eb',
+                borderRight: '1px solid #1e88e5',
+                borderBottom: '1px solid #1e88e5',
               },
-              ...baseCell,
             };
-          } else if (index >= 2 && index < actualColumnsToProcess) {
+
+          default: // All other columns (columns 2-7) - Editable number cells
             return {
+              ...baseCell,
               type: 'number',
               text: '',
               value: null,
@@ -321,10 +302,9 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
                 ...baseStyle,
                 textAlign: 'right',
               },
-              ...baseCell,
             };
-          }
-        });
+        }
+      });
 
       const newRow = {
         rowId: `999-${clonedValues.length - headerRowsCount + 1}`,
@@ -338,7 +318,6 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
     setLocalRows(clonedValues);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(clonedValues));
   };
-
   const isValueCell = useCallback((cell: SheetCell): boolean => {
     return cell.type === 'number' && !cell.nonEditable;
   }, []);
@@ -364,43 +343,17 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
       borderBottom: '1px solid #e2e8f0',
     };
 
-    if (!cell || !cell.type) {
-      return {
-        type: 'empty',
-        text: '',
-        nonEditable: true,
-        style: {
-          ...baseStyle,
-          background: 'transparent',
-          border: 'none',
-        },
-      };
-    }
-
-    // Get the actual row number for alternating colors
-    const rowNr = parseInt(String(cell.rownr));
-
-    const getBackground = (cellType: string, rownr: number) => {
-      if (cellType === 'header') return '#e5e7eb';
-      if (cellType === 'shaded') return '#969696';
-      if (cellType === 'empty') return 'transparent';
-      // Only alternate colors for non-header rows
-      return 'white'; // Remove alternating colors
-    };
-
-    // Special styles for header cells
     const headerStyle = {
       ...baseStyle,
-      borderRight: '1px solid #1e88e5', // Blue border for headers
-      borderBottom: '1px solid #1e88e5', // Blue border for headers
       background: '#e5e7eb',
+      borderRight: '1px solid #1e88e5',
+      borderBottom: '1px solid #1e88e5',
+      fontWeight: 500,
     };
 
-    // Regular cell style
-    const regularStyle = {
-      ...baseStyle,
-      background: getBackground(cell.type, cell.rownr),
-    };
+    if (!cell || !cell.type) {
+      return createEmptyCell();
+    }
 
     switch (cell.type) {
       case 'header':
@@ -417,27 +370,19 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
           value: cell.value,
           nonEditable: cell.nonEditable,
           style: {
-            ...regularStyle,
+            ...baseStyle,
+            background: 'white',
             textAlign: 'right',
           },
         };
       case 'empty':
-        return {
-          type: 'empty',
-          text: '',
-          nonEditable: true,
-          style: {
-            ...regularStyle,
-            background: 'transparent',
-            border: 'none',
-          },
-        };
+        return createEmptyCell();
       default:
         return {
           type: cell.nonEditable ? 'invalidtext' : 'text',
           text: decodeHtmlEntities(cell.text || ''),
           nonEditable: cell.nonEditable,
-          style: regularStyle,
+          style: baseStyle,
         };
     }
   }, []);
