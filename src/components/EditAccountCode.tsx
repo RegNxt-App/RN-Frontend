@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
 
 interface LedgerData {
   ledgerCode: string;
@@ -46,12 +48,10 @@ const EditAccountCode = ({ onClose, record }: EditRecordPopupProps) => {
           >
             Ledger Code
           </label>
-          <input
-            type="text"
+          <Input
             id="ledgerCode"
             value={ledgerCode}
             onChange={(e) => setLedgerCode(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-2"
           />
         </div>
         <div className="mb-4">
@@ -61,12 +61,11 @@ const EditAccountCode = ({ onClose, record }: EditRecordPopupProps) => {
           >
             Account Code
           </label>
-          <input
+          <Input
             type="text"
             id="accountCode"
             value={accountCode}
             onChange={(e) => setAccountCode(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-2"
           />
         </div>
         <div className="mb-4">
@@ -76,29 +75,28 @@ const EditAccountCode = ({ onClose, record }: EditRecordPopupProps) => {
           >
             Description
           </label>
-          <input
+          <Input
             type="text"
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-2"
           />
         </div>
         <div className="flex justify-end">
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="mr-2 px-4 py-2 bg-gray-300 rounded-md"
+            className="bg-gray-300 hover:bg-gray-300"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={handleSave}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+            className="bg-purple text-white bg-indigo-800"
           >
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </div>

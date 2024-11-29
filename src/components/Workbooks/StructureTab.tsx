@@ -12,6 +12,7 @@ import {
   selectStructureError,
 } from '../../features/sheetData/sheetDataSlice';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
+import { Input } from '../ui/input';
 
 const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   const dispatch = useAppDispatch();
@@ -142,10 +143,8 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
 
         {/* Search section */}
         <div className="mb-4">
-          <input
-            type="text"
+          <Input
             placeholder="Search..."
-            className="w-full p-2 border rounded"
             value={searchTerm}
             onChange={handleSearch}
           />

@@ -115,7 +115,7 @@ const PostUnpost = () => {
                 className={`z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-md cursor-pointer ${
                   activeTab === tab.id
                     ? 'bg-white text-blue-700 shadow-md font-bold border-b-2'
-                    : 'text-slate-600 bg-inherit font-bold'
+                    : 'text-black bg-inherit font-bold'
                 }`}
                 onClick={() => setActiveTab(tab.id)}
                 role="tab"

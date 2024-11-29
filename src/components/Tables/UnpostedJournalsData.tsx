@@ -3,6 +3,25 @@ import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
 import Api from '../../utils/Api';
 import FdlJournalDetailsTable from './FdlJournalDetailsTable';
+import Loader from '../../components/loader';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Button } from '../ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import { Input } from '../ui/input';
 
 interface UnpostedJournalsData {
   id: string;
@@ -210,9 +229,9 @@ const UnpostedJournalsData = ({
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
               {[
                 'Journal Code',
                 'Journal Nr',
@@ -225,104 +244,191 @@ const UnpostedJournalsData = ({
                 'Reversal Journal Nr',
                 'Description',
               ].map((header) => (
-                <th
-                  key={header}
-                  className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11"
-                >
-                  <div className="flex items-center">
+                <TableHead key={header}>
+                  <div className="flex items-center gap-2">
                     {header}
-                    <button
-                      className="ml-2"
-                      onClick={() =>
-                        setActiveFilter(activeFilter === header ? null : header)
-                      }
-                    >
-                      <Filter size={16} strokeWidth={1.5} />
-                    </button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 p-0"
+                        >
+                          <Filter className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <div className="space-y-4">
+                          <Select
+                            value={
+                              filters[header.toLowerCase()]?.type || 'matchAll'
+                            }
+                            onValueChange={(value) =>
+                              handleFilterChange(
+                                header.toLowerCase(),
+                                value as FilterType,
+                                filters[header.toLowerCase()]?.value || '',
+                              )
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select match type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="matchAll">
+                                Match All
+                              </SelectItem>
+                              <SelectItem value="matchAny">
+                                Match Any
+                              </SelectItem>
+                              <SelectItem value="startsWith">
+                                Starts With
+                              </SelectItem>
+                              <SelectItem value="Contains">Contains</SelectItem>
+                              <SelectItem value="NotContains">
+                                Not Contains
+                              </SelectItem>
+                              <SelectItem value="EndsWith">
+                                Ends With
+                              </SelectItem>
+                              <SelectItem value="Equals">Equals</SelectItem>
+                              <SelectItem value="NotEquals">
+                                Not Equals
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          <Input
+                            placeholder="Search..."
+                            value={filters[header.toLowerCase()]?.value || ''}
+                            onChange={(e) =>
+                              handleFilterChange(
+                                header.toLowerCase(),
+                                filters[header.toLowerCase()]?.type ||
+                                  'matchAll',
+                                e.target.value,
+                              )
+                            }
+                          />
+
+                          <div className="flex justify-between">
+                            <Button
+                              variant="outline"
+                              onClick={() => clearFilter(header.toLowerCase())}
+                            >
+                              Clear
+                            </Button>
+                            <Button onClick={() => setActiveFilter(null)}>
+                              Apply
+                            </Button>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
-                  {activeFilter === header &&
-                    renderFilterDropdown(header.toLowerCase())}
-                </th>
+                </TableHead>
               ))}
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentItems.map((item) => (
-              <tr
+              <TableRow
                 key={item.id}
                 onClick={() => handleRowClick(item.journalCode, item.journalNr)}
-                className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="cursor-pointer"
               >
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.journalCode}
-                  </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.journalNr}
-                  </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">{item.status}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">{item.entryDate}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.entityList}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.minEffectiveDate}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.maxEffectiveDate}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.reversalJournalCode}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.reversalJournalNr}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.description}
-                  </p>
-                </td>
-              </tr>
+                <TableCell>{item.journalCode}</TableCell>
+                <TableCell>{item.journalNr}</TableCell>
+                <TableCell>{item.status}</TableCell>
+                <TableCell>{item.entryDate}</TableCell>
+                <TableCell>{item.entityList}</TableCell>
+                <TableCell>{item.minEffectiveDate}</TableCell>
+                <TableCell>{item.maxEffectiveDate}</TableCell>
+                <TableCell>{item.reversalJournalCode}</TableCell>
+                <TableCell>{item.reversalJournalNr}</TableCell>
+                <TableCell>{item.description}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      <div className="flex items-center justify-between px-2">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {`${indexOfFirstItem + 1}-${Math.min(indexOfLastItem, filteredData.length)} of ${filteredData.length} entries`}
+        </div>
+        <div className="flex items-center space-x-6 lg:space-x-8">
+          <div className="flex items-center space-x-2">
+            <p className="text-sm font-medium">Rows per page</p>
+            <Select
+              value={`${itemsPerPage}`}
+              onValueChange={(value) => {
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue placeholder={itemsPerPage} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 20, 30, 50].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+            >
+              {'<<'}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              {'<'}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              {'>'}
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            >
+              {'>>'}
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {journalDetails &&
-      clickedjournalNr &&
-      clickedjournalCode &&
-      journalDetails.length > 0 ? (
-        <FdlJournalDetailsTable
-          data={journalDetails}
-          clickedjournalNr={clickedjournalNr}
-          clickedjournalCode={clickedjournalCode}
-          onUpdateSuccess={handleUpdateSuccess}
-        />
-      ) : (
-        <div></div>
-      )}
+        clickedjournalNr &&
+        clickedjournalCode &&
+        journalDetails.length > 0 && (
+          <FdlJournalDetailsTable
+            data={journalDetails}
+            clickedjournalNr={clickedjournalNr}
+            clickedjournalCode={clickedjournalCode}
+            onUpdateSuccess={handleUpdateSuccess}
+          />
+        )}
     </div>
   );
 };

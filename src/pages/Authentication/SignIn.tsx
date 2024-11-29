@@ -131,7 +131,7 @@ const SignIn = () => {
           </div>
 
           <Button
-            className="w-full text-white	"
+            className="w-full text-white bg-purple"
             type="submit"
             disabled={form.formState.isSubmitting}
           >

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
 import Api from '../../../../utils/Api';
+import { Button } from '@/components/ui/button';
 
 interface ValidationResponse {
   rulecount: number;
@@ -315,17 +316,17 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
   return (
     <div className="rounded-lg bg-white shadow-sm">
       <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        <button
-          className={`px-4 py-2 bg-green-500 text-white rounded-md mb-4 ${
+        <Button
+          className={`px-4 py-2 bg-purple text-white rounded-md mb-4 ${
             isValidating
               ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-green-600'
+              : 'hover:bg-indigo-800	'
           }`}
           onClick={handleValidate}
           disabled={isValidating}
         >
           {isValidating ? 'Validating...' : 'Validate'}
-        </button>
+        </Button>
         <div className="max-h-[60vh] overflow-y-auto">
           {renderTableItems(tableData)}
         </div>

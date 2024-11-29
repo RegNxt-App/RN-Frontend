@@ -109,7 +109,7 @@ const OverviewRegulatoryReports = () => {
             variant="ghost"
             className={`rounded-none px-4 ${
               view === 'list'
-                ? 'bg-primary text-white hover:bg-primary/90'
+                ? 'bg-purple text-white hover:bg-primary/90'
                 : 'hover:bg-accent hover:text-accent-foreground'
             }`}
             onClick={() => setView('list')}
@@ -121,7 +121,7 @@ const OverviewRegulatoryReports = () => {
             variant="ghost"
             className={`rounded-none px-4 ${
               view === 'kanban'
-                ? 'bg-primary text-white hover:bg-primary/90'
+                ? 'bg-purple text-white hover:bg-primary/90'
                 : 'hover:bg-accent hover:text-accent-foreground'
             }`}
             onClick={() => setView('kanban')}
@@ -129,7 +129,10 @@ const OverviewRegulatoryReports = () => {
             Kanban
           </Button>
         </div>
-        <Button className="text-white" onClick={() => setIsOpen(true)}>
+        <Button
+          className="text-white bg-purple"
+          onClick={() => setIsOpen(true)}
+        >
           Add Workbook
         </Button>
       </div>

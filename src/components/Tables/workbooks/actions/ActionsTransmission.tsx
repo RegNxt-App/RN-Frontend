@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Api from '../../../../utils/Api';
+import { Button } from '@/components/ui/button';
 
 interface ActionsTransmissionProps {
   workbookId: string | number;
@@ -105,13 +106,13 @@ const ActionsTransmission: React.FC<ActionsTransmissionProps> = ({
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <button
-        className="px-4 py-2 bg-green-500 text-white rounded-md mb-4 disabled:opacity-50 hover:bg-green-600 transition-colors"
+      <Button
+        className="bg-purple text-white"
         onClick={handleButtonClick}
         disabled={isLoading || isProcessing}
       >
         {getButtonText()}
-      </button>
+      </Button>
       {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
     </div>
   );

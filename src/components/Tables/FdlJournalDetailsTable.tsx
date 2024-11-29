@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
 import Api from '../../utils/Api';
+import { Button } from '../ui/button';
 
 interface JournalEntry {
   journalCode: string;
@@ -228,15 +229,12 @@ const FdlJournalDetailsTable = ({
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 mt-8">
       <div className="max-w-full overflow-x-auto">
-        <p className="font-semibold text-gray-700 mb-3">
+        <p className="font-semibold text-black mb-3">
           Journal details for {clickedjournalCode} - {clickedjournalNr}
         </p>
-        <button
-          className="px-4 py-2 bg-green-500 text-white rounded-md mb-4"
-          onClick={handlePostToBalances}
-        >
+        <Button className="bg-purple text-white" onClick={handlePostToBalances}>
           Post into Balances
-        </button>
+        </Button>
 
         <table className="w-full table-auto">
           <thead>

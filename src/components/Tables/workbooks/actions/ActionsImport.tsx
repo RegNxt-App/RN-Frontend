@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 const ActionsImport = () => {
   const [selectedOption, setSelectedOption] = useState<'Excel' | 'XBRL'>(
@@ -26,26 +28,26 @@ const ActionsImport = () => {
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       {/* Toggle Button */}
       <div className="flex justify-center mb-6">
-        <button
+        <Button
           onClick={handleToggle}
           className={`px-4 py-2 rounded-md ${
             selectedOption === 'Excel'
-              ? 'bg-blue-500 text-white'
+              ? 'bg-purple text-white'
               : 'bg-gray-200 text-black'
           } mr-2`}
         >
           Excel
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleToggle}
           className={`px-4 py-2 rounded-md ${
             selectedOption === 'XBRL'
-              ? 'bg-blue-500 text-white'
+              ? 'bg-purple text-white'
               : 'bg-gray-200 text-black'
           }`}
         >
           XBRL
-        </button>
+        </Button>
       </div>
 
       {/* Drag & Drop File Section */}
@@ -61,21 +63,18 @@ const ActionsImport = () => {
           className="hidden"
           id="file-upload"
         />
-        <label
+        <Label
           htmlFor="file-upload"
-          className="px-4 py-2 bg-green-500 text-white rounded-md cursor-pointer"
+          // className="px-4 py-2 bg-green-500 text-white rounded-md cursor-pointer"
         >
           Choose File
-        </label>
+        </Label>
       </div>
 
       {/* Upload Button */}
-      <button
-        onClick={handleUpload}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md w-full"
-      >
+      <Button onClick={handleUpload} className="bg-purple text-white w-full">
         {selectedOption === 'Excel' ? 'React Excel' : 'React XBRL'}
-      </button>
+      </Button>
     </div>
   );
 };

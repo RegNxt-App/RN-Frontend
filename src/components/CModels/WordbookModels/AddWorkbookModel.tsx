@@ -291,7 +291,10 @@ const AddWorkbookModel = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button className="text-white" type="submit">
+              <Button
+                className="text-white bg-purple hover:bg-indigo-800	"
+                type="submit"
+              >
                 Create Report
               </Button>
             </DialogFooter>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Pagination from '../../../Pagination';
 import Api from '../../../../utils/Api';
 import Swal from 'sweetalert2';
+import { Button } from '@/components/ui/button';
 
 interface SaveTableData {
   cellid: number;
@@ -118,13 +119,12 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
   return (
     <div className="flex flex-col h-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="px-5 py-4 sm:px-7.5">
-        <button
+        <Button
           className={`
-            px-4 py-2 rounded-md mb-4 transition-all duration-200 flex items-center justify-center min-w-[120px]
             ${
               isButtonDisabled
-                ? 'bg-red-500 cursor-not-allowed opacity-60'
-                : 'bg-green-500 hover:bg-green-600'
+                ? 'bg-purple cursor-not-allowed opacity-60'
+                : 'bg-purple hover:bg-indigo-800	'
             } text-white
           `}
           onClick={handleSaveToDb}
@@ -143,7 +143,7 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
           ) : (
             buttonText
           )}
-        </button>
+        </Button>
       </div>
 
       <div className="flex-1 overflow-hidden px-5 sm:px-7.5">

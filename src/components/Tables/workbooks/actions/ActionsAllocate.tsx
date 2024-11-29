@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 const ActionsAllocate = () => {
@@ -49,12 +50,9 @@ const ActionsAllocate = () => {
           <option value="Ruleset 3">Ruleset 3</option>
         </select>
 
-        <button
-          className="px-4 py-2 bg-green-500 text-white rounded-md"
-          onClick={handleCapture}
-        >
+        <Button className="bg-purple text-white" onClick={handleCapture}>
           Capture
-        </button>
+        </Button>
       </div>
 
       {/* Section 2: Full Allocation (from generic dimension+metric table) */}
@@ -62,12 +60,9 @@ const ActionsAllocate = () => {
         Full Allocation (from generic dimension+metric table)
       </h2>
 
-      <button
-        className="px-4 py-2 bg-blue-500 text-white rounded-md"
-        onClick={handleAllocate}
-      >
+      <Button className="bg-purple text-white" onClick={handleAllocate}>
         Allocate
-      </button>
+      </Button>
     </div>
   );
 };

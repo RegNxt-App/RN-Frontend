@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Button } from './ui/button';
 
 interface AccountingCategory {
   id: string;
@@ -39,47 +42,33 @@ const EditAccountingCat = ({ onClose, record }: EditRecordPopupProps) => {
           Edit Accounting Category
         </h3>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1" htmlFor="name">
-            Name
-          </label>
-          <input
-            type="text"
+          <Label htmlFor="name">Name</Label>
+          <Input
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-2"
+            // className="w-full rounded-md border border-gray-300 p-2"
           />
         </div>
         <div className="mb-4">
-          <label
-            className="block text-sm font-medium mb-1"
-            htmlFor="description"
-          >
-            Description
-          </label>
-          <input
-            type="text"
+          <Label htmlFor="description">Description</Label>
+          <Input
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-md border border-gray-300 p-2"
           />
         </div>
         <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="mr-2 px-4 py-2 bg-gray-300 rounded-md"
-          >
+          <Button onClick={onClose} className="bg-gray-300 hover:bg-gray-300">
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md"
+            className="bg-purple text-white hover:bg-indigo-800"
           >
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </div>

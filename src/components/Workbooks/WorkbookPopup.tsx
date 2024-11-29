@@ -37,6 +37,7 @@ import { InvalidTextCellTemplate } from '../ReactGrid/InvalidTextCellTemplate';
 import { InvalidNumberCellTemplate } from '../ReactGrid/InvalidNumberCellTemplate';
 import { Dialog } from '@headlessui/react';
 import { removeLastSelectedSheetItems } from '../../utils/localStorage';
+import { Button } from '../ui/button';
 interface WorkbookData {
   id: number;
   name: string;
@@ -1107,12 +1108,12 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
                         <div className="border-b border-gray-200 pb-2 mb-4 flex justify-center">
                           <span className="p-tag">Possible values</span>
                         </div>
-                        <button
+                        <Button
                           onClick={_grabCellValue}
-                          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-2"
+                          className="bg-purple text-white hover:bg-indigo-800	mb-2"
                         >
                           Copy value into cell
-                        </button>
+                        </Button>
                         <select
                           value={selectedOption?.name}
                           onChange={(e) =>
