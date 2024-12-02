@@ -3,6 +3,14 @@ import Pagination from '../../../Pagination';
 import Api from '../../../../utils/Api';
 import Swal from 'sweetalert2';
 import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface SaveTableData {
   cellid: number;
@@ -26,6 +34,7 @@ const itemsPerPage = 10;
 const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [pageSize, setPageSize] = useState(1);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -33,10 +42,13 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+  };
   const handleSaveToDb = async () => {
     if (!data.length) return;
 
@@ -146,89 +158,47 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
         </Button>
       </div>
 
-      <div className="flex-1 overflow-hidden px-5 sm:px-7.5">
-        <div className="relative h-full">
-          <div className="absolute inset-0 overflow-auto">
-            <table className="w-full table-auto">
-              <thead className="sticky top-0 z-10 bg-gray-2 dark:bg-meta-4">
-                <tr className="text-left">
-                  <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                    Cell Id
-                  </th>
-                  <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                    Cell Code
-                  </th>
-                  <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                    Sheet Id
-                  </th>
-                  <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                    Row Nr
-                  </th>
-                  <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white">
-                    Col Nr
-                  </th>
-                  <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                    Previous Value
-                  </th>
-                  <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                    New Value
-                  </th>
-                  <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
-                    Comment
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((item) => (
-                  <tr key={item.cellid}>
-                    <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {item.cellid}
-                      </h5>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                      <h5 className="font-medium text-black dark:text-white">
-                        {item.cellcode}
-                      </h5>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">
-                        {item.sheetid}
-                      </p>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">{item.rowNr}</p>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">{item.colNr}</p>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">
-                        {item.prevvalue}
-                      </p>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">
-                        {item.newvalue}
-                      </p>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">
-                        {item.comment}
-                      </p>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      {/* <div className="flex-1 overflow-hidden px-5 sm:px-7.5"> */}
+      {/* <div className="relative max-h-full"> */}
+      {/* <div className="absolute inset-0 overflow-auto"> */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Cell Id</TableHead>
+            <TableHead>Cell Code</TableHead>
+            <TableHead>Sheet Id</TableHead>
+            <TableHead>Row Nr</TableHead>
+            <TableHead>Col Nr</TableHead>
+            <TableHead>Previous Value</TableHead>
+            <TableHead>New Value</TableHead>
+            <TableHead>Comment</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {currentItems.map((item) => (
+            <TableRow key={item.cellid}>
+              <TableCell>{item.cellid}</TableCell>
+              <TableCell>{item.cellcode}</TableCell>
+              <TableCell>{item.sheetid}</TableCell>
+              <TableCell>{item.rowNr}</TableCell>
+              <TableCell>{item.colNr}</TableCell>
+              <TableCell>{item.prevvalue}</TableCell>
+              <TableCell>{item.newvalue}</TableCell>
+              <TableCell>{item.comment}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      {/* </div> */}
+      {/* </div> */}
+      {/* </div> */}
 
       <div className="px-5 py-4 sm:px-7.5">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
           onPageChange={handlePageChange}
         />
       </div>

@@ -3,6 +3,16 @@ import Pagination from '../../../Pagination';
 import ViewLayer from './ViewLayer';
 import Api from '../../../../utils/Api';
 import { Dialog } from '../../../ui/Dialog';
+import DeleteDialog from './DeleteDialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 interface LayersTableData {
   versionId: number;
   from: string;
@@ -54,12 +64,6 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
     return [...data].sort((a, b) => a.versionId - b.versionId);
   }, [data]);
 
-  useEffect(() => {
-    const maxPage = Math.ceil(sortedData.length / itemsPerPage);
-    if (currentPage > maxPage && maxPage > 0) {
-      setCurrentPage(maxPage);
-    }
-  }, [sortedData.length, currentPage]);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = sortedData.slice(indexOfFirstItem, indexOfLastItem);
@@ -84,7 +88,7 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
         ? response.data
         : [response.data];
       setVersionDetails(detailsData);
-      setIsModalOpen(true);
+      setIsModalOpen(true); // Open modal when version is selected
     } catch (err) {
       console.error('Error fetching version details:', err);
       setError('Failed to fetch version details');
@@ -99,6 +103,7 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
     setVersionDetails([]);
     setError(null);
   };
+
   const handleDelete = async (version: LayersTableData) => {
     try {
       setIsLoading(true);
@@ -116,7 +121,7 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
         version,
         cellCount: versionData.length,
       });
-      setIsDeleteDialogOpen(true);
+      setIsDeleteDialogOpen(true); // Open delete confirmation dialog
     } catch (err) {
       console.error('Error fetching version details:', err);
       setError('Failed to fetch version details for deletion');
@@ -171,78 +176,48 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
         <div className="max-w-full">
           <div className="overflow-x-auto">
             <div className="max-h-[580px] overflow-y-auto">
-              <table className="w-full table-auto relative">
-                <thead className="sticky top-0 bg-gray-2 dark:bg-meta-4 z-10">
-                  <tr className="bg-gray-2 text-left dark:bg-meta-4">
-                    <th className="min-w-[80px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                      Version Id
-                    </th>
-                    <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                      From
-                    </th>
-                    <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                      To
-                    </th>
-                    <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                      Reason
-                    </th>
-                    <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                      Modifier
-                    </th>
-                    <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white text-center">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Version Id</TableHead>
+                    <TableHead>From</TableHead>
+                    <TableHead>To</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Modifier</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {currentItems.map((item) => (
-                    <tr key={item.versionId}>
-                      <td className="border-b border-[#eee] py-3 px-2 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {item.versionId}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-3 px-2 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {item.from}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-3 px-2 dark:border-strokedark">
-                        <p className="text-black dark:text-white">{item.to}</p>
-                      </td>
-                      <td className="border-b border-[#eee] py-3 px-2 dark:border-strokedark">
-                        <p className="text-black dark:text-white">
-                          {item.reason}
-                        </p>
-                      </td>
-                      <td className="border-b border-[#eee] py-3 px-2 dark:border-strokedark">
-                        <p className="text-black dark:text-white">
-                          {item.modifier}
-                        </p>
-                      </td>
-                      <td className="border-b border-[#eee] py-3 px-2 dark:border-strokedark">
+                    <TableRow key={item.versionId}>
+                      <TableCell>{item.versionId}</TableCell>
+                      <TableCell>{item.from}</TableCell>
+                      <TableCell>{item.to}</TableCell>
+                      <TableCell>{item.reason}</TableCell>
+                      <TableCell>{item.modifier}</TableCell>
+                      <TableCell>
                         <div className="flex items-center justify-center space-x-3.5">
-                          <button
-                            className="inline-flex items-center justify-center rounded-md border border-blue-500 py-1 text-center font-medium text-blue-500 hover:bg-blue-500 hover:text-white lg:px-4 xl:px-6"
+                          <Button
+                            className="text-white bg-purple hover:bg-white hover:text-purple border hover:border-purple"
                             onClick={() => handleView(item)}
                           >
                             View
-                          </button>
+                          </Button>
                           {item.versionId !== 1 && (
-                            <button
-                              className="inline-flex items-center justify-center rounded-md border border-red-500 py-1 text-center font-medium text-red-500 hover:bg-red-500 hover:text-white lg:px-4 xl:px-6"
+                            <Button
+                              className="text-white bg-red-500 hover:bg-white hover:text-red-500 border hover:border-red-500"
                               onClick={() => handleDelete(item)}
                               disabled={isDeleting}
                             >
                               {isDeleting ? 'Removing...' : 'Remove'}
-                            </button>
+                            </Button>
                           )}
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </div>
         </div>
@@ -252,7 +227,6 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
           onPageChange={handlePageChange}
         />
       </div>
-
       <Dialog
         open={isModalOpen}
         onClose={handleCloseModal}
@@ -267,10 +241,10 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
           <div className="text-red-500 p-4 text-center">
             <p>{error}</p>
             <button
-              className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md dark:bg-meta-4 dark:text-gray-200 dark:hover:bg-meta-4/80 transition-colors"
-              onClick={() => selectedVersion && handleView(selectedVersion)}
+              className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md dark:bg-meta-4 dark:text-gray-200 dark:hover:bg-meta-3"
+              onClick={handleCloseModal}
             >
-              Retry
+              Close
             </button>
           </div>
         ) : (
@@ -281,50 +255,42 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
           />
         )}
       </Dialog>
-      <Dialog
+      {/* <Dialog
         open={isDeleteDialogOpen}
-        onClose={() => {
-          if (!isDeleting) {
-            setIsDeleteDialogOpen(false);
-            setDeleteConfirmationData(null);
-          }
-        }}
-        title="Confirm Delete"
+        onClose={() => setIsDeleteDialogOpen(false)}
+        title="Confirm Deletion"
+        description="Are you sure you want to delete this version?"
       >
-        <div className="p-6">
-          <p className="text-base text-gray-700 dark:text-gray-300">
-            Are you sure you want to remove the changes related to version{' '}
-            <span className="font-semibold">
-              {deleteConfirmationData?.version.versionId}
-            </span>
-            ? This will reverse{' '}
-            <span className="font-semibold">
-              {deleteConfirmationData?.cellCount}
-            </span>{' '}
-            cells!
+        <div className="p-4">
+          <p>
+            You are about to delete version{' '}
+            {deleteConfirmationData?.version.versionId}. It has{' '}
+            {deleteConfirmationData?.cellCount} cells.
           </p>
-
-          <div className="mt-6 flex justify-end space-x-4">
+          <div className="mt-4 flex justify-between space-x-4">
             <button
-              onClick={() => {
-                setIsDeleteDialogOpen(false);
-                setDeleteConfirmationData(null);
-              }}
+              className="px-4 py-2 bg-red-600 text-white rounded"
+              onClick={handleConfirmDelete}
               disabled={isDeleting}
-              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors disabled:opacity-50"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </button>
+            <button
+              className="px-4 py-2 bg-gray-300 text-black rounded"
+              onClick={() => setIsDeleteDialogOpen(false)}
             >
               Cancel
             </button>
-            <button
-              onClick={handleConfirmDelete}
-              disabled={isDeleting}
-              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:bg-red-300"
-            >
-              {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-            </button>
           </div>
         </div>
-      </Dialog>
+      </Dialog> */}
+      <DeleteDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirmDelete={handleConfirmDelete}
+        deleteConfirmationData={deleteConfirmationData}
+        isDeleting={isDeleting}
+      />
     </>
   );
 };
