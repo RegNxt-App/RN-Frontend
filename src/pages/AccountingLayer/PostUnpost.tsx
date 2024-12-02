@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PostedJournalsData from '../../components/Tables/PostedJournalsData';
 import UnpostedJournalsData from '../../components/Tables/UnpostedJournalsData';
-import UploadPan from './UploadJournalPan';
 import Api from '../../utils/Api';
 import Loader from '../../components/loader';
+import UploadPan from './UploadJournalPan';
 interface Item {
   id: string;
   journalCode: string;
@@ -76,7 +76,6 @@ const PostUnpost = () => {
       title: 'Unposted Journals',
       content: (
         <>
-          <UploadPan />
           {loading ? (
             <Loader />
           ) : error ? (
@@ -106,7 +105,7 @@ const PostUnpost = () => {
     <div className="w-full">
       <div className="relative right-0">
         <ul
-          className="relative flex flex-wrap px-1.5 py-1.5 list-none rounded-md bg-slate-100"
+          className="relative flex flex-wrap px-1.5 py-1.5 list-none rounded-md"
           role="tablist"
         >
           {tabs.map((tab) => (
@@ -127,6 +126,7 @@ const PostUnpost = () => {
             </li>
           ))}
         </ul>
+        <UploadPan />
 
         {/* <div className="p-5 bg-white shadow-md rounded-b-md"> */}
         {tabs.map((tab) => (

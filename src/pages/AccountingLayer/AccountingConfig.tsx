@@ -128,7 +128,7 @@ const AccountingConfig = () => {
     <div className="w-full">
       <div className="relative right-0">
         <ul
-          className="relative flex flex-wrap px-1.5 py-1.5 list-none rounded-md bg-slate-100"
+          className="relative flex flex-wrap px-1.5 py-1.5 list-none rounded-md"
           role="tablist"
         >
           {tabs.map((tab) => (
