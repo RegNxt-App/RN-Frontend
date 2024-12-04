@@ -28,6 +28,14 @@ import AccountingConfig from './pages/AccountingLayer/AccountingConfig';
 import PostUnpost from './pages/AccountingLayer/PostUnpost';
 import ViewBalance from './pages/AccountingLayer/ViewBalance';
 import { Toaster } from '@/components/ui/toaster';
+import Connections from './pages/Orchestra/Connections';
+import Variables from './pages/Orchestra/Variables';
+import Datasets from './pages/Orchestra/Datasets';
+import Dataviews from './pages/Orchestra/Dataviews';
+import DataLoaders from './pages/Orchestra/DataLoaders';
+import Tasks from './pages/Orchestra/Tasks';
+import Workflows from './pages/Orchestra/Workflows';
+import Monitoring from './pages/Orchestra/Monitoring';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -51,210 +59,302 @@ function App() {
         <Route path="/auth/signin" element={<SignIn />} />
         <Route path="/auth/signup" element={<SignUp />} />
 
+        {/* RegNxt Orchestra Routes */}
+
+        <Route
+          path="/orchestra/connections"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt | Orchestra " />
+                <Connections />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/orchestra/variables"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt | Orchestra " />
+                <Variables />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/orchestra/datasets"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt | Orchestra " />
+                <Datasets />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/orchestra/dataviews"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt | Orchestra " />
+                <Dataviews />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/orchestra/data-loaders"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt | Orchestra " />
+                <DataLoaders />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/orchestra/tasks"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt | Orchestra " />
+                <Tasks />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/orchestra/workflows"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt | Orchestra " />
+                <Workflows />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+        <Route
+          path="/orchestra/monitoring"
+          element={
+            <DefaultLayout>
+              <PrivateRoute>
+                <PageTitle title="RegNxt | Orchestra " />
+                <Monitoring />
+              </PrivateRoute>
+            </DefaultLayout>
+          }
+        />
+
+        {/* RegNxt Reporting Routes */}
         <Route
           index
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Dashboard />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/overview"
+          path="/reporting/overview"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Overview />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/view-balance"
+          path="/reporting/view-balance"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="RegNxt View- Balance" />
+                <PageTitle title="RegNxt | Reporting" />
                 <ViewBalance />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/post-unpost"
+          path="/reporting/post-unpost"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="RegNxt - Post Unpost" />
+                <PageTitle title="RegNxt | Reporting" />
                 <PostUnpost />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/accounting-configuration"
+          path="/reporting/accounting-configuration"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="RegNxt - Accounting Config" />
+                <PageTitle title="RegNxt | Reporting" />
                 <AccountingConfig />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/messages"
+          path="/reporting/messages"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Messages />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/inspect"
+          path="/reporting/inspect"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Inspect />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/profile"
+          path="/reporting/profile"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Profile />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/reports-overview"
+          path="/reporting/reports-overview"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <OverviewRegulatoryReports />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/data"
+          path="/reporting/data"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Data | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Data />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/business-rules"
+          path="/reporting/business-rules"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Business Rules | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <BusinessRules />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/reconciliations"
+          path="/reporting/reconciliations"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Reconciliations | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Reconciliations />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/processing"
+          path="/reporting/processing"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Processing | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Processing />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/accounting-layer"
+          path="/reporting/accounting-layer"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Accounting Layer | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <AccountingLayer />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/transaction-layer"
+          path="/reporting/transaction-layer"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Transaction Layer | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <TransactionLayer />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/entity"
+          path="/reporting/entity"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Entity | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Entity />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/template"
+          path="/reporting/template"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Template | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Template />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/regulatory-calender"
+          path="/reporting/regulatory-calender"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Regulatory Calender | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <RegulatoryCalender />
               </PrivateRoute>
             </DefaultLayout>
           }
         />
         <Route
-          path="/validation"
+          path="/reporting/validation"
           element={
             <DefaultLayout>
               <PrivateRoute>
-                <PageTitle title="Validation | RegNxt" />
+                <PageTitle title="RegNxt | Reporting" />
                 <Validation />
               </PrivateRoute>
             </DefaultLayout>

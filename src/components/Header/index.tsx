@@ -1,3 +1,12 @@
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 import DropdownUser from './DropdownUser';
 import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -6,13 +15,18 @@ interface HeaderProps {
   setSidebarOpen: (arg: boolean) => void;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (arg: boolean) => void;
+  setSelectedApp: (app: string) => void;
 }
 const Header = ({
   sidebarOpen,
   setSidebarOpen,
   sidebarCollapsed,
   setSidebarCollapsed,
+  setSelectedApp,
 }: HeaderProps) => {
+  const handleSelectChange = (value: string) => {
+    setSelectedApp(value);
+  };
   return (
     <header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
       <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
@@ -37,6 +51,18 @@ const Header = ({
               <ChevronLeft size={24} />
             )}
           </button>
+          <Select onValueChange={handleSelectChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select an App" />
+            </SelectTrigger>
+            <SelectContent className="mt-5">
+              <SelectGroup>
+                <SelectItem value="reporting">Reporting</SelectItem>
+                <SelectItem value="orchestra">Orchestra</SelectItem>
+                <SelectItem value="bird">BIRD</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="hidden sm:block"></div>
