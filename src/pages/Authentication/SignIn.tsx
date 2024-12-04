@@ -58,7 +58,7 @@ const SignIn = () => {
       });
 
       console.log('Authentication successful', data);
-      navigate('/reports-overview');
+      navigate('/reporting/reports-overview');
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to sign in';
       setError(errorMessage);
