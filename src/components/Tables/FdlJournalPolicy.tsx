@@ -44,13 +44,27 @@ type FilterType =
   | 'Equals'
   | 'NotEquals';
 
-const itemsPerPage = 10;
-
 const FdlJournalPolicy = ({ data }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [filteredData, setFilteredData] = useState<JournalPolicyData[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  const indexOfLastItem = (currentPage + 1) * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(0);
+  };
 
   useEffect(() => {
     applyFilters();
@@ -93,16 +107,6 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
       return newFilters;
     });
     setActiveFilter(null);
-  };
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
   };
 
   const renderFilterDropdown = (column: string) => (
@@ -244,6 +248,8 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
       />
     </div>

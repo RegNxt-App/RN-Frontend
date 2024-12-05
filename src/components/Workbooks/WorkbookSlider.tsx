@@ -97,7 +97,7 @@ const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
               <button
                 key={tab}
                 className={`px-4 py-2 mr-2 border-b-2 ${
-                  activeTab === tab ? 'border-blue-500' : 'border-transparent'
+                  activeTab === tab ? 'border-purple-500	' : 'border-transparent'
                 }`}
                 onClick={() =>
                   setActiveTab(tab as 'structure' | 'actions' | 'layers')

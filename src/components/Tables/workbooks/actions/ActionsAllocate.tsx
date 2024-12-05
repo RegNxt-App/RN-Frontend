@@ -50,7 +50,7 @@ const ActionsAllocate = () => {
           <option value="Ruleset 3">Ruleset 3</option>
         </select>
 
-        <Button className="bg-purple text-white" onClick={handleCapture}>
+        <Button className="bg-purple-500 text-white" onClick={handleCapture}>
           Capture
         </Button>
       </div>
@@ -60,7 +60,7 @@ const ActionsAllocate = () => {
         Full Allocation (from generic dimension+metric table)
       </h2>
 
-      <Button className="bg-purple text-white" onClick={handleAllocate}>
+      <Button className="bg-purple-500 text-white" onClick={handleAllocate}>
         Allocate
       </Button>
     </div>

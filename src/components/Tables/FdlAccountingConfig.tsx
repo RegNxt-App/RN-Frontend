@@ -42,7 +42,6 @@ type FilterType =
 const FdlAccountingConfig = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-
   const [filteredData, setFilteredData] = useState<AccountingCategory[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -50,12 +49,11 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
   const [recordToEdit, setRecordToEdit] = useState<AccountingCategory | null>(
     null,
   );
-
   const indexOfLastItem = (currentPage + 1) * pageSize;
   const indexOfFirstItem = indexOfLastItem - pageSize;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(filteredData.length / pageSize); // Use filteredData for totalPages
+  const totalPages = Math.ceil(filteredData.length / pageSize);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -63,7 +61,7 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
 
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
-    setCurrentPage(0); // Reset to first page when page size changes
+    setCurrentPage(0);
   };
 
   useEffect(() => {
@@ -86,7 +84,7 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
       });
     });
     setFilteredData(result);
-    setCurrentPage(0); // Reset to the first page after filtering
+    setCurrentPage(0);
   };
 
   const handleFilterChange = (

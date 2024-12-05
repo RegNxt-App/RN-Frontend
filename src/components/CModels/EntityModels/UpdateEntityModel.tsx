@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Api from '../../../utils/Api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Loader from '@/components/loader';
 
 interface UpdateRecordPopupProps {
   onClose: () => void;
@@ -126,7 +129,9 @@ const UpdateEntityModel = ({
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
-        <div className="bg-white p-6 rounded-sm">Loading...</div>
+        <div className="bg-white p-6 rounded-sm">
+          <Loader />
+        </div>
       </div>
     );
   }
@@ -146,7 +151,7 @@ const UpdateEntityModel = ({
         )}
         <form onSubmit={handleSubmit}>
           <div className="p-6.5 grid grid-cols-3 gap-4">
-            <input
+            <Input
               type="text"
               name="entityCode"
               placeholder="Entity Code"
@@ -155,7 +160,7 @@ const UpdateEntityModel = ({
               value={formData.entityCode}
               required
             />
-            <input
+            <Input
               type="text"
               name="entityLabel"
               placeholder="Entity Label"
@@ -164,7 +169,7 @@ const UpdateEntityModel = ({
               value={formData.entityLabel}
               required
             />
-            <input
+            <Input
               type="text"
               name="country"
               placeholder="Country"
@@ -173,7 +178,7 @@ const UpdateEntityModel = ({
               value={formData.country}
               required
             />
-            <input
+            <Input
               type="text"
               name="city"
               placeholder="City"
@@ -198,7 +203,7 @@ const UpdateEntityModel = ({
                 </option>
               ))}
             </select>
-            <input
+            <Input
               type="text"
               name="vat"
               placeholder="VAT"
@@ -207,7 +212,7 @@ const UpdateEntityModel = ({
               value={formData.vat}
               required
             />
-            <input
+            <Input
               type="text"
               name="bicCode"
               placeholder="BIC Code"
@@ -216,7 +221,7 @@ const UpdateEntityModel = ({
               value={formData.bicCode}
               required
             />
-            <input
+            <Input
               type="text"
               name="kbo"
               placeholder="KBO Code"
@@ -225,7 +230,7 @@ const UpdateEntityModel = ({
               value={formData.kbo}
               required
             />
-            <input
+            <Input
               type="text"
               name="lei"
               placeholder="LEI Code"
@@ -250,7 +255,7 @@ const UpdateEntityModel = ({
                 </option>
               ))}
             </select>
-            <input
+            <Input
               type="text"
               name="significantCurrencies"
               placeholder="Significant Currencies"
@@ -259,7 +264,7 @@ const UpdateEntityModel = ({
               value={formData.significantCurrencies}
               required
             />
-            <input
+            <Input
               type="email"
               name="email"
               placeholder="Email"
@@ -268,8 +273,7 @@ const UpdateEntityModel = ({
               value={formData.email}
               required
             />
-            <input
-              type="text"
+            <Input
               name="consolidationScope"
               placeholder="Consolidation Scope"
               className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
@@ -279,19 +283,16 @@ const UpdateEntityModel = ({
             />
           </div>
           <div className="flex justify-end p-6.5">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="mr-2 px-4 py-2 bg-gray-300 rounded-md"
+              className="mr-2 px-4 py-2 bg-gray-300 hover:bg-gray-300 rounded-md"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex justify-center rounded bg-primary p-3 font-medium text-white"
-            >
+            </Button>
+            <Button type="submit" className="bg-purple-500 text-white">
               Update
-            </button>
+            </Button>
           </div>
         </form>
       </div>

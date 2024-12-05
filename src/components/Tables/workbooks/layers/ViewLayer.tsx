@@ -30,19 +30,23 @@ interface DataTableProps {
   onRemove?: (versionId: number) => void;
 }
 
-const itemsPerPage = 5;
-
 const ViewLayer = ({ data, onView, onRemove }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfLastItem = (currentPage + 1) * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.ceil(data.length / pageSize); // Use filteredData for totalPages
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(0); // Reset to first page when page size changes
   };
 
   const formatDateTime = (dateTimeString: string) => {
@@ -88,6 +92,8 @@ const ViewLayer = ({ data, onView, onRemove }: DataTableProps) => {
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
       />
     </div>

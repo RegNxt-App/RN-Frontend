@@ -3,6 +3,14 @@ import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
 import Api from '../../utils/Api';
 import { Button } from '../ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
 interface JournalEntry {
   journalCode: string;
   journalNr: number;
@@ -53,15 +61,14 @@ type FilterType =
   | 'Equals'
   | 'NotEquals';
 
-const itemsPerPage = 10;
-
 const FdlPostedJournalDetailsTable = ({
   data,
   clickedjournalCode,
   clickedjournalNr,
   onUpdateSuccess,
 }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [filteredData, setFilteredData] = useState<JournalEntry[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -127,14 +134,19 @@ const FdlPostedJournalDetailsTable = ({
     setActiveFilter(null);
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfLastItem = (currentPage + 1) * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / pageSize);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(0);
   };
 
   const renderFilterDropdown = (column: string) => (
@@ -233,7 +245,7 @@ const FdlPostedJournalDetailsTable = ({
           Journal details for {clickedjournalCode} - {clickedjournalNr}
         </p>
         <Button
-          className=" bg-purple text-white"
+          className=" bg-purple-500 text-white"
           onClick={() => setShowConfirmDialog(true)}
         >
           Unpost from Balances
@@ -264,195 +276,44 @@ const FdlPostedJournalDetailsTable = ({
           </div>
         )}
 
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              {[
-                { key: 'journalLineNr', label: 'Line Nr' },
-                { key: 'domainId', label: 'Domain Id' },
-                { key: 'amountClass', label: 'Amount Class' },
-                { key: 'entity', label: 'Entity' },
-                { key: 'accountCode', label: 'Account Code' },
-                { key: 'counterparty', label: 'Counterparty' },
-                { key: 'currency', label: 'Currency' },
-                { key: 'dealId', label: 'Deal Id' },
-                { key: 'effectiveDate', label: 'Effective Date' },
-                { key: 'amountInOrigCCy', label: 'Amount In Orig CCy' },
-                {
-                  key: 'freeField1',
-                  label: fieldLabels.freefield1 || 'Free Field 1',
-                },
-                {
-                  key: 'freeField2',
-                  label: fieldLabels.freefield2 || 'Free Field 2',
-                },
-                {
-                  key: 'freeField3',
-                  label: fieldLabels.freefield3 || 'Free Field 3',
-                },
-                {
-                  key: 'freeField4',
-                  label: fieldLabels.freefield4 || 'Free Field 4',
-                },
-                {
-                  key: 'freeField5',
-                  label: fieldLabels.freefield5 || 'Free Field 5',
-                },
-                {
-                  key: 'freeField6',
-                  label: fieldLabels.freefield6 || 'Free Field 6',
-                },
-                {
-                  key: 'freeField7',
-                  label: fieldLabels.freefield7 || 'Free Field 7',
-                },
-                {
-                  key: 'freeField8',
-                  label: fieldLabels.freefield8 || 'Free Field 8',
-                },
-                {
-                  key: 'freeField9',
-                  label: fieldLabels.freefield9 || 'Free Field 9',
-                },
-                {
-                  key: 'freeField10',
-                  label: fieldLabels.freefield10 || 'Free Field 10',
-                },
-                { key: 'journalCode', label: 'Source' },
-                { key: 'description', label: 'Description' },
-              ].map(({ key, label }) => (
-                <th
-                  className="py-4 px-4 font-medium text-black dark:text-white xl:pl-11"
-                  key={key}
-                >
-                  <div className="flex items-center gap-2">
-                    <span>{label}</span>
-                    <Filter
-                      className="w-4 h-4"
-                      onClick={() => setActiveFilter(key)}
-                    />
-                  </div>
-                  {activeFilter === key && renderFilterDropdown(key)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {currentItems.map((item) => (
-              <tr key={`${item.journalCode}-${item.journalLineNr}`}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.journalLineNr}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">{item.domainId}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.amountClass}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">{item.entity}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.accountCode}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.counterparty}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">{item.currency}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">{item.dealId}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.effectiveDate}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.amountInOrigCCy}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField1}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField2}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField3}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField4}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField5}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField6}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField7}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField8}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField9}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField10}
-                  </p>
-                </td>
-
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.journalCode}
-                  </p>
-                </td>
-
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.description}
-                  </p>
-                </td>
-              </tr>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Journal Code</TableHead>
+              <TableHead>Journal Nr</TableHead>
+              <TableHead>Entity</TableHead>
+              <TableHead>Amount Class</TableHead>
+              <TableHead>Domain ID</TableHead>
+              <TableHead>Counterparty</TableHead>
+              <TableHead>Account Code</TableHead>
+              <TableHead>Deal ID</TableHead>
+              <TableHead>Currency</TableHead>
+              <TableHead>Description</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {currentItems.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell>{item.journalCode}</TableCell>
+                <TableCell>{item.journalNr}</TableCell>
+                <TableCell>{item.entity}</TableCell>
+                <TableCell>{item.amountClass}</TableCell>
+                <TableCell>{item.domainId}</TableCell>
+                <TableCell>{item.counterparty}</TableCell>
+                <TableCell>{item.accountCode}</TableCell>
+                <TableCell>{item.dealId}</TableCell>
+                <TableCell>{item.currency}</TableCell>
+                <TableCell>{item.description}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
       />
     </div>

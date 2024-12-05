@@ -47,14 +47,14 @@ function Template() {
         <div className="flex space-x-4">
           <Button
             onClick={() => setView('list')}
-            className="flex items-center gap-2 bg-purple text-white"
+            className="flex items-center gap-2 bg-purple-500 text-white"
           >
             Import
             <ArrowUpFromLine size={20} strokeWidth={1.75} />
           </Button>
           <Button
             onClick={() => setView('kanban')}
-            className="flex items-center gap-2 bg-purple text-white"
+            className="flex items-center gap-2 bg-purple-500 text-white"
           >
             Export
             <ArrowDownToLine size={20} strokeWidth={1.75} />
@@ -62,7 +62,7 @@ function Template() {
         </div>
 
         <Button
-          className="flex items-center gap-2 bg-purple text-white"
+          className="flex items-center gap-2 bg-purple-500 text-white"
           onClick={() => setIsOpen(true)}
         >
           <Plus size={20} strokeWidth={1.75} />

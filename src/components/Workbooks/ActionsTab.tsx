@@ -95,7 +95,7 @@ const ActionsTab: React.FC<{
             key={action}
             className={`px-4 py-2 mr-2 border-b-2 ${
               activeActionTab === action
-                ? 'border-blue-500'
+                ? 'border-purple-500'
                 : 'border-transparent'
             }`}
             onClick={() =>

@@ -522,7 +522,7 @@ const AddTemplateModel = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button className="bg-purple text-white" type="submit">
+              <Button className="bg-purple-500 text-white" type="submit">
                 Save Template
               </Button>
             </DialogFooter>

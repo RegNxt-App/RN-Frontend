@@ -1110,7 +1110,7 @@ const WorkbookPopup: React.FC<WorkbookPopupProps> = ({
                         </div>
                         <Button
                           onClick={_grabCellValue}
-                          className="bg-purple text-white hover:bg-indigo-800	mb-2"
+                          className="bg-purple-500 text-white hover:bg-indigo-800	mb-2"
                         >
                           Copy value into cell
                         </Button>

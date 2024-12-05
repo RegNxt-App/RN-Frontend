@@ -3,6 +3,14 @@ import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
 import Api from '../../utils/Api';
 import { Button } from '../ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
 
 interface JournalEntry {
   journalCode: string;
@@ -54,21 +62,33 @@ type FilterType =
   | 'Equals'
   | 'NotEquals';
 
-const itemsPerPage = 10;
-
 const FdlJournalDetailsTable = ({
   data,
   clickedjournalCode,
   clickedjournalNr,
   onUpdateSuccess,
 }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
-
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [filteredData, setFilteredData] = useState<JournalEntry[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [fieldLabels, setFieldLabels] = useState<{ [key: string]: string }>({});
 
+  const indexOfLastItem = (currentPage + 1) * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(0);
+  };
   useEffect(() => {
     applyFilters();
   }, [filters, data]);
@@ -125,16 +145,6 @@ const FdlJournalDetailsTable = ({
       return newFilters;
     });
     setActiveFilter(null);
-  };
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
   };
 
   const renderFilterDropdown = (column: string) => (
@@ -232,13 +242,16 @@ const FdlJournalDetailsTable = ({
         <p className="font-semibold text-black mb-3">
           Journal details for {clickedjournalCode} - {clickedjournalNr}
         </p>
-        <Button className="bg-purple text-white" onClick={handlePostToBalances}>
+        <Button
+          className="bg-purple-500 text-white"
+          onClick={handlePostToBalances}
+        >
           Post into Balances
         </Button>
 
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
               {[
                 { key: 'journalLineNr', label: 'Line Nr' },
                 { key: 'domainId', label: 'Domain Id' },
@@ -293,10 +306,7 @@ const FdlJournalDetailsTable = ({
                 { key: 'journalCode', label: 'Source' },
                 { key: 'description', label: 'Description' },
               ].map(({ key, label }) => (
-                <th
-                  className="py-4 px-4 font-medium text-black dark:text-white xl:pl-11"
-                  key={key}
-                >
+                <TableHead key={key}>
                   <div className="flex items-center gap-2">
                     <span>{label}</span>
                     <Filter
@@ -305,126 +315,52 @@ const FdlJournalDetailsTable = ({
                     />
                   </div>
                   {activeFilter === key && renderFilterDropdown(key)}
-                </th>
+                </TableHead>
               ))}
-            </tr>
-          </thead>
+            </TableRow>
+          </TableHeader>
 
-          <tbody>
+          <TableBody>
             {currentItems.map((item) => (
-              <tr key={`${item.journalCode}-${item.journalLineNr}`}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.journalLineNr}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">{item.domainId}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.amountClass}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">{item.entity}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.accountCode}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.counterparty}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">{item.currency}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">{item.dealId}</p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.effectiveDate}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.amountInOrigCCy}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField1}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField2}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField3}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField4}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField5}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField6}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField7}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField8}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField9}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.freeField10}
-                  </p>
-                </td>
-
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.journalCode}
-                  </p>
-                </td>
-
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.description}
-                  </p>
-                </td>
-              </tr>
+              <TableRow key={`${item.journalCode}-${item.journalLineNr}`}>
+                {[
+                  'journalLineNr',
+                  'domainId',
+                  'amountClass',
+                  'entity',
+                  'accountCode',
+                  'counterparty',
+                  'currency',
+                  'dealId',
+                  'effectiveDate',
+                  'amountInOrigCCy',
+                  'freeField1',
+                  'freeField2',
+                  'freeField3',
+                  'freeField4',
+                  'freeField5',
+                  'freeField6',
+                  'freeField7',
+                  'freeField8',
+                  'freeField9',
+                  'freeField10',
+                  'journalCode',
+                  'description',
+                ].map((key) => (
+                  <TableCell key={key}>
+                    <p className="text-black dark:text-white">{item[key]}</p>
+                  </TableCell>
+                ))}
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
       />
     </div>

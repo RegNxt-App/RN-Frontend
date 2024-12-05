@@ -48,14 +48,27 @@ type FilterType =
   | 'Equals'
   | 'NotEquals';
 
-const itemsPerPage = 10;
-
 const CurrencyRateData = ({ data }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [filteredData, setFilteredData] = useState<CurrencyRateData[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
+  const indexOfLastItem = (currentPage + 1) * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(0);
+  };
   useEffect(() => {
     applyFilters();
   }, [filters, data]);
@@ -179,15 +192,6 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
     </div>
   );
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
@@ -263,6 +267,8 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
       />
     </div>

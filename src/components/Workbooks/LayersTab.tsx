@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import LayersTable from '../Tables/workbooks/layers/LayersData';
 import Api from '../../utils/Api';
+import Loader from '../loader';
 
 interface LayersTableData {
   versionId: number;
@@ -62,7 +63,9 @@ const LayersTab: React.FC<LayersTabProps> = ({ workbookId }) => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-4">Loading...</div>
+      <div className="flex justify-center items-center p-4">
+        <Loader />
+      </div>
     );
   }
 

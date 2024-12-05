@@ -45,10 +45,10 @@ interface DeleteConfirmationData {
   version: LayersTableData;
   cellCount: number;
 }
-const itemsPerPage = 5;
 
 const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [versionDetails, setVersionDetails] = useState<VersionDetailData[]>([]);
@@ -64,14 +64,19 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
     return [...data].sort((a, b) => a.versionId - b.versionId);
   }, [data]);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfLastItem = (currentPage + 1) * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
   const currentItems = sortedData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedData.length / pageSize); // Use filteredData for totalPages
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(0); // Reset to first page when page size changes
   };
 
   const handleView = async (version: LayersTableData) => {
@@ -198,7 +203,7 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
                       <TableCell>
                         <div className="flex items-center justify-center space-x-3.5">
                           <Button
-                            className="text-white bg-purple hover:bg-white hover:text-purple border hover:border-purple"
+                            className="text-white bg-purple-500 hover:bg-white hover:text-purple border hover:border-purple"
                             onClick={() => handleView(item)}
                           >
                             View
@@ -224,6 +229,8 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
           onPageChange={handlePageChange}
         />
       </div>

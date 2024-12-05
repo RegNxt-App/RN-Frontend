@@ -135,8 +135,8 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
           className={`
             ${
               isButtonDisabled
-                ? 'bg-purple cursor-not-allowed opacity-60'
-                : 'bg-purple hover:bg-indigo-800	'
+                ? 'bg-purple-500 cursor-not-allowed opacity-60'
+                : 'bg-purple-500 hover:bg-indigo-800	'
             } text-white
           `}
           onClick={handleSaveToDb}

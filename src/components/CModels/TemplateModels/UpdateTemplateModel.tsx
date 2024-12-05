@@ -269,7 +269,7 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button className="text-white" type="submit">
+              <Button className="bg-purple-500 text-white" type="submit">
                 Save Changes
               </Button>
             </DialogFooter>

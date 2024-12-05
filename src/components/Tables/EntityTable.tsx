@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react';
 
 import Pagination from '../Pagination';
 import UpdateEntityModel from '../CModels/EntityModels/UpdateEntityModel';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
 
 interface WorkbookData {
   id: number;
@@ -24,10 +32,9 @@ interface DataTableProps {
   onDataChange: () => void;
 }
 
-const itemsPerPage = 10;
-
 const EntityTable = ({ data, onDataChange }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
     null,
@@ -36,14 +43,19 @@ const EntityTable = ({ data, onDataChange }: DataTableProps) => {
   useEffect(() => {
     setTableData(data);
   }, [data]);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfLastItem = (currentPage + 1) * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
   const currentItems = tableData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(tableData.length / itemsPerPage);
+  const totalPages = Math.ceil(tableData.length / pageSize);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(0);
   };
 
   const handleEditClick = (record: WorkbookData) => {
@@ -62,100 +74,47 @@ const EntityTable = ({ data, onDataChange }: DataTableProps) => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Id
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Code
-              </th>
-              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Label
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                Country
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                City
-              </th>
-              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Identification Type
-              </th>
-              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                VAT
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                BIC Code
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                KBO Code
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                LEI Code
-              </th>
-              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Reporting Currency
-              </th>
-              <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                Significant Currencies
-              </th>
-              <th className="min-w-[250px] py-4 px-4 font-medium text-black dark:text-white">
-                Email
-              </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
-                Actions
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Id</TableHead>
+              <TableHead>Code</TableHead>
+              <TableHead>Label</TableHead>
+              <TableHead>Country</TableHead>
+              <TableHead>City</TableHead>
+              <TableHead>Identification Type</TableHead>
+              <TableHead>VAT</TableHead>
+              <TableHead>BIC Code</TableHead>
+              <TableHead>KBO Code</TableHead>
+              <TableHead>LEI Code</TableHead>
+              <TableHead>Reporting Currency</TableHead>
+              <TableHead>Significant Currencies</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentItems.map((item) => (
-              <tr key={item.id}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  {item.id}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  {item.code}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.label}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.country}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.city}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.identificationType}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.vat}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.bicCode}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.kboCode}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.lei}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.reportingCurrency}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+              <TableRow key={item.id}>
+                <TableCell>{item.id}</TableCell>
+                <TableCell>{item.code}</TableCell>
+                <TableCell>{item.label}</TableCell>
+                <TableCell>{item.country}</TableCell>
+                <TableCell>{item.city}</TableCell>
+                <TableCell>{item.identificationType}</TableCell>
+                <TableCell>{item.vat}</TableCell>
+                <TableCell>{item.bicCode}</TableCell>
+                <TableCell>{item.kboCode}</TableCell>
+                <TableCell>{item.lei}</TableCell>
+                <TableCell>{item.reportingCurrency}</TableCell>
+                <TableCell>
                   {item.significantCurrencies &&
                   Array.isArray(item.significantCurrencies)
                     ? item.significantCurrencies.join(', ')
                     : 'N/A'}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  {item.email}
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                </TableCell>
+                <TableCell>{item.email}</TableCell>
+                <TableCell>
                   <div className="flex items-center space-x-3.5">
                     <button
                       className="hover:text-primary"
@@ -164,16 +123,18 @@ const EntityTable = ({ data, onDataChange }: DataTableProps) => {
                       Edit
                     </button>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
       />
 

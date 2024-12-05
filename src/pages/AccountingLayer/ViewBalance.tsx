@@ -138,7 +138,7 @@ const ViewBalance = () => {
       </div>
       <Button
         onClick={handleShowBalances}
-        className="w-full bg-purple text-white hover:bg-purple-900"
+        className="w-full bg-purple-500 text-white hover:bg-purple-500"
       >
         Show Balances
       </Button>

@@ -65,7 +65,7 @@ const EditAccountingCat = ({ onClose, record }: EditRecordPopupProps) => {
           <Button
             type="button"
             onClick={handleSave}
-            className="bg-purple text-white hover:bg-indigo-800"
+            className="bg-purple-500 text-white hover:bg-indigo-800"
           >
             Save
           </Button>

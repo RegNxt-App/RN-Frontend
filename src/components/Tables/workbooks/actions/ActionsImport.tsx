@@ -32,7 +32,7 @@ const ActionsImport = () => {
           onClick={handleToggle}
           className={`px-4 py-2 rounded-md ${
             selectedOption === 'Excel'
-              ? 'bg-purple text-white'
+              ? 'bg-purple-500 text-white'
               : 'bg-gray-200 text-black'
           } mr-2`}
         >
@@ -42,7 +42,7 @@ const ActionsImport = () => {
           onClick={handleToggle}
           className={`px-4 py-2 rounded-md ${
             selectedOption === 'XBRL'
-              ? 'bg-purple text-white'
+              ? 'bg-purple-500 text-white'
               : 'bg-gray-200 text-black'
           }`}
         >
@@ -72,7 +72,10 @@ const ActionsImport = () => {
       </div>
 
       {/* Upload Button */}
-      <Button onClick={handleUpload} className="bg-purple text-white w-full">
+      <Button
+        onClick={handleUpload}
+        className="bg-purple-500 text-white w-full"
+      >
         {selectedOption === 'Excel' ? 'React Excel' : 'React XBRL'}
       </Button>
     </div>

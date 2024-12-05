@@ -292,7 +292,7 @@ const AddWorkbookModel = ({
                 Cancel
               </Button>
               <Button
-                className="text-white bg-purple hover:bg-indigo-800	"
+                className="text-white bg-purple-500 hover:bg-indigo-800	"
                 type="submit"
               >
                 Create Report
