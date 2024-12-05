@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import Api from '../../utils/Api';
 import ViewBalanceData from '../../components/Tables/ViewBalancesTable';
+import { Button } from '@/components/ui/button';
 
 interface Option {
   value: string;
@@ -135,12 +136,12 @@ const ViewBalance = () => {
           }
         />
       </div>
-      <button
+      <Button
         onClick={handleShowBalances}
-        className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+        className="w-full bg-purple text-white hover:bg-purple-900"
       >
         Show Balances
-      </button>
+      </Button>
       {showBalances && <ViewBalanceData data={balancesData} />}
     </div>
   );

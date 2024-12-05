@@ -3,6 +3,15 @@ import Pagination from '../Pagination';
 import { Edit, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import EditAccountCode from '../EditAccountCode';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
+import { Button } from '../ui/button';
 
 interface LedgerData {
   ledgerCode: string;
@@ -16,21 +25,25 @@ interface DataTableProps {
   onUpdate: (updatedRecord: LedgerData) => void;
 }
 
-const itemsPerPage = 10;
-
 const AccountCodeTable = ({ data, onDelete, onUpdate }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
   const [recordToEdit, setRecordToEdit] = useState<LedgerData | null>(null);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const indexOfLastItem = (currentPage + 1) * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.ceil(data.length / pageSize);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(0);
   };
 
   const handleDelete = (id: string) => {
@@ -68,66 +81,51 @@ const AccountCodeTable = ({ data, onDelete, onUpdate }: DataTableProps) => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Ledger Code
-              </th>
-              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Account Code
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                Description
-              </th>
-              <th className="min-w-[100px] py-4 px-4 font-medium text-black dark:text-white">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Ledger Code</TableHead>
+              <TableHead>Account Code</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentItems.map((item, index) => (
-              <tr key={index}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.ledgerCode}
-                  </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.accountCode}
-                  </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.description}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+              <TableRow key={index}>
+                <TableCell>{item.ledgerCode}</TableCell>
+                <TableCell>{item.accountCode}</TableCell>
+                <TableCell>{item.description}</TableCell>
+                <TableCell>
                   <div className="flex items-center space-x-2">
-                    <button
+                    <Button
+                      variant="link"
+                      size="sm"
                       onClick={() => handleEdit(item)}
-                      className="text-blue-500 hover:text-blue-700"
                     >
                       <Edit size={18} />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="text-red-500"
                       onClick={() => handleDelete(item.ledgerCode)}
-                      className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 size={18} />
-                    </button>
+                    </Button>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
       />
 

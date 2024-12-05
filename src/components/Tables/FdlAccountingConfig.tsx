@@ -3,6 +3,14 @@ import Pagination from '../Pagination';
 import { Filter, Edit, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import EditAccountingCat from '../EditAccountingCat';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
 
 interface AccountingCategory {
   id: string;
@@ -31,10 +39,9 @@ type FilterType =
   | 'Equals'
   | 'NotEquals';
 
-const itemsPerPage = 10;
-
 const FdlAccountingConfig = ({ data }: DataTableProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const [filteredData, setFilteredData] = useState<AccountingCategory[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
@@ -43,6 +50,21 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
   const [recordToEdit, setRecordToEdit] = useState<AccountingCategory | null>(
     null,
   );
+
+  const indexOfLastItem = (currentPage + 1) * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize); // Use filteredData for totalPages
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(0); // Reset to first page when page size changes
+  };
 
   useEffect(() => {
     applyFilters();
@@ -64,7 +86,7 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
       });
     });
     setFilteredData(result);
-    setCurrentPage(1);
+    setCurrentPage(0); // Reset to the first page after filtering
   };
 
   const handleFilterChange = (
@@ -85,16 +107,6 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
       return newFilters;
     });
     setActiveFilter(null);
-  };
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
   };
 
   const handleDelete = (id: string) => {
@@ -206,14 +218,11 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
               {['Name', 'Description', 'Actions'].map((header) => (
-                <th
-                  key={header}
-                  className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11"
-                >
+                <TableHead key={header}>
                   <div className="flex items-center">
                     {header}
                     {header !== 'Actions' && (
@@ -232,24 +241,16 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
                   {activeFilter === header &&
                     header !== 'Actions' &&
                     renderFilterDropdown(header.toLowerCase())}
-                </th>
+                </TableHead>
               ))}
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentItems.map((item) => (
-              <tr key={item.id}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.name}
-                  </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <p className="text-black dark:text-white">
-                    {item.description}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+              <TableRow key={item.id}>
+                <TableCell>{item.name}</TableCell>
+                <TableCell>{item.description}</TableCell>
+                <TableCell>
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleEdit(item)}
@@ -264,15 +265,17 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
                       <Trash2 size={18} />
                     </button>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
         onPageChange={handlePageChange}
       />
       {isEditPopupOpen && recordToEdit && (

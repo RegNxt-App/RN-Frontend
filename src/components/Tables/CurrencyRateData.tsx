@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
+import { Select, SelectItem } from '../ui/select';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
 import { Filter } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 interface CurrencyRateData {
   rateType: string;
@@ -31,7 +48,7 @@ type FilterType =
   | 'Equals'
   | 'NotEquals';
 
-const itemsPerPage = 20;
+const itemsPerPage = 10;
 
 const CurrencyRateData = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -126,8 +143,8 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
         >
           <option value="startsWith">Starts With</option>
           <option value="Contains">Contains</option>
-          <option value="NotContains">Not Contains</option>
-          <option value="EndsWith">Ends With</option>
+          <option value="NotContains">Not contains</option>
+          <option value="EndsWith">Ends with</option>
           <option value="Equals">Equals</option>
           <option value="NotEquals">Not Equals</option>
         </select>
@@ -174,13 +191,10 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              {/* <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                <div className="flex items-center">Rate Type</div>
-              </th> */}
-              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>
                 <div className="flex items-center">
                   Rate Date
                   <button
@@ -196,8 +210,8 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
                 </div>
                 {activeFilter === 'rateDate' &&
                   renderFilterDropdown('rateDate')}
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
+              </TableHead>
+              <TableHead>
                 <div className="flex items-center">
                   From Currency
                   <button
@@ -213,8 +227,8 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
                 </div>
                 {activeFilter === 'fromCurrency' &&
                   renderFilterDropdown('fromCurrency')}
-              </th>
-              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+              </TableHead>
+              <TableHead>
                 <div className="flex items-center">
                   To Currency
                   <button
@@ -230,44 +244,21 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
                 </div>
                 {activeFilter === 'toCurrency' &&
                   renderFilterDropdown('toCurrency')}
-              </th>
-              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                <div className="flex items-center">Multiplication Factor</div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+              <TableHead>Multiplication Factor</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentItems.map((item, index) => (
-              <tr key={index}>
-                {/* <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.rateType}
-                  </h5>
-                </td> */}
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.rateDate}
-                  </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.fromCurrency}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.toCurrency}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.multiplicationfactor}
-                  </p>
-                </td>
-              </tr>
+              <TableRow key={index}>
+                <TableCell>{item.rateDate}</TableCell>
+                <TableCell>{item.fromCurrency}</TableCell>
+                <TableCell>{item.toCurrency}</TableCell>
+                <TableCell>{item.multiplicationfactor}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       <Pagination
         currentPage={currentPage}

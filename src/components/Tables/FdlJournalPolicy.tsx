@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../Pagination';
 import { Filter, CheckCircle, XCircle } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
 
 interface JournalPolicyData {
   id: string;
@@ -41,7 +48,6 @@ const itemsPerPage = 10;
 
 const FdlJournalPolicy = ({ data }: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-
   const [filteredData, setFilteredData] = useState<JournalPolicyData[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -176,9 +182,9 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
               {[
                 'Policy Code',
                 'Name',
@@ -191,10 +197,7 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
                 'lastJournalNr',
                 'mustBeReversed',
               ].map((header) => (
-                <th
-                  key={header}
-                  className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11"
-                >
+                <TableCell key={header}>
                   <div className="flex items-center">
                     {header}
                     <button
@@ -208,67 +211,35 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
                   </div>
                   {activeFilter === header &&
                     renderFilterDropdown(header.toLowerCase())}
-                </th>
+                </TableCell>
               ))}
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentItems.map((item) => (
-              <tr key={item.id}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.code}
-                  </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <h5 className="font-medium text-black dark:text-white">
-                    {item.name}
-                  </h5>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4  dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.description}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {renderBooleanIcon(item.allowManualEntries)}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {renderBooleanIcon(item.allowAutomatedEntries)}
-                  </p>
-                </td>{' '}
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {renderBooleanIcon(item.allowMultipleEntries)}
-                  </p>
-                </td>{' '}
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {renderBooleanIcon(item.applyAutoApprove)}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.inbalanceThreshold}
-                  </p>
-                </td>{' '}
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {item.lastJournalNr}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {renderBooleanIcon(item.mustBeReversed)}
-                  </p>
-                </td>
-              </tr>
+              <TableRow key={item.id}>
+                <TableCell>{item.code}</TableCell>
+                <TableCell>{item.name}</TableCell>
+                <TableCell>{item.description}</TableCell>
+                <TableCell>
+                  {renderBooleanIcon(item.allowManualEntries)}
+                </TableCell>
+                <TableCell>
+                  {renderBooleanIcon(item.allowAutomatedEntries)}
+                </TableCell>
+                <TableCell>
+                  {renderBooleanIcon(item.allowMultipleEntries)}
+                </TableCell>
+                <TableCell>
+                  {renderBooleanIcon(item.applyAutoApprove)}
+                </TableCell>
+                <TableCell>{item.inbalanceThreshold}</TableCell>
+                <TableCell>{item.lastJournalNr}</TableCell>
+                <TableCell>{renderBooleanIcon(item.mustBeReversed)}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       <Pagination
         currentPage={currentPage}

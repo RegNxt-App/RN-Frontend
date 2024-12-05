@@ -12,9 +12,9 @@ import Overview from './pages/Overview/Overview';
 import Inspect from './pages/Inspect/Inspect';
 import OverviewRegulatoryReports from './pages/OverviewRegulatoryReports/OverviewRegulatoryReports';
 import Reconciliations from './pages/Reconciliations/Reconciliations';
-import Data from './pages/Data/Data';
-import BusinessRules from './pages/BusinessRules/BusinessRules';
-import Processing from './pages/Processing/Processing';
+import BusinessRules from './pages/Orchestra/BusinessRules/BusinessRules';
+import Data from './pages/Orchestra/Data/Data';
+import Processing from './pages/Orchestra/Processing/Processing';
 import AccountingLayer from './pages/AccountingLayer/ViewBalance';
 import TransactionLayer from './pages/TransactionLayer/TransactionLayer';
 import Messages from './pages/Messages/Messages';
@@ -251,7 +251,7 @@ function App() {
           }
         />
         <Route
-          path="/reporting/data"
+          path="/orchestra/data"
           element={
             <DefaultLayout>
               <PrivateRoute>
@@ -262,7 +262,7 @@ function App() {
           }
         />
         <Route
-          path="/reporting/business-rules"
+          path="/orchestra/business-rules"
           element={
             <DefaultLayout>
               <PrivateRoute>
@@ -284,7 +284,7 @@ function App() {
           }
         />
         <Route
-          path="/reporting/processing"
+          path="/orchestra/processing"
           element={
             <DefaultLayout>
               <PrivateRoute>
