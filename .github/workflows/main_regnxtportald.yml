@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - RegNxtPortalD
 
 on:
@@ -8,6 +5,10 @@ on:
     branches:
       - main
   workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build:
@@ -31,8 +32,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: node-app
-          path: dist # This should be your distribution path, not the root path
- 
+          path: dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -46,13 +46,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: node-app
-          
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5101ED941DAD4D98B69B79E2B8124C64 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_217F7FC42C484856BB150BEF33C1D9A4 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_425B2BF52F7C4DE9AE2184345C8329E2 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -60,5 +60,4 @@ jobs:
         with:
           app-name: 'RegNxtPortalD'
           slot-name: 'Production'
-          package: .
-          
+          package: ./dist
