@@ -1,75 +1,96 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from './ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 
-interface PaginationProps {
+interface PaginationWithPageSizeProps {
   currentPage: number;
   totalPages: number;
+  pageSize: number;
+  pageSizeOptions?: number[];
+  onPageSizeChange: (size: number) => void;
   onPageChange: (page: number) => void;
 }
 
-const Pagination: React.FC<PaginationProps> = ({
+const Pagination: React.FC<PaginationWithPageSizeProps> = ({
   currentPage,
   totalPages,
+  pageSize,
+  pageSizeOptions = [10, 20, 30, 50, 100],
+  onPageSizeChange,
   onPageChange,
 }) => {
   return (
-    <div className="flex items-center justify-between border-t border-stroke bg-white px-4 py-3 dark:border-strokedark dark:bg-boxdark sm:px-6">
-      <div className="flex flex-1 justify-between sm:hidden">
-        <button
-          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-          className="relative inline-flex items-center rounded-md border border-stroke bg-white px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:text-white"
-        >
-          Previous
-        </button>
-        <button
-          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-          className="relative ml-3 inline-flex items-center rounded-md border border-stroke bg-white px-4 py-2 text-sm font-medium text-black hover:bg-gray-50 dark:border-strokedark dark:bg-boxdark dark:text-white"
-        >
-          Next
-        </button>
-      </div>
-      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-black dark:text-white">
-            Page <span className="font-medium">{currentPage}</span> of{' '}
-            <span className="font-medium">{totalPages}</span>
-          </p>
-        </div>
-        <div>
-          <nav
-            className="isolate inline-flex -space-x-px rounded-md shadow-sm"
-            aria-label="Pagination"
+    <div className="flex items-center justify-center px-2 pb-2">
+      <div className="flex items-center space-x-6 lg:space-x-8">
+        {/* Rows per page */}
+        <div className="flex items-center space-x-2">
+          <p className="text-sm font-medium">Rows per page</p>
+          <Select
+            value={`${pageSize}`}
+            onValueChange={(value) => {
+              onPageSizeChange(Number(value));
+              onPageChange(0); // Reset to the first page
+            }}
           >
-            <button
-              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-strokedark dark:hover:bg-meta-4"
-            >
-              <span className="sr-only">Previous</span>
-              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-            </button>
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index}
-                onClick={() => onPageChange(index + 1)}
-                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                  currentPage === index + 1
-                    ? 'z-10 bg-primary text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
-                    : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:text-white dark:ring-strokedark dark:hover:bg-meta-4'
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
-            <button
-              onClick={() =>
-                onPageChange(Math.min(totalPages, currentPage + 1))
-              }
-              className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 dark:ring-strokedark dark:hover:bg-meta-4"
-            >
-              <span className="sr-only">Next</span>
-              <ChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
-          </nav>
+            <SelectTrigger className="h-8 w-[70px]">
+              <SelectValue placeholder={pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {pageSizeOptions.map((size) => (
+                <SelectItem key={size} value={`${size}`}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Page info */}
+        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+          Page {currentPage + 1} of {totalPages}
+        </div>
+
+        {/* Navigation buttons */}
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            className="hidden h-8 w-8 p-0 lg:flex"
+            onClick={() => onPageChange(0)}
+            disabled={currentPage === 0}
+          >
+            {'<<'}
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => onPageChange(Math.max(0, currentPage - 1))}
+            disabled={currentPage === 0}
+          >
+            {'<'}
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() =>
+              onPageChange(Math.min(totalPages - 1, currentPage + 1))
+            }
+            disabled={currentPage === totalPages - 1}
+          >
+            {'>'}
+          </Button>
+          <Button
+            variant="outline"
+            className="hidden h-8 w-8 p-0 lg:flex"
+            onClick={() => onPageChange(totalPages - 1)}
+            disabled={currentPage === totalPages - 1}
+          >
+            {'>>'}
+          </Button>
         </div>
       </div>
     </div>

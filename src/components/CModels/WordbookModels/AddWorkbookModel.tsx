@@ -1,97 +1,307 @@
-import React, { useState } from 'react';
-import { Package } from '../../../types/package';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 
-interface NewRecordPopupProps {
-  onClose: () => void;
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import Api from '../../../utils/Api';
+import { useToast } from '@/hooks/use-toast';
+import Loader from '../../loader';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/Dialog';
+
+interface EntityOption {
+  name: string;
+  code: number;
 }
 
-const AddWorkbookModel: React.FC<NewRecordPopupProps> = ({ onClose }) => {
-  const [formData, setFormData] = useState<Partial<Package>>({
-    module: '',
-    entity: '',
-    name: '',
-    invoiceDate: '',
-    status: 'Pending',
+interface TemplateOption {
+  name: string;
+  code: number;
+}
+
+interface CurrencyOption {
+  name: string;
+  code: string;
+}
+
+interface AddWorkbookModelProps {
+  onClose: () => void;
+  onWorkbookAdded: () => void;
+  isOpen: boolean;
+}
+
+const formSchema = z.object({
+  name: z.string().min(1, 'Report name is required'),
+  entityId: z.number({ required_error: 'Entity is required' }),
+  templateId: z.number({ required_error: 'Template is required' }),
+  reportingCurrency: z.string().optional(),
+  reportingDate: z.string().min(1, 'Reporting date is required'),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+const AddWorkbookModel = ({
+  onClose,
+  onWorkbookAdded,
+  isOpen,
+}: AddWorkbookModelProps) => {
+  const [entities, setEntities] = useState<EntityOption[]>([]);
+  const [templates, setTemplates] = useState<TemplateOption[]>([]);
+  const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      entityId: undefined,
+      templateId: undefined,
+      reportingCurrency: '',
+      reportingDate: '',
+    },
   });
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [entityResponse, templateResponse, currencyResponse] =
+          await Promise.all([
+            Api.get<EntityOption[]>('RI/UIInput?type=Entity'),
+            Api.get<TemplateOption[]>('RI/UIInput?type=Template'),
+            Api.get<CurrencyOption[]>('RI/UIInput?type=Currency'),
+          ]);
+
+        setEntities(entityResponse.data);
+        setTemplates(templateResponse.data);
+        setCurrencies(currencyResponse.data);
+      } catch (err) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description:
+            err instanceof Error
+              ? err.message
+              : 'An error occurred while fetching data',
+          duration: 3000,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen, toast]);
+
+  const formatDate = (dateString: string): string => {
+    return dateString.replace(/\D/g, '');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onClose();
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await Api.post('/RI/Workbook', {
+        Name: data.name.trim(),
+        TemplateId: data.templateId,
+        EntityId: data.entityId,
+        ReportingCurrency: data.reportingCurrency?.trim(),
+        ReportingDate: formatDate(data.reportingDate),
+      });
+
+      toast({
+        title: 'Success',
+        description: 'Workbook created successfully',
+        duration: 3000,
+      });
+
+      onWorkbookAdded();
+      onClose();
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description:
+          err instanceof Error ? err.message : 'Failed to create workbook',
+        duration: 3000,
+      });
+    }
   };
+
+  if (isLoading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <div className="flex items-center justify-center p-6">
+            <Loader />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="rounded-sm border border-stroke bg-white shadow-default p-6 w-full max-w-md">
-        <div className="border-b border-stroke py-4 px-6.5">
-          <h3 className="text-2xl font-extrabold text-black">
-            Add New Workbook
-          </h3>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="p-6.5">
-            <input
-              type="text"
-              name=""
-              placeholder="Module Name"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary mb-4" // Added margin-bottom here
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="text"
-              name=""
-              placeholder="Entity Name"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary mb-4" // Added margin-bottom here
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="date"
-              name="Date"
-              placeholder="Reporting Date"
-              className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary mb-4" // Added margin-bottom here
-              onChange={handleInputChange}
-              required
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="text-black">Add New Workbook</DialogTitle>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Report Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter report name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
-            <div className="mb-4">
-              <select
-                name="status"
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary"
-                onChange={handleInputChange}
-                value={formData.status}
-              >
-                <option value="Paid">Paid</option>
-                <option value="Unpaid">Unpaid</option>
-                <option value="Pending">Pending</option>
-              </select>
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={onClose}
-                className="mr-2 px-4 py-2 bg-gray-300 rounded-md"
-              >
+            <FormField
+              control={form.control}
+              name="entityId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Reporting Entity</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Reporting Entity" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {entities.map((entity) => (
+                        <SelectItem
+                          key={entity.code}
+                          value={entity.code.toString()}
+                        >
+                          {entity.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="templateId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Template</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Template" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {templates.map((template) => (
+                        <SelectItem
+                          key={template.code}
+                          value={template.code.toString()}
+                        >
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reportingCurrency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Reporting Currency (Optional)</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Reporting Currency" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {currencies.map((currency) => (
+                        <SelectItem key={currency.code} value={currency.code}>
+                          {currency.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reportingDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Reporting Date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                className="text-white bg-purple-500 hover:bg-indigo-800	"
                 type="submit"
-                className="flex justify-center rounded bg-primary p-3 font-medium text-white"
               >
-                Submit
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
+                Create Report
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

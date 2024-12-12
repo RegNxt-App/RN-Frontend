@@ -1,4 +1,3 @@
-import React from 'react';
 interface WorkbookData {
   id: number;
   name: string;
@@ -16,10 +15,7 @@ interface ViewRecordPopupProps {
   record: WorkbookData;
 }
 
-const ViewRecordPopup: React.FC<ViewRecordPopupProps> = ({
-  onClose,
-  record,
-}) => {
+const ViewRecordPopup = ({ onClose, record }: ViewRecordPopupProps) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="rounded-sm border border-stroke bg-white shadow-default p-6 w-full max-w-md">

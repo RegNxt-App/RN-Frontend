@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUp } from 'lucide-react';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 interface CardDataStatsProps {
   title: string;
@@ -10,14 +10,14 @@ interface CardDataStatsProps {
   children: ReactNode;
 }
 
-const CardDataStats: React.FC<CardDataStatsProps> = ({
+const CardDataStats = ({
   title,
   total,
   rate,
   levelUp,
   levelDown,
   children,
-}) => {
+}: CardDataStatsProps) => {
   return (
     <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark">
       <div className="flex h-11.5 w-11.5 items-center justify-center rounded-full bg-meta-2 dark:bg-meta-4">
@@ -34,13 +34,15 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({
 
         <span
           className={`flex items-center gap-1 text-sm font-medium ${
-            levelUp && 'text-meta-3'
-          } ${levelDown && 'text-meta-5'} `}
+            levelUp && 'text-purple'
+          } ${levelDown && 'text-purple'} `}
         >
           {rate}
 
-          {levelUp && <ArrowUp size={16} strokeWidth={1.25} />}
-          {levelDown && <ArrowDown size={16} strokeWidth={1.25} />}
+          {levelUp && <ArrowUp color="#6419E6" size={16} strokeWidth={1.25} />}
+          {levelDown && (
+            <ArrowDown color="#6419E6" size={16} strokeWidth={1.25} />
+          )}
         </span>
       </div>
     </div>
