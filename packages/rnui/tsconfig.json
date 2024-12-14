@@ -1,0 +1,12 @@
+{
+  "extends": "./node_modules/@rn/tsconfig/react-library.json",
+  "include": ["./components", "./utils", "./hooks", "index.ts"],
+  "exclude": ["dist", "build", "node_modules", "./components/**/*.stories.tsx"],
+  "compilerOptions": {
+    "lib": ["ESNext", "dom"],
+    "noEmitOnError": false,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "declaration": false
+  }
+}
