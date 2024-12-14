@@ -3,7 +3,7 @@ import Pagination from '../Pagination';
 import { Filter } from 'lucide-react';
 import Api from '../../utils/Api';
 import FdlJournalDetailsTable from './FdlJournalDetailsTable';
-import Loader from '../../components/loader';
+import Loader from '../loader';
 import {
   Table,
   TableBody,
