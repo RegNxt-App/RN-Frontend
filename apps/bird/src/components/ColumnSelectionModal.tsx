@@ -1,18 +1,8 @@
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 
 interface Column {
   column_name: string;
@@ -55,26 +45,17 @@ const ColumnSelectionModal: React.FC<ColumnSelectionModalProps> = ({
   initialSourceCardinality,
   initialTargetCardinality,
 }) => {
-  const [sourceColumn, setSourceColumn] = useState(initialSourceColumn || "");
-  const [targetColumn, setTargetColumn] = useState(initialTargetColumn || "");
-  const [sourceCardinality, setSourceCardinality] = useState(
-    initialSourceCardinality || "1"
-  );
-  const [targetCardinality, setTargetCardinality] = useState(
-    initialTargetCardinality || "1"
-  );
+  const [sourceColumn, setSourceColumn] = useState(initialSourceColumn || '');
+  const [targetColumn, setTargetColumn] = useState(initialTargetColumn || '');
+  const [sourceCardinality, setSourceCardinality] = useState(initialSourceCardinality || '1');
+  const [targetCardinality, setTargetCardinality] = useState(initialTargetCardinality || '1');
 
   useEffect(() => {
-    setSourceColumn(initialSourceColumn || "");
-    setTargetColumn(initialTargetColumn || "");
-    setSourceCardinality(initialSourceCardinality || "1");
-    setTargetCardinality(initialTargetCardinality || "1");
-  }, [
-    initialSourceColumn,
-    initialTargetColumn,
-    initialSourceCardinality,
-    initialTargetCardinality,
-  ]);
+    setSourceColumn(initialSourceColumn || '');
+    setTargetColumn(initialTargetColumn || '');
+    setSourceCardinality(initialSourceCardinality || '1');
+    setTargetCardinality(initialTargetCardinality || '1');
+  }, [initialSourceColumn, initialTargetColumn, initialSourceCardinality, initialTargetCardinality]);
 
   const handleSubmit = () => {
     onSelect(sourceColumn, targetColumn, sourceCardinality, targetCardinality);
@@ -82,17 +63,26 @@ const ColumnSelectionModal: React.FC<ColumnSelectionModalProps> = ({
   };
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
+    <Dialog
+      open={true}
+      onOpenChange={onClose}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Relationship</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="sourceColumn" className="text-right">
+            <label
+              htmlFor="sourceColumn"
+              className="text-right"
+            >
               Source Column
             </label>
-            <Select value={sourceColumn} onValueChange={setSourceColumn}>
+            <Select
+              value={sourceColumn}
+              onValueChange={setSourceColumn}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select source column" />
               </SelectTrigger>
@@ -109,10 +99,16 @@ const ColumnSelectionModal: React.FC<ColumnSelectionModalProps> = ({
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="targetColumn" className="text-right">
+            <label
+              htmlFor="targetColumn"
+              className="text-right"
+            >
               Target Column
             </label>
-            <Select value={targetColumn} onValueChange={setTargetColumn}>
+            <Select
+              value={targetColumn}
+              onValueChange={setTargetColumn}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select target column" />
               </SelectTrigger>
@@ -129,7 +125,10 @@ const ColumnSelectionModal: React.FC<ColumnSelectionModalProps> = ({
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="sourceCardinality" className="text-right">
+            <label
+              htmlFor="sourceCardinality"
+              className="text-right"
+            >
               Source Cardinality
             </label>
             <Select
@@ -148,7 +147,10 @@ const ColumnSelectionModal: React.FC<ColumnSelectionModalProps> = ({
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="targetCardinality" className="text-right">
+            <label
+              htmlFor="targetCardinality"
+              className="text-right"
+            >
               Target Cardinality
             </label>
             <Select

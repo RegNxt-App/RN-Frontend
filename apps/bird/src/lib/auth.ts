@@ -1,5 +1,6 @@
-import { jwtDecode } from "jwt-decode";
-import axiosInstance from "./axios";
+import {jwtDecode} from 'jwt-decode';
+
+import axiosInstance from './axios';
 
 export interface User {
   id: number;
@@ -26,30 +27,27 @@ interface DecodedToken {
 let refreshTokenPromise: Promise<string> | null = null;
 
 export async function login(email: string, password: string): Promise<User> {
-  const response = await axiosInstance.post<AuthResponse>(
-    "/accounts/authenticate",
-    { email, password }
-  );
-  const { jwtToken, ...user } = response.data;
-  localStorage.setItem("token", jwtToken);
+  const response = await axiosInstance.post<AuthResponse>('/accounts/authenticate', {email, password});
+  const {jwtToken, ...user} = response.data;
+  localStorage.setItem('token', jwtToken);
   return user;
 }
 
 export function logout() {
-  localStorage.removeItem("token");
+  localStorage.removeItem('token');
 }
 
 export async function refreshToken(): Promise<string> {
   if (!refreshTokenPromise) {
     refreshTokenPromise = axiosInstance
-      .post<AuthResponse>("/accounts/refresh-token")
+      .post<AuthResponse>('/accounts/refresh-token')
       .then((response) => {
-        const { jwtToken } = response.data;
-        localStorage.setItem("token", jwtToken);
+        const {jwtToken} = response.data;
+        localStorage.setItem('token', jwtToken);
         return jwtToken;
       })
       .catch((error) => {
-        console.error("Error refreshing token:", error);
+        console.error('Error refreshing token:', error);
         logout();
         throw error;
       })
@@ -61,7 +59,7 @@ export async function refreshToken(): Promise<string> {
 }
 
 export async function getUser(): Promise<User | null> {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
   if (!token) return null;
 
   try {
@@ -71,8 +69,8 @@ export async function getUser(): Promise<User | null> {
     }
     return await fetchUserDetails(decodedToken.id);
   } catch (error) {
-    console.error("Error decoding token or fetching user details:", error);
-    localStorage.removeItem("token");
+    console.error('Error decoding token or fetching user details:', error);
+    localStorage.removeItem('token');
     return null;
   }
 }
@@ -82,13 +80,13 @@ async function fetchUserDetails(userId: string): Promise<User | null> {
     const response = await axiosInstance.get<User>(`/accounts/${userId}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching user details:", error);
+    console.error('Error fetching user details:', error);
     return null;
   }
 }
 
 export function isTokenValid(): boolean {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
   if (!token) return false;
 
   try {
@@ -111,10 +109,7 @@ axiosInstance.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        console.error(
-          "Error refreshing token in response interceptor:",
-          refreshError
-        );
+        console.error('Error refreshing token in response interceptor:', refreshError);
         logout();
         throw refreshError;
       }

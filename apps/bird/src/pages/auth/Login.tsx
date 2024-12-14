@@ -1,36 +1,30 @@
-import AuthLayout from "@/components/AuthLayout";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useLocation, useNavigate } from "react-router-dom";
-import * as z from "zod";
+import {useForm} from 'react-hook-form';
+import {useLocation, useNavigate} from 'react-router-dom';
+
+import AuthLayout from '@/components/AuthLayout';
+import {Button} from '@/components/ui/button';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
+import {Input} from '@/components/ui/input';
+import {useAuth} from '@/contexts/AuthContext';
+import {useToast} from '@/hooks/use-toast';
+import {zodResolver} from '@hookform/resolvers/zod';
+import * as z from 'zod';
 
 const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
-  const { login } = useAuth();
+  const {toast} = useToast();
+  const {login} = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
@@ -38,19 +32,17 @@ export default function Login() {
     try {
       await login(values.email, values.password);
       toast({
-        title: "Login successful",
-        description: "You have been logged in successfully.",
+        title: 'Login successful',
+        description: 'You have been logged in successfully.',
       });
-      const from =
-        (location.state as { from?: { pathname: string } })?.from?.pathname ||
-        "/configuration";
-      navigate(from, { replace: true });
+      const from = (location.state as {from?: {pathname: string}})?.from?.pathname || '/configuration';
+      navigate(from, {replace: true});
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {
       toast({
-        title: "Login failed",
-        description: "Invalid email or password. Please try again.",
-        variant: "destructive",
+        title: 'Login failed',
+        description: 'Invalid email or password. Please try again.',
+        variant: 'destructive',
       });
     }
   }
@@ -63,15 +55,21 @@ export default function Login() {
       description="Intuitive user interface for visualizing, managing and extending the BIRD model"
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
+            render={({field}) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="m@example.com" {...field} />
+                  <Input
+                    placeholder="m@example.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -80,11 +78,14 @@ export default function Login() {
           <FormField
             control={form.control}
             name="password"
-            render={({ field }) => (
+            render={({field}) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input type="password" {...field} />
+                  <Input
+                    type="password"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -95,7 +96,7 @@ export default function Login() {
             type="submit"
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? "Signing In..." : "Sign In"}
+            {form.formState.isSubmitting ? 'Signing In...' : 'Sign In'}
           </Button>
         </form>
       </Form>
@@ -110,9 +111,7 @@ export default function Login() {
       </div>
 
       <div className="mt-6 text-center text-sm">
-        <span className="text-muted-foreground">
-          Don&apos;t have an account?{" "}
-        </span>
+        <span className="text-muted-foreground">Don&apos;t have an account? </span>
         <a
           className="font-semibold hover:text-primary underline underline-offset-4"
           href="/auth/register"

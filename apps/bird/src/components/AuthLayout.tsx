@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -39,9 +39,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
             height={400}
             className="mx-auto mb-8"
           />
-          <h3 className="text-2xl font-bold mb-4 text-white">
-            Banks Integrated Reporting Dictionary
-          </h3>
+          <h3 className="text-2xl font-bold mb-4 text-white">Banks Integrated Reporting Dictionary</h3>
           <p className="text-muted-foreground">{description}</p>
         </div>
       </div>

@@ -6,10 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "TIMING=1 eslint src/**/*.{js,ts,tsx} --fix",
+    "prettier": "prettier --write \"./**/!(*.d).{js,jsx,ts,tsx}\"",
+    "prettier-check": "prettier --check \"./**/!(*.d).{js,jsx,ts,tsx}\"",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf build"
   },
   "dependencies": {
+    "@rn/config": "workspace:*",
+    "@rn/tokens": "workspace:*",
+    "@rn/tsconfig": "workspace:*",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.2",

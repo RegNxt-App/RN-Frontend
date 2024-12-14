@@ -1,6 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { FileText, LucideIcon } from "lucide-react";
-import React from "react";
+import React from 'react';
+
+import {Button} from '@/components/ui/button';
+import {FileText, LucideIcon} from 'lucide-react';
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -18,7 +19,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   action,
-  className = "",
+  className = '',
 }) => {
   return (
     <div
@@ -30,7 +31,10 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         <p className="text-sm text-muted-foreground max-w-sm">{description}</p>
       </div>
       {action && (
-        <Button onClick={action.onClick} variant="secondary">
+        <Button
+          onClick={action.onClick}
+          variant="secondary"
+        >
           {action.label}
         </Button>
       )}

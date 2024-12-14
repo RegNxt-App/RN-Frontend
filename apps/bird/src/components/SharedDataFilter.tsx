@@ -1,13 +1,8 @@
 import React from 'react';
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ColumnDef } from "@tanstack/react-table";
+
+import {Input} from '@/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {ColumnDef} from '@tanstack/react-table';
 
 interface DataItem {
   dataSetId: number;
@@ -25,15 +20,15 @@ interface DataItem {
 interface SharedDataFilterProps {
   globalFilter: string;
   setGlobalFilter: (value: string) => void;
-  columnFilters: { id: string; value: string }[];
-  setColumnFilters: (filters: { id: string; value: string }[]) => void;
+  columnFilters: {id: string; value: string}[];
+  setColumnFilters: (filters: {id: string; value: string}[]) => void;
   columns: ColumnDef<DataItem>[];
   frameworkFilter: string;
   setFrameworkFilter: (value: string) => void;
   frameworks: string[];
 }
 
-const ALL_FRAMEWORKS = "ALL";
+const ALL_FRAMEWORKS = 'ALL';
 
 export const SharedDataFilter: React.FC<SharedDataFilterProps> = ({
   globalFilter,
@@ -54,14 +49,20 @@ export const SharedDataFilter: React.FC<SharedDataFilterProps> = ({
           onChange={(e) => setGlobalFilter(e.target.value)}
           className="max-w-sm"
         />
-        <Select value={frameworkFilter} onValueChange={setFrameworkFilter}>
+        <Select
+          value={frameworkFilter}
+          onValueChange={setFrameworkFilter}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select Framework" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_FRAMEWORKS}>All Frameworks</SelectItem>
             {frameworks.map((framework) => (
-              <SelectItem key={framework} value={framework}>
+              <SelectItem
+                key={framework}
+                value={framework}
+              >
                 {framework}
               </SelectItem>
             ))}
@@ -71,8 +72,14 @@ export const SharedDataFilter: React.FC<SharedDataFilterProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
         {columns.map((column) => (
-          <div key={column.id as string} className="flex flex-col">
-            <label htmlFor={column.id as string} className="text-sm font-medium mb-1">
+          <div
+            key={column.id as string}
+            className="flex flex-col"
+          >
+            <label
+              htmlFor={column.id as string}
+              className="text-sm font-medium mb-1"
+            >
               {column.header as string}
             </label>
             <Input

@@ -1,18 +1,10 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  Dataset,
-  DatasetItem,
-  DatasetVersion,
-  DatasetVersions,
-} from "@/types/databaseTypes";
-import React, { useState } from "react";
-import { Button } from "../ui/button";
-import { DatasetAccordion } from "./DatasetAccordion";
+import React, {useState} from 'react';
+
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@/components/ui/accordion';
+import {Dataset, DatasetItem, DatasetVersion, DatasetVersions} from '@/types/databaseTypes';
+
+import {Button} from '../ui/button';
+import {DatasetAccordion} from './DatasetAccordion';
 
 interface FrameworkAccordionProps {
   groupedDatasets: Record<string, Record<string, DatasetItem[]>>;
@@ -56,26 +48,17 @@ export const FrameworkAccordion: React.FC<FrameworkAccordionProps> = ({
 }) => {
   const [frameworkPage, setFrameworkPage] = useState(1);
   const [groupPages, setGroupPages] = useState<Record<string, number>>({});
-  const [expandedFramework, setExpandedFramework] = useState<
-    string | undefined
-  >(undefined);
-  const [expandedGroup, setExpandedGroup] = useState<string | undefined>(
-    undefined
-  );
+  const [expandedFramework, setExpandedFramework] = useState<string | undefined>(undefined);
+  const [expandedGroup, setExpandedGroup] = useState<string | undefined>(undefined);
   const FRAMEWORKS_PER_PAGE = 15;
   const GROUPS_PER_PAGE = 10;
   const frameworks = Object.keys(groupedDatasets);
-  const totalFrameworkPages = Math.ceil(
-    frameworks.length / FRAMEWORKS_PER_PAGE
-  );
+  const totalFrameworkPages = Math.ceil(frameworks.length / FRAMEWORKS_PER_PAGE);
   const paginatedFrameworks = frameworks.slice(
     (frameworkPage - 1) * FRAMEWORKS_PER_PAGE,
     frameworkPage * FRAMEWORKS_PER_PAGE
   );
-  const renderFrameworks =
-    selectedFramework !== "NO_FILTER"
-      ? [selectedFramework]
-      : paginatedFrameworks;
+  const renderFrameworks = selectedFramework !== 'NO_FILTER' ? [selectedFramework] : paginatedFrameworks;
 
   const getPaginatedGroups = (framework: string) => {
     if (!groupedDatasets[framework]) return [];
@@ -193,10 +176,7 @@ export const FrameworkAccordion: React.FC<FrameworkAccordionProps> = ({
                       onClick={() =>
                         setGroupPages((prev) => ({
                           ...prev,
-                          [framework]: Math.min(
-                            (prev[framework] || 1) + 1,
-                            totalGroupPages
-                          ),
+                          [framework]: Math.min((prev[framework] || 1) + 1, totalGroupPages),
                         }))
                       }
                       disabled={currentGroupPage === totalGroupPages}
@@ -213,7 +193,7 @@ export const FrameworkAccordion: React.FC<FrameworkAccordionProps> = ({
         })}
       </Accordion>
 
-      {selectedFramework === "NO_FILTER" && totalFrameworkPages > 1 && (
+      {selectedFramework === 'NO_FILTER' && totalFrameworkPages > 1 && (
         <div className="flex justify-center items-center space-x-2 mt-4">
           <Button
             onClick={() => setFrameworkPage((prev) => Math.max(prev - 1, 1))}
@@ -227,11 +207,7 @@ export const FrameworkAccordion: React.FC<FrameworkAccordionProps> = ({
             Page {frameworkPage} of {totalFrameworkPages}
           </span>
           <Button
-            onClick={() =>
-              setFrameworkPage((prev) =>
-                Math.min(prev + 1, totalFrameworkPages)
-              )
-            }
+            onClick={() => setFrameworkPage((prev) => Math.min(prev + 1, totalFrameworkPages))}
             disabled={frameworkPage === totalFrameworkPages}
             variant="outline"
             size="sm"

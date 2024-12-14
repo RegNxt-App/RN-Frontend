@@ -1,36 +1,17 @@
-import { DatePicker } from "@/components/GDate";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useToast } from "@/hooks/use-toast";
-import { fastApiInstance } from "@/lib/axios";
-import { format } from "date-fns";
-import {
-  AlertCircle,
-  CircleDot,
-  FileQuestion,
-  InfoIcon,
-  Loader,
-  Loader2,
-  X,
-} from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import useSWR from "swr";
+import {DatePicker} from '@/components/GDate';
+import {Alert, AlertDescription} from '@/components/ui/alert';
+import {Badge} from '@/components/ui/badge';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
+import {useToast} from '@/hooks/use-toast';
+import {fastApiInstance} from '@/lib/axios';
+import {format} from 'date-fns';
+import {AlertCircle, CircleDot, FileQuestion, InfoIcon, Loader, Loader2, X} from 'lucide-react';
+import useSWR from 'swr';
 
 // Types
 interface FilterField {
@@ -65,8 +46,8 @@ interface FilterResponse {
 }
 
 // Helper Components
-const NoResults: React.FC<{ title?: string; message?: string }> = ({
-  title = "No results found",
+const NoResults: React.FC<{title?: string; message?: string}> = ({
+  title = 'No results found',
   message = "Try adjusting your filters to find what you're looking for.",
 }) => (
   <div className="flex flex-col items-center justify-center py-12 px-4 bg-muted/20 rounded-lg border border-dashed">
@@ -81,10 +62,8 @@ const ActiveFilters: React.FC<{
   fields: FilterField[];
   onClearFilter: (code: string) => void;
   disabled?: boolean;
-}> = ({ filterValues, fields, onClearFilter, disabled }) => {
-  const activeFilters = Object.entries(filterValues).filter(
-    ([_, value]) => value !== null && value !== ""
-  );
+}> = ({filterValues, fields, onClearFilter, disabled}) => {
+  const activeFilters = Object.entries(filterValues).filter(([_, value]) => value !== null && value !== '');
 
   if (activeFilters.length === 0) return null;
 
@@ -125,12 +104,12 @@ const FilterField: React.FC<{
   onChange: (value: any) => void;
   options?: DropdownOption[];
   disabled?: boolean;
-}> = ({ field, value, onChange, options = [], disabled }) => {
+}> = ({field, value, onChange, options = [], disabled}) => {
   if (field.value_statement) {
     return (
       <Select
-        value={value?.toString() || ""}
-        onValueChange={(v) => onChange(v === "__clear__" ? null : v)}
+        value={value?.toString() || ''}
+        onValueChange={(v) => onChange(v === '__clear__' ? null : v)}
         disabled={disabled}
       >
         <SelectTrigger className="w-full">
@@ -138,12 +117,18 @@ const FilterField: React.FC<{
         </SelectTrigger>
         <SelectContent>
           {value && (
-            <SelectItem value="__clear__" className="text-destructive">
+            <SelectItem
+              value="__clear__"
+              className="text-destructive"
+            >
               Clear selection
             </SelectItem>
           )}
           {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
+            <SelectItem
+              key={option.value}
+              value={option.value}
+            >
               {option.label}
             </SelectItem>
           ))}
@@ -152,14 +137,12 @@ const FilterField: React.FC<{
     );
   }
 
-  if (field.datatype.toLowerCase() === "gregorianday") {
+  if (field.datatype.toLowerCase() === 'gregorianday') {
     return (
       <div className="flex items-center gap-2">
         <DatePicker
           value={value}
-          onChange={(date) =>
-            onChange(date ? format(date, "yyyy-MM-dd") : null)
-          }
+          onChange={(date) => onChange(date ? format(date, 'yyyy-MM-dd') : null)}
           placeholder={`Select ${field.label}`}
           disabled={disabled}
         />
@@ -180,8 +163,8 @@ const FilterField: React.FC<{
   return (
     <div className="flex items-center gap-2">
       <Input
-        type={field.datatype === "number" ? "number" : "text"}
-        value={value || ""}
+        type={field.datatype === 'number' ? 'number' : 'text'}
+        value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
         placeholder={`Enter ${field.label}`}
         disabled={disabled}
@@ -208,22 +191,19 @@ export default function FilterPanel({
   setHasAppliedFilters,
   isDataLoading = false,
 }: FilterPanelProps) {
-  const { toast } = useToast();
+  const {toast} = useToast();
   const [filterValues, setFilterValues] = useState<Record<string, any>>({});
   const [isApplying, setIsApplying] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
 
   // Fetch filter fields configuration
-  const { data: filterFields, isLoading: isFieldsLoading } =
-    useSWR<FilterResponse>(
-      versionId
-        ? `/api/v1/datasets/${datasetId}/filters/?version_id=${versionId}`
-        : null,
-      fastApiInstance,
-      {
-        revalidateOnFocus: false,
-      }
-    );
+  const {data: filterFields, isLoading: isFieldsLoading} = useSWR<FilterResponse>(
+    versionId ? `/api/v1/datasets/${datasetId}/filters/?version_id=${versionId}` : null,
+    fastApiInstance,
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
   // Initialize filter values
   useEffect(() => {
@@ -237,23 +217,19 @@ export default function FilterPanel({
   }, [filterFields, versionId]);
 
   // Separate snapshot and regular filters
-  const { snapshotFields, filterFields: regularFilters } = useMemo(() => {
-    if (!filterFields?.data) return { snapshotFields: [], filterFields: [] };
+  const {snapshotFields, filterFields: regularFilters} = useMemo(() => {
+    if (!filterFields?.data) return {snapshotFields: [], filterFields: []};
 
-    const sorted = [...filterFields.data].sort(
-      (a, b) => a.column_order - b.column_order
-    );
+    const sorted = [...filterFields.data].sort((a, b) => a.column_order - b.column_order);
 
     return {
       snapshotFields: sorted.filter((f) => f.is_report_snapshot_field),
-      filterFields: sorted.filter(
-        (f) => !f.is_report_snapshot_field && f.is_filter
-      ),
+      filterFields: sorted.filter((f) => !f.is_report_snapshot_field && f.is_filter),
     };
   }, [filterFields]);
 
   // Fetch dropdown options
-  const { data: dropdownOptions, isLoading: isOptionsLoading } = useSWR(
+  const {data: dropdownOptions, isLoading: isOptionsLoading} = useSWR(
     filterFields?.data
       ? filterFields.data
           .filter((f) => f.value_statement)
@@ -268,28 +244,28 @@ export default function FilterPanel({
         requests.map(async (req) => {
           try {
             const response = await fastApiInstance.get(req.url, {
-              params: { statement: req.statement },
+              params: {statement: req.statement},
             });
             return {
               code: req.code,
               options: response.data.map((item: any) => ({
-                value: item.value?.toString() || "",
-                label: item.label || item.value?.toString() || "",
+                value: item.value?.toString() || '',
+                label: item.label || item.value?.toString() || '',
               })),
             };
           } catch (error) {
             console.error(`Error fetching options for ${req.code}:`, error);
-            return { code: req.code, options: [] };
+            return {code: req.code, options: []};
           }
         })
       );
 
-      return results.reduce((acc, { code, options }) => {
+      return results.reduce((acc, {code, options}) => {
         acc[code] = options;
         return acc;
       }, {} as Record<string, DropdownOption[]>);
     },
-    { dedupingInterval: 60000, revalidateOnFocus: false }
+    {dedupingInterval: 60000, revalidateOnFocus: false}
   );
 
   const handleFilterChange = useCallback((code: string, value: any) => {
@@ -299,12 +275,9 @@ export default function FilterPanel({
     }));
   }, []);
   const canApplyFilters = useMemo(() => {
-    const mandatoryFields = [...snapshotFields, ...regularFilters].filter(
-      (f) => f.is_mandatory
-    );
+    const mandatoryFields = [...snapshotFields, ...regularFilters].filter((f) => f.is_mandatory);
     return mandatoryFields.every(
-      (field) =>
-        filterValues[field.code] != null && filterValues[field.code] !== ""
+      (field) => filterValues[field.code] != null && filterValues[field.code] !== ''
     );
   }, [filterValues, snapshotFields, regularFilters]);
 
@@ -321,15 +294,15 @@ export default function FilterPanel({
       await onFilterApply(clearedValues);
 
       toast({
-        title: "Success",
-        description: "All filters have been cleared",
+        title: 'Success',
+        description: 'All filters have been cleared',
       });
     } catch (error) {
-      console.error("Error clearing filters:", error);
+      console.error('Error clearing filters:', error);
       toast({
-        title: "Error",
-        description: "Failed to clear filters",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to clear filters',
+        variant: 'destructive',
       });
     } finally {
       setIsClearing(false);
@@ -344,15 +317,15 @@ export default function FilterPanel({
     try {
       await onFilterApply(filterValues);
       toast({
-        title: "Success",
-        description: "Filters applied successfully",
+        title: 'Success',
+        description: 'Filters applied successfully',
       });
     } catch (error) {
-      console.error("Error applying filters:", error);
+      console.error('Error applying filters:', error);
       toast({
-        title: "Error",
-        description: "Failed to apply filters",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to apply filters',
+        variant: 'destructive',
       });
     } finally {
       setIsApplying(false);
@@ -362,10 +335,7 @@ export default function FilterPanel({
   const isLoading = isFieldsLoading || isOptionsLoading || isDataLoading;
   const isDisabled = disabled || isLoading;
 
-  if (
-    !filterFields?.data ||
-    (snapshotFields.length === 0 && regularFilters.length === 0)
-  ) {
+  if (!filterFields?.data || (snapshotFields.length === 0 && regularFilters.length === 0)) {
     return (
       <NoResults
         title="No filters available"
@@ -383,7 +353,10 @@ export default function FilterPanel({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {snapshotFields.map((field) => (
-              <div key={field.code} className="space-y-2">
+              <div
+                key={field.code}
+                className="space-y-2"
+              >
                 <div className="flex items-center gap-2">
                   <label className="text-sm font-medium">
                     {field.label}
@@ -423,7 +396,10 @@ export default function FilterPanel({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {regularFilters.map((field) => (
-              <div key={field.code} className="space-y-2">
+              <div
+                key={field.code}
+                className="space-y-2"
+              >
                 <div className="flex items-center gap-2">
                   <label className="text-sm font-medium">
                     {field.label}
@@ -457,20 +433,14 @@ export default function FilterPanel({
       {!canApplyFilters && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Please fill in all mandatory fields to see the content.
-          </AlertDescription>
+          <AlertDescription>Please fill in all mandatory fields to see the content.</AlertDescription>
         </Alert>
       )}
       <div className="flex space-x-4 mt-6">
         <Button
           variant="outline"
           onClick={handleClearFilters}
-          disabled={
-            isDisabled ||
-            Object.values(filterValues).every((v) => v === null) ||
-            isClearing
-          }
+          disabled={isDisabled || Object.values(filterValues).every((v) => v === null) || isClearing}
           className="w-32"
         >
           {isClearing ? (
@@ -479,7 +449,7 @@ export default function FilterPanel({
               Clearing...
             </>
           ) : (
-            "Clear Filters"
+            'Clear Filters'
           )}
         </Button>
         <Button
@@ -493,7 +463,7 @@ export default function FilterPanel({
               Applying...
             </>
           ) : (
-            "Show Data"
+            'Show Data'
           )}
         </Button>
       </div>

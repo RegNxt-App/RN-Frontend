@@ -1,21 +1,18 @@
-import { GroupFormModal } from "@/components/configurations/GroupFormModal";
-import { GroupItemsModal } from "@/components/configurations/GroupItemsModal";
-import { SharedDataTable } from "@/components/SharedDataTable";
-import { SharedColumnFilters } from "@/components/SharedFilters";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useToast } from "@/hooks/use-toast";
-import { fastApiInstance } from "@/lib/axios";
-import { ColumnDef } from "@tanstack/react-table";
-import { Edit, Eye, Plus, Trash } from "lucide-react";
-import React, { useState } from "react";
-import useSWR from "swr";
-import { Skeleton } from "../ui/skeleton";
+import React, {useState} from 'react';
+
+import {SharedDataTable} from '@/components/SharedDataTable';
+import {SharedColumnFilters} from '@/components/SharedFilters';
+import {GroupFormModal} from '@/components/configurations/GroupFormModal';
+import {GroupItemsModal} from '@/components/configurations/GroupItemsModal';
+import {Button} from '@/components/ui/button';
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
+import {useToast} from '@/hooks/use-toast';
+import {fastApiInstance} from '@/lib/axios';
+import {ColumnDef} from '@tanstack/react-table';
+import {Edit, Eye, Plus, Trash} from 'lucide-react';
+import useSWR from 'swr';
+
+import {Skeleton} from '../ui/skeleton';
 
 interface Group {
   code: string;
@@ -36,60 +33,55 @@ interface Grouping {
 }
 
 export const ConfigureGrouping: React.FC = () => {
-  const { toast } = useToast();
+  const {toast} = useToast();
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [columnFilters, setColumnFilters] = useState({
-    code: "",
-    label: "",
-    group: "",
-    type: "",
-    description: "",
+    code: '',
+    label: '',
+    group: '',
+    type: '',
+    description: '',
   });
 
   const {
     data: groupsResponse,
     mutate: mutateGroups,
     isLoading,
-  } = useSWR<Grouping>("/api/v1/groups/", fastApiInstance);
+  } = useSWR<Grouping>('/api/v1/groups/', fastApiInstance);
 
   const handleCreateGroup = async (newGroup: Partial<Group>) => {
     try {
-      await fastApiInstance.post("/api/v1/groups/", newGroup);
+      await fastApiInstance.post('/api/v1/groups/', newGroup);
       await mutateGroups();
       setIsGroupModalOpen(false); // Close modal first
-      toast({ title: "Success", description: "Group created successfully." });
+      toast({title: 'Success', description: 'Group created successfully.'});
     } catch (error: any) {
       setIsGroupModalOpen(false); // Close modal
-      const errorMessage =
-        error.response?.data?.error ||
-        "Failed to create group. Please try again.";
+      const errorMessage = error.response?.data?.error || 'Failed to create group. Please try again.';
       toast({
-        title: "Error",
+        title: 'Error',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
     }
   };
 
   const handleUpdateGroup = async (updatedGroup: Group) => {
     try {
-      await fastApiInstance.put(
-        `/api/v1/groups/${updatedGroup.code}/`,
-        updatedGroup
-      );
+      await fastApiInstance.put(`/api/v1/groups/${updatedGroup.code}/`, updatedGroup);
       await mutateGroups();
-      toast({ title: "Success", description: "Group updated successfully." });
+      toast({title: 'Success', description: 'Group updated successfully.'});
       setIsGroupModalOpen(false);
       setEditingGroup(null);
     } catch (error) {
-      console.error("Error updating group:", error);
+      console.error('Error updating group:', error);
       toast({
-        title: "Error",
-        description: "Failed to update group. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update group. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -98,37 +90,37 @@ export const ConfigureGrouping: React.FC = () => {
     try {
       await fastApiInstance.delete(`/api/v1/groups/${groupCode}/`);
       await mutateGroups();
-      toast({ title: "Success", description: "Group deleted successfully." });
+      toast({title: 'Success', description: 'Group deleted successfully.'});
     } catch (error) {
-      console.error("Error deleting group:", error);
+      console.error('Error deleting group:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete group. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete group. Please try again.',
+        variant: 'destructive',
       });
     }
   };
 
   const columns: ColumnDef<Group>[] = [
-    { accessorKey: "code", header: "Code" },
-    { accessorKey: "label", header: "Label" },
-    { accessorKey: "description", header: "Description" },
+    {accessorKey: 'code', header: 'Code'},
+    {accessorKey: 'label', header: 'Label'},
+    {accessorKey: 'description', header: 'Description'},
     {
-      accessorKey: "is_system_generated",
-      header: "System Generated",
-      cell: ({ row }) => (row.getValue("is_system_generated") ? "Yes" : "No"),
+      accessorKey: 'is_system_generated',
+      header: 'System Generated',
+      cell: ({row}) => (row.getValue('is_system_generated') ? 'Yes' : 'No'),
     },
     {
-      accessorKey: "items",
-      header: "Items Count",
-      cell: ({ row }) => {
-        const items = JSON.parse(row.getValue("items") as string);
+      accessorKey: 'items',
+      header: 'Items Count',
+      cell: ({row}) => {
+        const items = JSON.parse(row.getValue('items') as string);
         return items.length;
       },
     },
     {
-      id: "actions",
-      cell: ({ row }) => (
+      id: 'actions',
+      cell: ({row}) => (
         <div className="flex items-center space-x-2">
           <TooltipProvider>
             <Tooltip>
@@ -149,9 +141,7 @@ export const ConfigureGrouping: React.FC = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {row.original.is_system_generated
-                  ? "Cannot edit system-generated group"
-                  : "Edit group"}
+                {row.original.is_system_generated ? 'Cannot edit system-generated group' : 'Edit group'}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -172,9 +162,7 @@ export const ConfigureGrouping: React.FC = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {row.original.is_system_generated
-                  ? "Cannot delete system-generated group"
-                  : "Delete group"}
+                {row.original.is_system_generated ? 'Cannot delete system-generated group' : 'Delete group'}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -208,9 +196,7 @@ export const ConfigureGrouping: React.FC = () => {
 
       <SharedColumnFilters
         filters={columnFilters}
-        setFilter={(key, value) =>
-          setColumnFilters((prev) => ({ ...prev, [key]: value }))
-        }
+        setFilter={(key, value) => setColumnFilters((prev) => ({...prev, [key]: value}))}
       />
 
       <div className="mt-4 flex flex-row-reverse">
@@ -245,7 +231,7 @@ export const ConfigureGrouping: React.FC = () => {
         }}
         onSubmit={(group) => {
           if (editingGroup) {
-            handleUpdateGroup({ ...editingGroup, ...group } as Group);
+            handleUpdateGroup({...editingGroup, ...group} as Group);
           } else {
             handleCreateGroup(group);
           }

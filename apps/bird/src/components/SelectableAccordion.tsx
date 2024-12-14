@@ -1,11 +1,7 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
-import React, { useMemo } from "react";
+import React, {useMemo} from 'react';
+
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@/components/ui/accordion';
+import {Checkbox} from '@/components/ui/checkbox';
 
 interface SelectableAccordionProps {
   data: Record<string, Record<string, any[]>>;
@@ -21,9 +17,7 @@ const SelectableAccordion: React.FC<SelectableAccordionProps> = ({
   searchTerm,
 }) => {
   const isGroupSelected = (items: any[]) => {
-    return items.every((item) =>
-      selectedItems.some((selected) => selected.dataset_id === item.dataset_id)
-    );
+    return items.every((item) => selectedItems.some((selected) => selected.dataset_id === item.dataset_id));
   };
 
   const handleGroupSelect = (items: any[]) => {
@@ -31,11 +25,7 @@ const SelectableAccordion: React.FC<SelectableAccordionProps> = ({
     items.forEach((item) => {
       if (allSelected) {
         onItemSelect(item); // Deselect
-      } else if (
-        !selectedItems.some(
-          (selected) => selected.dataset_id === item.dataset_id
-        )
-      ) {
+      } else if (!selectedItems.some((selected) => selected.dataset_id === item.dataset_id)) {
         onItemSelect(item); // Select
       }
     });
@@ -71,14 +61,23 @@ const SelectableAccordion: React.FC<SelectableAccordionProps> = ({
   }
 
   return (
-    <Accordion type="multiple" className="w-full">
+    <Accordion
+      type="multiple"
+      className="w-full"
+    >
       {Object.entries(filteredData).map(([framework, groups]) => (
-        <AccordionItem key={framework} value={framework}>
+        <AccordionItem
+          key={framework}
+          value={framework}
+        >
           <AccordionTrigger>{framework}</AccordionTrigger>
           <AccordionContent>
             <Accordion type="multiple">
               {Object.entries(groups).map(([group, items]) => (
-                <AccordionItem key={group} value={group}>
+                <AccordionItem
+                  key={group}
+                  value={group}
+                >
                   <AccordionTrigger>
                     <div className="flex items-center">
                       <Checkbox
@@ -97,15 +96,10 @@ const SelectableAccordion: React.FC<SelectableAccordionProps> = ({
                       >
                         <Checkbox
                           id={`dataset-${item.dataset_id}`}
-                          checked={selectedItems.some(
-                            (selected) =>
-                              selected.dataset_id === item.dataset_id
-                          )}
+                          checked={selectedItems.some((selected) => selected.dataset_id === item.dataset_id)}
                           onCheckedChange={() => onItemSelect(item)}
                         />
-                        <label htmlFor={`dataset-${item.dataset_id}`}>
-                          {item.code}
-                        </label>
+                        <label htmlFor={`dataset-${item.dataset_id}`}>{item.code}</label>
                       </div>
                     ))}
                   </AccordionContent>

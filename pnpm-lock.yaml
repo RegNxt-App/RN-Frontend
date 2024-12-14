@@ -77,6 +77,15 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.1.2
         version: 1.1.5(@types/react-dom@18.3.5(@types/react@18.3.16))(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@rn/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@rn/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
+      '@rn/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@tanstack/react-table':
         specifier: ^8.20.5
         version: 8.20.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

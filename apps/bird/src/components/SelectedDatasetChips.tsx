@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import {X} from 'lucide-react';
 
 interface SelectedDatasetChipsProps {
   selectedDatasets: Array<{
@@ -10,7 +10,7 @@ interface SelectedDatasetChipsProps {
 }
 
 export default function SelectedDatasetChips(
-  { selectedDatasets, onRemove }: SelectedDatasetChipsProps = {
+  {selectedDatasets, onRemove}: SelectedDatasetChipsProps = {
     selectedDatasets: [],
     onRemove: () => {},
   }

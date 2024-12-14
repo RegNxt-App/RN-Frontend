@@ -1,14 +1,10 @@
-import { SharedDataTable } from "@/components/SharedDataTable";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { DatasetItem } from "@/types/databaseTypes";
-import { ColumnDef } from "@tanstack/react-table";
-import React, { useState } from "react";
+import React, {useState} from 'react';
+
+import {SharedDataTable} from '@/components/SharedDataTable';
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@/components/ui/accordion';
+import {Button} from '@/components/ui/button';
+import {DatasetItem} from '@/types/databaseTypes';
+import {ColumnDef} from '@tanstack/react-table';
 
 interface ConfigurationDataTableProps {
   data: Record<string, Record<string, DatasetItem[]>>;
@@ -17,52 +13,43 @@ interface ConfigurationDataTableProps {
 
 const columns: ColumnDef<DatasetItem>[] = [
   {
-    accessorKey: "framework",
-    header: "Framework",
-    cell: ({ row }) => <div>{row.getValue("framework")}</div>,
+    accessorKey: 'framework',
+    header: 'Framework',
+    cell: ({row}) => <div>{row.getValue('framework')}</div>,
   },
   {
-    accessorKey: "type",
-    header: "Layer/Type",
-    cell: ({ row }) => <div>{row.getValue("type")}</div>,
+    accessorKey: 'type',
+    header: 'Layer/Type',
+    cell: ({row}) => <div>{row.getValue('type')}</div>,
   },
   {
-    accessorKey: "code",
-    header: "Code",
-    cell: ({ row }) => <div>{row.getValue("code")}</div>,
+    accessorKey: 'code',
+    header: 'Code',
+    cell: ({row}) => <div>{row.getValue('code')}</div>,
   },
   {
-    accessorKey: "label",
-    header: "Name",
-    cell: ({ row }) => <div>{row.getValue("label")}</div>,
+    accessorKey: 'label',
+    header: 'Name',
+    cell: ({row}) => <div>{row.getValue('label')}</div>,
   },
   {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => <div>{row.getValue("description")}</div>,
+    accessorKey: 'description',
+    header: 'Description',
+    cell: ({row}) => <div>{row.getValue('description')}</div>,
   },
 ];
 
 const FRAMEWORKS_PER_PAGE = 15;
 const GROUPS_PER_PAGE = 10;
 
-export const ConfigurationDataTable: React.FC<ConfigurationDataTableProps> = ({
-  data,
-  onRowClick,
-}) => {
-  const [expandedFramework, setExpandedFramework] = useState<
-    string | undefined
-  >(undefined);
-  const [expandedGroup, setExpandedGroup] = useState<string | undefined>(
-    undefined
-  );
+export const ConfigurationDataTable: React.FC<ConfigurationDataTableProps> = ({data, onRowClick}) => {
+  const [expandedFramework, setExpandedFramework] = useState<string | undefined>(undefined);
+  const [expandedGroup, setExpandedGroup] = useState<string | undefined>(undefined);
   const [frameworkPage, setFrameworkPage] = useState(1);
   const [groupPages, setGroupPages] = useState<Record<string, number>>({});
 
   const frameworks = Object.keys(data);
-  const totalFrameworkPages = Math.ceil(
-    frameworks.length / FRAMEWORKS_PER_PAGE
-  );
+  const totalFrameworkPages = Math.ceil(frameworks.length / FRAMEWORKS_PER_PAGE);
   const paginatedFrameworks = frameworks.slice(
     (frameworkPage - 1) * FRAMEWORKS_PER_PAGE,
     frameworkPage * FRAMEWORKS_PER_PAGE
@@ -111,11 +98,7 @@ export const ConfigurationDataTable: React.FC<ConfigurationDataTableProps> = ({
                 <div className="flex items-center justify-between w-full">
                   <span className="font-semibold text-lg">{framework}</span>
                   <span className="text-sm text-gray-600">
-                    {Object.values(data[framework]).reduce(
-                      (acc, items) => acc + items.length,
-                      0
-                    )}{" "}
-                    item(s)
+                    {Object.values(data[framework]).reduce((acc, items) => acc + items.length, 0)} item(s)
                   </span>
                 </div>
               </AccordionTrigger>
@@ -174,10 +157,7 @@ export const ConfigurationDataTable: React.FC<ConfigurationDataTableProps> = ({
                       onClick={() =>
                         setGroupPages((prev) => ({
                           ...prev,
-                          [framework]: Math.min(
-                            (prev[framework] || 1) + 1,
-                            totalGroupPages
-                          ),
+                          [framework]: Math.min((prev[framework] || 1) + 1, totalGroupPages),
                         }))
                       }
                       disabled={currentGroupPage === totalGroupPages}
@@ -208,11 +188,7 @@ export const ConfigurationDataTable: React.FC<ConfigurationDataTableProps> = ({
             Page {frameworkPage} of {totalFrameworkPages}
           </span>
           <Button
-            onClick={() =>
-              setFrameworkPage((prev) =>
-                Math.min(prev + 1, totalFrameworkPages)
-              )
-            }
+            onClick={() => setFrameworkPage((prev) => Math.min(prev + 1, totalFrameworkPages))}
             disabled={frameworkPage === totalFrameworkPages}
             variant="outline"
             size="sm"

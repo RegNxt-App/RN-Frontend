@@ -1,29 +1,17 @@
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import {useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {
   ColumnDef,
+  SortingState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
   useReactTable,
-} from "@tanstack/react-table";
-import { useState } from "react";
+} from '@tanstack/react-table';
 
 interface SharedDataTableProps<T> {
   data: T[];
@@ -69,10 +57,7 @@ export function SharedDataTable<T>({
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -84,15 +69,12 @@ export function SharedDataTable<T>({
                 <TableRow
                   key={row.id}
                   className="cursor-pointer"
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={row.getIsSelected() && 'selected'}
                   onClick={() => onRowClick(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -113,8 +95,8 @@ export function SharedDataTable<T>({
       {showPagination && (
         <div className="flex items-center justify-between">
           <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+            {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length}{' '}
+            row(s) selected.
           </div>
           <div className="flex items-center space-x-6 lg:space-x-8">
             <div className="flex items-center space-x-2">
@@ -130,7 +112,10 @@ export function SharedDataTable<T>({
                 </SelectTrigger>
                 <SelectContent side="top">
                   {[10, 20, 30, 50, 100].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                    <SelectItem
+                      key={pageSize}
+                      value={`${pageSize}`}
+                    >
                       {pageSize}
                     </SelectItem>
                   ))}
@@ -138,8 +123,7 @@ export function SharedDataTable<T>({
               </Select>
             </div>
             <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()}
+              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
             </div>
             <div className="flex items-center space-x-2">
               <Button
@@ -148,7 +132,7 @@ export function SharedDataTable<T>({
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
-                {"<<"}
+                {'<<'}
               </Button>
               <Button
                 variant="outline"
@@ -156,7 +140,7 @@ export function SharedDataTable<T>({
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
               >
-                {"<"}
+                {'<'}
               </Button>
               <Button
                 variant="outline"
@@ -164,7 +148,7 @@ export function SharedDataTable<T>({
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
               >
-                {">"}
+                {'>'}
               </Button>
               <Button
                 variant="outline"
@@ -172,7 +156,7 @@ export function SharedDataTable<T>({
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
               >
-                {">>"}
+                {'>>'}
               </Button>
             </div>
           </div>

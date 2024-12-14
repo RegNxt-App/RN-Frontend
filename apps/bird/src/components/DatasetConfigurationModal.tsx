@@ -1,30 +1,12 @@
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import {useForm} from 'react-hook-form';
+
+import {Button} from '@/components/ui/button';
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Switch} from '@/components/ui/switch';
+import {zodResolver} from '@hookform/resolvers/zod';
+import * as z from 'zod';
 
 interface DatasetConfigurationModalProps {
   isOpen: boolean;
@@ -48,9 +30,9 @@ const formSchema = z.object({
 });
 
 const HISTORIZATION_OPTIONS = [
-  { value: "0", label: "No historization" },
-  { value: "1", label: "Always latest" },
-  { value: "2", label: "Versioning" },
+  {value: '0', label: 'No historization'},
+  {value: '1', label: 'Always latest'},
+  {value: '2', label: 'Versioning'},
 ];
 
 export default function DatasetConfigurationModal({
@@ -74,7 +56,10 @@ export default function DatasetConfigurationModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Dataset Configuration</DialogTitle>
@@ -88,12 +73,10 @@ export default function DatasetConfigurationModal({
             <FormField
               control={form.control}
               name="is_visible"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      Visible in Data/Diagram
-                    </FormLabel>
+                    <FormLabel className="text-base">Visible in Data/Diagram</FormLabel>
                     <div className="text-sm text-muted-foreground">
                       Show this dataset in data and diagram sections
                     </div>
@@ -112,7 +95,7 @@ export default function DatasetConfigurationModal({
             <FormField
               control={form.control}
               name="historization_type"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Historization Type</FormLabel>
                   <Select
@@ -127,7 +110,10 @@ export default function DatasetConfigurationModal({
                     </FormControl>
                     <SelectContent>
                       {HISTORIZATION_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                        >
                           {option.label}
                         </SelectItem>
                       ))}
@@ -139,10 +125,17 @@ export default function DatasetConfigurationModal({
             />
 
             <DialogFooter>
-              <Button variant="outline" onClick={onClose} type="button">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                type="button"
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSystemGenerated}>
+              <Button
+                type="submit"
+                disabled={isSystemGenerated}
+              >
                 Save Changes
               </Button>
             </DialogFooter>

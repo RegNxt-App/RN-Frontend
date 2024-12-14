@@ -1,34 +1,14 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Column,
-  Dataset,
-  DatasetVersion,
-  DatasetVersions,
-} from "@/types/databaseTypes";
-import { format } from "date-fns";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Edit,
-  Plus,
-  Settings2,
-  Trash,
-} from "lucide-react";
-import React, { useMemo, useState } from "react";
-import { DatasetVersionColumns } from "./DatasetVersionColumns";
+import React, {useMemo, useState} from 'react';
+
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@/components/ui/accordion';
+import {Badge} from '@/components/ui/badge';
+import {Button} from '@/components/ui/button';
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
+import {Column, Dataset, DatasetVersion, DatasetVersions} from '@/types/databaseTypes';
+import {format} from 'date-fns';
+import {ChevronLeft, ChevronRight, Edit, Plus, Settings2, Trash} from 'lucide-react';
+
+import {DatasetVersionColumns} from './DatasetVersionColumns';
 
 interface DatasetAccordionProps {
   datasets: Dataset[] | any;
@@ -67,21 +47,16 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
   handleDeleteDataset,
   isLoadingVersions,
   onVersionSelect,
-  handleViewHistory,
   handleConfigureDataset,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [expandedDatasetId, setExpandedDatasetId] = useState<number | null>(
-    null
-  );
-  const [selectedVersionId, setSelectedVersionId] = useState<number | null>(
-    null
-  );
+  const [expandedDatasetId, setExpandedDatasetId] = useState<number | null>(null);
+  const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
 
   const flattenedDatasets = useMemo(() => {
     if (!Array.isArray(datasets)) {
       const flattened: Dataset[] = [];
-      Object.entries(datasets).forEach(([groupName, groupItems]) => {
+      Object.entries(datasets).forEach(([, groupItems]) => {
         if (Array.isArray(groupItems)) {
           flattened.push(...groupItems);
         }
@@ -114,9 +89,7 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
   };
 
   const getDatasetVersions = (datasetId: number) => {
-    return (
-      datasetVersions?.data.filter((v) => v.dataset_id === datasetId) || []
-    );
+    return datasetVersions?.data.filter((v) => v.dataset_id === datasetId) || [];
   };
 
   const renderVersions = (dataset: Dataset) => {
@@ -127,9 +100,7 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
     }
 
     if (versions.length === 0) {
-      return (
-        <div className="py-4">No versions available for this dataset.</div>
-      );
+      return <div className="py-4">No versions available for this dataset.</div>;
     }
 
     return (
@@ -139,23 +110,21 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
             key={version.dataset_version_id}
             className={`border rounded-lg p-4 transition-colors ${
               selectedVersionId === version.dataset_version_id
-                ? "border-primary bg-primary/5"
-                : "border-border"
+                ? 'border-primary bg-primary/5'
+                : 'border-border'
             }`}
           >
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <h4 className="text-sm font-medium">
-                    Version {version.version_nr}
-                  </h4>
+                  <h4 className="text-sm font-medium">Version {version.version_nr}</h4>
                   <Badge variant="outline">{version.version_code}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Valid from: {format(new Date(version.valid_from), "PP")}
-                  {version.valid_to && version.valid_to !== "9999-12-31"
-                    ? ` to ${format(new Date(version.valid_to), "PP")}`
-                    : " to Present"}
+                  Valid from: {format(new Date(version.valid_from), 'PP')}
+                  {version.valid_to && version.valid_to !== '9999-12-31'
+                    ? ` to ${format(new Date(version.valid_to), 'PP')}`
+                    : ' to Present'}
                 </p>
               </div>
 
@@ -176,14 +145,10 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
                   size="sm"
                   onClick={() => {
                     onVersionSelect(
-                      selectedVersionId === version.dataset_version_id
-                        ? null
-                        : version.dataset_version_id
+                      selectedVersionId === version.dataset_version_id ? null : version.dataset_version_id
                     );
                     setSelectedVersionId(
-                      selectedVersionId === version.dataset_version_id
-                        ? null
-                        : version.dataset_version_id
+                      selectedVersionId === version.dataset_version_id ? null : version.dataset_version_id
                     );
                   }}
                 >
@@ -197,12 +162,7 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            handleDeleteVersion(
-                              dataset.dataset_id,
-                              version.dataset_version_id
-                            )
-                          }
+                          onClick={() => handleDeleteVersion(dataset.dataset_id, version.dataset_version_id)}
                           disabled={dataset.is_system_generated}
                         >
                           <Trash className="h-4 w-4" />
@@ -211,8 +171,8 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
                     </TooltipTrigger>
                     <TooltipContent>
                       {dataset.is_system_generated
-                        ? "Cannot delete system-generated version"
-                        : "Delete version"}
+                        ? 'Cannot delete system-generated version'
+                        : 'Delete version'}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -255,14 +215,10 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
                   <div className="text-left">
                     <h3 className="text-sm font-medium">{dataset.label}</h3>
                     <div className="flex gap-2">
-                      <p className="text-sm text-muted-foreground">
-                        {dataset.code}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{dataset.code}</p>
                       <Badge>{dataset.framework}</Badge>
                       <Badge variant="outline">{dataset.type}</Badge>
-                      {!dataset.is_visible && (
-                        <Badge variant="secondary">Hidden</Badge>
-                      )}
+                      {!dataset.is_visible && <Badge variant="secondary">Hidden</Badge>}
                     </div>
                   </div>
                 </div>
@@ -298,8 +254,8 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
                       </TooltipTrigger>
                       <TooltipContent>
                         {dataset.is_system_generated
-                          ? "Cannot edit system-generated dataset"
-                          : "Edit dataset"}
+                          ? 'Cannot edit system-generated dataset'
+                          : 'Edit dataset'}
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -311,9 +267,7 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              handleDeleteDataset(dataset.dataset_id)
-                            }
+                            onClick={() => handleDeleteDataset(dataset.dataset_id)}
                             disabled={dataset.is_system_generated}
                           >
                             <Trash className="h-4 w-4" />
@@ -322,8 +276,8 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
                       </TooltipTrigger>
                       <TooltipContent>
                         {dataset.is_system_generated
-                          ? "Cannot delete system-generated dataset"
-                          : "Delete dataset"}
+                          ? 'Cannot delete system-generated dataset'
+                          : 'Delete dataset'}
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -334,9 +288,7 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
             <AccordionContent>
               <div className="px-4 py-2 space-y-4">
                 {dataset.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {dataset.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{dataset.description}</p>
                 )}
 
                 <div className="flex justify-between items-center">
@@ -379,9 +331,7 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
           </span>
 
           <Button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
             variant="outline"
             size="sm"

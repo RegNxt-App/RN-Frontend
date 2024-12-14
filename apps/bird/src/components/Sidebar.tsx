@@ -1,4 +1,7 @@
-import { Button } from "@/components/ui/button";
+import React, {useEffect, useRef, useState} from 'react';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
+
+import {Button} from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -6,7 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,30 +17,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
-import Avatar from "boring-avatars";
-import { motion } from "framer-motion";
-import {
-  Database,
-  GitBranch,
-  LogOut,
-  LucideIcon,
-  Settings,
-  User,
-} from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+} from '@/components/ui/dropdown-menu';
+import {useAuth} from '@/contexts/AuthContext';
+import Avatar from 'boring-avatars';
+import {motion} from 'framer-motion';
+import {Database, GitBranch, LogOut, LucideIcon, Settings, User} from 'lucide-react';
 
 interface SidebarProps {
   isLoading: boolean;
   isExpanded: boolean;
   setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-interface LogoProps {
-  size: number;
-  expanded?: boolean;
 }
 
 interface NavigationItem {
@@ -47,10 +36,7 @@ interface NavigationItem {
   current: boolean;
 }
 
-const CollapsibleSidebar: React.FC<SidebarProps> = ({
-  isExpanded,
-  setIsExpanded,
-}) => {
+const CollapsibleSidebar: React.FC<SidebarProps> = ({isExpanded, setIsExpanded}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -58,26 +44,26 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
   const location = useLocation();
   const currentPath = location.pathname;
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const {logout, user} = useAuth();
 
   const navigation: NavigationItem[] = [
     {
       icon: Settings,
-      href: "/configuration/",
-      name: "Configuration",
-      current: currentPath.startsWith("/configuration"),
+      href: '/configuration/',
+      name: 'Configuration',
+      current: currentPath.startsWith('/configuration'),
     },
     {
       icon: Database,
-      href: "/data/",
-      name: "Data",
-      current: currentPath.startsWith("/data"),
+      href: '/data/',
+      name: 'Data',
+      current: currentPath.startsWith('/data'),
     },
     {
       icon: GitBranch,
-      href: "/relationships/",
-      name: "Relationships",
-      current: currentPath.startsWith("/relationships"),
+      href: '/relationships/',
+      name: 'Relationships',
+      current: currentPath.startsWith('/relationships'),
     },
   ];
 
@@ -85,7 +71,7 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
    * Combines CSS classes
    */
   const classNames = (...classes: (string | boolean | undefined)[]) => {
-    return classes.filter(Boolean).join(" ");
+    return classes.filter(Boolean).join(' ');
   };
 
   useEffect(() => {
@@ -101,9 +87,9 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [setIsExpanded]);
 
@@ -126,9 +112,9 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
     try {
       await logout();
       setIsLogoutDialogOpen(false);
-      navigate("/auth/login");
+      navigate('/auth/login');
     } catch (error) {
-      console.error("Error logging out:", error);
+      console.error('Error logging out:', error);
     }
   };
 
@@ -138,19 +124,19 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
         ref={sidebarRef}
         className="fixed left-0 top-0 z-40 h-screen bg-custom-primary-light dark:bg-custom-primary-dark border-r shadow-lg flex flex-col"
         initial={false}
-        animate={{ width: isExpanded || isDropdownOpen ? 280 : 80 }}
-        transition={{ duration: 0.3 }}
+        animate={{width: isExpanded || isDropdownOpen ? 280 : 80}}
+        transition={{duration: 0.3}}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-center py-2">
             <motion.div
-              animate={{ width: isExpanded || isDropdownOpen ? 160 : 140 }}
-              transition={{ duration: 0.3 }}
+              animate={{width: isExpanded || isDropdownOpen ? 160 : 140}}
+              transition={{duration: 0.3}}
             >
               <img
-                src={isExpanded || isDropdownOpen ? "/logo.svg" : "/vite.svg"}
+                src={isExpanded || isDropdownOpen ? '/logo.svg' : '/vite.svg'}
                 alt="logo"
                 width={isExpanded || isDropdownOpen ? 200 : 50}
                 height={400}
@@ -166,16 +152,12 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
                     to={item.href}
                     className={classNames(
                       item.current
-                        ? "bg-custom-primary text-white"
-                        : "text-custom-text-light dark:text-custom-text-dark hover:bg-custom-primary hover:text-white",
-                      "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
+                        ? 'bg-custom-primary text-white'
+                        : 'text-custom-text-light dark:text-custom-text-dark hover:bg-custom-primary hover:text-white',
+                      'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6'
                     )}
                   >
-                    <item.icon
-                      className={`h-5 w-5 ${
-                        isExpanded || isDropdownOpen ? "mr-3" : "mx-auto"
-                      }`}
-                    />
+                    <item.icon className={`h-5 w-5 ${isExpanded || isDropdownOpen ? 'mr-3' : 'mx-auto'}`} />
                     {(isExpanded || isDropdownOpen) && (
                       <span className="text-sm font-medium">{item.name}</span>
                     )}
@@ -184,16 +166,22 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
               ))}
             </ul>
           </nav>
-          <div className="p-4" ref={dropdownRef}>
+          <div
+            className="p-4"
+            ref={dropdownRef}
+          >
             <DropdownMenu
               open={isDropdownOpen}
               onOpenChange={setIsDropdownOpen}
             >
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="w-full p-0">
+                <Button
+                  variant="ghost"
+                  className="w-full p-0"
+                >
                   <div
                     className={`flex items-center ${
-                      isExpanded || isDropdownOpen ? "w-full" : "justify-center"
+                      isExpanded || isDropdownOpen ? 'w-full' : 'justify-center'
                     }`}
                   >
                     <Avatar
@@ -214,7 +202,10 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent
+                align="end"
+                className="w-56"
+              >
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
@@ -236,13 +227,14 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
         </div>
       </motion.div>
 
-      <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
+      <Dialog
+        open={isLogoutDialogOpen}
+        onOpenChange={setIsLogoutDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Logout</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to log out of the system?
-            </DialogDescription>
+            <DialogDescription>Are you sure you want to log out of the system?</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
@@ -251,7 +243,10 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmLogout}>
+            <Button
+              variant="destructive"
+              onClick={confirmLogout}
+            >
               Log out
             </Button>
           </DialogFooter>

@@ -1,7 +1,9 @@
-import { Column } from "@/types/databaseTypes";
-import { Loader } from "lucide-react";
-import React from "react";
-import { EditableColumnTable } from "./EditableColumnTable";
+import React from 'react';
+
+import {Column} from '@/types/databaseTypes';
+import {Loader} from 'lucide-react';
+
+import {EditableColumnTable} from './EditableColumnTable';
 
 interface DatasetVersionColumnsProps {
   datasetId: number;

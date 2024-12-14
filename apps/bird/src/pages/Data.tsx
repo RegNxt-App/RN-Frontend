@@ -1,36 +1,25 @@
 // Data.tsx
-import { format } from "date-fns";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import useSWR from "swr";
 
-import { ConfigurationDataTable } from "@/components/ConfigurationDataTable";
-import { DataAccordion } from "@/components/DataAccordion";
-import DatePicker from "@/components/DatePicker";
-import FilterPanel from "@/components/FilterPanel";
-import { MetadataTable } from "@/components/metadatatable/MetadataTable";
-import { SelectionDisplay } from "@/components/SelectionDisplay";
-import { SharedColumnFilters } from "@/components/SharedFilters";
-import DataSkeleton from "@/components/skeletons/DataSkeleton";
-import { TableInfoHeader } from "@/components/TableInfoHeader";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { fastApiInstance } from "@/lib/axios";
-import {
-  DatasetItem,
-  DatasetResponse,
-  Frameworks,
-  Layers,
-  ValidationResult,
-} from "@/types/databaseTypes";
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-const NO_FILTER = "NO_FILTER";
+import {ConfigurationDataTable} from '@/components/ConfigurationDataTable';
+import {DataAccordion} from '@/components/DataAccordion';
+import DatePicker from '@/components/DatePicker';
+import FilterPanel from '@/components/FilterPanel';
+import {SelectionDisplay} from '@/components/SelectionDisplay';
+import {SharedColumnFilters} from '@/components/SharedFilters';
+import {TableInfoHeader} from '@/components/TableInfoHeader';
+import {MetadataTable} from '@/components/metadatatable/MetadataTable';
+import DataSkeleton from '@/components/skeletons/DataSkeleton';
+import {Button} from '@/components/ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {useToast} from '@/hooks/use-toast';
+import {fastApiInstance} from '@/lib/axios';
+import {DatasetItem, DatasetResponse, Frameworks, Layers, ValidationResult} from '@/types/databaseTypes';
+import {format} from 'date-fns';
+import useSWR from 'swr';
+
+const NO_FILTER = 'NO_FILTER';
 
 const Data: React.FC = () => {
   const [selectedFramework, setSelectedFramework] = useState<string>(NO_FILTER);
@@ -45,28 +34,21 @@ const Data: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pageSize, _] = useState(10000);
 
-  const [metadataTableData, setMetadataTableData] = useState<
-    Record<string, string>[]
-  >([]);
+  const [metadataTableData, setMetadataTableData] = useState<Record<string, string>[]>([]);
   const [isMetadataLoading, setIsMetadataLoading] = useState(false);
   const [columnFilters, setColumnFilters] = useState({
-    code: "",
-    label: "",
-    type: "",
-    group: "",
-    description: "",
+    code: '',
+    label: '',
+    type: '',
+    group: '',
+    description: '',
   });
-  const [validationResults, setValidationResults] = useState<
-    ValidationResult[]
-  >([]);
-  const { toast } = useToast();
+  const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
+  const {toast} = useToast();
 
-  const { data: layers } = useSWR<Layers>("/api/v1/layers/", fastApiInstance);
-  const { data: frameworks } = useSWR<Frameworks>(
-    "/api/v1/frameworks/",
-    fastApiInstance
-  );
-  const { data: dataTableJson } = useSWR<DatasetResponse>(
+  const {data: layers} = useSWR<Layers>('/api/v1/layers/', fastApiInstance);
+  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', fastApiInstance);
+  const {data: dataTableJson} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
     fastApiInstance,
     {
@@ -80,14 +62,12 @@ const Data: React.FC = () => {
 
   const groupedData = useMemo(() => {
     if (!dataTableJson?.data?.results) return {};
-    return dataTableJson.data.results.reduce<
-      Record<string, Record<string, DatasetItem[]>>
-    >((acc, item) => {
+    return dataTableJson.data.results.reduce<Record<string, Record<string, DatasetItem[]>>>((acc, item) => {
       const framework = item.framework;
       const group =
         item.groups && item.groups.length > 0 && item.groups[0].label
           ? item.groups[0].label
-          : "Ungrouped Datasets";
+          : 'Ungrouped Datasets';
 
       if (!acc[framework]) {
         acc[framework] = {};
@@ -102,11 +82,7 @@ const Data: React.FC = () => {
   }, [dataTableJson]);
 
   const hasMandatoryFilters = useCallback(() => {
-    return (
-      metadata?.some(
-        (col) => col.is_report_snapshot_field && col.is_mandatory
-      ) ?? false
-    );
+    return metadata?.some((col) => col.is_report_snapshot_field && col.is_mandatory) ?? false;
   }, [metadata]);
 
   const handleFilterApply = useCallback(
@@ -117,26 +93,21 @@ const Data: React.FC = () => {
       setIsMetadataLoading(true);
 
       try {
-        const allFiltersEmpty = Object.values(filterValues).every(
-          (v) => v === null || v === ""
-        );
+        const allFiltersEmpty = Object.values(filterValues).every((v) => v === null || v === '');
 
         if (allFiltersEmpty) {
           toast({
-            title: "Error",
-            description: "Please select at least one filter",
-            variant: "destructive",
+            title: 'Error',
+            description: 'Please select at least one filter',
+            variant: 'destructive',
           });
           return;
         }
 
         const params = new URLSearchParams();
-        params.append(
-          "version_id",
-          datasetVersion.dataset_version_id.toString()
-        );
+        params.append('version_id', datasetVersion.dataset_version_id.toString());
         Object.entries(filterValues).forEach(([key, value]) => {
-          if (value !== null && value !== "") {
+          if (value !== null && value !== '') {
             params.append(key, value.toString());
           }
         });
@@ -147,11 +118,11 @@ const Data: React.FC = () => {
         setMetadataTableData(response.data);
         setHasAppliedFilters(true);
       } catch (error) {
-        console.error("Error applying filters:", error);
+        console.error('Error applying filters:', error);
         toast({
-          title: "Error",
-          description: "Failed to apply filters. Please try again.",
-          variant: "destructive",
+          title: 'Error',
+          description: 'Failed to apply filters. Please try again.',
+          variant: 'destructive',
         });
       } finally {
         setIsFilterLoading(false);
@@ -171,42 +142,34 @@ const Data: React.FC = () => {
 
       filtered[framework] = {};
 
-      Object.entries(groups as Record<string, DatasetItem[]>).forEach(
-        ([group, items]) => {
-          const filteredItems = items.filter((item: DatasetItem) => {
-            const layerMatch =
-              selectedLayer === NO_FILTER || item.type === selectedLayer;
-            const columnFilterMatch = Object.entries(columnFilters).every(
-              ([key, value]) => {
-                if (key === "group") {
-                  return (
-                    value === "" ||
-                    (item.groups &&
-                      item.groups.some(
-                        (g: any) =>
-                          g.code.toLowerCase().includes(value.toLowerCase()) ||
-                          g.label.toLowerCase().includes(value.toLowerCase())
-                      ))
-                  );
-                }
-                return (
-                  value === "" ||
-                  (item[key as keyof DatasetItem] &&
-                    item[key as keyof DatasetItem]
-                      .toString()
-                      .toLowerCase()
-                      .includes(value.toLowerCase()))
-                );
-              }
+      Object.entries(groups as Record<string, DatasetItem[]>).forEach(([group, items]) => {
+        const filteredItems = items.filter((item: DatasetItem) => {
+          const layerMatch = selectedLayer === NO_FILTER || item.type === selectedLayer;
+          const columnFilterMatch = Object.entries(columnFilters).every(([key, value]) => {
+            if (key === 'group') {
+              return (
+                value === '' ||
+                (item.groups &&
+                  item.groups.some(
+                    (g: any) =>
+                      g.code.toLowerCase().includes(value.toLowerCase()) ||
+                      g.label.toLowerCase().includes(value.toLowerCase())
+                  ))
+              );
+            }
+            return (
+              value === '' ||
+              (item[key as keyof DatasetItem] &&
+                item[key as keyof DatasetItem].toString().toLowerCase().includes(value.toLowerCase()))
             );
-            return layerMatch && columnFilterMatch;
           });
+          return layerMatch && columnFilterMatch;
+        });
 
-          if (filteredItems.length > 0) {
-            filtered[framework][group] = filteredItems;
-          }
+        if (filteredItems.length > 0) {
+          filtered[framework][group] = filteredItems;
         }
-      );
+      });
 
       if (Object.keys(filtered[framework]).length === 0) {
         delete filtered[framework];
@@ -230,29 +193,22 @@ const Data: React.FC = () => {
   const fetchDatasetVersion = useCallback(async () => {
     if (!selectedTable) return;
     try {
-      const response = await fastApiInstance.get(
-        `/api/v1/datasets/${selectedTable.dataset_id}/versions/`,
-        {
-          params: { date: format(selectedDate, "yyyy-MM-dd") },
-        }
-      );
-      setDatasetVersion(
-        response.data && Object.keys(response.data).length > 0
-          ? response.data
-          : null
-      );
+      const response = await fastApiInstance.get(`/api/v1/datasets/${selectedTable.dataset_id}/versions/`, {
+        params: {date: format(selectedDate, 'yyyy-MM-dd')},
+      });
+      setDatasetVersion(response.data && Object.keys(response.data).length > 0 ? response.data : null);
       if (!response.data || Object.keys(response.data).length === 0) {
         toast({
-          title: "No Version Available",
+          title: 'No Version Available',
           description: `No version history exists for the selected table on ${format(
             selectedDate,
-            "yyyy-MM-dd"
+            'yyyy-MM-dd'
           )}.`,
-          variant: "destructive",
+          variant: 'destructive',
         });
       }
     } catch (error) {
-      console.error("Error fetching dataset version:", error);
+      console.error('Error fetching dataset version:', error);
       setDatasetVersion(null);
     }
   }, [selectedTable, selectedDate, toast]);
@@ -265,23 +221,18 @@ const Data: React.FC = () => {
     if (!selectedTable || !datasetVersion) return;
     try {
       const [metadataResponse, dataResponse] = await Promise.all([
-        fastApiInstance.get(
-          `/api/v1/datasets/${selectedTable.dataset_id}/version-columns/`,
-          {
-            params: { version_id: datasetVersion.dataset_version_id },
-          }
-        ),
+        fastApiInstance.get(`/api/v1/datasets/${selectedTable.dataset_id}/version-columns/`, {
+          params: {version_id: datasetVersion.dataset_version_id},
+        }),
         fastApiInstance.get(
           `/api/v1/datasets/${selectedTable.dataset_id}/get_data/?version_id=${datasetVersion.dataset_version_id}`
         ),
       ]);
 
-      setMetadata(
-        Array.isArray(metadataResponse.data) ? metadataResponse.data : null
-      );
+      setMetadata(Array.isArray(metadataResponse.data) ? metadataResponse.data : null);
       setMetadataTableData(dataResponse.data);
     } catch (error) {
-      console.error("Error fetching table data:", error);
+      console.error('Error fetching table data:', error);
       setMetadata(null);
       setMetadataTableData([]);
     }
@@ -297,27 +248,24 @@ const Data: React.FC = () => {
     setIsMetadataLoading(true);
     try {
       const [columnsResponse, dataResponse] = await Promise.all([
-        fastApiInstance.get(
-          `/api/v1/datasets/${selectedTable.dataset_id}/version-columns/`,
-          { params: { version_id: datasetVersion.dataset_version_id } }
-        ),
+        fastApiInstance.get(`/api/v1/datasets/${selectedTable.dataset_id}/version-columns/`, {
+          params: {version_id: datasetVersion.dataset_version_id},
+        }),
         fastApiInstance.get(
           `/api/v1/datasets/${selectedTable.dataset_id}/get_data/?version_id=${datasetVersion.dataset_version_id}`
         ),
       ]);
 
-      setMetadata(
-        Array.isArray(columnsResponse.data) ? columnsResponse.data : null
-      );
+      setMetadata(Array.isArray(columnsResponse.data) ? columnsResponse.data : null);
       setMetadataTableData(dataResponse.data);
     } catch (error) {
-      console.error("Error fetching metadata:", error);
+      console.error('Error fetching metadata:', error);
       setMetadata(null);
       setMetadataTableData([]);
       toast({
-        title: "Error",
-        description: "Failed to fetch metadata. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to fetch metadata. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsMetadataLoading(false);
@@ -358,24 +306,21 @@ const Data: React.FC = () => {
           dataset_version_id: selectedTable.dataset_version_id,
         };
 
-        await fastApiInstance.post(
-          `/api/v1/datasets/${selectedTable.dataset_id}/save_data/`,
-          payload
-        );
+        await fastApiInstance.post(`/api/v1/datasets/${selectedTable.dataset_id}/save_data/`, payload);
 
         toast({
-          title: "Success",
+          title: 'Success',
           description: saveData.deletions?.length
             ? `Successfully saved changes and deleted ${saveData.deletions.length} row(s)`
-            : "Successfully saved changes",
+            : 'Successfully saved changes',
         });
         fetchTableData();
       } catch (error) {
-        console.error("Error saving data:", error);
+        console.error('Error saving data:', error);
         toast({
-          title: "Error",
-          description: "Failed to save data. Please try again.",
-          variant: "destructive",
+          title: 'Error',
+          description: 'Failed to save data. Please try again.',
+          variant: 'destructive',
         });
       }
     },
@@ -388,7 +333,7 @@ const Data: React.FC = () => {
 
       try {
         const preparedData = tableData.map((row) => {
-          const transformed = { ...row };
+          const transformed = {...row};
           Object.keys(transformed).forEach((key) => {
             if (transformed[key] === undefined) {
               transformed[key] = null;
@@ -418,23 +363,21 @@ const Data: React.FC = () => {
         setValidationResults(response.data);
         const errorCount = response.data.length;
         toast({
-          title: "Validation Complete",
+          title: 'Validation Complete',
           description:
             errorCount > 0
-              ? `Found ${errorCount} validation issue${
-                  errorCount === 1 ? "" : "s"
-                }`
-              : "No validation issues found.",
-          variant: errorCount > 0 ? "destructive" : "default",
+              ? `Found ${errorCount} validation issue${errorCount === 1 ? '' : 's'}`
+              : 'No validation issues found.',
+          variant: errorCount > 0 ? 'destructive' : 'default',
         });
 
         return response.data;
       } catch (error: any) {
-        console.error("Validation error:", error);
+        console.error('Validation error:', error);
         toast({
-          title: "Validation Error",
-          description: error.response?.data?.error || "Failed to validate data",
-          variant: "destructive",
+          title: 'Validation Error',
+          description: error.response?.data?.error || 'Failed to validate data',
+          variant: 'destructive',
         });
         throw error;
       }
@@ -444,24 +387,16 @@ const Data: React.FC = () => {
 
   const totalFilteredItems = useMemo(() => {
     return Object.values(filteredData).reduce(
-      (total, groups) =>
-        total +
-        Object.values(groups).reduce((sum, items) => sum + items.length, 0),
+      (total, groups) => total + Object.values(groups).reduce((sum, items) => sum + items.length, 0),
       0
     );
   }, [filteredData]);
   const layersWithNoFilter = useMemo(
-    () => [
-      { code: NO_FILTER, name: "No Layer Selected" },
-      ...(layers?.data || []),
-    ],
+    () => [{code: NO_FILTER, name: 'No Layer Selected'}, ...(layers?.data || [])],
     [layers]
   );
   const frameworksWithNoFilter = useMemo(
-    () => [
-      { code: NO_FILTER, name: "No Framework Selected" },
-      ...(frameworks?.data || []),
-    ],
+    () => [{code: NO_FILTER, name: 'No Framework Selected'}, ...(frameworks?.data || [])],
     [frameworks]
   );
 
@@ -471,36 +406,44 @@ const Data: React.FC = () => {
     <div className="container mx-auto py-10">
       <h1 className="text-2xl font-bold mb-5">Data</h1>
       <div className="flex space-x-4 mb-5">
-        <Select onValueChange={handleFrameworkChange} value={selectedFramework}>
+        <Select
+          onValueChange={handleFrameworkChange}
+          value={selectedFramework}
+        >
           <SelectTrigger className="w-[250px]">
             <SelectValue placeholder="Select a Framework" />
           </SelectTrigger>
           <SelectContent>
             {frameworksWithNoFilter.map((framework) => (
-              <SelectItem key={framework.code} value={framework.code}>
+              <SelectItem
+                key={framework.code}
+                value={framework.code}
+              >
                 {framework.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select onValueChange={handleLayerChange} value={selectedLayer}>
+        <Select
+          onValueChange={handleLayerChange}
+          value={selectedLayer}
+        >
           <SelectTrigger className="w-[250px]">
             <SelectValue placeholder="Select a Layer" />
           </SelectTrigger>
           <SelectContent>
             {layersWithNoFilter.map((layer) => (
-              <SelectItem key={layer.code} value={layer.code}>
+              <SelectItem
+                key={layer.code}
+                value={layer.code}
+              >
                 {layer.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <DatePicker
-          onSelect={
-            handleDateChange as React.ComponentProps<
-              typeof DatePicker
-            >["onSelect"]
-          }
+          onSelect={handleDateChange as React.ComponentProps<typeof DatePicker>['onSelect']}
           initialDate={selectedDate}
         />
       </div>
@@ -512,9 +455,7 @@ const Data: React.FC = () => {
       />
       <SharedColumnFilters
         filters={columnFilters}
-        setFilter={(key, value) =>
-          setColumnFilters((prev) => ({ ...prev, [key]: value }))
-        }
+        setFilter={(key, value) => setColumnFilters((prev) => ({...prev, [key]: value}))}
       />
       {selectedLayer === NO_FILTER ? (
         <DataAccordion
@@ -531,9 +472,8 @@ const Data: React.FC = () => {
       {dataTableJson && (
         <div className="mt-4 flex justify-between items-center">
           <div>
-            Showing {(currentPage - 1) * pageSize + 1} to{" "}
-            {Math.min(currentPage * pageSize, dataTableJson.data.count)} of{" "}
-            {dataTableJson.data.count} entries
+            Showing {(currentPage - 1) * pageSize + 1} to{' '}
+            {Math.min(currentPage * pageSize, dataTableJson.data.count)} of {dataTableJson.data.count} entries
           </div>
           <div className="flex space-x-2">
             <Button
@@ -561,8 +501,7 @@ const Data: React.FC = () => {
           {datasetVersion ? (
             <>
               <p className="mb-4">
-                Valid from: {datasetVersion.valid_from} to{" "}
-                {datasetVersion.valid_to || "Present"}
+                Valid from: {datasetVersion.valid_from} to {datasetVersion.valid_to || 'Present'}
               </p>
 
               <FilterPanel
@@ -589,9 +528,7 @@ const Data: React.FC = () => {
               </div>
             </>
           ) : (
-            <p className="text-gray-500 italic">
-              No version history available for the selected date.
-            </p>
+            <p className="text-gray-500 italic">No version history available for the selected date.</p>
           )}
         </div>
       )}

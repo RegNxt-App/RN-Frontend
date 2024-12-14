@@ -1,31 +1,27 @@
-import { TooltipProvider } from "@/components/ui/tooltip";
-import axiosInstance from "@/lib/axios";
-import React, { ComponentProps, useEffect } from "react";
-import {
-  createBrowserRouter,
-  Navigate,
-  Outlet,
-  RouterProvider,
-  useLocation,
-} from "react-router-dom";
-import { SWRConfig } from "swr";
-import { ConfigureDatasets } from "./components/configurations/ConfigureDatasets";
-import { ConfigureDataviews } from "./components/configurations/ConfigureDataviews";
-import { ConfigureGrouping } from "./components/configurations/ConfigureGrouping";
-import ErrorBoundary from "./components/ErrorBoundary";
-import Layout from "./components/Layout";
-import LogoSpinner from "./components/LogoSpinner";
-import { Toaster } from "./components/ui/toaster";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import Config from "./pages/ConfigureView";
-import Data from "./pages/Data";
-import Relationships from "./pages/Relationship";
+import React, {ComponentProps, useEffect} from 'react';
+import {Navigate, Outlet, RouterProvider, createBrowserRouter, useLocation} from 'react-router-dom';
+
+import {TooltipProvider} from '@/components/ui/tooltip';
+import axiosInstance from '@/lib/axios';
+import {SWRConfig} from 'swr';
+
+import ErrorBoundary from './components/ErrorBoundary';
+import Layout from './components/Layout';
+import LogoSpinner from './components/LogoSpinner';
+import {ConfigureDatasets} from './components/configurations/ConfigureDatasets';
+import {ConfigureDataviews} from './components/configurations/ConfigureDataviews';
+import {ConfigureGrouping} from './components/configurations/ConfigureGrouping';
+import {Toaster} from './components/ui/toaster';
+import {AuthProvider, useAuth} from './contexts/AuthContext';
+import Config from './pages/ConfigureView';
+import Data from './pages/Data';
+import Relationships from './pages/Relationship';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 
 const PrivateRoute: React.FC = () => {
-  const { user, loading, refreshUserSession } = useAuth();
+  const {user, loading, refreshUserSession} = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -39,7 +35,13 @@ const PrivateRoute: React.FC = () => {
   }
 
   if (!user) {
-    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+    return (
+      <Navigate
+        to="/auth/login"
+        state={{from: location}}
+        replace
+      />
+    );
   }
 
   return <Outlet />;
@@ -47,60 +49,65 @@ const PrivateRoute: React.FC = () => {
 
 const router = createBrowserRouter([
   {
-    path: "auth/",
+    path: 'auth/',
     children: [
       {
-        path: "login",
+        path: 'login',
         element: <Login />,
       },
       {
-        path: "register",
+        path: 'register',
         element: <Register />,
       },
       {
-        path: "forgot-password",
+        path: 'forgot-password',
         element: <ForgotPassword />,
       },
     ],
   },
   {
-    path: "/",
+    path: '/',
     element: <PrivateRoute />,
     children: [
       {
         element: <Layout />,
         children: [
           {
-            path: "",
-            element: <Navigate to="/configuration" replace />,
+            path: '',
+            element: (
+              <Navigate
+                to="/configuration"
+                replace
+              />
+            ),
           },
           {
-            path: "configuration",
+            path: 'configuration',
             children: [
               {
-                path: "",
+                path: '',
                 element: <Config />,
               },
               {
-                path: "dataset",
+                path: 'dataset',
                 element: <ConfigureDatasets />,
               },
               {
-                path: "dataview",
+                path: 'dataview',
                 element: <ConfigureDataviews />,
               },
               {
-                path: "groups",
+                path: 'groups',
                 element: <ConfigureGrouping />,
               },
             ],
           },
           {
-            path: "data",
+            path: 'data',
             element: <Data />,
           },
           {
-            path: "relationships",
+            path: 'relationships',
             element: <Relationships />,
           },
         ],
@@ -112,7 +119,7 @@ const router = createBrowserRouter([
 const swrConfig = {
   fetcher: (res: string) => axiosInstance.get(res).then((r) => r.data),
   focusThrottleInterval: 30000,
-} satisfies ComponentProps<typeof SWRConfig>["value"];
+} satisfies ComponentProps<typeof SWRConfig>['value'];
 
 const App: React.FC = () => {
   return (

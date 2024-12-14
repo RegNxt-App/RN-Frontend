@@ -1,19 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { TableCell, TableRow } from "@/components/ui/table";
-import { MetadataItem, ValidationResult } from "@/types/databaseTypes";
-import { Trash } from "lucide-react";
-import React from "react";
-import { MetadataTableCell } from "./MetadataTableCell";
+import React from 'react';
+
+import {Button} from '@/components/ui/button';
+import {TableCell, TableRow} from '@/components/ui/table';
+import {MetadataItem, ValidationResult} from '@/types/databaseTypes';
+import {Trash} from 'lucide-react';
+
+import {MetadataTableCell} from './MetadataTableCell';
 
 interface MetadataTableRowProps {
   row: Record<string, string | null>;
   rowIndex: number;
   filteredMetadata: MetadataItem[];
-  handleCellChange: (
-    rowIndex: number,
-    columnName: string,
-    value: string | null
-  ) => void;
+  handleCellChange: (rowIndex: number, columnName: string, value: string | null) => void;
   handleDeleteRow: (rowIndex: number) => void;
   validationResults: ValidationResult[];
 }
@@ -29,13 +27,9 @@ export const MetadataTableRow: React.FC<MetadataTableRowProps> = ({
   <TableRow
     key={rowIndex}
     className={`hover:bg-gray-50 transition-colors ${
-      validationResults.some((result) => result.row_id === rowIndex.toString())
-        ? "bg-red-50"
-        : ""
+      validationResults.some((result) => result.row_id === rowIndex.toString()) ? 'bg-red-50' : ''
     }`}
-    data-validation-error={validationResults.some(
-      (result) => result.row_id === rowIndex.toString()
-    )}
+    data-validation-error={validationResults.some((result) => result.row_id === rowIndex.toString())}
   >
     <TableCell>
       <Button

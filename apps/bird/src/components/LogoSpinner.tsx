@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const LogoSpinner: React.FC = () => {
   return (
@@ -19,9 +19,7 @@ const LogoSpinner: React.FC = () => {
           />
         </svg>
       </div>
-      <div className="absolute mt-64  text-xl font-bold text-black">
-        Loading...
-      </div>
+      <div className="absolute mt-64  text-xl font-bold text-black">Loading...</div>
     </div>
   );
 };

@@ -1,36 +1,19 @@
 // MetadataTableBody.tsx
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { MetadataItem, ValidationResult } from "@/types/databaseTypes";
-import { Circle, Info, Key } from "lucide-react";
-import React from "react";
-import { MetadataTableRow } from "./MetadataTableRow";
+
+import React from 'react';
+
+import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
+import {MetadataItem, ValidationResult} from '@/types/databaseTypes';
+import {Circle, Info, Key} from 'lucide-react';
+
+import {MetadataTableRow} from './MetadataTableRow';
 
 interface MetadataTableBodyProps {
   filteredMetadata: MetadataItem[];
   localTableData: Record<string, string | null>[];
-  handleCellChange: (
-    rowIndex: number,
-    columnName: string,
-    value: string | null
-  ) => void;
+  handleCellChange: (rowIndex: number, columnName: string, value: string | null) => void;
   handleDeleteRow: (rowIndex: number) => void;
   validationResults: ValidationResult[];
 }
@@ -88,19 +71,16 @@ export const MetadataTableBody: React.FC<MetadataTableBodyProps> = ({
                                   <strong>Label:</strong> {item.label}
                                 </p>
                                 <p>
-                                  <strong>Description:</strong>{" "}
-                                  {item.description}
+                                  <strong>Description:</strong> {item.description}
                                 </p>
                                 <p>
                                   <strong>Data Type:</strong> {item.datatype}
                                 </p>
                                 <p>
-                                  <strong>Is Key:</strong>{" "}
-                                  {item.is_key ? "Yes" : "No"}
+                                  <strong>Is Key:</strong> {item.is_key ? 'Yes' : 'No'}
                                 </p>
                                 <p>
-                                  <strong>Is Mandatory:</strong>{" "}
-                                  {item.is_mandatory ? "Yes" : "No"}
+                                  <strong>Is Mandatory:</strong> {item.is_mandatory ? 'Yes' : 'No'}
                                 </p>
                               </div>
                             </PopoverContent>

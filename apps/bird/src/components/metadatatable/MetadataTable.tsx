@@ -1,13 +1,15 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { MetadataItem, ValidationResult } from "@/types/databaseTypes";
-import { AlertCircle } from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ExcelOperations } from "../ExcelOperations";
-import { NoResults } from "../NoResults";
-import { Button } from "../ui/button";
-import { MetadataTableBody } from "./MetadataTableBody";
-import { MetadataTableHeader } from "./MetadataTableHeader";
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+
+import {Skeleton} from '@/components/ui/skeleton';
+import {useToast} from '@/hooks/use-toast';
+import {MetadataItem, ValidationResult} from '@/types/databaseTypes';
+import {AlertCircle} from 'lucide-react';
+
+import {ExcelOperations} from '../ExcelOperations';
+import {NoResults} from '../NoResults';
+import {Button} from '../ui/button';
+import {MetadataTableBody} from './MetadataTableBody';
+import {MetadataTableHeader} from './MetadataTableHeader';
 
 interface MetadataTableProps {
   metadata: MetadataItem[] | null;
@@ -16,8 +18,8 @@ interface MetadataTableProps {
   hasAppliedFilters: boolean;
   onSave: any;
   onValidate: (tableData: Record<string, string | null>[]) => void;
-  selectedTable: { code: string; label: string };
-  datasetVersion: { version_nr: string };
+  selectedTable: {code: string; label: string};
+  datasetVersion: {version_nr: string};
   validationResults: ValidationResult[];
   hasMandatoryFilters: any;
 }
@@ -36,19 +38,17 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
   validationResults,
   hasMandatoryFilters,
 }) => {
-  const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
+  const {toast} = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  const [localTableData, setLocalTableData] = useState<
-    Record<string, string | null>[]
-  >([]);
+  const [localTableData, setLocalTableData] = useState<Record<string, string | null>[]>([]);
   const [isDataModified, setIsDataModified] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (tableData && tableData.length > 0) {
-      const initialData = tableData.map((row) => ({ ...row, id: row.id }));
+      const initialData = tableData.map((row) => ({...row, id: row.id}));
       setLocalTableData(initialData);
     } else {
       setLocalTableData([]);
@@ -57,26 +57,21 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
     setCurrentPage(1);
   }, [tableData]);
 
-  const handleCellChange = useCallback(
-    (rowIndex: number, columnName: string, value: string | null) => {
-      setLocalTableData((prevData) => {
-        const newData = [...prevData];
-        newData[rowIndex] = {
-          ...newData[rowIndex],
-          [columnName]: value === "" ? null : value,
-        };
-        return newData;
-      });
-      setIsDataModified(true);
-    },
-    []
-  );
+  const handleCellChange = useCallback((rowIndex: number, columnName: string, value: string | null) => {
+    setLocalTableData((prevData) => {
+      const newData = [...prevData];
+      newData[rowIndex] = {
+        ...newData[rowIndex],
+        [columnName]: value === '' ? null : value,
+      };
+      return newData;
+    });
+    setIsDataModified(true);
+  }, []);
 
   const handleAddRow = useCallback(() => {
     if (!metadata) return;
-    const newRow = Object.fromEntries(
-      metadata.map((column) => [column.code, null])
-    );
+    const newRow = Object.fromEntries(metadata.map((column) => [column.code, null]));
     setLocalTableData((prevData) => [...prevData, newRow]);
     setIsDataModified(true);
 
@@ -94,9 +89,7 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
       const originalIds = new Set(tableData.map((row) => row.id));
 
       // Find deleted IDs by comparing original and current IDs
-      const deletedIds = Array.from(originalIds).filter(
-        (id) => !currentIds.has(id)
-      );
+      const deletedIds = Array.from(originalIds).filter((id) => !currentIds.has(id));
 
       // Pass both data and deletions to onSave
       await onSave({
@@ -107,18 +100,18 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
       setIsDataModified(false);
 
       toast({
-        title: "Success",
+        title: 'Success',
         description:
           deletedIds.length > 0
             ? `Successfully saved changes and deleted ${deletedIds.length} row(s)`
-            : "Successfully saved changes",
+            : 'Successfully saved changes',
       });
     } catch (error) {
-      console.error("Save error:", error);
+      console.error('Save error:', error);
       toast({
-        title: "Error",
-        description: "Failed to save changes",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to save changes',
+        variant: 'destructive',
       });
     } finally {
       setIsSaving(false);
@@ -129,29 +122,23 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
     try {
       const validationResults = (await onValidate(localTableData)) as any;
       if (validationResults && validationResults.length > 0) {
-        const firstErrorElement = document.querySelector(
-          '[data-validation-error="true"]'
-        );
+        const firstErrorElement = document.querySelector('[data-validation-error="true"]');
         if (firstErrorElement) {
           firstErrorElement.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
+            behavior: 'smooth',
+            block: 'center',
           });
         }
       }
     } catch (error) {
-      console.error("Validation error:", error);
+      console.error('Validation error:', error);
     } finally {
       setIsValidating(false);
     }
   }, [onValidate, localTableData]);
 
   const filteredMetadata = useMemo(() => {
-    return (
-      metadata?.filter((item) =>
-        item.label.toLowerCase().includes(searchTerm.toLowerCase())
-      ) || []
-    );
+    return metadata?.filter((item) => item.label.toLowerCase().includes(searchTerm.toLowerCase())) || [];
   }, [metadata, searchTerm]);
 
   const totalPages = Math.ceil(localTableData.length / PAGE_SIZE);
@@ -181,7 +168,7 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
     <div className="space-y-4">
       <div className="flex justify-between flex-end">
         <h3 className="text-xl font-semibold">
-          Data for table {selectedTable.code} | {selectedTable.label}{" "}
+          Data for table {selectedTable.code} | {selectedTable.label}{' '}
           {datasetVersion && `| Version ${datasetVersion.version_nr}`}
         </h3>
 
@@ -221,9 +208,7 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
             handleCellChange={handleCellChange}
             handleDeleteRow={(rowIndex) => {
               const actualIndex = (currentPage - 1) * PAGE_SIZE + rowIndex;
-              setLocalTableData((prevData) =>
-                prevData.filter((_, index) => index !== actualIndex)
-              );
+              setLocalTableData((prevData) => prevData.filter((_, index) => index !== actualIndex));
               setIsDataModified(true);
             }}
             validationResults={validationResults}
@@ -231,9 +216,8 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
 
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-gray-600">
-              Showing {(currentPage - 1) * PAGE_SIZE + 1} to{" "}
-              {Math.min(currentPage * PAGE_SIZE, localTableData.length)} of{" "}
-              {localTableData.length} entries
+              Showing {(currentPage - 1) * PAGE_SIZE + 1} to{' '}
+              {Math.min(currentPage * PAGE_SIZE, localTableData.length)} of {localTableData.length} entries
             </div>
             <div className="flex space-x-2">
               <Button
@@ -244,18 +228,16 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
                 Previous
               </Button>
               <div className="flex items-center space-x-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <Button
-                      key={page}
-                      variant={page === currentPage ? "default" : "outline"}
-                      onClick={() => handlePageChange(page)}
-                      className="w-8 h-8 p-0"
-                    >
-                      {page}
-                    </Button>
-                  )
-                )}
+                {Array.from({length: totalPages}, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    variant={page === currentPage ? 'default' : 'outline'}
+                    onClick={() => handlePageChange(page)}
+                    className="w-8 h-8 p-0"
+                  >
+                    {page}
+                  </Button>
+                ))}
               </div>
               <Button
                 variant="outline"
@@ -281,7 +263,10 @@ const LoadingSkeleton = () => (
     </div>
     <div className="space-y-2">
       {[...Array(5)].map((_, index) => (
-        <Skeleton key={index} className="h-12 w-full" />
+        <Skeleton
+          key={index}
+          className="h-12 w-full"
+        />
       ))}
     </div>
   </div>

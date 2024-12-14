@@ -1,5 +1,6 @@
-import { Edge } from "@xyflow/react";
-import React from "react";
+import React from 'react';
+
+import {Edge} from '@xyflow/react';
 
 interface EdgeContextMenuProps {
   x: number;
@@ -10,17 +11,11 @@ interface EdgeContextMenuProps {
   onClose: () => void;
 }
 
-const EdgeContextMenu: React.FC<EdgeContextMenuProps> = ({
-  x,
-  y,
-  edge,
-  onEdit,
-  onDelete,
-}) => {
+const EdgeContextMenu: React.FC<EdgeContextMenuProps> = ({x, y, edge, onEdit, onDelete}) => {
   return (
     <div
       className="absolute bg-white border border-gray-200 rounded shadow-md z-50"
-      style={{ top: y, left: x }}
+      style={{top: y, left: x}}
     >
       <ul>
         <li

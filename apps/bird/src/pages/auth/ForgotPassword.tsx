@@ -1,8 +1,9 @@
-import AuthLayout from "@/components/AuthLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+import React, {useState} from 'react';
+
+import AuthLayout from '@/components/AuthLayout';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Label} from '@/components/ui/label';
 
 export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,13 +25,25 @@ export default function ForgotPassword() {
       imageAlt="BIRD"
       description="Intuitive user interface for visualizing, managing and extending the BIRD model"
     >
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form
+        onSubmit={onSubmit}
+        className="space-y-6"
+      >
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" placeholder="m@example.com" required type="email" />
+          <Input
+            id="email"
+            placeholder="m@example.com"
+            required
+            type="email"
+          />
         </div>
-        <Button className="w-full" type="submit" disabled={isLoading}>
-          {isLoading ? "Sending..." : "Send Reset Link"}
+        <Button
+          className="w-full"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Sending...' : 'Send Reset Link'}
         </Button>
       </form>
 
@@ -45,9 +58,7 @@ export default function ForgotPassword() {
       </div>
 
       <div className="mt-6 text-center text-sm">
-        <span className="text-muted-foreground">
-          Don&apos;t have an account?{" "}
-        </span>
+        <span className="text-muted-foreground">Don&apos;t have an account? </span>
         <a
           className="font-semibold hover:text-primary underline underline-offset-4"
           href="/register"
