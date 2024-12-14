@@ -1,0 +1,9 @@
+node_modules
+.turbo
+build/**
+dist/**
+.next/**
+.DS_Store
+.env*.local
+bun.lockb
+.idea/
