@@ -198,6 +198,9 @@ importers:
       tailwindcss:
         specifier: ^3.4.12
         version: 3.4.16
+      ts-toolbelt:
+        specifier: ^9.6.0
+        version: 9.6.0
       typescript:
         specifier: ^5.5.3
         version: 5.7.2
@@ -437,6 +440,43 @@ importers:
         specifier: ^5.3.3
         version: 5.7.2
 
+  packages/lib:
+    dependencies:
+      '@react-aria/focus':
+        specifier: ^3.11.0
+        version: 3.19.0(react@18.3.1)
+      '@react-aria/utils':
+        specifier: ^3.15.0
+        version: 3.26.0(react@18.3.1)
+      '@react-types/shared':
+        specifier: ^3.18.0
+        version: 3.26.0(react@18.3.1)
+      '@rn/tokens':
+        specifier: workspace:*
+        version: link:../tokens
+      clsx:
+        specifier: ^1.2.1
+        version: 1.2.1
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      tailwind-merge:
+        specifier: ^1.14.0
+        version: 1.14.0
+      tailwind-variants:
+        specifier: ^0.0.30
+        version: 0.0.30(tailwindcss@3.4.16)
+    devDependencies:
+      '@rn/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/react':
+        specifier: ^18.2.47
+        version: 18.3.16
+      typescript:
+        specifier: ^5.2.2
+        version: 5.7.2
+
   packages/rnui:
     dependencies:
       '@hookform/resolvers':
@@ -609,11 +649,11 @@ importers:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.4.49)
       eslint:
-        specifier: ^9.9.0
-        version: 9.17.0(jiti@1.21.6)
+        specifier: ^8.56.0
+        version: 8.57.1
       eslint-plugin-storybook:
         specifier: ^0.6.15
-        version: 0.6.15(eslint@9.17.0(jiti@1.21.6))(typescript@5.7.2)
+        version: 0.6.15(eslint@8.57.1)(typescript@5.7.2)
       globals:
         specifier: ^15.9.0
         version: 15.13.0
@@ -3334,6 +3374,10 @@ packages:
   client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
 
+  clsx@1.2.1:
+    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
+
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
@@ -5579,6 +5623,9 @@ packages:
 
   ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
+
+  ts-toolbelt@9.6.0:
+    resolution: {integrity: sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==}
 
   tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
@@ -8749,21 +8796,6 @@ snapshots:
       - supports-color
       - typescript
 
-  '@typescript-eslint/utils@5.62.0(eslint@9.17.0(jiti@1.21.6))(typescript@5.7.2)':
-    dependencies:
-      '@eslint-community/eslint-utils': 4.4.1(eslint@9.17.0(jiti@1.21.6))
-      '@types/json-schema': 7.0.15
-      '@types/semver': 7.5.8
-      '@typescript-eslint/scope-manager': 5.62.0
-      '@typescript-eslint/types': 5.62.0
-      '@typescript-eslint/typescript-estree': 5.62.0(typescript@5.7.2)
-      eslint: 9.17.0(jiti@1.21.6)
-      eslint-scope: 5.1.1
-      semver: 7.6.3
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-
   '@typescript-eslint/utils@8.18.0(eslint@9.17.0(jiti@1.21.6))(typescript@5.7.2)':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.1(eslint@9.17.0(jiti@1.21.6))
@@ -9252,6 +9284,8 @@ snapshots:
       string-width: 5.1.2
 
   client-only@0.0.1: {}
+
+  clsx@1.2.1: {}
 
   clsx@2.1.1: {}
 
@@ -9837,11 +9871,11 @@ snapshots:
       string.prototype.matchall: 4.0.11
       string.prototype.repeat: 1.0.0
 
-  eslint-plugin-storybook@0.6.15(eslint@9.17.0(jiti@1.21.6))(typescript@5.7.2):
+  eslint-plugin-storybook@0.6.15(eslint@8.57.1)(typescript@5.7.2):
     dependencies:
       '@storybook/csf': 0.0.1
-      '@typescript-eslint/utils': 5.62.0(eslint@9.17.0(jiti@1.21.6))(typescript@5.7.2)
-      eslint: 9.17.0(jiti@1.21.6)
+      '@typescript-eslint/utils': 5.62.0(eslint@8.57.1)(typescript@5.7.2)
+      eslint: 8.57.1
       requireindex: 1.2.0
       ts-dedent: 2.2.0
     transitivePeerDependencies:
@@ -11767,6 +11801,8 @@ snapshots:
   ts-dedent@2.2.0: {}
 
   ts-interface-checker@0.1.13: {}
+
+  ts-toolbelt@9.6.0: {}
 
   tsconfig-paths@3.15.0:
     dependencies:
