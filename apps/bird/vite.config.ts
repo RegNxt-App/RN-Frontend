@@ -13,7 +13,7 @@ export default defineConfig(({mode}): UserConfig => {
       },
     },
     worker: {
-      format: 'es', // Add this line
+      format: 'es',
     },
 
     build: {
@@ -76,7 +76,10 @@ export default defineConfig(({mode}): UserConfig => {
       'import.meta.env.VITE_FAST_API_BACKEND': JSON.stringify(env.VITE_FAST_API_BACKEND),
     },
     optimizeDeps: {
-      exclude: ['web-worker'], // Add this line
+      exclude: ['web-worker'],
+    },
+    server: {
+      port: 4000,
     },
   };
 });

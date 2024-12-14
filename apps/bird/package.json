@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "TIMING=1 eslint src/**/*.{js,ts,tsx} --fix",
+    "lint": "eslint .",
     "prettier": "prettier --write \"./**/!(*.d).{js,jsx,ts,tsx}\"",
     "prettier-check": "prettier --check \"./**/!(*.d).{js,jsx,ts,tsx}\"",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf build"

@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig, loadEnv} from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
 export default defineConfig(function (_a) {
   var mode = _a.mode;
@@ -13,7 +13,7 @@ export default defineConfig(function (_a) {
       },
     },
     worker: {
-      format: 'es', // Add this line
+      format: 'es',
     },
     build: {
       outDir: 'dist',
@@ -74,7 +74,11 @@ export default defineConfig(function (_a) {
       'import.meta.env.VITE_FAST_API_BACKEND': JSON.stringify(env.VITE_FAST_API_BACKEND),
     },
     optimizeDeps: {
-      exclude: ['web-worker'], // Add this line
+      exclude: ['web-worker'],
+    },
+    server: {
+      port: 4000,
     },
   };
+
 });
