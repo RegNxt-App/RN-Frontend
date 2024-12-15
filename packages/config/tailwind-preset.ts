@@ -16,7 +16,7 @@ import { PluginUtils } from "tailwindcss/types/config";
 
 export default {
   content: [
-    "../../packages/nui/components/**/*.{tsx,ts,js,jsx}",
+    "../../packages/rnui/components/**/*.{tsx,ts,js,jsx}",
     "../../packages/layouts/**/*.{tsx,ts,js,jsx}",
   ],
   theme: {

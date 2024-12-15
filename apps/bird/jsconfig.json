@@ -7,8 +7,9 @@
       "utils/*": ["utils/*"],
       "hooks/*": ["hooks/*"],
       "views/*": ["views/*"],
-      "middlewares/*": ["middlewares/*"],
+      "pages/*": ["pages/*"],
+      "middlewares/*": ["middlewares/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src"]
 }

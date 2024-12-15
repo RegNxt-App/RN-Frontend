@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import {Config} from 'tailwindcss';
 
 import baseConfig from '@rn/config/tailwind-preset';
+import {Config} from 'tailwindcss';
 
 export default {
   ...baseConfig,

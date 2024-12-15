@@ -39,9 +39,6 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@tanstack/react-table": "^8.20.5",
-    "@tiptap/pm": "2.0.0-beta.218",
-    "@tiptap/react": "2.0.0-beta.218",
-    "@tiptap/starter-kit": "2.0.0-beta.218",
     "@types/lodash": "^4.14.202",
     "aria-hidden": "^1.2.3",
     "axios": "^1.6.5",
@@ -79,9 +76,9 @@
     "eslint": "^8.56.0",
     "eslint-plugin-storybook": "^0.6.15",
     "globals": "^15.9.0",
-    "postcss": "^8.4.47",
+    "postcss": "^8.4.33",
     "prettier": "^2.8.8",
-    "tailwindcss": "^3.4.12",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.5.3",
     "vite": "^5.4.1"
   }
