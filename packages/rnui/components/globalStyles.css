@@ -2,35 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-.rx-slide-in-2 {
-  @apply rx-side-bottom:slide-in-from-bottom-2;
-  @apply rx-side-top:slide-in-from-top-2;
-  @apply rx-side-right:slide-in-from-right-2;
-  @apply rx-side-left:slide-in-from-left-2;
-}
 
-.rx-slide-in-1 {
-  @apply rx-side-bottom:slide-in-from-bottom-1;
-  @apply rx-side-top:slide-in-from-top-1;
-  @apply rx-side-right:slide-in-from-right-1;
-  @apply rx-side-left:slide-in-from-left-1;
-}
-
-.rx-slide-in-reverse-2 {
-  @apply rx-side-bottom:slide-in-from-top-2;
-  @apply rx-side-top:slide-in-from-bottom-2;
-  @apply rx-side-right:slide-in-from-left-2;
-  @apply rx-side-left:slide-in-from-right-2;
-}
-
-.rx-slide-in-reverse-1 {
-  @apply rx-side-bottom:slide-in-from-top-1;
-  @apply rx-side-top:slide-in-from-bottom-1;
-  @apply rx-side-right:slide-in-from-left-1;
-  @apply rx-side-left:slide-in-from-right-1;
-}
-
- 
 @layer base {
   :root {
     --background: 0 0% 100%;

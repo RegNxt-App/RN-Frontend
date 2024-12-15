@@ -1,9 +1,18 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
-import baseConfig from '@rn/config/tailwind-preset';
 import {Config} from 'tailwindcss';
+
+import baseConfig from '@rn/config/tailwind-preset';
 
 export default {
   ...baseConfig,
-  content: [...baseConfig.content, './components/**/*', './form/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    ...baseConfig.content,
+    './components/**/*',
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+    '../../packages/ui/src/**/*.{ts,tsx}',
+  ],
 } satisfies Config;

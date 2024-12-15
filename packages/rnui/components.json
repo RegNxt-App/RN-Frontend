@@ -5,16 +5,16 @@
   "tsx": true,
   "tailwind": {
     "config": "tailwind.config.ts",
-    "css": "components/globalStyles.css",
+    "css": "globals.css",
     "baseColor": "zinc",
     "cssVariables": true,
     "prefix": ""
   },
   "aliases": {
-    "components": "@/components",
-    "utils": "@/rn/lib/utils",
-    "ui": "@/components/",
-    "lib": "@/rn/lib",
-    "hooks": "@/hooks"
+    "components": "@rn/rnui/components",
+    "utils": "@rn/lib/utils",
+    "ui": "@rn/rnui/components",
+    "lib": "@rn/rnui/lib",
+    "hooks": "@rn/rnui/hooks"
   }
 }
