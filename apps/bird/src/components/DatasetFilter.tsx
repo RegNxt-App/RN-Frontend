@@ -9,6 +9,8 @@ import {Asterisk} from 'lucide-react';
 import useSWR from 'swr';
 
 import {
+  Alert,
+  AlertDescription,
   Badge,
   Button,
   Input,
@@ -19,7 +21,6 @@ import {
   SelectValue,
   Skeleton,
 } from '@rn/rnui';
-import {Alert, AlertDescription} from '@rn/rnui';
 
 interface FilterField {
   code: string;

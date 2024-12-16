@@ -1,9 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 
 import {SharedColumnFilters} from '@/components/SharedFilters';
-import {Button} from '@/components/ui/button';
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {useToast} from '@/hooks/use-toast';
 import {fastApiInstance} from '@/lib/axios';
 import {
@@ -18,6 +15,20 @@ import {
 } from '@/types/databaseTypes';
 import {Plus} from 'lucide-react';
 import useSWR from 'swr';
+
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@rn/rnui';
 
 import DataSkeleton from '../skeletons/DataSkeleton';
 import {ConfigurationAccordion} from './ConfigAccord';

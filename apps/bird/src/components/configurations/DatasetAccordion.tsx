@@ -1,12 +1,21 @@
 import React, {useMemo, useState} from 'react';
 
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@/components/ui/accordion';
-import {Badge} from '@/components/ui/badge';
-import {Button} from '@/components/ui/button';
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
 import {Column, Dataset, DatasetVersion, DatasetVersions} from '@/types/databaseTypes';
 import {format} from 'date-fns';
 import {ChevronLeft, ChevronRight, Edit, Plus, Settings2, Trash} from 'lucide-react';
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  Badge,
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@rn/rnui';
 
 import {DatasetVersionColumns} from './DatasetVersionColumns';
 

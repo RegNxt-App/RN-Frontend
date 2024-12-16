@@ -1,9 +1,9 @@
 import React from 'react';
 
-import {Button} from '@/components/ui/button';
-import {TableCell, TableRow} from '@/components/ui/table';
 import {MetadataItem, ValidationResult} from '@/types/databaseTypes';
 import {Trash} from 'lucide-react';
+
+import {Button, TableCell, TableRow} from '@rn/rnui';
 
 import {MetadataTableCell} from './MetadataTableCell';
 

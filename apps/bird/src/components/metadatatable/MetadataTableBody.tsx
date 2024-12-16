@@ -1,12 +1,23 @@
-// MetadataTableBody.tsx
-
 import React from 'react';
 
-import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
 import {MetadataItem, ValidationResult} from '@/types/databaseTypes';
 import {Circle, Info, Key} from 'lucide-react';
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@rn/rnui';
 
 import {MetadataTableRow} from './MetadataTableRow';
 

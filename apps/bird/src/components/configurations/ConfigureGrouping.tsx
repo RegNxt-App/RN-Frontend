@@ -4,15 +4,14 @@ import {SharedDataTable} from '@/components/SharedDataTable';
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {GroupFormModal} from '@/components/configurations/GroupFormModal';
 import {GroupItemsModal} from '@/components/configurations/GroupItemsModal';
-import {Button} from '@/components/ui/button';
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
 import {useToast} from '@/hooks/use-toast';
 import {fastApiInstance} from '@/lib/axios';
 import {ColumnDef} from '@tanstack/react-table';
 import {Edit, Eye, Plus, Trash} from 'lucide-react';
 import useSWR from 'swr';
 
-import {Skeleton} from '../ui/skeleton';
+import {Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/rnui';
+import {Skeleton} from '@rn/rnui';
 
 interface Group {
   code: string;

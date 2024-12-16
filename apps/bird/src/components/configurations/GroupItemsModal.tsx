@@ -3,12 +3,11 @@
 import React, {useEffect, useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
-import {Button} from '@/components/ui/button';
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {Label} from '@/components/ui/label';
 import {useToast} from '@/hooks/use-toast';
 import {fastApiInstance} from '@/lib/axios';
 import {ColumnDef} from '@tanstack/react-table';
+
+import {Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Label} from '@rn/rnui';
 
 import GenericComboBox from '../ComboBox';
 

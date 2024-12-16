@@ -1,15 +1,25 @@
 import React, {useMemo} from 'react';
 
-import {Input} from '@/components/ui/input';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
 import {cn} from '@/lib/utils';
 import {MetadataItem, ValidationResult} from '@/types/databaseTypes';
 import {format} from 'date-fns';
 import {AlertTriangle} from 'lucide-react';
 
+import {
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  TableCell,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@rn/rnui';
+
 import {DatePicker} from '../GDate';
-import {TableCell} from '../ui/table';
 
 interface MetadataTableCellProps {
   item: MetadataItem;

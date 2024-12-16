@@ -1,10 +1,8 @@
-// MetadataTableHeader.tsx
-
 import React from 'react';
 
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
 import {CheckCircle, Loader, Plus, Save, Search} from 'lucide-react';
+
+import {Button, Input} from '@rn/rnui';
 
 interface MetadataTableHeaderProps {
   searchTerm: string;

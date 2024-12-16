@@ -1,14 +1,25 @@
 import {useForm} from 'react-hook-form';
 
-import {Button} from '@/components/ui/button';
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
-import {Input} from '@/components/ui/input';
 import {DatasetVersion} from '@/types/databaseTypes';
 import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
-import {Badge} from '../ui/badge';
+import {
+  Badge,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input,
+} from '@rn/rnui';
 
 interface DatasetVersionFormModalProps {
   isOpen: boolean;

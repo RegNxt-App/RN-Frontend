@@ -1,20 +1,29 @@
 import React, {useCallback, useMemo, useState} from 'react';
 
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
-// Add this import
-
-import {Switch} from '@/components/ui/switch';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
 import {useToast} from '@/hooks/use-toast';
 import {fastApiInstance} from '@/lib/axios';
 import {cn} from '@/lib/utils';
 import {Column} from '@/types/databaseTypes';
-import {Edit, Trash2} from 'lucide-react';
-import {History, Plus} from 'lucide-react';
+import {Edit, History, Plus, Trash2} from 'lucide-react';
 import useSWR from 'swr';
 
+import {
+  Button,
+  Input,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@rn/rnui';
+
+// Add this import
 import ColumnFormModal from './ColumnFormModal';
 import {ConfirmDialog} from './ConfirmDialog';
 

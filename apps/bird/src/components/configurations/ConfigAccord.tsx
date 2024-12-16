@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@/components/ui/accordion';
-import {Button} from '@/components/ui/button';
 import {Dataset, DatasetItem, DatasetVersion, DatasetVersions} from '@/types/databaseTypes';
+
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button} from '@rn/rnui';
 
 import {DatasetAccordion} from './DatasetAccordion';
 

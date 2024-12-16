@@ -1,13 +1,13 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-import {Skeleton} from '@/components/ui/skeleton';
 import {useToast} from '@/hooks/use-toast';
 import {MetadataItem, ValidationResult} from '@/types/databaseTypes';
 import {AlertCircle} from 'lucide-react';
 
+import {Button, Skeleton} from '@rn/rnui';
+
 import {ExcelOperations} from '../ExcelOperations';
 import {NoResults} from '../NoResults';
-import {Button} from '../ui/button';
 import {MetadataTableBody} from './MetadataTableBody';
 import {MetadataTableHeader} from './MetadataTableHeader';
 

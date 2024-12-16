@@ -1,12 +1,24 @@
 import React, {useEffect} from 'react';
 import {useForm} from 'react-hook-form';
 
-import {Button} from '@/components/ui/button';
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
-import {Input} from '@/components/ui/input';
 import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
+
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input,
+} from '@rn/rnui';
 
 const formSchema = z.object({
   code: z.string().min(1, 'Code is required'),
