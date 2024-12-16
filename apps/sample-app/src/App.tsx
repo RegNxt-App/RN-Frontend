@@ -1,35 +1,60 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rn/rnui";
+import { AlertCircle } from "lucide-react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const sourceColumn = ["Abc", "XYZ"];
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="mx-[200px]">
+      <div className="flex w-full  flex-col  items-center justify-center gap-3 my-5">
+        <Button className="w-full" type="submit">
+          Hello Nice
+        </Button>
+        <Input type="password" />
+
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Please fill in all mandatory fields to see the content.
+          </AlertDescription>
+        </Alert>
+
+        <div className="grid grid-cols-4 items-center gap-4">
+          <label htmlFor="sourceColumn" className="text-right">
+            Source Column
+          </label>
+          <Select
+            value={"abc"}
+            onValueChange={(val) => console.log("ok: ", val)}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select Framework" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ABC">All Frameworks</SelectItem>
+              {sourceColumn.map((framework) => (
+                <SelectItem key={framework} value={framework}>
+                  {framework}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <h1 className="text-3xl font-bold underline">Hello world!</h1>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;

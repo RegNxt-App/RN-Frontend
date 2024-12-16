@@ -12,7 +12,7 @@
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "storybook": "storybook dev -p 6006 --no-open",
     "build": "tsc -b ./tsconfig.json && npm run copy:styles",
-    "copy:styles": "find ./components -name '*.css' -exec bash -c 'echo {}; mkdir -p \"./dist/$(dirname \"{}\")\"; cp \"{}\" \"./dist/{}\"' \\;",
+    "copy:styles": "find ./src/components -name '*.css' -exec bash -c 'echo {}; mkdir -p \"./dist/$(dirname \"{}\")\"; cp \"{}\" \"./dist/{}\"' \\;",
     "storybook:build": "build-storybook",
     "type-check": "tsc --noEmit"
   },
