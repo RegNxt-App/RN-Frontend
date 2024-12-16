@@ -1,5 +1,5 @@
-import './components/globalStyles.css';
-import './components/globals.css';
+import './components/index.css';
+import './index.css';
 
 export * from './components/accordion';
 export * from './components/alert';

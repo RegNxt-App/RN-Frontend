@@ -52,13 +52,13 @@ export const ConfigureDatasets: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10000);
 
-  const [, setSelectedTable] = useState<any | null>(null);
+  const [selectedTable, setSelectedTable] = useState<any | null>(null);
 
   // Modal states
   const [isDatasetModalOpen, setIsDatasetModalOpen] = useState(false);
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
-  const [, setIsConfigModalOpen] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -66,7 +66,7 @@ export const ConfigureDatasets: React.FC = () => {
   const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<DatasetVersion | null>(null);
   const [editingDataset, setEditingDataset] = useState<Dataset | null>(null);
-  const [, setEditingVersion] = useState<DatasetVersion | null>(null);
+  const [editingVersion, setEditingVersion] = useState<DatasetVersion | null>(null);
   const [deletingDatasetId, setDeletingDatasetId] = useState<number | null>(null);
 
   // Column filters

@@ -305,6 +305,7 @@ export const DatasetAccordion: React.FC<DatasetAccordionProps> = ({
                   {!dataset.is_system_generated && (
                     <Button
                       onClick={() => {
+                        console.log('hello');
                         setIsVersionModalOpen(true);
                         handleDatasetClick(dataset);
                       }}
