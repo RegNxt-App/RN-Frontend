@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@/components/ui/accordion';
-import {Button} from '@/components/ui/button';
 import {DatasetItem} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
+
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button} from '@rn/rnui';
 
 interface ConfigurationDataTableProps {
   data: Record<string, Record<string, DatasetItem[]>>;

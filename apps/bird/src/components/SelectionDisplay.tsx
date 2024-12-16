@@ -1,8 +1,9 @@
 // Import format from date-fns
 import React from 'react';
 
-import {Badge} from '@/components/ui/badge';
 import {format} from 'date-fns';
+
+import {Badge} from '@rn/rnui';
 
 interface SelectionDisplayProps {
   filteredDataLength: number;

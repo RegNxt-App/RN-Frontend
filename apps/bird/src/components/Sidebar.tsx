@@ -1,27 +1,26 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Link, useLocation, useNavigate} from 'react-router-dom';
 
-import {Button} from '@/components/ui/button';
+import {useAuth} from '@/contexts/AuthContext';
+import Avatar from 'boring-avatars';
+import {motion} from 'framer-motion';
+import {Database, GitBranch, LogOut, LucideIcon, Settings, User} from 'lucide-react';
+
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {useAuth} from '@/contexts/AuthContext';
-import Avatar from 'boring-avatars';
-import {motion} from 'framer-motion';
-import {Database, GitBranch, LogOut, LucideIcon, Settings, User} from 'lucide-react';
+} from '@rn/rnui';
 
 interface SidebarProps {
   isLoading: boolean;

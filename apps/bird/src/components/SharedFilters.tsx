@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Input} from '@/components/ui/input';
+import {Input} from '@rn/rnui';
 
 interface SharedColumnFiltersProps {
   filters: {

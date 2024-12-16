@@ -1,10 +1,10 @@
 import {useRef, useState} from 'react';
 
-import {Button} from '@/components/ui/button';
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
 import {useToast} from '@/hooks/use-toast';
 import {Workbook} from 'exceljs';
 import {Download, Upload} from 'lucide-react';
+
+import {Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/rnui';
 
 import ExcelPreviewModal from './ExcelPreviewModal';
 

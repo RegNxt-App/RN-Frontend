@@ -2,12 +2,11 @@
 
 import * as React from 'react';
 
-import {Button} from '@/components/ui/button';
-import {Calendar} from '@/components/ui/calendar';
-import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover';
 import {cn} from '@/lib/utils';
 import {format, isValid, parse} from 'date-fns';
 import {Calendar as CalendarIcon} from 'lucide-react';
+
+import {Button, Calendar, Popover, PopoverContent, PopoverTrigger} from '@rn/rnui';
 
 interface DatePickerProps {
   value: string | null;

@@ -1,8 +1,5 @@
 import {useState} from 'react';
 
-import {Button} from '@/components/ui/button';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {
   ColumnDef,
   SortingState,
@@ -12,6 +9,21 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@rn/rnui';
 
 interface SharedDataTableProps<T> {
   data: T[];

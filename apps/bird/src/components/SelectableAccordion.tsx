@@ -1,7 +1,6 @@
 import React, {useMemo} from 'react';
 
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@/components/ui/accordion';
-import {Checkbox} from '@/components/ui/checkbox';
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger, Checkbox} from '@rn/rnui';
 
 interface SelectableAccordionProps {
   data: Record<string, Record<string, any[]>>;

@@ -2,13 +2,12 @@ import {useForm} from 'react-hook-form';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 import AuthLayout from '@/components/AuthLayout';
-import {Input} from '@/components/ui/input';
 import {useAuth} from '@/contexts/AuthContext';
 import {useToast} from '@/hooks/use-toast';
 import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
-import {Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@rn/rnui';
+import {Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input} from '@rn/rnui';
 
 const formSchema = z.object({
   email: z.string().email('Invalid email address'),

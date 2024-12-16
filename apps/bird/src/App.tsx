@@ -1,9 +1,10 @@
 import React, {ComponentProps, useEffect} from 'react';
 import {Navigate, Outlet, RouterProvider, createBrowserRouter, useLocation} from 'react-router-dom';
 
-import {TooltipProvider} from '@/components/ui/tooltip';
 import axiosInstance from '@/lib/axios';
 import {SWRConfig} from 'swr';
+
+import {Toaster, TooltipProvider} from '@rn/rnui';
 
 import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
@@ -11,7 +12,6 @@ import LogoSpinner from './components/LogoSpinner';
 import {ConfigureDatasets} from './components/configurations/ConfigureDatasets';
 import {ConfigureDataviews} from './components/configurations/ConfigureDataviews';
 import {ConfigureGrouping} from './components/configurations/ConfigureGrouping';
-import {Toaster} from './components/ui/toaster';
 import {AuthProvider, useAuth} from './contexts/AuthContext';
 import Config from './pages/ConfigureView';
 import Data from './pages/Data';

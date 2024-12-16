@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {Input} from '@/components/ui/input';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {ColumnDef} from '@tanstack/react-table';
+
+import {Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/rnui';
 
 interface DataItem {
   dataSetId: number;

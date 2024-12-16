@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
 
 import GenericComboBox from '@/components/ComboBox';
-import {Checkbox} from '@/components/ui/checkbox';
 import {fastApiInstance} from '@/lib/axios';
 import {format} from 'date-fns';
 import useSWR from 'swr';
+
+import {Checkbox} from '@rn/rnui';
 
 interface DatasetVersionSelectorProps {
   framework: string;

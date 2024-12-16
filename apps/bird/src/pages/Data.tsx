@@ -11,13 +11,13 @@ import {SharedColumnFilters} from '@/components/SharedFilters';
 import {TableInfoHeader} from '@/components/TableInfoHeader';
 import {MetadataTable} from '@/components/metadatatable/MetadataTable';
 import DataSkeleton from '@/components/skeletons/DataSkeleton';
-import {Button} from '@/components/ui/button';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {useToast} from '@/hooks/use-toast';
 import {fastApiInstance} from '@/lib/axios';
 import {DatasetItem, DatasetResponse, Frameworks, Layers, ValidationResult} from '@/types/databaseTypes';
 import {format} from 'date-fns';
 import useSWR from 'swr';
+
+import {Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/rnui';
 
 const NO_FILTER = 'NO_FILTER';
 

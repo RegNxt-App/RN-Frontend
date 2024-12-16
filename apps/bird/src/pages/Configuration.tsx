@@ -5,9 +5,19 @@ import React from 'react';
 import {ConfigureDatasets} from '@/components/configurations/ConfigureDatasets';
 import {ConfigureDataviews} from '@/components/configurations/ConfigureDataviews';
 import {ConfigureGrouping} from '@/components/configurations/ConfigureGrouping';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Database, LayersIcon, Table} from 'lucide-react';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@rn/rnui';
 
 const Configuration: React.FC = () => {
   return (

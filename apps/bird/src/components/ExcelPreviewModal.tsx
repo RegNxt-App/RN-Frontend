@@ -1,10 +1,22 @@
 import {useEffect, useRef, useState} from 'react';
 
-import {Button} from '@/components/ui/button';
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {Input} from '@/components/ui/input';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Loader2} from 'lucide-react';
+
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@rn/rnui';
 
 interface ExcelPreviewModalProps {
   isOpen: boolean;
