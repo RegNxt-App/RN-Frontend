@@ -1,0 +1,60 @@
+name: Build and Deploy RegNXT Apps
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        app: ["bird", "reporting"]
+        include:
+          - app: bird
+            app-name: "bird"
+            dist-path: "dist"
+          - app: reporting
+            app-name: "RegNxtPortalD"
+            dist-path: "dist"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+          cache: "npm"
+
+      - name: Install Root Dependencies
+        run: pnpm install
+
+      - name: Install App Dependencies
+        run: |
+          cd apps/${{ matrix.app }}
+          pnpm install
+
+      - name: Build App
+        run: |
+          cd apps/${{ matrix.app }}
+          pnpm run build
+        env:
+          CI: false
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.app }}-build
+          path: apps/${{ matrix.app }}/${{ matrix.dist-path }}
+
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ matrix.app-name }}
+          slot-name: "Production"
+          package: apps/${{ matrix.app }}/${{ matrix.dist-path }}
+          publish-profile: ${{ secrets[format('AZUREAPPSERVICE_PUBLISHPROFILE_{0}', matrix.app)] }}
