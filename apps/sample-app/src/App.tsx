@@ -1,15 +1,14 @@
 import "./App.css";
+import { Alert, AlertDescription } from "@rn/ui/components/ui/alert";
+import { Button } from "@rn/ui/components/ui/button";
+import { Input } from "@rn/ui/components/ui/input";
 import {
-  Alert,
-  AlertDescription,
-  Button,
-  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@rn/rnui";
+} from "@rn/ui/components/ui/select";
 import { AlertCircle } from "lucide-react";
 
 function App() {
