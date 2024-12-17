@@ -1,15 +1,14 @@
-"use client";
-import { cn } from "@/lib/utils";
-import { Button } from "@rn/ui/components/ui/button";
-import { Calendar } from "@rn/ui/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@rn/ui/components/ui/popover";
-import { format, isValid, parse } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import * as React from "react";
+'use client';
+
+import * as React from 'react';
+
+import {cn} from '@/lib/utils';
+import {format, isValid, parse} from 'date-fns';
+import {Calendar as CalendarIcon} from 'lucide-react';
+
+import {Button} from '@rn/ui/components/ui/button';
+import {Calendar} from '@rn/ui/components/ui/calendar';
+import {Popover, PopoverContent, PopoverTrigger} from '@rn/ui/components/ui/popover';
 
 interface DatePickerProps {
   value: string | null;
@@ -18,42 +17,37 @@ interface DatePickerProps {
   isValidDate?: (date: Date) => boolean;
 }
 
-export function DatePicker({
-  value,
-  onChange,
-  className,
-  isValidDate,
-}: DatePickerProps) {
+export function DatePicker({value, onChange, className, isValidDate}: DatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(
-    value ? parse(value, "yyyy-MM-dd", new Date()) : undefined
+    value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined
   );
 
   const handleDateChange = (newDate: Date | undefined) => {
     setDate(newDate);
     if (newDate && isValid(newDate)) {
-      onChange(format(newDate, "yyyy-MM-dd"));
+      onChange(format(newDate, 'yyyy-MM-dd'));
     } else {
       onChange(null);
     }
   };
 
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn('grid gap-2', className)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             id="date"
-            variant={"outline"}
-            className={cn(
-              "w-[300px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}
+            variant={'outline'}
+            className={cn('w-[300px] justify-start text-left font-normal', !date && 'text-muted-foreground')}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>Pick a date</span>}
+            {date ? format(date, 'PPP') : <span>Pick a date</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent
+          className="w-auto p-0"
+          align="start"
+        >
           <Calendar
             mode="single"
             selected={date}

@@ -1,13 +1,9 @@
-import { Input } from "@rn/ui/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@rn/ui/components/ui/select";
-import { ColumnDef } from "@tanstack/react-table";
 import React from 'react';
+
+import {ColumnDef} from '@tanstack/react-table';
+
+import {Input} from '@rn/ui/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 
 interface DataItem {
   dataSetId: number;
@@ -25,15 +21,15 @@ interface DataItem {
 interface SharedDataFilterProps {
   globalFilter: string;
   setGlobalFilter: (value: string) => void;
-  columnFilters: { id: string; value: string }[];
-  setColumnFilters: (filters: { id: string; value: string }[]) => void;
+  columnFilters: {id: string; value: string}[];
+  setColumnFilters: (filters: {id: string; value: string}[]) => void;
   columns: ColumnDef<DataItem>[];
   frameworkFilter: string;
   setFrameworkFilter: (value: string) => void;
   frameworks: string[];
 }
 
-const ALL_FRAMEWORKS = "ALL";
+const ALL_FRAMEWORKS = 'ALL';
 
 export const SharedDataFilter: React.FC<SharedDataFilterProps> = ({
   globalFilter,
@@ -47,21 +43,27 @@ export const SharedDataFilter: React.FC<SharedDataFilterProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+      <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <Input
           placeholder="Search all fields..."
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
           className="max-w-sm"
         />
-        <Select value={frameworkFilter} onValueChange={setFrameworkFilter}>
+        <Select
+          value={frameworkFilter}
+          onValueChange={setFrameworkFilter}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select Framework" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_FRAMEWORKS}>All Frameworks</SelectItem>
             {frameworks.map((framework) => (
-              <SelectItem key={framework} value={framework}>
+              <SelectItem
+                key={framework}
+                value={framework}
+              >
                 {framework}
               </SelectItem>
             ))}
@@ -69,10 +71,16 @@ export const SharedDataFilter: React.FC<SharedDataFilterProps> = ({
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+      <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {columns.map((column) => (
-          <div key={column.id as string} className="flex flex-col">
-            <label htmlFor={column.id as string} className="text-sm font-medium mb-1">
+          <div
+            key={column.id as string}
+            className="flex flex-col"
+          >
+            <label
+              htmlFor={column.id as string}
+              className="mb-1 text-sm font-medium"
+            >
               {column.header as string}
             </label>
             <Input

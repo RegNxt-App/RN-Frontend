@@ -1,9 +1,11 @@
-import GenericComboBox from "@/components/ComboBox";
-import { fastApiInstance } from "@/lib/axios";
-import { Checkbox } from "@rn/ui/components/ui/checkbox";
-import { format } from "date-fns";
-import React, { useEffect, useState } from "react";
-import useSWR from "swr";
+import React, {useEffect, useState} from 'react';
+
+import GenericComboBox from '@/components/ComboBox';
+import {fastApiInstance} from '@/lib/axios';
+import {format} from 'date-fns';
+import useSWR from 'swr';
+
+import {Checkbox} from '@rn/ui/components/ui/checkbox';
 
 interface DatasetVersionSelectorProps {
   framework: string;
@@ -33,18 +35,14 @@ const DatasetVersionSelector: React.FC<DatasetVersionSelectorProps> = ({
 }) => {
   const [selectedDataset, setSelectedDataset] = useState<any>(null);
 
-  
-  const { data: datasetVersion } = useSWR<DatasetVersionResponse>(
+  const {data: datasetVersion} = useSWR<DatasetVersionResponse>(
     selectedDataset
-      ? `/api/v1/datasets/${selectedDataset.dataset_id}/versions/?date=${format(
-          date,
-          "yyyy-MM-dd"
-        )}`
+      ? `/api/v1/datasets/${selectedDataset.dataset_id}/versions/?date=${format(date, 'yyyy-MM-dd')}`
       : null,
     fastApiInstance
   );
 
-  const { data: dataVersionColumns } = useSWR<DataVersionColumnsResponse>(
+  const {data: dataVersionColumns} = useSWR<DataVersionColumnsResponse>(
     datasetVersion?.data
       ? `/api/v1/datasets/${selectedDataset.dataset_id}/columns/?version_id=${datasetVersion.data.dataset_version_id}`
       : null,
@@ -80,13 +78,11 @@ const DatasetVersionSelector: React.FC<DatasetVersionSelectorProps> = ({
         <div className="flex items-center space-x-2">
           <Checkbox
             id={`version-${datasetVersion.data.dataset_version_id}`}
-            checked={selectedVersions.includes(
-              datasetVersion.data.dataset_version_id.toString()
-            )}
+            checked={selectedVersions.includes(datasetVersion.data.dataset_version_id.toString())}
             onCheckedChange={handleVersionSelect}
           />
           <label htmlFor={`version-${datasetVersion.data.dataset_version_id}`}>
-            {datasetVersion.data.version_code || "Unnamed Version"}
+            {datasetVersion.data.version_code || 'Unnamed Version'}
           </label>
         </div>
       )}

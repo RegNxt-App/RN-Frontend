@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import React, {useState} from 'react';
+import {Outlet} from 'react-router-dom';
+
+import Sidebar from './Sidebar';
 
 const Layout: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -14,7 +15,7 @@ const Layout: React.FC = () => {
       />
       <div
         className={`flex-1 overflow-auto transition-all duration-300 ease-in-out ${
-          isExpanded ? "ml-[280px]" : "ml-[80px]"
+          isExpanded ? 'ml-[280px]' : 'ml-[80px]'
         }`}
       >
         <main className="flex-1 overflow-y-auto p-5">

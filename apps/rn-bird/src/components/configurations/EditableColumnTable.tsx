@@ -1,47 +1,38 @@
-import { Button } from "@rn/ui/components/ui/button";
-import { Input } from "@rn/ui/components/ui/input";
-import { Edit, Trash2 } from "lucide-react"; // Add this import
+import React, {useCallback, useMemo, useState} from 'react';
 
-import { useToast } from "@/hooks/use-toast";
-import { fastApiInstance } from "@/lib/axios";
-import { cn } from "@/lib/utils";
-import { Column } from "@/types/databaseTypes";
-import { Switch } from "@rn/ui/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@rn/ui/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@rn/ui/components/ui/tooltip";
-import { History, Plus } from "lucide-react";
-import React, { useCallback, useMemo, useState } from "react";
-import useSWR from "swr";
-import ColumnFormModal from "./ColumnFormModal";
-import { ConfirmDialog } from "./ConfirmDialog";
+// Add this import
+import {useToast} from '@/hooks/use-toast';
+import {fastApiInstance} from '@/lib/axios';
+import {cn} from '@/lib/utils';
+import {Column} from '@/types/databaseTypes';
+import {Edit, Trash2} from 'lucide-react';
+import {History, Plus} from 'lucide-react';
+import useSWR from 'swr';
+
+import {Button} from '@rn/ui/components/ui/button';
+import {Input} from '@rn/ui/components/ui/input';
+import {Switch} from '@rn/ui/components/ui/switch';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/ui/components/ui/tooltip';
+
+import ColumnFormModal from './ColumnFormModal';
+import {ConfirmDialog} from './ConfirmDialog';
 
 const HISTORIZATION_TYPES = {
   0: {
-    label: "No Historization",
-    description: "No change tracking for this column",
-    className: "bg-gray-100 text-gray-700 hover:bg-gray-200",
+    label: 'No Historization',
+    description: 'No change tracking for this column',
+    className: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
   },
   1: {
-    label: "Always Latest",
-    description: "Only keeps the most recent value",
-    className: "bg-purple-100 text-purple-700 hover:bg-purple-200",
+    label: 'Always Latest',
+    description: 'Only keeps the most recent value',
+    className: 'bg-purple-100 text-purple-700 hover:bg-purple-200',
   },
   2: {
-    label: "Versioning",
-    description: "Maintains full history of all changes",
-    className: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
+    label: 'Versioning',
+    description: 'Maintains full history of all changes',
+    className: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200',
   },
 } as const;
 
@@ -62,21 +53,18 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
   versionId,
   isLoading,
 }) => {
-  const { toast } = useToast();
+  const {toast} = useToast();
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState<Column | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [columnToDelete, setColumnToDelete] = useState<Column | null>(null);
   const columnKey = versionId
     ? `/api/v1/datasets/${datasetId}/version-columns/?version_id=${versionId}`
     : null;
 
-  const { data: columns, mutate: mutateColumns } = useSWR<ColumnData>(
-    columnKey,
-    fastApiInstance
-  );
+  const {data: columns, mutate: mutateColumns} = useSWR<ColumnData>(columnKey, fastApiInstance);
 
   const handleFormSubmit = useCallback(
     async (data: any) => {
@@ -86,8 +74,7 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
             {
               ...selectedColumn,
               ...data,
-              dataset_version_column_id:
-                selectedColumn?.dataset_version_column_id,
+              dataset_version_column_id: selectedColumn?.dataset_version_column_id,
               column_order: selectedColumn?.column_order,
               is_visible: true,
               is_filter: data.is_filter ?? true,
@@ -108,19 +95,15 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
         setSelectedColumn(null);
 
         toast({
-          title: "Success",
-          description: selectedColumn
-            ? "Column updated successfully"
-            : "Column created successfully",
+          title: 'Success',
+          description: selectedColumn ? 'Column updated successfully' : 'Column created successfully',
         });
       } catch (error: any) {
-        console.error("Error saving column:", error);
+        console.error('Error saving column:', error);
         toast({
-          title: "Error",
-          description:
-            error?.response?.data?.error ||
-            "Failed to save column. Please try again.",
-          variant: "destructive",
+          title: 'Error',
+          description: error?.response?.data?.error || 'Failed to save column. Please try again.',
+          variant: 'destructive',
         });
       }
     },
@@ -141,26 +124,23 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
     if (!columnToDelete) return;
 
     try {
-      await fastApiInstance.post(
-        `/api/v1/datasets/${datasetId}/update-columns/?version_id=${versionId}`,
-        {
-          is_delete_operation: true,
-          columns_to_delete: [columnToDelete?.dataset_version_column_id],
-        }
-      );
+      await fastApiInstance.post(`/api/v1/datasets/${datasetId}/update-columns/?version_id=${versionId}`, {
+        is_delete_operation: true,
+        columns_to_delete: [columnToDelete?.dataset_version_column_id],
+      });
 
       mutateColumns();
 
       toast({
-        title: "Success",
-        description: "Column deleted successfully",
+        title: 'Success',
+        description: 'Column deleted successfully',
       });
     } catch (error) {
-      console.error("Error deleting column:", error);
+      console.error('Error deleting column:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete column",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete column',
+        variant: 'destructive',
       });
     } finally {
       setIsDeleteDialogOpen(false);
@@ -169,7 +149,7 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
   }, [columnToDelete, datasetId, versionId, toast, mutateColumns]);
 
   const filteredColumns = useMemo(() => {
-    console.log("columns: ", columns);
+    console.log('columns: ', columns);
     return (
       columns &&
       columns?.data?.filter(
@@ -181,10 +161,7 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
   }, [columns, searchTerm]);
 
   const renderHistorizationBadge = (historization_type: number) => {
-    const config =
-      HISTORIZATION_TYPES[
-        historization_type as keyof typeof HISTORIZATION_TYPES
-      ];
+    const config = HISTORIZATION_TYPES[historization_type as keyof typeof HISTORIZATION_TYPES];
 
     return (
       <TooltipProvider>
@@ -192,18 +169,16 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
           <TooltipTrigger asChild>
             <div className="inline-flex items-center gap-2">
               <div
-                className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 transition-colors ${config.className}`}
+                className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition-colors ${config.className}`}
               >
                 <History className="h-4 w-4" />
                 {config.label}
               </div>
             </div>
           </TooltipTrigger>
-          <TooltipContent className="bg-white border shadow-lg p-3 rounded-lg max-w-xs">
+          <TooltipContent className="max-w-xs rounded-lg border bg-white p-3 shadow-lg">
             <div className="space-y-2">
-              <p className="font-medium text-gray-600 text-sm">
-                {config.label}
-              </p>
+              <p className="text-sm font-medium text-gray-600">{config.label}</p>
               <p className="text-sm text-gray-600">{config.description}</p>
             </div>
           </TooltipContent>
@@ -214,7 +189,7 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <Input
           placeholder="Search columns..."
           value={searchTerm}
@@ -224,9 +199,9 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
         <Button
           onClick={() => setIsFormModalOpen(true)}
           disabled={isLoading}
-          className="bg-purple-600 hover:bg-purple-700 text-white"
+          className="bg-purple-600 text-white hover:bg-purple-700"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Column
         </Button>
       </div>
@@ -259,19 +234,34 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
                 <TableCell>{column.datatype}</TableCell>
                 <TableCell>{column.role}</TableCell>
                 <TableCell>
-                  <Switch checked={column.is_mandatory} disabled />
+                  <Switch
+                    checked={column.is_mandatory}
+                    disabled
+                  />
                 </TableCell>
                 <TableCell>
-                  <Switch checked={column.is_key} disabled />
+                  <Switch
+                    checked={column.is_key}
+                    disabled
+                  />
                 </TableCell>
                 <TableCell>
-                  <Switch checked={column.is_visible} disabled />
+                  <Switch
+                    checked={column.is_visible}
+                    disabled
+                  />
                 </TableCell>
                 <TableCell>
-                  <Switch checked={column.is_filter} disabled />
+                  <Switch
+                    checked={column.is_filter}
+                    disabled
+                  />
                 </TableCell>
                 <TableCell>
-                  <Switch checked={column.is_report_snapshot_field} disabled />
+                  <Switch
+                    checked={column.is_report_snapshot_field}
+                    disabled
+                  />
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   {renderHistorizationBadge(column.historization_type)}
@@ -295,9 +285,7 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
                           </span>
                         </TooltipTrigger>
                         <TooltipContent side="top">
-                          {column.is_system_generated
-                            ? "Cannot edit system-generated column"
-                            : "Edit column"}
+                          {column.is_system_generated ? 'Cannot edit system-generated column' : 'Edit column'}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -311,10 +299,10 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
                               onClick={() => handleDeleteClick(column)}
                               disabled={column.is_system_generated}
                               className={cn(
-                                "h-8 w-8",
+                                'h-8 w-8',
                                 column.is_system_generated
-                                  ? "text-gray-400"
-                                  : "text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  ? 'text-gray-400'
+                                  : 'text-red-600 hover:bg-red-50 hover:text-red-700'
                               )}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -323,8 +311,8 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
                         </TooltipTrigger>
                         <TooltipContent side="top">
                           {column.is_system_generated
-                            ? "Cannot delete system-generated column"
-                            : "Delete column"}
+                            ? 'Cannot delete system-generated column'
+                            : 'Delete column'}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>

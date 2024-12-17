@@ -1,25 +1,14 @@
-import { DatasetVersion } from "@/types/databaseTypes";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Badge } from "@rn/ui/components/ui/badge";
-import { Button } from "@rn/ui/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@rn/ui/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@rn/ui/components/ui/form";
-import { Input } from "@rn/ui/components/ui/input";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import {useForm} from 'react-hook-form';
+
+import {DatasetVersion} from '@/types/databaseTypes';
+import {zodResolver} from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+import {Badge} from '@rn/ui/components/ui/badge';
+import {Button} from '@rn/ui/components/ui/button';
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@rn/ui/components/ui/form';
+import {Input} from '@rn/ui/components/ui/input';
 
 interface DatasetVersionFormModalProps {
   isOpen: boolean;
@@ -30,7 +19,7 @@ interface DatasetVersionFormModalProps {
 }
 
 const formSchema = z.object({
-  label: z.string().min(1, "Label is required"),
+  label: z.string().min(1, 'Label is required'),
   description: z.string().optional(),
   code: z.string().optional(),
 });
@@ -47,9 +36,9 @@ export function DatasetVersionFormModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      label: "",
-      description: "",
-      code: "",
+      label: '',
+      description: '',
+      code: '',
     },
   });
 
@@ -65,13 +54,16 @@ export function DatasetVersionFormModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}
+    >
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create New Version</DialogTitle>
         </DialogHeader>
         <div className="mb-4">
-          <div className="flex items-center space-x-2 mb-2">
+          <div className="mb-2 flex items-center space-x-2">
             <span className="font-medium">Next Version:</span>
             <Badge variant="secondary">{nextVersionNumber}</Badge>
           </div>
@@ -88,11 +80,14 @@ export function DatasetVersionFormModal({
             <FormField
               control={form.control}
               name="label"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Label</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter label" {...field} />
+                    <Input
+                      placeholder="Enter label"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -102,11 +97,14 @@ export function DatasetVersionFormModal({
             <FormField
               control={form.control}
               name="description"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter description" {...field} />
+                    <Input
+                      placeholder="Enter description"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

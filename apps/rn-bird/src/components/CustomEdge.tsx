@@ -1,5 +1,6 @@
-import { EdgeProps, getBezierPath } from "@xyflow/react";
-import React from "react";
+import React from 'react';
+
+import {EdgeProps, getBezierPath} from '@xyflow/react';
 
 const CustomEdge: React.FC<EdgeProps> = ({
   id,
@@ -22,9 +23,7 @@ const CustomEdge: React.FC<EdgeProps> = ({
     targetPosition,
   });
 
-  const cardinalityLabel = `${data?.sourceCardinality || ""} : ${
-    data?.targetCardinality || ""
-  }`;
+  const cardinalityLabel = `${data?.sourceCardinality || ''} : ${data?.targetCardinality || ''}`;
 
   return (
     <>
@@ -38,7 +37,7 @@ const CustomEdge: React.FC<EdgeProps> = ({
       <text>
         <textPath
           href={`#${id}`}
-          style={{ fontSize: 12 }}
+          style={{fontSize: 12}}
           startOffset="50%"
           textAnchor="middle"
         >
@@ -48,7 +47,7 @@ const CustomEdge: React.FC<EdgeProps> = ({
       <text>
         <textPath
           href={`#${id}`}
-          style={{ fontSize: 10, fill: "blue" }}
+          style={{fontSize: 10, fill: 'blue'}}
           startOffset="75%"
           textAnchor="middle"
         >

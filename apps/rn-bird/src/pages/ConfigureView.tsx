@@ -1,4 +1,8 @@
-import { Button } from "@rn/ui/components/ui/button";
+import {useNavigate} from 'react-router-dom';
+
+import {Columns, Database, Group, Settings2, Table} from 'lucide-react';
+
+import {Button} from '@rn/ui/components/ui/button';
 import {
   Card,
   CardContent,
@@ -6,21 +10,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@rn/ui/components/ui/card";
-import { Columns, Database, Group, Settings2, Table } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+} from '@rn/ui/components/ui/card';
 
 const Config = () => {
   const navigate = useNavigate();
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-8">Configuration</h1>
-      <p className="text-lg text-gray-600 mb-8">
-        Welcome to the Configuration page. In the future, you'll be able to
-        dynamically create and manage PostgreSQL tables, datasets, and columns.
+      <h1 className="mb-8 text-3xl font-bold">Configuration</h1>
+      <p className="mb-8 text-lg text-gray-600">
+        Welcome to the Configuration page. In the future, you'll be able to dynamically create and manage
+        PostgreSQL tables, datasets, and columns.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -35,7 +37,7 @@ const Config = () => {
           <CardFooter>
             <Button
               className="w-full"
-              onClickCapture={() => navigate("/configuration/dataset")}
+              onClickCapture={() => navigate('/configuration/dataset')}
             >
               <Settings2 className="mr-2 h-4 w-4" /> Configure
             </Button>
@@ -54,7 +56,10 @@ const Config = () => {
             <p>Add, edit, or remove tables to match your data requirements.</p>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" variant="outline">
+            <Button
+              className="w-full"
+              variant="outline"
+            >
               Manage Tables
             </Button>
           </CardFooter>
@@ -69,15 +74,13 @@ const Config = () => {
             <CardDescription>Customize table columns</CardDescription>
           </CardHeader>
           <CardContent>
-            <p>
-              Fine-tune your data structure with custom column configurations.
-            </p>
+            <p>Fine-tune your data structure with custom column configurations.</p>
           </CardContent>
           <CardFooter>
             <Button
               className="w-full"
               variant="secondary"
-              onClickCapture={() => navigate("/configuration/groups")}
+              onClickCapture={() => navigate('/configuration/groups')}
             >
               <Group className="mr-2 h-4 w-4" /> Configure
             </Button>
@@ -85,12 +88,11 @@ const Config = () => {
         </Card>
       </div>
 
-      <div className="mt-12 bg-gray-100 rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">Coming Soon</h2>
+      <div className="mt-12 rounded-lg bg-gray-100 p-6">
+        <h2 className="mb-4 text-2xl font-semibold">Coming Soon</h2>
         <p className="text-gray-600">
-          We're working on bringing you powerful tools to create and manage your
-          database configurations directly through this interface. Stay tuned
-          for updates!
+          We're working on bringing you powerful tools to create and manage your database configurations
+          directly through this interface. Stay tuned for updates!
         </p>
       </div>
     </div>

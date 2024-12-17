@@ -1,6 +1,8 @@
-import { Badge } from "@rn/ui/components/ui/badge";
-import { format } from "date-fns";
-import React from "react";
+import React from 'react';
+
+import {format} from 'date-fns';
+
+import {Badge} from '@rn/ui/components/ui/badge';
 
 interface SelectionDisplayProps {
   filteredDataLength: number;
@@ -9,7 +11,7 @@ interface SelectionDisplayProps {
   selectedDate: Date;
 }
 
-const NO_FILTER = "NO_FILTER";
+const NO_FILTER = 'NO_FILTER';
 
 export const SelectionDisplay: React.FC<SelectionDisplayProps> = ({
   filteredDataLength,
@@ -19,11 +21,10 @@ export const SelectionDisplay: React.FC<SelectionDisplayProps> = ({
 }) => {
   const isFrameworkSelected = selectedFramework !== NO_FILTER;
   const isLayerSelected = selectedLayer !== NO_FILTER;
-  const isDateSelected =
-    selectedDate && selectedDate.getTime() !== new Date().setHours(0, 0, 0, 0);
+  const isDateSelected = selectedDate && selectedDate.getTime() !== new Date().setHours(0, 0, 0, 0);
 
   return (
-    <div className="text-lg mb-4 flex flex-wrap items-center gap-2">
+    <div className="mb-4 flex flex-wrap items-center gap-2 text-lg">
       <span>{filteredDataLength} tables</span>
       {isFrameworkSelected || isLayerSelected || isDateSelected ? (
         <>
@@ -39,17 +40,13 @@ export const SelectionDisplay: React.FC<SelectionDisplayProps> = ({
             <Badge variant="outline">Layer: Any</Badge>
           )}
           {isDateSelected ? (
-            <Badge variant="secondary">
-              Date: {format(selectedDate, "yyyy-MM-dd")}
-            </Badge>
+            <Badge variant="secondary">Date: {format(selectedDate, 'yyyy-MM-dd')}</Badge>
           ) : (
             <Badge variant="outline">Date: Any</Badge>
           )}
         </>
       ) : (
-        <span className="text-gray-500 italic">
-          (Select a framework, layer, or date to filter)
-        </span>
+        <span className="italic text-gray-500">(Select a framework, layer, or date to filter)</span>
       )}
     </div>
   );

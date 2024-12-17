@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -7,9 +9,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@rn/ui/components/ui/alert-dialog";
-import { Button } from "@rn/ui/components/ui/button";
-import React from "react";
+} from '@rn/ui/components/ui/alert-dialog';
+import {Button} from '@rn/ui/components/ui/button';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -27,11 +28,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
 }) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={onClose}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -39,12 +43,18 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel asChild>
-            <Button variant="outline" onClick={onClose}>
+            <Button
+              variant="outline"
+              onClick={onClose}
+            >
               {cancelText}
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
-            <Button variant="destructive" onClick={onConfirm}>
+            <Button
+              variant="destructive"
+              onClick={onConfirm}
+            >
               {confirmText}
             </Button>
           </AlertDialogAction>

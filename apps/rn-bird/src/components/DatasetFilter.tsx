@@ -1,23 +1,19 @@
-import { DatePicker } from "@/components/GDate";
-import { useToast } from "@/hooks/use-toast";
-import { fastApiInstance } from "@/lib/axios";
-import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { Alert, AlertDescription } from "@rn/ui/components/ui/alert";
-import { Badge } from "@rn/ui/components/ui/badge";
-import { Button } from "@rn/ui/components/ui/button";
-import { Input } from "@rn/ui/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@rn/ui/components/ui/select";
-import { Skeleton } from "@rn/ui/components/ui/skeleton";
-import { format } from "date-fns";
-import { Asterisk } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
-import useSWR from "swr";
+import {useCallback, useMemo, useState} from 'react';
+
+import {DatePicker} from '@/components/GDate';
+import {useToast} from '@/hooks/use-toast';
+import {fastApiInstance} from '@/lib/axios';
+import {InfoCircledIcon} from '@radix-ui/react-icons';
+import {format} from 'date-fns';
+import {Asterisk} from 'lucide-react';
+import useSWR from 'swr';
+
+import {Alert, AlertDescription} from '@rn/ui/components/ui/alert';
+import {Badge} from '@rn/ui/components/ui/badge';
+import {Button} from '@rn/ui/components/ui/button';
+import {Input} from '@rn/ui/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
+import {Skeleton} from '@rn/ui/components/ui/skeleton';
 
 interface FilterField {
   code: string;
@@ -43,25 +39,21 @@ interface Option {
   label: string;
 }
 
-const filterFieldsFetcher = (url: string) =>
-  fastApiInstance.get(url).then((res) => res.data);
+const filterFieldsFetcher = (url: string) => fastApiInstance.get(url).then((res) => res.data);
 
-const fetchDropdownOptions = async (
-  url: string,
-  statement: string
-): Promise<Option[]> => {
+const fetchDropdownOptions = async (url: string, statement: string): Promise<Option[]> => {
   try {
     const response = await fastApiInstance.get(url, {
-      params: { statement },
+      params: {statement},
     });
     return response.data
       .map((item: any) => ({
-        value: item.value?.toString() || "",
-        label: item.label || item.value?.toString() || "",
+        value: item.value?.toString() || '',
+        label: item.label || item.value?.toString() || '',
       }))
-      .filter((option: Option) => option.value !== "");
+      .filter((option: Option) => option.value !== '');
   } catch (error) {
-    console.error("Error fetching dropdown options:", error);
+    console.error('Error fetching dropdown options:', error);
     return [];
   }
 };
@@ -72,39 +64,31 @@ export default function DatasetFilter({
   onFilterApply,
   disabled = false,
 }: FilterPanelProps) {
-  const { toast } = useToast();
+  const {toast} = useToast();
   const [filterValues, setFilterValues] = useState<Record<string, any>>({});
   const [isApplying, setIsApplying] = useState(false);
 
-  const { data: filterFields, isLoading } = useSWR<{ data: FilterField[] }>(
-    versionId
-      ? `/api/v1/datasets/${datasetId}/filters/?version_id=${versionId}`
-      : null,
+  const {data: filterFields, isLoading} = useSWR<{data: FilterField[]}>(
+    versionId ? `/api/v1/datasets/${datasetId}/filters/?version_id=${versionId}` : null,
     filterFieldsFetcher
   );
 
-  const { snapshotFields, filterFields: regularFilters } = useMemo(() => {
-    if (!filterFields?.data) return { snapshotFields: [], filterFields: [] };
+  const {snapshotFields, filterFields: regularFilters} = useMemo(() => {
+    if (!filterFields?.data) return {snapshotFields: [], filterFields: []};
 
-    const sorted = [...filterFields.data].sort(
-      (a, b) => (a.column_order || 0) - (b.column_order || 0)
-    );
+    const sorted = [...filterFields.data].sort((a, b) => (a.column_order || 0) - (b.column_order || 0));
 
     return {
       snapshotFields: sorted.filter((f) => f.is_report_snapshot_field),
-      filterFields: sorted.filter(
-        (f) => !f.is_report_snapshot_field && f.is_filter
-      ),
+      filterFields: sorted.filter((f) => !f.is_report_snapshot_field && f.is_filter),
     };
   }, [filterFields]);
 
   const fieldsWithStatements = useMemo(() => {
-    return [...snapshotFields, ...regularFilters].filter(
-      (field) => field.value_statement
-    );
+    return [...snapshotFields, ...regularFilters].filter((field) => field.value_statement);
   }, [snapshotFields, regularFilters]);
 
-  const { data: dropdownOptionsData } = useSWR(
+  const {data: dropdownOptionsData} = useSWR(
     fieldsWithStatements.length > 0
       ? fieldsWithStatements.map((field) => ({
           url: `/api/v1/datasets/${datasetId}/execute_statement/`,
@@ -116,18 +100,21 @@ export default function DatasetFilter({
       const results = await Promise.all(
         requests.map((req) =>
           fetchDropdownOptions(req.url, req.statement as any)
-            .then((options) => ({ code: req.code, options }))
+            .then((options) => ({code: req.code, options}))
             .catch((error) => {
               console.error(`Error fetching options for ${req.code}:`, error);
-              return { code: req.code, options: [] };
+              return {code: req.code, options: []};
             })
         )
       );
 
-      return results.reduce((acc, { code, options }) => {
-        acc[code] = options;
-        return acc;
-      }, {} as Record<string, Option[]>);
+      return results.reduce(
+        (acc, {code, options}) => {
+          acc[code] = options;
+          return acc;
+        },
+        {} as Record<string, Option[]>
+      );
     },
     {
       dedupingInterval: 60000,
@@ -141,7 +128,7 @@ export default function DatasetFilter({
   const handleFilterChange = useCallback((code: string, value: any) => {
     setFilterValues((prev) => ({
       ...prev,
-      [code]: value === "__clear__" ? null : value,
+      [code]: value === '__clear__' ? null : value,
     }));
   }, []);
 
@@ -150,15 +137,13 @@ export default function DatasetFilter({
   }, []);
 
   const canApplyFilters = useMemo(() => {
-    const mandatoryFields = [...snapshotFields, ...regularFilters].filter(
-      (f) => f.is_mandatory
-    );
+    const mandatoryFields = [...snapshotFields, ...regularFilters].filter((f) => f.is_mandatory);
 
     return mandatoryFields.every(
       (field) =>
         filterValues[field.code] !== undefined &&
         filterValues[field.code] !== null &&
-        filterValues[field.code] !== ""
+        filterValues[field.code] !== ''
     );
   }, [filterValues, snapshotFields, regularFilters]);
 
@@ -169,11 +154,11 @@ export default function DatasetFilter({
     try {
       await onFilterApply(filterValues);
     } catch (error) {
-      console.error("Error applying filters:", error);
+      console.error('Error applying filters:', error);
       toast({
-        title: "Error",
-        description: "Failed to apply filters. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to apply filters. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsApplying(false);
@@ -188,7 +173,7 @@ export default function DatasetFilter({
         const options = dropdownOptions[field.code] || [];
         return (
           <Select
-            value={value?.toString() || ""}
+            value={value?.toString() || ''}
             onValueChange={(v) => handleFilterChange(field.code, v)}
             disabled={disabled}
           >
@@ -197,11 +182,12 @@ export default function DatasetFilter({
             </SelectTrigger>
             <SelectContent>
               {/* Only add clear option if there's a current value */}
-              {value && (
-                <SelectItem value="__clear__">Clear selection</SelectItem>
-              )}
+              {value && <SelectItem value="__clear__">Clear selection</SelectItem>}
               {options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                >
                   {option.label || option.value}
                 </SelectItem>
               ))}
@@ -210,17 +196,12 @@ export default function DatasetFilter({
         );
       }
 
-      if (field.datatype.toLowerCase() === "gregorianday") {
+      if (field.datatype.toLowerCase() === 'gregorianday') {
         return (
           <div className="flex items-center space-x-2">
             <DatePicker
               value={value}
-              onChange={(date) =>
-                handleFilterChange(
-                  field.code,
-                  date ? format(date, "yyyy-MM-dd") : null
-                )
-              }
+              onChange={(date) => handleFilterChange(field.code, date ? format(date, 'yyyy-MM-dd') : null)}
               placeholder={`Select ${field.label}`}
               disabled={disabled}
             />
@@ -241,8 +222,8 @@ export default function DatasetFilter({
       return (
         <div className="flex items-center space-x-2">
           <Input
-            type={field.datatype === "number" ? "number" : "text"}
-            value={value || ""}
+            type={field.datatype === 'number' ? 'number' : 'text'}
+            value={value || ''}
             onChange={(e) => handleFilterChange(field.code, e.target.value)}
             placeholder={`Enter ${field.label}`}
             disabled={disabled}
@@ -277,18 +258,19 @@ export default function DatasetFilter({
     <div className="space-y-6">
       {snapshotFields.length > 0 && (
         <div className="space-y-4">
-          <h3 className="font-semibold flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-semibold">
             Report Snapshot Fields
             <Badge variant="outline">Priority 1</Badge>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {snapshotFields.map((field) => (
-              <div key={field.code} className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-2">
+              <div
+                key={field.code}
+                className="space-y-2"
+              >
+                <label className="flex items-center gap-2 text-sm font-medium">
                   {field.label}
-                  {field.is_mandatory && (
-                    <Asterisk className="inline-block ml-1 h-3 w-3 text-destructive" />
-                  )}
+                  {field.is_mandatory && <Asterisk className="ml-1 inline-block h-3 w-3 text-destructive" />}
                 </label>
                 {renderField(field)}
               </div>
@@ -299,14 +281,17 @@ export default function DatasetFilter({
 
       {regularFilters.length > 0 && (
         <div className="space-y-4">
-          <h3 className="font-semibold flex items-center gap-2">
+          <h3 className="flex items-center gap-2 font-semibold">
             Additional Filters
             <Badge variant="outline">Priority 2</Badge>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {regularFilters.map((field) => (
-              <div key={field.code} className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-2">
+              <div
+                key={field.code}
+                className="space-y-2"
+              >
+                <label className="flex items-center gap-2 text-sm font-medium">
                   {field.label}
                   {field.is_mandatory && (
                     <Badge
@@ -325,9 +310,7 @@ export default function DatasetFilter({
       {!canApplyFilters && (
         <Alert variant="destructive">
           <InfoCircledIcon className="h-4 w-4" />
-          <AlertDescription>
-            Please fill in all mandatory fields before applying filters.
-          </AlertDescription>
+          <AlertDescription>Please fill in all mandatory fields before applying filters.</AlertDescription>
         </Alert>
       )}
 
@@ -343,7 +326,7 @@ export default function DatasetFilter({
           onClick={handleApplyFilters}
           disabled={disabled || !canApplyFilters || isApplying}
         >
-          {isApplying ? "Applying..." : "Show Data"}
+          {isApplying ? 'Applying...' : 'Show Data'}
         </Button>
       </div>
     </div>

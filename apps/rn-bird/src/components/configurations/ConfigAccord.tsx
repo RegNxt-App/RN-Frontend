@@ -1,18 +1,11 @@
-import { DatasetAccordion } from "./DatasetAccordion";
-import {
-  Dataset,
-  DatasetItem,
-  DatasetVersion,
-  DatasetVersions,
-} from "@/types/databaseTypes";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@rn/ui/components/ui/accordion";
-import { Button } from "@rn/ui/components/ui/button";
-import React, { useState } from "react";
+import React, {useState} from 'react';
+
+import {Dataset, DatasetItem, DatasetVersion, DatasetVersions} from '@/types/databaseTypes';
+
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@rn/ui/components/ui/accordion';
+import {Button} from '@rn/ui/components/ui/button';
+
+import {DatasetAccordion} from './DatasetAccordion';
 
 interface ConfigurationDataTableProps {
   datasets: Record<string, Record<string, DatasetItem[]>>;
@@ -55,20 +48,14 @@ export const ConfigurationAccordion: React.FC<ConfigurationDataTableProps> = ({
   handleEditDataset,
   handleViewHistory,
 }) => {
-  const [expandedFramework, setExpandedFramework] = useState<
-    string | undefined
-  >(undefined);
-  const [expandedGroup, setExpandedGroup] = useState<string | undefined>(
-    undefined
-  );
+  const [expandedFramework, setExpandedFramework] = useState<string | undefined>(undefined);
+  const [expandedGroup, setExpandedGroup] = useState<string | undefined>(undefined);
 
   const [frameworkPage, setFrameworkPage] = useState(1);
   const [groupPages, setGroupPages] = useState<Record<string, number>>({});
 
   const frameworks = Object.keys(datasets);
-  const totalFrameworkPages = Math.ceil(
-    frameworks.length / FRAMEWORKS_PER_PAGE
-  );
+  const totalFrameworkPages = Math.ceil(frameworks.length / FRAMEWORKS_PER_PAGE);
   const paginatedFrameworks = frameworks.slice(
     (frameworkPage - 1) * FRAMEWORKS_PER_PAGE,
     frameworkPage * FRAMEWORKS_PER_PAGE
@@ -98,7 +85,7 @@ export const ConfigurationAccordion: React.FC<ConfigurationDataTableProps> = ({
         collapsible
         value={expandedFramework}
         onValueChange={setExpandedFramework}
-        className="border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+        className="overflow-hidden rounded-lg border border-gray-200 shadow-sm"
       >
         {paginatedFrameworks.map((framework) => {
           if (!datasets[framework]) return null;
@@ -111,16 +98,13 @@ export const ConfigurationAccordion: React.FC<ConfigurationDataTableProps> = ({
             <AccordionItem
               key={framework}
               value={framework}
-              className="border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+              className="overflow-hidden rounded-lg border border-gray-200 shadow-sm"
             >
-              <AccordionTrigger className="px-6 py-4 bg-white hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-semibold text-lg">{framework}</span>
+              <AccordionTrigger className="bg-white px-6 py-4 transition-colors hover:bg-gray-50">
+                <div className="flex w-full items-center justify-between">
+                  <span className="text-lg font-semibold">{framework}</span>
                   <span className="text-sm text-gray-600">
-                    {Object.values(datasets[framework]).reduce(
-                      (acc, items) => acc + items.length,
-                      0
-                    )}
+                    {Object.values(datasets[framework]).reduce((acc, items) => acc + items.length, 0)}
                     item(s)
                   </span>
                 </div>
@@ -139,8 +123,8 @@ export const ConfigurationAccordion: React.FC<ConfigurationDataTableProps> = ({
                       value={group}
                       className="border-b border-gray-200 last:border-b-0"
                     >
-                      <AccordionTrigger className="py-3 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between w-full">
+                      <AccordionTrigger className="py-3 transition-colors hover:bg-gray-50">
+                        <div className="flex w-full items-center justify-between">
                           <span className="font-medium">{group}</span>
                           <span className="text-sm text-gray-600">
                             {datasets[framework][group].length} item(s)
@@ -172,7 +156,7 @@ export const ConfigurationAccordion: React.FC<ConfigurationDataTableProps> = ({
                   ))}
                 </Accordion>
                 {totalGroupPages > 1 && (
-                  <div className="flex justify-center items-center space-x-2 mt-4">
+                  <div className="mt-4 flex items-center justify-center space-x-2">
                     <Button
                       onClick={() =>
                         setGroupPages((prev) => ({
@@ -193,10 +177,7 @@ export const ConfigurationAccordion: React.FC<ConfigurationDataTableProps> = ({
                       onClick={() =>
                         setGroupPages((prev) => ({
                           ...prev,
-                          [framework]: Math.min(
-                            (prev[framework] || 1) + 1,
-                            totalGroupPages
-                          ),
+                          [framework]: Math.min((prev[framework] || 1) + 1, totalGroupPages),
                         }))
                       }
                       disabled={currentGroupPage === totalGroupPages}
@@ -214,7 +195,7 @@ export const ConfigurationAccordion: React.FC<ConfigurationDataTableProps> = ({
       </Accordion>
 
       {totalFrameworkPages > 1 && (
-        <div className="flex justify-center items-center space-x-2 mt-4">
+        <div className="mt-4 flex items-center justify-center space-x-2">
           <Button
             onClick={() => setFrameworkPage((prev) => Math.max(prev - 1, 1))}
             disabled={frameworkPage === 1}
@@ -227,11 +208,7 @@ export const ConfigurationAccordion: React.FC<ConfigurationDataTableProps> = ({
             Page {frameworkPage} of {totalFrameworkPages}
           </span>
           <Button
-            onClick={() =>
-              setFrameworkPage((prev) =>
-                Math.min(prev + 1, totalFrameworkPages)
-              )
-            }
+            onClick={() => setFrameworkPage((prev) => Math.min(prev + 1, totalFrameworkPages))}
             disabled={frameworkPage === totalFrameworkPages}
             variant="outline"
             size="sm"

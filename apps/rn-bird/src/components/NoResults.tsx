@@ -1,4 +1,4 @@
-import { LucideIcon } from "lucide-react";
+import {LucideIcon} from 'lucide-react';
 
 interface NoResultsProps {
   title: string;
@@ -6,14 +6,10 @@ interface NoResultsProps {
   icon?: LucideIcon;
 }
 
-export const NoResults: React.FC<NoResultsProps> = ({
-  title,
-  message,
-  icon: Icon,
-}) => (
+export const NoResults: React.FC<NoResultsProps> = ({title, message, icon: Icon}) => (
   <div className="flex flex-col items-center justify-center p-8 text-center">
-    {Icon && <Icon className="h-12 w-12 text-muted-foreground mb-4" />}
-    <h3 className="text-lg font-semibold mb-2">{title}</h3>
-    <p className="text-sm text-muted-foreground max-w-md">{message}</p>
+    {Icon && <Icon className="mb-4 h-12 w-12 text-muted-foreground" />}
+    <h3 className="mb-2 text-lg font-semibold">{title}</h3>
+    <p className="max-w-md text-sm text-muted-foreground">{message}</p>
   </div>
 );

@@ -1,7 +1,6 @@
+import React, {useCallback, useState} from 'react';
+
 import {
-  addEdge,
-  applyEdgeChanges,
-  applyNodeChanges,
   Background,
   BackgroundVariant,
   Connection,
@@ -12,12 +11,15 @@ import {
   ReactFlow,
   Edge as ReactFlowEdge,
   Node as ReactFlowNode,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
-import React, { useCallback, useState } from "react";
-import ColumnSelectionModal from "./ColumnSelectionModal";
-import CustomEdge from "./CustomEdge";
-import DatabaseTableNode from "./DatabaseTableNode";
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+
+import ColumnSelectionModal from './ColumnSelectionModal';
+import CustomEdge from './CustomEdge';
+import DatabaseTableNode from './DatabaseTableNode';
 
 type CustomNode = ReactFlowNode<Record<string, unknown>>;
 type CustomEdge = ReactFlowEdge<any>;
@@ -34,7 +36,7 @@ interface DatabaseDiagramProps {
   getLayoutedElements: (
     nodes: CustomNode[],
     edges: CustomEdge[]
-  ) => Promise<{ nodes: CustomNode[]; edges: CustomEdge[] }>;
+  ) => Promise<{nodes: CustomNode[]; edges: CustomEdge[]}>;
   onNodeInfoLog: (node: CustomNode) => void;
 }
 
@@ -57,9 +59,7 @@ export default function DatabaseDiagram({
   onNodeInfoLog,
 }: DatabaseDiagramProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [pendingConnection, setPendingConnection] = useState<Connection | null>(
-    null
-  );
+  const [pendingConnection, setPendingConnection] = useState<Connection | null>(null);
 
   const onConnect = useCallback((params: Connection) => {
     setPendingConnection(params);
@@ -74,12 +74,7 @@ export default function DatabaseDiagram({
   // );
 
   const handleColumnSelection = useCallback(
-    (
-      sourceColumn: string,
-      targetColumn: string,
-      sourceCardinality: string,
-      targetCardinality: string
-    ) => {
+    (sourceColumn: string, targetColumn: string, sourceCardinality: string, targetCardinality: string) => {
       if (pendingConnection) {
         const sourceNode = nodes.find((n) => n.id === pendingConnection.source);
         const targetNode = nodes.find((n) => n.id === pendingConnection.target);
@@ -87,7 +82,7 @@ export default function DatabaseDiagram({
         if (sourceNode && targetNode) {
           const newEdge = {
             ...pendingConnection,
-            type: "custom",
+            type: 'custom',
             animated: true,
             data: {
               label: `${sourceColumn} -> ${targetColumn}`,
@@ -104,8 +99,7 @@ export default function DatabaseDiagram({
     [pendingConnection, setEdges, nodes]
   );
   const onLayout = useCallback(async () => {
-    const { nodes: layoutedNodes, edges: layoutedEdges } =
-      await getLayoutedElements(nodes, edges);
+    const {nodes: layoutedNodes, edges: layoutedEdges} = await getLayoutedElements(nodes, edges);
     setNodes([...layoutedNodes]);
     setEdges([...layoutedEdges]);
   }, [nodes, edges, setNodes, setEdges, getLayoutedElements]);
@@ -120,23 +114,19 @@ export default function DatabaseDiagram({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[800px]">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex h-[800px] items-center justify-center">
+        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div style={{ width: "100%", height: "800px" }}>
+    <div style={{width: '100%', height: '800px'}}>
       <ReactFlow
         nodes={nodes as any}
         edges={edges}
-        onNodesChange={(changes) =>
-          setNodes((nds: any) => applyNodeChanges(changes, nds) as any)
-        }
-        onEdgesChange={(changes) =>
-          setEdges((eds) => applyEdgeChanges(changes, eds) as CustomEdge[])
-        }
+        onNodesChange={(changes) => setNodes((nds: any) => applyNodeChanges(changes, nds) as any)}
+        onEdgesChange={(changes) => setEdges((eds) => applyEdgeChanges(changes, eds) as CustomEdge[])}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
@@ -145,29 +135,32 @@ export default function DatabaseDiagram({
         fitView
       >
         <Controls />
-        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-        <Panel position="top-right" className="flex gap-2">
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={12}
+          size={1}
+        />
+        <Panel
+          position="top-right"
+          className="flex gap-2"
+        >
           <button
             onClick={onLayout}
-            className="px-4 py-2 font-semibold text-sm bg-primary text-white rounded-lg shadow-sm"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm"
           >
             Layout
           </button>
           <button
             onClick={onReset}
-            className="px-4 py-2 font-semibold text-sm bg-red-500 text-white rounded-lg shadow-sm"
+            className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm"
           >
             Reset
           </button>
         </Panel>
         {isModalOpen && pendingConnection && (
           <ColumnSelectionModal
-            sourceNode={
-              nodes.find((n) => n.id === pendingConnection.source) as any
-            }
-            targetNode={
-              nodes.find((n) => n.id === pendingConnection.target) as any
-            }
+            sourceNode={nodes.find((n) => n.id === pendingConnection.source) as any}
+            targetNode={nodes.find((n) => n.id === pendingConnection.target) as any}
             onClose={() => setIsModalOpen(false)}
             onSelect={handleColumnSelection}
           />

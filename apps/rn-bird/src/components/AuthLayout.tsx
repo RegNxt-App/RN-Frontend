@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -22,15 +22,15 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
 }) => {
   return (
     <div className="flex min-h-screen">
-      <div className="flex w-full lg:w-1/2 flex-col justify-center px-8 md:px-16 lg:px-24 xl:px-32">
+      <div className="flex w-full flex-col justify-center px-8 md:px-16 lg:w-1/2 lg:px-24 xl:px-32">
         <div className="mx-auto w-full max-w-md">
-          <h2 className="text-3xl font-bold mb-2">{title}</h2>
-          <p className="text-muted-foreground mb-8">{subtitle}</p>
+          <h2 className="mb-2 text-3xl font-bold">{title}</h2>
+          <p className="mb-8 text-muted-foreground">{subtitle}</p>
           {children}
         </div>
       </div>
 
-      <div className="hidden lg:flex lg:w-1/2 bg-black flex-col items-center justify-center p-12">
+      <div className="hidden flex-col items-center justify-center bg-black p-12 lg:flex lg:w-1/2">
         <div className="max-w-md text-center">
           <img
             src={imageSrc}
@@ -39,9 +39,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
             height={400}
             className="mx-auto mb-8"
           />
-          <h3 className="text-2xl font-bold mb-4 text-white">
-            Banks Integrated Reporting Dictionary
-          </h3>
+          <h3 className="mb-4 text-2xl font-bold text-white">Banks Integrated Reporting Dictionary</h3>
           <p className="text-muted-foreground">{description}</p>
         </div>
       </div>

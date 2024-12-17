@@ -1,60 +1,43 @@
-import { Column } from "@/types/databaseTypes";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@rn/ui/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@rn/ui/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@rn/ui/components/ui/form";
-import { Input } from "@rn/ui/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@rn/ui/components/ui/select";
-import { Switch } from "@rn/ui/components/ui/switch";
-import { Loader2 } from "lucide-react";
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import React, {useEffect} from 'react';
+import {useForm} from 'react-hook-form';
+
+import {Column} from '@/types/databaseTypes';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {Loader2} from 'lucide-react';
+import * as z from 'zod';
+
+import {Button} from '@rn/ui/components/ui/button';
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@rn/ui/components/ui/form';
+import {Input} from '@rn/ui/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
+import {Switch} from '@rn/ui/components/ui/switch';
 
 // Column types configuration
 const COLUMN_TYPES = [
-  { value: "string", label: "String" },
-  { value: "number", label: "Number" },
-  { value: "integer", label: "Integer" },
-  { value: "date", label: "Date" },
-  { value: "boolean", label: "Boolean" },
-  { value: "decimal", label: "Decimal" },
+  {value: 'string', label: 'String'},
+  {value: 'number', label: 'Number'},
+  {value: 'integer', label: 'Integer'},
+  {value: 'date', label: 'Date'},
+  {value: 'boolean', label: 'Boolean'},
+  {value: 'decimal', label: 'Decimal'},
 ];
 
 const ROLES = [
-  { value: "D", label: "Dimension" },
-  { value: "M", label: "Measure" },
-  { value: "A", label: "Attribute" },
+  {value: 'D', label: 'Dimension'},
+  {value: 'M', label: 'Measure'},
+  {value: 'A', label: 'Attribute'},
 ];
 
 const HISTORIZATION_TYPES = [
-  { value: 0, label: "No historization" },
-  { value: 1, label: "Always latest" },
-  { value: 2, label: "Versioning" },
+  {value: 0, label: 'No historization'},
+  {value: 1, label: 'Always latest'},
+  {value: 2, label: 'Versioning'},
 ];
 
 const columnSchema = z.object({
-  code: z.string().min(1, "Code is required"),
-  label: z.string().min(1, "Label is required"),
+  code: z.string().min(1, 'Code is required'),
+  label: z.string().min(1, 'Label is required'),
   description: z.string().optional(),
   role: z.string(),
   dimension_type: z.string().optional(),
@@ -79,30 +62,25 @@ interface ColumnFormModalProps {
   versionId: string | number;
 }
 
-export default function ColumnFormModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  initialData,
-}: ColumnFormModalProps) {
+export default function ColumnFormModal({isOpen, onClose, onSubmit, initialData}: ColumnFormModalProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<ColumnFormData>({
     resolver: zodResolver(columnSchema),
     defaultValues: {
-      code: "",
-      label: "",
-      description: "",
-      role: "A",
-      dimension_type: "",
-      datatype: "string",
-      datatype_format: "",
+      code: '',
+      label: '',
+      description: '',
+      role: 'A',
+      dimension_type: '',
+      datatype: 'string',
+      datatype_format: '',
       is_mandatory: false,
       is_key: false,
       is_visible: true,
       is_filter: true,
       is_mandatory_filter: false,
-      value_statement: "",
+      value_statement: '',
       historization_type: 1,
     },
   });
@@ -117,19 +95,19 @@ export default function ColumnFormModal({
         });
       } else {
         form.reset({
-          code: "",
-          label: "",
-          description: "",
-          role: "A",
-          dimension_type: "",
-          datatype: "string",
-          datatype_format: "",
+          code: '',
+          label: '',
+          description: '',
+          role: 'A',
+          dimension_type: '',
+          datatype: 'string',
+          datatype_format: '',
           is_mandatory: false,
           is_key: false,
           is_visible: true,
           is_filter: true,
           is_mandatory_filter: false,
-          value_statement: "",
+          value_statement: '',
           historization_type: 1,
         });
       }
@@ -146,19 +124,20 @@ export default function ColumnFormModal({
       await onSubmit(mappedData);
       onClose();
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error('Error submitting form:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}
+    >
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {initialData ? "Edit Column" : "Create New Column"}
-          </DialogTitle>
+          <DialogTitle>{initialData ? 'Edit Column' : 'Create New Column'}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -171,7 +150,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="code"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Code</FormLabel>
                     <FormControl>
@@ -188,7 +167,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="label"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Label</FormLabel>
                     <FormControl>
@@ -206,7 +185,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="datatype"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Data Type</FormLabel>
                     <Select
@@ -221,7 +200,10 @@ export default function ColumnFormModal({
                       </FormControl>
                       <SelectContent>
                         {COLUMN_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
+                          <SelectItem
+                            key={type.value}
+                            value={type.value}
+                          >
                             {type.label}
                           </SelectItem>
                         ))}
@@ -235,7 +217,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="role"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Role</FormLabel>
                     <Select
@@ -250,7 +232,10 @@ export default function ColumnFormModal({
                       </FormControl>
                       <SelectContent>
                         {ROLES.map((role) => (
-                          <SelectItem key={role.value} value={role.value}>
+                          <SelectItem
+                            key={role.value}
+                            value={role.value}
+                          >
                             {role.label}
                           </SelectItem>
                         ))}
@@ -264,7 +249,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="historization_type"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Historization Type</FormLabel>
                     <Select
@@ -299,7 +284,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="is_mandatory"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
                       <FormLabel>Mandatory</FormLabel>
@@ -318,7 +303,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="is_key"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
                       <FormLabel>Is Key</FormLabel>
@@ -337,7 +322,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="is_visible"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
                       <FormLabel>Is Visible</FormLabel>
@@ -356,7 +341,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="is_filter"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
                       <FormLabel>Is Filter</FormLabel>
@@ -375,7 +360,7 @@ export default function ColumnFormModal({
               <FormField
                 control={form.control}
                 name="is_mandatory_filter"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
                       <FormLabel>Is Mandatory Filter</FormLabel>
@@ -393,7 +378,11 @@ export default function ColumnFormModal({
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+              >
                 Cancel
               </Button>
               <Button
@@ -406,9 +395,9 @@ export default function ColumnFormModal({
                     Saving...
                   </>
                 ) : initialData ? (
-                  "Update Column"
+                  'Update Column'
                 ) : (
-                  "Create Column"
+                  'Create Column'
                 )}
               </Button>
             </DialogFooter>

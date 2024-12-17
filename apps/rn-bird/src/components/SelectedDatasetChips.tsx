@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import {X} from 'lucide-react';
 
 interface SelectedDatasetChipsProps {
   selectedDatasets: Array<{
@@ -10,17 +10,17 @@ interface SelectedDatasetChipsProps {
 }
 
 export default function SelectedDatasetChips(
-  { selectedDatasets, onRemove }: SelectedDatasetChipsProps = {
+  {selectedDatasets, onRemove}: SelectedDatasetChipsProps = {
     selectedDatasets: [],
     onRemove: () => {},
   }
 ) {
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
+    <div className="mb-4 flex flex-wrap gap-2">
       {selectedDatasets.map((dataset) => (
         <div
           key={dataset.dataset_version_id}
-          className="flex items-center bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm"
+          className="flex items-center rounded-full bg-primary px-3 py-1 text-sm text-primary-foreground"
         >
           <span>
             {dataset.dataset_name} (v{dataset.version_nr})

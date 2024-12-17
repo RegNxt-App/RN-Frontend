@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import DatabaseDiagram from "@/components/DatabaseDiagram";
-import DatePicker from "@/components/DatePicker";
-import SelectableAccordion from "@/components/SelectableAccordion";
-import { fastApiInstance } from "@/lib/axios";
-import { DatasetResponse, Frameworks, Layers } from "@/types/databaseTypes";
-import { Button } from "@rn/ui/components/ui/button";
-import { Input } from "@rn/ui/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@rn/ui/components/ui/select";
+import {useCallback, useEffect, useMemo, useState} from 'react';
+
+import DatabaseDiagram from '@/components/DatabaseDiagram';
+import DatePicker from '@/components/DatePicker';
+import SelectableAccordion from '@/components/SelectableAccordion';
+import {fastApiInstance} from '@/lib/axios';
+import {DatasetResponse, Frameworks, Layers} from '@/types/databaseTypes';
+import {ReactFlowProvider} from '@xyflow/react';
+import ELK from 'elkjs/lib/elk.bundled.js';
+import useSWR from 'swr';
+
+import {Button} from '@rn/ui/components/ui/button';
+import {Input} from '@rn/ui/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {
   Sheet,
   SheetContent,
@@ -21,14 +21,10 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@rn/ui/components/ui/sheet";
-import { Skeleton } from "@rn/ui/components/ui/skeleton";
-import { ReactFlowProvider } from "@xyflow/react";
-import ELK from "elkjs/lib/elk.bundled.js";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import useSWR from "swr";
+} from '@rn/ui/components/ui/sheet';
+import {Skeleton} from '@rn/ui/components/ui/skeleton';
 
-const NO_FILTER = "NO_FILTER";
+const NO_FILTER = 'NO_FILTER';
 const PAGE_SIZE = 10000;
 
 const elk = new ELK();
@@ -38,7 +34,7 @@ const calculateNodeDimensions = (columns: any[]) => {
   const rowHeight = 24;
   const width = 250;
   const height = baseHeight + columns.length * rowHeight;
-  return { width, height };
+  return {width, height};
 };
 
 const getLayoutedElements = async (nodes: any[], edges: any[]) => {
@@ -55,14 +51,14 @@ const getLayoutedElements = async (nodes: any[], edges: any[]) => {
   }));
 
   const elkGraph = await elk.layout({
-    id: "root",
+    id: 'root',
     layoutOptions: {
-      "elk.algorithm": "layered",
-      "elk.direction": "RIGHT",
-      "elk.spacing.nodeNode": "50",
-      "elk.layered.spacing.nodeNodeBetweenLayers": "100",
-      "elk.padding": "[top=50,left=50,bottom=50,right=50]",
-      "elk.layered.nodePlacement.strategy": "BRANDES_KOEPF",
+      'elk.algorithm': 'layered',
+      'elk.direction': 'RIGHT',
+      'elk.spacing.nodeNode': '50',
+      'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+      'elk.padding': '[top=50,left=50,bottom=50,right=50]',
+      'elk.layered.nodePlacement.strategy': 'BRANDES_KOEPF',
     },
     children: elkNodes,
     edges: elkEdges,
@@ -73,7 +69,7 @@ const getLayoutedElements = async (nodes: any[], edges: any[]) => {
       const elkNode = elkGraph.children?.find((n) => n.id === node.id);
       return {
         ...node,
-        position: { x: elkNode?.x || 0, y: elkNode?.y || 0 },
+        position: {x: elkNode?.x || 0, y: elkNode?.y || 0},
       };
     }),
     edges,
@@ -84,24 +80,19 @@ export default function Relationship() {
   const [selectedFramework, setSelectedFramework] = useState<string>(NO_FILTER);
   const [selectedLayer, setSelectedLayer] = useState<string>(NO_FILTER);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedDatasetVersions, setSelectedDatasetVersions] = useState<any[]>(
-    []
-  );
+  const [selectedDatasetVersions, setSelectedDatasetVersions] = useState<any[]>([]);
   const [pendingSelections, setPendingSelections] = useState<any[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   // const [allDatasets, setAllDatasets] = useState<any[]>([]);
 
-  const { data: layers } = useSWR<Layers>("/api/v1/layers/", fastApiInstance);
-  const { data: frameworks } = useSWR<Frameworks>(
-    "/api/v1/frameworks/",
-    fastApiInstance
-  );
-  const { data: dataTableJson, isLoading } = useSWR<DatasetResponse>(
+  const {data: layers} = useSWR<Layers>('/api/v1/layers/', fastApiInstance);
+  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', fastApiInstance);
+  const {data: dataTableJson, isLoading} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${PAGE_SIZE}`,
     fastApiInstance,
     {
@@ -129,7 +120,7 @@ export default function Relationship() {
     setPendingSelections((prev) =>
       prev.some((v) => v.dataset_version_id === item.dataset_version_id)
         ? prev.filter((v) => v.dataset_version_id !== item.dataset_version_id)
-        : [...prev, { ...item, dataset_code: item.dataset_code || item.code }]
+        : [...prev, {...item, dataset_code: item.dataset_code || item.code}]
     );
   }, []);
 
@@ -160,18 +151,11 @@ export default function Relationship() {
 
     const filtered: Record<string, Record<string, any[]>> = {};
     dataTableJson?.data?.results.forEach((item: any) => {
-      if (
-        selectedFramework !== NO_FILTER &&
-        item.framework !== selectedFramework
-      )
-        return;
+      if (selectedFramework !== NO_FILTER && item.framework !== selectedFramework) return;
       if (selectedLayer !== NO_FILTER && item.type !== selectedLayer) return;
 
       const framework = item.framework;
-      const group =
-        item.groups && item.groups.length > 0
-          ? item.groups[0].code
-          : "Ungrouped Datasets";
+      const group = item.groups && item.groups.length > 0 ? item.groups[0].code : 'Ungrouped Datasets';
 
       if (!filtered[framework]) filtered[framework] = {};
       if (!filtered[framework][group]) filtered[framework][group] = [];
@@ -204,9 +188,7 @@ export default function Relationship() {
       try {
         const responses = await Promise.all(
           selectedDatasetVersions.map((v) =>
-            fastApiInstance.get(
-              `/api/v1/datasets/${v.dataset_version_id}/relationships/`
-            )
+            fastApiInstance.get(`/api/v1/datasets/${v.dataset_version_id}/relationships/`)
           )
         );
         const data = responses.map((r) => r.data);
@@ -216,15 +198,13 @@ export default function Relationship() {
         const processedTables = new Set<string>();
 
         const createNode = (dataset: any) => {
-          const { width, height } = calculateNodeDimensions(dataset.columns);
+          const {width, height} = calculateNodeDimensions(dataset.columns);
           return {
             id: dataset.dataset_code || dataset.code,
-            type: "databaseTable",
-            position: { x: 0, y: 0 },
+            type: 'databaseTable',
+            position: {x: 0, y: 0},
             data: {
-              label: `${dataset.dataset_name} (${
-                dataset.dataset_code || dataset.code
-              })`,
+              label: `${dataset.dataset_name} (${dataset.dataset_code || dataset.code})`,
               columns: dataset.columns,
             },
             width,
@@ -236,13 +216,13 @@ export default function Relationship() {
           relationship: any,
           source: any,
           target: any,
-          direction: "inbound" | "outbound"
+          direction: 'inbound' | 'outbound'
         ) => {
           const edgeId = `${source}-${target}-${relationship.from_col}-${relationship.to_col}`;
           const sourceHandle = `${source}.${relationship.from_col}.right`;
           const targetHandle = `${target}.${relationship.to_col}.left`;
           const label =
-            direction === "outbound"
+            direction === 'outbound'
               ? `${relationship.from_col} -> ${relationship.to_col}`
               : `${relationship.from_col} <- ${relationship.to_col}`;
 
@@ -252,7 +232,7 @@ export default function Relationship() {
             target,
             sourceHandle,
             targetHandle,
-            type: "custom",
+            type: 'custom',
             animated: true,
             data: {
               label,
@@ -269,7 +249,7 @@ export default function Relationship() {
 
         data.forEach((relationshipData) => {
           if (!relationshipData.central_dataset_version) {
-            console.error("Missing central_dataset_version:", relationshipData);
+            console.error('Missing central_dataset_version:', relationshipData);
             return;
           }
 
@@ -288,15 +268,11 @@ export default function Relationship() {
           });
 
           relationshipData.inbound.forEach((rel: any) => {
-            newEdges.push(
-              createEdge(rel, rel.from_table, rel.to_table, "inbound")
-            );
+            newEdges.push(createEdge(rel, rel.from_table, rel.to_table, 'inbound'));
           });
 
           relationshipData.outbound.forEach((rel: any) => {
-            newEdges.push(
-              createEdge(rel, rel.from_table, rel.to_table, "outbound")
-            );
+            newEdges.push(createEdge(rel, rel.from_table, rel.to_table, 'outbound'));
           });
         });
 
@@ -306,13 +282,12 @@ export default function Relationship() {
         //   )
         // );
 
-        const { nodes: layoutedNodes, edges: layoutedEdges } =
-          await getLayoutedElements(newNodes, newEdges);
+        const {nodes: layoutedNodes, edges: layoutedEdges} = await getLayoutedElements(newNodes, newEdges);
 
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
       } catch (error) {
-        console.error("Error fetching relationships:", error);
+        console.error('Error fetching relationships:', error);
       } finally {
         setLoading(false);
       }
@@ -324,13 +299,13 @@ export default function Relationship() {
   }, [selectedDatasetVersions]);
 
   const handleNodeInfoLog = useCallback((node: any) => {
-    console.log("Table Information:", node.data);
+    console.log('Table Information:', node.data);
   }, []);
 
   return (
     <div className="flex h-screen">
       <div className="w-full p-4">
-        <div className="flex flex-wrap space-x-4 mb-4">
+        <div className="mb-4 flex flex-wrap space-x-4">
           <Select
             onValueChange={handleFrameworkChange}
             value={selectedFramework}
@@ -341,31 +316,36 @@ export default function Relationship() {
             <SelectContent>
               <SelectItem value={NO_FILTER}>All Frameworks</SelectItem>
               {frameworks?.data?.map((framework: any) => (
-                <SelectItem key={framework.code} value={framework.code}>
+                <SelectItem
+                  key={framework.code}
+                  value={framework.code}
+                >
                   {framework.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select onValueChange={handleLayerChange} value={selectedLayer}>
+          <Select
+            onValueChange={handleLayerChange}
+            value={selectedLayer}
+          >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select Layer" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={NO_FILTER}>All Layers</SelectItem>
               {layers?.data?.map((layer: any) => (
-                <SelectItem key={layer.code} value={layer.code}>
+                <SelectItem
+                  key={layer.code}
+                  value={layer.code}
+                >
                   {layer.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <DatePicker
-            onSelect={
-              handleDateChange as React.ComponentProps<
-                typeof DatePicker
-              >["onSelect"]
-            }
+            onSelect={handleDateChange as React.ComponentProps<typeof DatePicker>['onSelect']}
             initialDate={selectedDate}
           />
         </div>
@@ -385,18 +365,17 @@ export default function Relationship() {
           />
         </ReactFlowProvider>
       </div>
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+      <Sheet
+        open={isSheetOpen}
+        onOpenChange={setIsSheetOpen}
+      >
         <SheetTrigger asChild>
-          <Button className="fixed right-4 top-4 z-10">
-            Open Dataset List
-          </Button>
+          <Button className="fixed right-4 top-4 z-10">Open Dataset List</Button>
         </SheetTrigger>
-        <SheetContent className="overflow-y-auto max-h-screen">
+        <SheetContent className="max-h-screen overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Selected Datasets</SheetTitle>
-            <SheetDescription>
-              View and manage your selected datasets here.
-            </SheetDescription>
+            <SheetDescription>View and manage your selected datasets here.</SheetDescription>
           </SheetHeader>
           <div className="mt-4">
             {/* <SelectedDatasetChips

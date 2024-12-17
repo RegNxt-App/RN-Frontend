@@ -1,8 +1,10 @@
 // MetadataTableHeader.tsx
-import { Button } from "@rn/ui/components/ui/button";
-import { Input } from "@rn/ui/components/ui/input";
-import { CheckCircle, Loader, Plus, Save, Search } from "lucide-react";
-import React from "react";
+import React from 'react';
+
+import {CheckCircle, Loader, Plus, Save, Search} from 'lucide-react';
+
+import {Button} from '@rn/ui/components/ui/button';
+import {Input} from '@rn/ui/components/ui/input';
 
 interface MetadataTableHeaderProps {
   searchTerm: string;
@@ -27,7 +29,7 @@ export const MetadataTableHeader: React.FC<MetadataTableHeaderProps> = ({
 }) => (
   <div className="flex items-center justify-between">
     <div className="flex items-center">
-      <Search className="w-5 h-5 text-gray-500 mr-2" />
+      <Search className="mr-2 h-5 w-5 text-gray-500" />
       <Input
         placeholder="Search columns..."
         value={searchTerm}
@@ -36,25 +38,31 @@ export const MetadataTableHeader: React.FC<MetadataTableHeaderProps> = ({
       />
     </div>
     <div className="space-x-2">
-      <Button onClick={handleAddRow} variant="outline">
-        <Plus className="w-4 h-4 mr-2" />
+      <Button
+        onClick={handleAddRow}
+        variant="outline"
+      >
+        <Plus className="mr-2 h-4 w-4" />
         Add Row
       </Button>
-      <Button onClick={handleSave} disabled={!isDataModified || isSaving}>
-        {isSaving ? (
-          <Loader className="w-4 h-4 mr-2 animate-spin" />
-        ) : (
-          <Save className="w-4 h-4 mr-2" />
-        )}
-        {isSaving ? "Saving..." : "Save Changes"}
+      <Button
+        onClick={handleSave}
+        disabled={!isDataModified || isSaving}
+      >
+        {isSaving ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+        {isSaving ? 'Saving...' : 'Save Changes'}
       </Button>
-      <Button onClick={onValidate} variant="secondary" disabled={isValidating}>
+      <Button
+        onClick={onValidate}
+        variant="secondary"
+        disabled={isValidating}
+      >
         {isValidating ? (
-          <Loader className="w-4 h-4 mr-2 animate-spin" />
+          <Loader className="mr-2 h-4 w-4 animate-spin" />
         ) : (
-          <CheckCircle className="w-4 h-4 mr-2" />
+          <CheckCircle className="mr-2 h-4 w-4" />
         )}
-        {isValidating ? "Validating..." : "Validate"}
+        {isValidating ? 'Validating...' : 'Validate'}
       </Button>
     </div>
   </div>

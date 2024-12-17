@@ -1,4 +1,4 @@
-import { Badge } from "@rn/ui/components/ui/badge";
+import {Badge} from '@rn/ui/components/ui/badge';
 
 interface TableData {
   dataset_id: number;
@@ -19,13 +19,10 @@ interface TableInfoHeaderProps {
   datasetVersion: DatasetVersion;
 }
 
-export const TableInfoHeader: React.FC<TableInfoHeaderProps> = ({
-  selectedTable,
-  datasetVersion,
-}) => {
+export const TableInfoHeader: React.FC<TableInfoHeaderProps> = ({selectedTable, datasetVersion}) => {
   return (
-    <div className="bg-gray-100 p-4 rounded-lg mb-4">
-      <h2 className="text-2xl font-bold mb-2">{selectedTable.label}</h2>
+    <div className="mb-4 rounded-lg bg-gray-100 p-4">
+      <h2 className="mb-2 text-2xl font-bold">{selectedTable.label}</h2>
       <div className="flex flex-wrap gap-2">
         <Badge variant="outline">Code: {selectedTable.code}</Badge>
         <Badge variant="outline">ID: {selectedTable.dataset_id}</Badge>
@@ -33,12 +30,8 @@ export const TableInfoHeader: React.FC<TableInfoHeaderProps> = ({
         <Badge variant="outline">Type: {selectedTable.type}</Badge>
         {datasetVersion && (
           <>
-            <Badge variant="outline">
-              Version: {datasetVersion.version_nr}
-            </Badge>
-            <Badge variant="outline">
-              Version ID: {datasetVersion.dataset_version_id}
-            </Badge>
+            <Badge variant="outline">Version: {datasetVersion.version_nr}</Badge>
+            <Badge variant="outline">Version ID: {datasetVersion.dataset_version_id}</Badge>
           </>
         )}
       </div>

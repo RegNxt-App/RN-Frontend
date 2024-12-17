@@ -1,15 +1,14 @@
-"use client";
-import { cn } from "@/lib/utils";
-import { Button } from "@rn/ui/components/ui/button";
-import { Calendar } from "@rn/ui/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@rn/ui/components/ui/popover";
-import { format, isValid, parse } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import * as React from "react";
+'use client';
+
+import * as React from 'react';
+
+import {cn} from '@/lib/utils';
+import {format, isValid, parse} from 'date-fns';
+import {Calendar as CalendarIcon} from 'lucide-react';
+
+import {Button} from '@rn/ui/components/ui/button';
+import {Calendar} from '@rn/ui/components/ui/calendar';
+import {Popover, PopoverContent, PopoverTrigger} from '@rn/ui/components/ui/popover';
 
 interface DatePickerProps {
   value: string | null;
@@ -20,21 +19,12 @@ interface DatePickerProps {
   isValidDate?: (date: Date) => boolean;
 }
 
-export function DatePicker({
-  value,
-  onChange,
-  disabled = false,
-  className,
-}: DatePickerProps) {
+export function DatePicker({value, onChange, disabled = false, className}: DatePickerProps) {
   const parseDate = (dateString: string | null): Date | undefined => {
     if (!dateString) return undefined;
 
     // Try parsing with different formats
-    const formats = [
-      "yyyy-MM-dd",
-      "yyyy-MM-dd'T'HH:mm:ss",
-      "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-    ];
+    const formats = ['yyyy-MM-dd', "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
     for (const format of formats) {
       const parsedDate = parse(dateString, format, new Date());
       if (isValid(parsedDate)) {
@@ -50,7 +40,7 @@ export function DatePicker({
   const handleDateChange = (newDate: Date | undefined) => {
     setDate(newDate);
     if (newDate && isValid(newDate)) {
-      onChange(format(newDate, "yyyy-MM-dd"));
+      onChange(format(newDate, 'yyyy-MM-dd'));
     } else {
       onChange(null);
     }
@@ -58,31 +48,31 @@ export function DatePicker({
 
   const displayValue = React.useMemo(() => {
     if (date && isValid(date)) {
-      return format(date, "PPP");
+      return format(date, 'PPP');
     }
     if (value) {
       return `Invalid date: ${value}`;
     }
-    return "Pick a date";
+    return 'Pick a date';
   }, [date, value]);
 
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn('grid gap-2', className)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             id="date"
-            variant={"outline"}
-            className={cn(
-              "w-[300px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}
+            variant={'outline'}
+            className={cn('w-[300px] justify-start text-left font-normal', !date && 'text-muted-foreground')}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {displayValue}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent
+          className="w-auto p-0"
+          align="start"
+        >
           <Calendar
             mode="single"
             disabled={disabled}

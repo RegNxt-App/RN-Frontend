@@ -1,4 +1,4 @@
-import { Edge, Node, Position } from "@xyflow/react";
+import {Edge, Node, Position} from '@xyflow/react';
 
 export interface TableColumn {
   id?: string;
@@ -6,7 +6,7 @@ export interface TableColumn {
   description: string;
   type: string;
   key?: boolean;
-  handleType?: "source" | "target";
+  handleType?: 'source' | 'target';
 }
 
 export interface Dataset {
@@ -23,7 +23,7 @@ export interface Dataset {
   valid_from?: string;
   is_visible?: boolean;
   latest_version_id?: number;
-  groups: { code: string | null; label: string | null; order: number | null }[];
+  groups: {code: string | null; label: string | null; order: number | null}[];
 }
 
 export interface ExcelUploadData {
@@ -142,7 +142,7 @@ export interface CustomEdge extends Edge<EdgeData> {
 export interface DatabaseTable {
   name: string;
   description: string;
-  position: { x: number; y: number };
+  position: {x: number; y: number};
   columns: TableColumn[];
   schemaColor: string;
   schema?: string;
@@ -179,7 +179,7 @@ export interface DatasetItem {
   description: string;
   framework: string;
   type: string;
-  groups: { code: string | null; label: string | null; order: number | null }[];
+  groups: {code: string | null; label: string | null; order: number | null}[];
   latest_version_id: number;
   version_nr: number;
 }
