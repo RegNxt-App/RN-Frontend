@@ -36,6 +36,7 @@ jobs:
           node-version: "18.x"
           cache: "pnpm"
 
+      # Install dependencies using pnpm
       - name: Install Root Dependencies
         run: pnpm install
 
@@ -57,6 +58,7 @@ jobs:
           name: ${{ matrix.app }}-build
           path: apps/${{ matrix.app }}/${{ matrix.dist-path }}
 
+      # Add Azure Login step before deployment
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -68,4 +70,4 @@ jobs:
           app-name: ${{ matrix.app-name }}
           slot-name: "Production"
           package: apps/${{ matrix.app }}/${{ matrix.dist-path }}
-          publish-profile: ${{ secrets[format('AZUREAPPSERVICE_PUBLISHPROFILE_{0}', upper(matrix.app))] }}
+          publish-profile: ${{ secrets[format('AZUREAPPSERVICE_PUBLISHPROFILE_{0}', matrix.secret-suffix)] }}
