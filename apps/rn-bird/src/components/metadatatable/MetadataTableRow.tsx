@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { TableCell, TableRow } from "@/components/ui/table";
 import { MetadataItem, ValidationResult } from "@/types/databaseTypes";
+import { Button } from "@rn/ui/components/ui/button";
+import { TableCell, TableRow } from "@rn/ui/components/ui/table";
 import { Trash } from "lucide-react";
 import React from "react";
 import { MetadataTableCell } from "./MetadataTableCell";

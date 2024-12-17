@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +7,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@rn/ui/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,8 +15,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
+} from "@rn/ui/components/ui/dropdown-menu";
 import Avatar from "boring-avatars";
 import { motion } from "framer-motion";
 import {

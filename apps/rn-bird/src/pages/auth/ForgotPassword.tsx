@@ -1,7 +1,7 @@
 import AuthLayout from "@/components/AuthLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@rn/ui/components/ui/button";
+import { Input } from "@rn/ui/components/ui/input";
+import { Label } from "@rn/ui/components/ui/label";
 import React, { useState } from "react";
 
 export default function ForgotPassword() {

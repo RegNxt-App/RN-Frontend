@@ -1,5 +1,6 @@
-import { TooltipProvider } from "@/components/ui/tooltip";
 import axiosInstance from "@/lib/axios";
+import { Toaster } from "@rn/ui/components/ui/toaster";
+import { TooltipProvider } from "@rn/ui/components/ui/tooltip";
 import React, { ComponentProps, useEffect } from "react";
 import {
   createBrowserRouter,
@@ -15,7 +16,6 @@ import { ConfigureGrouping } from "./components/configurations/ConfigureGrouping
 import ErrorBoundary from "./components/ErrorBoundary";
 import Layout from "./components/Layout";
 import LogoSpinner from "./components/LogoSpinner";
-import { Toaster } from "./components/ui/toaster";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Login from "./pages/auth/Login";

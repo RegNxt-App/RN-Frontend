@@ -1,21 +1,21 @@
 import { SharedColumnFilters } from "@/components/SharedFilters";
-import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { fastApiInstance } from "@/lib/axios";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@rn/ui/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { fastApiInstance } from "@/lib/axios";
+} from "@rn/ui/components/ui/select";
 
 import {
   Column,

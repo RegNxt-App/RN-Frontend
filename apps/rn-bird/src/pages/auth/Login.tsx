@@ -1,5 +1,8 @@
 import AuthLayout from "@/components/AuthLayout";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Form,
   FormControl,
@@ -7,11 +10,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
+} from "@rn/ui/components/ui/form";
+import { Input } from "@rn/ui/components/ui/input";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as z from "zod";

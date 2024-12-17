@@ -12,14 +12,6 @@ import { SelectionDisplay } from "@/components/SelectionDisplay";
 import { SharedColumnFilters } from "@/components/SharedFilters";
 import DataSkeleton from "@/components/skeletons/DataSkeleton";
 import { TableInfoHeader } from "@/components/TableInfoHeader";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { fastApiInstance } from "@/lib/axios";
 import {
@@ -29,6 +21,14 @@ import {
   Layers,
   ValidationResult,
 } from "@/types/databaseTypes";
+import { Button } from "@rn/ui/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rn/ui/components/ui/select";
 
 const NO_FILTER = "NO_FILTER";
 

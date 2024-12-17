@@ -1,16 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { SharedDataTable } from "@/components/SharedDataTable";
-import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { fastApiInstance } from "@/lib/axios";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { fastApiInstance } from "@/lib/axios";
+} from "@rn/ui/components/ui/dialog";
+import { Label } from "@rn/ui/components/ui/label";
 import { ColumnDef } from "@tanstack/react-table";
 import React, { useEffect, useState } from "react";
 import GenericComboBox from "../ComboBox";

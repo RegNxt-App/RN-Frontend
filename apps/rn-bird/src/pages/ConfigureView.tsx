@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,7 +6,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@rn/ui/components/ui/card";
 import { Columns, Database, Group, Settings2, Table } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

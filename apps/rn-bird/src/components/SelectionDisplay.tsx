@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns"; // Import format from date-fns
+import { Badge } from "@rn/ui/components/ui/badge";
+import { format } from "date-fns";
 import React from "react";
 
 interface SelectionDisplayProps {

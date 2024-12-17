@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@rn/ui/components/ui/badge";
 
 interface TableData {
   dataset_id: number;

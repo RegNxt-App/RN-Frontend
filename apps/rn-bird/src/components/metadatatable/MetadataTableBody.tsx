@@ -1,9 +1,10 @@
 // MetadataTableBody.tsx
+import { MetadataItem, ValidationResult } from "@/types/databaseTypes";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@rn/ui/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -11,14 +12,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@rn/ui/components/ui/table";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { MetadataItem, ValidationResult } from "@/types/databaseTypes";
+} from "@rn/ui/components/ui/tooltip";
 import { Circle, Info, Key } from "lucide-react";
 import React from "react";
 import { MetadataTableRow } from "./MetadataTableRow";

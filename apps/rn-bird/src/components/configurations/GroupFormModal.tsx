@@ -1,11 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@rn/ui/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -13,9 +14,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
+} from "@rn/ui/components/ui/form";
+import { Input } from "@rn/ui/components/ui/input";
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";

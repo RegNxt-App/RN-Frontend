@@ -1,13 +1,13 @@
-import React from 'react';
-import { Input } from "@/components/ui/input";
+import { Input } from "@rn/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@rn/ui/components/ui/select";
 import { ColumnDef } from "@tanstack/react-table";
+import React from 'react';
 
 interface DataItem {
   dataSetId: number;

@@ -3,8 +3,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
+} from "@rn/ui/components/ui/accordion";
+import { Checkbox } from "@rn/ui/components/ui/checkbox";
 import React, { useMemo } from "react";
 
 interface SelectableAccordionProps {

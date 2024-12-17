@@ -1,12 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+} from "@rn/ui/components/ui/dialog";
+import { Input } from "@rn/ui/components/ui/input";
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@rn/ui/components/ui/table";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 

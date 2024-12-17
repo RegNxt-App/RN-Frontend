@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@rn/ui/components/ui/select";
 import {
   Table,
   TableBody,
@@ -13,7 +13,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@rn/ui/components/ui/table";
 import {
   ColumnDef,
   flexRender,

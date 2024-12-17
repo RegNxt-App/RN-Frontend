@@ -1,6 +1,6 @@
 import GenericComboBox from "@/components/ComboBox";
-import { Checkbox } from "@/components/ui/checkbox";
 import { fastApiInstance } from "@/lib/axios";
+import { Checkbox } from "@rn/ui/components/ui/checkbox";
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import useSWR from "swr";

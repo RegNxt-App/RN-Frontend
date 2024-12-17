@@ -2,20 +2,20 @@ import { GroupFormModal } from "@/components/configurations/GroupFormModal";
 import { GroupItemsModal } from "@/components/configurations/GroupItemsModal";
 import { SharedDataTable } from "@/components/SharedDataTable";
 import { SharedColumnFilters } from "@/components/SharedFilters";
-import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { fastApiInstance } from "@/lib/axios";
+import { Button } from "@rn/ui/components/ui/button";
+import { Skeleton } from "@rn/ui/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useToast } from "@/hooks/use-toast";
-import { fastApiInstance } from "@/lib/axios";
+} from "@rn/ui/components/ui/tooltip";
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Eye, Plus, Trash } from "lucide-react";
 import React, { useState } from "react";
 import useSWR from "swr";
-import { Skeleton } from "../ui/skeleton";
 
 interface Group {
   code: string;

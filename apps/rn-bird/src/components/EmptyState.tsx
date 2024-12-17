@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@rn/ui/components/ui/button";
 import { FileText, LucideIcon } from "lucide-react";
 import React from "react";
 

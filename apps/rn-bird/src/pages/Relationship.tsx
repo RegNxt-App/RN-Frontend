@@ -3,15 +3,17 @@
 import DatabaseDiagram from "@/components/DatabaseDiagram";
 import DatePicker from "@/components/DatePicker";
 import SelectableAccordion from "@/components/SelectableAccordion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { fastApiInstance } from "@/lib/axios";
+import { DatasetResponse, Frameworks, Layers } from "@/types/databaseTypes";
+import { Button } from "@rn/ui/components/ui/button";
+import { Input } from "@rn/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@rn/ui/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -19,10 +21,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Skeleton } from "@/components/ui/skeleton";
-import { fastApiInstance } from "@/lib/axios";
-import { DatasetResponse, Frameworks, Layers } from "@/types/databaseTypes";
+} from "@rn/ui/components/ui/sheet";
+import { Skeleton } from "@rn/ui/components/ui/skeleton";
 import { ReactFlowProvider } from "@xyflow/react";
 import ELK from "elkjs/lib/elk.bundled.js";
 import { useCallback, useEffect, useMemo, useState } from "react";

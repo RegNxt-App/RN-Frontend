@@ -1,4 +1,3 @@
-// components/NoResults.tsx
 import { LucideIcon } from "lucide-react";
 
 interface NoResultsProps {

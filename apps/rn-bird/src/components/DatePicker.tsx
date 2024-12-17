@@ -2,14 +2,14 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import * as React from "react";
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { Button } from "@rn/ui/components/ui/button";
+import { Calendar } from "@rn/ui/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+} from "@rn/ui/components/ui/popover";
 
 type DatePickerProps = React.HTMLAttributes<HTMLDivElement> & {
   onSelect?: (date: Date | undefined) => void;

@@ -1,24 +1,24 @@
-import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { MetadataItem, ValidationResult } from "@/types/databaseTypes";
+import { Input } from "@rn/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@rn/ui/components/ui/select";
+import { TableCell } from "@rn/ui/components/ui/table";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import { MetadataItem, ValidationResult } from "@/types/databaseTypes";
+} from "@rn/ui/components/ui/tooltip";
 import { format } from "date-fns";
 import { AlertTriangle } from "lucide-react";
 import React, { useMemo } from "react";
 import { DatePicker } from "../GDate";
-import { TableCell } from "../ui/table";
 
 interface MetadataTableCellProps {
   item: MetadataItem;

@@ -9,8 +9,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@rn/ui/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rn/ui/components/ui/tabs";
 import { Database, LayersIcon, Table } from "lucide-react";
 import React from "react";
 

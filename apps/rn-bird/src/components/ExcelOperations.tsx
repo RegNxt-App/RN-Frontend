@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useToast } from "@/hooks/use-toast";
+} from "@rn/ui/components/ui/tooltip";
 import { Workbook } from "exceljs";
 import { Download, Upload } from "lucide-react";
 import { useRef, useState } from "react";

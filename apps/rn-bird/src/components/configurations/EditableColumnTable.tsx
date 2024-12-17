@@ -1,8 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@rn/ui/components/ui/button";
+import { Input } from "@rn/ui/components/ui/input";
 import { Edit, Trash2 } from "lucide-react"; // Add this import
 
-import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import { fastApiInstance } from "@/lib/axios";
+import { cn } from "@/lib/utils";
+import { Column } from "@/types/databaseTypes";
+import { Switch } from "@rn/ui/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -10,17 +14,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@rn/ui/components/ui/table";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useToast } from "@/hooks/use-toast";
-import { fastApiInstance } from "@/lib/axios";
-import { cn } from "@/lib/utils";
-import { Column } from "@/types/databaseTypes";
+} from "@rn/ui/components/ui/tooltip";
 import { History, Plus } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";

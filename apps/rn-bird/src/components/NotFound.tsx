@@ -1,4 +1,3 @@
-// components/NotFoundMessage.tsx
 import React from "react";
 
 const NotFoundMessage: React.FC = () => {

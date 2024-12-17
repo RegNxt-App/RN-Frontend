@@ -1,11 +1,12 @@
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@rn/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@rn/ui/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -13,16 +14,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@rn/ui/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { zodResolver } from "@hookform/resolvers/zod";
+} from "@rn/ui/components/ui/select";
+import { Switch } from "@rn/ui/components/ui/switch";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 

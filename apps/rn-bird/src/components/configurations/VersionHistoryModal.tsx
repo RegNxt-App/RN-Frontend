@@ -1,13 +1,13 @@
-import { Badge } from "@/components/ui/badge";
+import { Dataset, DatasetVersion } from "@/types/databaseTypes";
+import { Badge } from "@rn/ui/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dataset, DatasetVersion } from "@/types/databaseTypes";
+} from "@rn/ui/components/ui/dialog";
+import { ScrollArea } from "@rn/ui/components/ui/scroll-area";
 import { format } from "date-fns";
 
 interface VersionHistoryModalProps {

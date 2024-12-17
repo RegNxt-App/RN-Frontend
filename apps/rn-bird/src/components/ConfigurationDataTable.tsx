@@ -1,12 +1,12 @@
 import { SharedDataTable } from "@/components/SharedDataTable";
+import { DatasetItem } from "@/types/databaseTypes";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { DatasetItem } from "@/types/databaseTypes";
+} from "@rn/ui/components/ui/accordion";
+import { Button } from "@rn/ui/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import React, { useState } from "react";
 

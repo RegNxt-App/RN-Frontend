@@ -1,23 +1,23 @@
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   Column,
   Dataset,
   DatasetVersion,
   DatasetVersions,
 } from "@/types/databaseTypes";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@rn/ui/components/ui/accordion";
+import { Badge } from "@rn/ui/components/ui/badge";
+import { Button } from "@rn/ui/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rn/ui/components/ui/tooltip";
 import { format } from "date-fns";
 import {
   ChevronLeft,

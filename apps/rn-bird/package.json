@@ -5,11 +5,17 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b && vite build",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf build",
     "dev": "vite",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "lint": "TIMING=1 eslint src/**/*.{js,ts,tsx} --fix",
+    "prettier": "prettier --write \"./**/!(*.d).{js,jsx,ts,tsx}\"",
+    "prettier-check": "prettier --check \"./**/!(*.d).{js,jsx,ts,tsx}\"",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@rn/config": "workspace:*",
+    "@rn/tokens": "workspace:*",
+    "@rn/tsconfig": "workspace:*",
     "@hookform/resolvers": "^3.9.0",
     "@rn/ui": "workspace:*",
     "@tanstack/react-table": "^8.20.5",

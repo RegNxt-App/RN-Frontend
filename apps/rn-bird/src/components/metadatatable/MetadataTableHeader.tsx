@@ -1,6 +1,6 @@
 // MetadataTableHeader.tsx
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@rn/ui/components/ui/button";
+import { Input } from "@rn/ui/components/ui/input";
 import { CheckCircle, Loader, Plus, Save, Search } from "lucide-react";
 import React from "react";
 
