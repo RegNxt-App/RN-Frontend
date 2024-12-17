@@ -24,12 +24,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
-          cache: "npm"
+          cache: "pnpm"
 
+      # Install dependencies using pnpm
       - name: Install Root Dependencies
         run: pnpm install
 
@@ -57,4 +64,4 @@ jobs:
           app-name: ${{ matrix.app-name }}
           slot-name: "Production"
           package: apps/${{ matrix.app }}/${{ matrix.dist-path }}
-          publish-profile: ${{ secrets[format('AZUREAPPSERVICE_PUBLISHPROFILE_{0}', matrix.app)] }}
+          publish-profile: ${{ secrets[format('AZUREAPPSERVICE_PUBLISHPROFILE_{0}', upper(matrix.app))] }}
