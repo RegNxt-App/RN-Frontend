@@ -1,0 +1,15 @@
+{
+  "extends": "./node_modules/@rn/tsconfig/base.json",
+  "include": [
+    "./tailwind-plugins",
+    "./tailwind-preset.ts"
+  ],
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "lib": ["ESNext", "dom", "es2017"],
+    "typeRoots": [
+      "./@types"
+    ]
+  }
+}

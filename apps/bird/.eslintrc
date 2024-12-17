@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "extends": [ "./node_modules/@rn/config/eslint-preset.cjs" ],
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [ ".ts", ".tsx" ]
+    },
+    "import/resolver": {
+      "typescript": {
+        "project": "."
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "eslint.validate": ["javascript"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.options": {
+    "overrideConfigFile": ".eslintrc.js"
+  },
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.rulers": [88],
+  "workbench.colorCustomizations": {
+    "editorRuler.foreground": "#0deb1c7c"
+  },
+  "editor.tabSize": 2
+}

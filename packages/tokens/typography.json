@@ -1,0 +1,73 @@
+{
+  "h1": {
+    "fontSize": "2.25rem",
+    "lineHeight": 1.2222,
+    "letterSpacing": "-0.02em"
+  },
+  "h2": {
+    "fontSize": "2rem",
+    "lineHeight": 1.25,
+    "letterSpacing": "-0.02em"
+  },
+  "h3": {
+    "fontSize": "1.5rem",
+    "lineHeight": 1.3333,
+    "letterSpacing": "normal"
+  },
+  "h4": {
+    "fontSize": "1.25rem",
+    "lineHeight": 1.4,
+    "letterSpacing": "normal"
+  },
+  "h5": {
+    "fontSize": "1rem",
+    "lineHeight": 1.5,
+    "letterSpacing": "normal",
+    "fontWeight": "700"
+  },
+  "h6": {
+    "fontSize": "0.875rem",
+    "lineHeight": "20px",
+    "letterSpacing": "normal",
+    "fontWeight": "700"
+  },
+  "body": {
+    "fontSize": "0.875rem",
+    "lineHeight": "22px",
+    "letterSpacing": "normal"
+  },
+  "body-sm": {
+    "fontSize": "0.75rem",
+    "lineHeight": "18px",
+    "letterSpacing": "normal"
+  },
+  "body-xs": {
+    "fontSize": "0.625rem",
+    "lineHeight": "14px",
+    "letterSpacing": "normal"
+  },
+  "button": {
+    "fontSize": "0.875rem",
+    "lineHeight": "22px",
+    "letterSpacing": "normal",
+    "fontWeight": "700"
+  },
+  "button-sm": {
+    "fontSize": "0.75rem",
+    "lineHeight": 1.5,
+    "letterSpacing": "normal",
+    "fontWeight": "700"
+  },
+  "overline": {
+    "fontSize": "0.875rem",
+    "lineHeight": 1.5714,
+    "letterSpacing": "1px",
+    "fontWeight": "700"
+  },
+  "overline-sm": {
+    "fontSize": "0.75rem",
+    "lineHeight": "18px",
+    "letterSpacing": "1px",
+    "fontWeight": "700"
+  }
+}

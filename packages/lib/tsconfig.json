@@ -1,0 +1,10 @@
+{
+  "extends": "./node_modules/@rn/tsconfig/base.json",
+  "include": ["./*.ts"],
+  "compilerOptions": {
+    "declaration": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "lib": ["ESNext", "dom"]
+  }
+}

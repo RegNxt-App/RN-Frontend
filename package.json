@@ -1,59 +1,43 @@
 {
-  "name": "regnxt",
-  "private": true,
-  "version": "1.3.7",
-  "type": "module",
+  "name": "@rn/root",
+  "version": "1.0.0",
+  "description": "Monorepo for Regnxt frontend",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "dev": "turbo run dev",
+    "start": "turbo run start",
+    "prettier": "turbo run prettier",
+    "prettier-check": "turbo run prettier-check",
+    "clean": "turbo run clean && rm -rf node_modules && rm pnpm-lock.yaml"
   },
-  "dependencies": {
-    "@headlessui/react": "^2.2.0",
-    "@hookform/resolvers": "^3.9.1",
-    "@radix-ui/react-accordion": "^1.2.1",
-    "@radix-ui/react-alert-dialog": "^1.1.2",
-    "@radix-ui/react-checkbox": "^1.1.2",
-    "@radix-ui/react-dialog": "^1.1.2",
-    "@radix-ui/react-dropdown-menu": "^2.1.2",
-    "@radix-ui/react-label": "^2.1.0",
-    "@radix-ui/react-popover": "^1.1.2",
-    "@radix-ui/react-select": "^2.1.2",
-    "@radix-ui/react-slot": "^1.1.0",
-    "@radix-ui/react-tabs": "^1.1.1",
-    "@radix-ui/react-toast": "^1.2.2",
-    "@reduxjs/toolkit": "^2.3.0",
-    "@silevis/reactgrid": "^4.1.10",
-    "axios": "^1.7.7",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "flatpickr": "^4.6.13",
-    "headlessui": "^0.0.0",
-    "lucide-react": "^0.441.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-hook-form": "^7.53.2",
-    "react-hot-toast": "^2.4.1",
-    "react-redux": "^9.1.2",
-    "react-router-dom": "^6.14.2",
-    "react-select": "^5.8.1",
-    "react-sweetalert2": "^0.6.0",
-    "react-tooltip": "^5.28.0",
-    "sweetalert2": "^11.14.3",
-    "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.23.8"
-  },
+  "keywords": [
+    "monorepo",
+    "regnxt",
+    "ats",
+    "frontend",
+    "react",
+    "typescript",
+    "js",
+    "javascript"
+  ],
+  "author": "abdullahmujahidali",
+  "license": "ISC",
+  "private": true,
+  "packageManager": "pnpm@7.11.0",
   "devDependencies": {
-    "@types/react": "^18.2.17",
-    "@types/react-dom": "^18.2.7",
-    "@vitejs/plugin-react": "^4.0.3",
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.27",
-    "prettier": "^3.0.0",
-    "prettier-plugin-tailwindcss": "^0.4.1",
-    "tailwindcss": "^3.4.1",
-    "vite": "^4.4.7",
-    "webpack": "^5.88.2"
+    "husky": "^8.0.3",
+    "lint-staged": "^13.3.0",
+    "turbo": "^1.11.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@radix-ui/react-dismissable-layer": "1.0.2"
+    }
   }
 }
