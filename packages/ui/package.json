@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@rn/eslint-config": "workspace:*",
-    "@rn/typescript-config": "workspace:*",
+    "@rn/tsconfig": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:react18",
     "autoprefixer": "^10",
