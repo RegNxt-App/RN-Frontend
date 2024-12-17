@@ -17,14 +17,15 @@ jobs:
           - app: bird
             app-name: "bird"
             dist-path: "dist"
+            secret-suffix: "BIRD"
           - app: reporting
             app-name: "RegNxtPortalD"
             dist-path: "dist"
+            secret-suffix: "REPORTING"
 
     steps:
       - uses: actions/checkout@v4
 
-      # Setup pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -36,7 +37,6 @@ jobs:
           node-version: "18.x"
           cache: "pnpm"
 
-      # Install dependencies using pnpm
       - name: Install Root Dependencies
         run: pnpm install
 
@@ -64,4 +64,4 @@ jobs:
           app-name: ${{ matrix.app-name }}
           slot-name: "Production"
           package: apps/${{ matrix.app }}/${{ matrix.dist-path }}
-          publish-profile: ${{ secrets[format('AZUREAPPSERVICE_PUBLISHPROFILE_{0}', upper(matrix.app))] }}
+          publish-profile: ${{ secrets[format('AZUREAPPSERVICE_PUBLISHPROFILE_{0}', matrix.secret-suffix)] }}
