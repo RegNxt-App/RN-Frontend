@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "constants/*": ["constants/*"],
+      "components/*": ["components/*"],
+      "utils/*": ["utils/*"],
+      "hooks/*": ["hooks/*"],
+      "views/*": ["views/*"],
+      "pages/*": ["pages/*"],
+      "middlewares/*": ["middlewares/*"]
+    }
+  },
+  "include": ["src"]
+}
