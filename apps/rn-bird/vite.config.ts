@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig, loadEnv, type UserConfig} from 'vite';
@@ -7,7 +6,7 @@ export default defineConfig(({mode}): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    plugins: [react()] as UserConfig['plugins'],
+    plugins: [react() as any],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
