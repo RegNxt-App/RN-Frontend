@@ -247,6 +247,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.1.2
         version: 1.1.5(@types/react-dom@18.3.5(@types/react@18.3.16))(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@rn/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@tanstack/react-table':
         specifier: ^8.20.5
         version: 8.20.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -320,9 +323,6 @@ importers:
       '@eslint/js':
         specifier: ^9.9.0
         version: 9.17.0
-      '@rn/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@types/d3-force':
         specifier: ^3.0.10
         version: 3.0.10
