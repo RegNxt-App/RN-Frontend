@@ -17,7 +17,8 @@ import {DatasetItem, DatasetResponse, Frameworks, Layers, ValidationResult} from
 import {format} from 'date-fns';
 import useSWR from 'swr';
 
-import {Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/rnui';
+import {Button} from '@rn/ui/components/ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 
 const NO_FILTER = 'NO_FILTER';
 

@@ -79,7 +79,7 @@ export default defineConfig(({mode}): UserConfig => {
       exclude: ['web-worker'],
     },
     server: {
-      port: 4000,
+      port: 5173,
     },
   };
 });

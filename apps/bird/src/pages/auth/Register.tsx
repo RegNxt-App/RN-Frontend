@@ -2,7 +2,10 @@ import React, {useState} from 'react';
 
 import AuthLayout from '@/components/AuthLayout';
 
-import {Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/rnui';
+import {Label} from '@rn/rnui';
+import {Button} from '@rn/ui/components/ui/button';
+import {Input} from '@rn/ui/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 
 export default function Register() {
   const [isLoading, setIsLoading] = useState(false);

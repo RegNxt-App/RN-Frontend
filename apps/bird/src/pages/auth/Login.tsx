@@ -7,7 +7,9 @@ import {useToast} from '@/hooks/use-toast';
 import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
-import {Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input} from '@rn/rnui';
+import {Button} from '@rn/ui/components/ui/button';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@rn/ui/components/ui/form';
+import {Input} from '@rn/ui/components/ui/input';
 
 const formSchema = z.object({
   email: z.string().email('Invalid email address'),

@@ -8,19 +8,9 @@ import {format} from 'date-fns';
 import {Asterisk} from 'lucide-react';
 import useSWR from 'swr';
 
-import {
-  Alert,
-  AlertDescription,
-  Badge,
-  Button,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Skeleton,
-} from '@rn/rnui';
+import {Alert, AlertDescription, Badge, Button, Input} from '@rn/rnui';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
+import {Skeleton} from '@rn/ui/components/ui/skeleton';
 
 interface FilterField {
   code: string;

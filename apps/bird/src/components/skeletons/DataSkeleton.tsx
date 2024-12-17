@@ -1,4 +1,4 @@
-import {Skeleton} from '@rn/rnui';
+import {Skeleton} from '@rn/ui/components/ui/skeleton';
 
 const DataSkeleton = () => {
   return (

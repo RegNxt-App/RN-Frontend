@@ -2,7 +2,9 @@ import React, {useState} from 'react';
 
 import AuthLayout from '@/components/AuthLayout';
 
-import {Button, Input, Label} from '@rn/rnui';
+import {Button} from '@rn/ui/components/ui/button';
+import {Input} from '@rn/ui/components/ui/input';
+import {Label} from '@rn/ui/components/ui/label';
 
 export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);

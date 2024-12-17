@@ -10,20 +10,9 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 
-import {
-  Button,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@rn/rnui';
+import {Button} from '@rn/ui/components/ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
 
 interface SharedDataTableProps<T> {
   data: T[];
