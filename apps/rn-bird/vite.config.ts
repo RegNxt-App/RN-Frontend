@@ -1,12 +1,14 @@
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import path from 'path';
-import {defineConfig, loadEnv, type UserConfig} from 'vite';
+import type {UserConfig} from 'vite';
+import {defineConfig, loadEnv} from 'vite';
 
+// https://vitejs.dev/config/
 export default defineConfig(({mode}): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    plugins: [react() as any],
+    plugins: [react()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
@@ -15,7 +17,6 @@ export default defineConfig(({mode}): UserConfig => {
     worker: {
       format: 'es',
     },
-
     build: {
       outDir: 'dist',
       rollupOptions: {
@@ -66,7 +67,6 @@ export default defineConfig(({mode}): UserConfig => {
           },
         },
       },
-
       assetsInlineLimit: 0,
       chunkSizeWarningLimit: 2000,
       sourcemap: mode === 'development',
@@ -76,7 +76,7 @@ export default defineConfig(({mode}): UserConfig => {
       'import.meta.env.VITE_FAST_API_BACKEND': JSON.stringify(env.VITE_FAST_API_BACKEND),
     },
     optimizeDeps: {
-      exclude: ['web-worker'], // Add this line
+      exclude: ['web-worker'],
     },
   };
 });

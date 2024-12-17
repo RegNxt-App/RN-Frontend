@@ -196,6 +196,9 @@ importers:
       '@tanstack/react-table':
         specifier: ^8.20.5
         version: 8.20.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@vitejs/plugin-react-swc':
+        specifier: ^3.7.2
+        version: 3.7.2(@swc/helpers@0.5.15)(vite@5.4.11(@types/node@22.10.2)(sass@1.83.0)(terser@5.37.0))
       '@xyflow/react':
         specifier: ^12.3.0
         version: 12.3.6(@types/react@18.3.16)(immer@10.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -8081,6 +8084,13 @@ snapshots:
       - jest
       - supports-color
       - vitest
+
+  '@vitejs/plugin-react-swc@3.7.2(@swc/helpers@0.5.15)(vite@5.4.11(@types/node@22.10.2)(sass@1.83.0)(terser@5.37.0))':
+    dependencies:
+      '@swc/core': 1.10.1(@swc/helpers@0.5.15)
+      vite: 5.4.11(@types/node@22.10.2)(sass@1.83.0)(terser@5.37.0)
+    transitivePeerDependencies:
+      - '@swc/helpers'
 
   '@vitejs/plugin-react-swc@3.7.2(@swc/helpers@0.5.15)(vite@6.0.3(@types/node@22.10.2)(jiti@1.21.6)(sass@1.83.0)(terser@5.37.0)(yaml@2.6.1))':
     dependencies:

@@ -1,6 +1,7 @@
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
+// https://vitejs.dev/config/
 export default defineConfig(function (_a) {
     var mode = _a.mode;
     var env = loadEnv(mode, process.cwd(), '');
@@ -73,7 +74,7 @@ export default defineConfig(function (_a) {
             'import.meta.env.VITE_FAST_API_BACKEND': JSON.stringify(env.VITE_FAST_API_BACKEND),
         },
         optimizeDeps: {
-            exclude: ['web-worker'], // Add this line
+            exclude: ['web-worker'],
         },
     };
 });

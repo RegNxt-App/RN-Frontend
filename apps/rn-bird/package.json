@@ -19,6 +19,7 @@
     "@rn/tsconfig": "workspace:*",
     "@rn/ui": "workspace:*",
     "@tanstack/react-table": "^8.20.5",
+    "@vitejs/plugin-react-swc": "^3.7.2",
     "@xyflow/react": "^12.3.0",
     "axios": "^1.7.7",
     "boring-avatars": "^1.11.2",
@@ -60,4 +61,3 @@
     "vite": "^5.4.1"
   }
 }
-
