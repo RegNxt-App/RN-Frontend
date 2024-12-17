@@ -13,7 +13,7 @@ export default defineConfig(function (_a) {
             },
         },
         worker: {
-            format: 'es', // Add this line
+            format: 'es',
         },
         build: {
             outDir: 'dist',
