@@ -15,7 +15,7 @@ jobs:
         app: ["bird", "reporting"]
         include:
           - app: bird
-            app-name: "bird"
+            app-name: "RegNxtPortalD"
             dist-path: "dist"
             publish-profile: AZUREAPPSERVICE_PUBLISHPROFILE_044585DFA9D24C99ACAB8C0FAED7E995
           - app: reporting
