@@ -2,10 +2,10 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Link, useLocation, useNavigate} from 'react-router-dom';
 
 import {useAuth} from '@/contexts/AuthContext';
-import Avatar from 'boring-avatars';
 import {motion} from 'framer-motion';
 import {Database, GitBranch, LogOut, LucideIcon, Settings, User} from 'lucide-react';
 
+import {Avatar, AvatarFallback, AvatarImage} from '@rn/ui/components/ui/avatar';
 import {Button} from '@rn/ui/components/ui/button';
 import {
   Dialog,
@@ -190,14 +190,12 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({isExpanded, setIsExpanded})
                       isExpanded || isDropdownOpen ? 'w-full' : 'justify-center'
                     }`}
                   >
-                    <Avatar
-                      className="h-10 w-10"
-                      name={user?.firstName?.charAt(0)}
-                    >
-                      {/* <AvatarImage src={user?.avatar} alt={user?.firstName} />
-                      <AvatarFallback>
-                        {user?.firstName?.charAt(0)}
-                      </AvatarFallback> */}
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        // src={user?.avatar}
+                        alt={user?.firstName}
+                      />
+                      <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
                     </Avatar>
                     {(isExpanded || isDropdownOpen) && (
                       <div className="ml-3 text-left">

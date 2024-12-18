@@ -41,7 +41,6 @@ export default defineConfig(({mode}): UserConfig => {
             table: ['@tanstack/react-table', '@xyflow/react'],
             style: ['framer-motion', 'tailwindcss-animate', 'react-day-picker'],
             misc: [
-              'boring-avatars',
               'jwt-decode',
               '@radix-ui/react-context-menu',
               '@radix-ui/react-checkbox',
