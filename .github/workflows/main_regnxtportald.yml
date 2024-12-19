@@ -46,22 +46,39 @@ jobs:
       - name: Setup Combined Distribution
         run: |
           # Create necessary directories
+          mkdir -p combined-dist/bird
           mkdir -p combined-dist/reporting
 
-          # Copy bird app files (to root)
-          cp -r apps/bird/dist/* combined-dist/
+          # Copy bird app files
+          cp -r apps/bird/dist/* combined-dist/bird/
 
-          # Copy reporting app files (to /reporting subdirectory)
+          # Copy reporting app files
           cp -r apps/reporting/dist/* combined-dist/reporting/
 
-          # Create web.config for routing
+          # Create main web.config
           cat > combined-dist/web.config << 'EOL'
           <?xml version="1.0" encoding="utf-8"?>
           <configuration>
             <system.webServer>
               <rewrite>
                 <rules>
-                  <!-- Rule for reporting app -->
+                  <!-- Default route to bird app -->
+                  <rule name="Default to Bird" stopProcessing="true">
+                    <match url="^$" />
+                    <action type="Redirect" url="/bird" redirectType="Permanent" />
+                  </rule>
+
+                  <!-- Bird app routes -->
+                  <rule name="Bird Routes" stopProcessing="true">
+                    <match url="^bird/.*" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="bird/index.html" />
+                  </rule>
+
+                  <!-- Reporting app routes -->
                   <rule name="Reporting Routes" stopProcessing="true">
                     <match url="^reporting/.*" />
                     <conditions logicalGrouping="MatchAll">
@@ -69,16 +86,6 @@ jobs:
                       <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
                     </conditions>
                     <action type="Rewrite" url="reporting/index.html" />
-                  </rule>
-                  <!-- Rule for bird app (default) -->
-                  <rule name="Bird Routes" stopProcessing="true">
-                    <match url=".*" />
-                    <conditions logicalGrouping="MatchAll">
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-                      <add input="{REQUEST_URI}" pattern="^/(api)" negate="true" />
-                    </conditions>
-                    <action type="Rewrite" url="index.html" />
                   </rule>
                 </rules>
               </rewrite>

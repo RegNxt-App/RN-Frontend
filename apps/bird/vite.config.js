@@ -7,7 +7,7 @@ export default defineConfig(function (_a) {
   var env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [react()],
-    base: '/',
+    base: '/bird/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
