@@ -45,47 +45,47 @@ jobs:
       # Create combined dist directory with proper structure
       - name: Setup Combined Distribution
         run: |
-          # Create necessary directories
-          mkdir -p combined-dist/bird
+          # Create base directory
+          mkdir -p combined-dist
+
+          # Copy bird app files to the root (since it's the default app)
+          cp -r apps/bird/dist/* combined-dist/
+
+          # Create and copy reporting app
           mkdir -p combined-dist/reporting
-
-          # Copy bird app files
-          cp -r apps/bird/dist/* combined-dist/bird/
-
-          # Copy reporting app files
           cp -r apps/reporting/dist/* combined-dist/reporting/
 
-          # Create main web.config
+          # Create web.config
           cat > combined-dist/web.config << 'EOL'
           <?xml version="1.0" encoding="utf-8"?>
           <configuration>
             <system.webServer>
               <rewrite>
                 <rules>
-                  <!-- Default route to bird app -->
-                  <rule name="Default to Bird" stopProcessing="true">
+                  <!-- Default route -->
+                  <rule name="Default" stopProcessing="true">
                     <match url="^$" />
-                    <action type="Redirect" url="/bird" redirectType="Permanent" />
-                  </rule>
-
-                  <!-- Bird app routes -->
-                  <rule name="Bird Routes" stopProcessing="true">
-                    <match url="^bird/.*" />
-                    <conditions logicalGrouping="MatchAll">
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-                    </conditions>
-                    <action type="Rewrite" url="bird/index.html" />
+                    <action type="Rewrite" url="index.html" />
                   </rule>
 
                   <!-- Reporting app routes -->
-                  <rule name="Reporting Routes" stopProcessing="true">
+                  <rule name="Reporting SPA Routes" stopProcessing="true">
                     <match url="^reporting/.*" />
-                    <conditions logicalGrouping="MatchAll">
+                    <conditions>
                       <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
                       <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
                     </conditions>
                     <action type="Rewrite" url="reporting/index.html" />
+                  </rule>
+
+                  <!-- Main app routes (catch-all) -->
+                  <rule name="SPA Routes" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions>
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="index.html" />
                   </rule>
                 </rules>
               </rewrite>
