@@ -44,11 +44,19 @@ jobs:
       # Create combined dist directory
       - name: Setup Combined Distribution
         run: |
+          # Create directories
           mkdir -p combined-dist
+
+          # Copy bird app files to root
           cp -r apps/bird/dist/* combined-dist/
+
+          # Create reporting directory and copy files
           mkdir -p combined-dist/reporting
           cp -r apps/reporting/dist/* combined-dist/reporting/
-          
+
+          # Set correct permissions
+          chmod -R 755 combined-dist
+
           # Create web.config
           cat > combined-dist/web.config << 'EOL'
           <?xml version="1.0" encoding="utf-8"?>
@@ -56,39 +64,52 @@ jobs:
             <system.webServer>
               <rewrite>
                 <rules>
-                  <!-- Default route -->
-                  <rule name="Default" stopProcessing="true">
+                  <!-- Root redirect to bird -->
+                  <rule name="Root to Bird" stopProcessing="true">
                     <match url="^$" />
+                    <action type="Redirect" url="/bird" redirectType="Permanent" />
+                  </rule>
+
+                  <!-- Bird static files -->
+                  <rule name="Bird Static Files" stopProcessing="true">
+                    <match url="^bird/(.*)\.([a-zA-Z0-9]+)$" />
+                    <action type="Rewrite" url="{R:1}.{R:2}" />
+                  </rule>
+
+                  <!-- Reporting static files -->
+                  <rule name="Reporting Static Files" stopProcessing="true">
+                    <match url="^reporting/(.*)\.([a-zA-Z0-9]+)$" />
+                    <action type="Rewrite" url="reporting/{R:1}.{R:2}" />
+                  </rule>
+
+                  <!-- Bird app routes -->
+                  <rule name="Bird SPA Routes" stopProcessing="true">
+                    <match url="^bird(/.*)?$" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
                     <action type="Rewrite" url="index.html" />
                   </rule>
 
                   <!-- Reporting app routes -->
                   <rule name="Reporting SPA Routes" stopProcessing="true">
-                    <match url="^reporting/.*" />
-                    <conditions>
+                    <match url="^reporting(/.*)?$" />
+                    <conditions logicalGrouping="MatchAll">
                       <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
                       <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
                     </conditions>
                     <action type="Rewrite" url="reporting/index.html" />
                   </rule>
-
-                  <!-- Main app routes (catch-all) -->
-                  <rule name="SPA Routes" stopProcessing="true">
-                    <match url=".*" />
-                    <conditions>
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-                    </conditions>
-                    <action type="Rewrite" url="index.html" />
-                  </rule>
                 </rules>
               </rewrite>
               <staticContent>
                 <mimeMap fileExtension=".js" mimeType="application/javascript" />
+                <mimeMap fileExtension=".jsx" mimeType="application/javascript" />
                 <mimeMap fileExtension=".json" mimeType="application/json" />
                 <mimeMap fileExtension=".wasm" mimeType="application/wasm" />
                 <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
-                <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
+                <mimeMap fileExtension=".woff2" mimeType="font/woff2" />
                 <mimeMap fileExtension=".ttf" mimeType="application/font-ttf" />
               </staticContent>
               <httpProtocol>
@@ -112,20 +133,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'Production'
+      name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
           name: combined-apps
-      
-      - name: 'Deploy to Azure Web App'
+
+      - name: Deploy to Azure
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'RegNxtPortalD'
-          slot-name: 'Production'
+          app-name: "RegNxtPortalD"
+          slot-name: "Production"
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E77D51FD04594742BD8C200FE54FDCDD }}
