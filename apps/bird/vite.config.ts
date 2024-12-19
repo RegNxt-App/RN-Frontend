@@ -9,6 +9,7 @@ export default defineConfig(({mode}): UserConfig => {
 
   return {
     plugins: [react()],
+    base: '/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

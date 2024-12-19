@@ -10,19 +10,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        app: ["bird", "reporting"]
-        include:
-          - app: bird
-            app-name: "RegNxtPortalD"
-            dist-path: "dist"
-            publish-profile: AZUREAPPSERVICE_PUBLISHPROFILE_044585DFA9D24C99ACAB8C0FAED7E995
-          - app: reporting
-            app-name: "RegNxtPortalD"
-            dist-path: "dist"
-            publish-profile: AZUREAPPSERVICE_PUBLISHPROFILE_E77D51FD04594742BD8C200FE54FDCDD
-
     steps:
       - uses: actions/checkout@v4
 
@@ -37,31 +24,71 @@ jobs:
           node-version: "18.x"
           cache: "pnpm"
 
-      - name: Install Root Dependencies
+      - name: Install Dependencies
         run: pnpm install
 
-      - name: Install App Dependencies
+      # Build both apps
+      - name: Build Bird App
         run: |
-          cd apps/${{ matrix.app }}
-          pnpm install
-
-      - name: Build App
-        run: |
-          cd apps/${{ matrix.app }}
+          cd apps/bird
           pnpm run build
         env:
           CI: false
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.app }}-build
-          path: apps/${{ matrix.app }}/${{ matrix.dist-path }}
+      - name: Build Reporting App
+        run: |
+          cd apps/reporting
+          pnpm run build
+        env:
+          CI: false
+
+      # Create combined dist directory
+      - name: Combine dist directories
+        run: |
+          mkdir -p combined-dist
+          cp -r apps/bird/dist/* combined-dist/
+          cp -r apps/reporting/dist/* combined-dist/reporting/
+          # Create web.config for routing
+          cat > combined-dist/web.config << 'EOL'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <rewrite>
+                <rules>
+                  <!-- Rule for reporting app -->
+                  <rule name="Reporting Routes" stopProcessing="true">
+                    <match url="^reporting/.*" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="reporting/index.html" />
+                  </rule>
+                  <!-- Rule for bird app (default) -->
+                  <rule name="Bird Routes" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                      <add input="{REQUEST_URI}" pattern="^/(api)" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="index.html" />
+                  </rule>
+                </rules>
+              </rewrite>
+              <staticContent>
+                <mimeMap fileExtension=".js" mimeType="application/javascript" />
+                <mimeMap fileExtension=".json" mimeType="application/json" />
+                <mimeMap fileExtension=".wasm" mimeType="application/wasm" />
+              </staticContent>
+            </system.webServer>
+          </configuration>
+          EOL
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ matrix.app-name }}
+          app-name: "RegNxtPortalD"
           slot-name: "Production"
-          package: apps/${{ matrix.app }}/${{ matrix.dist-path }}
-          publish-profile: ${{ secrets[matrix.publish-profile] }}
+          package: combined-dist
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_044585DFA9D24C99ACAB8C0FAED7E995 }}
