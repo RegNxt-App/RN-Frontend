@@ -116,10 +116,10 @@ const router = createBrowserRouter(
         },
       ],
     },
-  ]
-  // {
-  //   basename: '/bird',
-  // }
+  ],
+  {
+    basename: '/bird/',
+  }
 );
 
 const swrConfig = {

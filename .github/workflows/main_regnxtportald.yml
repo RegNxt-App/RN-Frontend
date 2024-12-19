@@ -44,17 +44,17 @@ jobs:
       # Create combined dist directory
       - name: Setup Combined Distribution
         run: |
-          # Create directories
-          mkdir -p combined-dist
-
-          # Copy bird app files to root
-          cp -r apps/bird/dist/* combined-dist/
-
-          # Create reporting directory and copy files
+          # Create base directory with subdirectories
+          mkdir -p combined-dist/bird
           mkdir -p combined-dist/reporting
+
+          # Copy bird app files
+          cp -r apps/bird/dist/* combined-dist/bird/
+
+          # Copy reporting app files
           cp -r apps/reporting/dist/* combined-dist/reporting/
 
-          # Set correct permissions
+          # Set permissions
           chmod -R 755 combined-dist
 
           # Create web.config
@@ -64,62 +64,82 @@ jobs:
             <system.webServer>
               <rewrite>
                 <rules>
-                  <!-- Root redirect to bird -->
-                  <rule name="Root to Bird" stopProcessing="true">
+                  <!-- Default route -->
+                  <rule name="Default Route" stopProcessing="true">
                     <match url="^$" />
-                    <action type="Redirect" url="/bird" redirectType="Permanent" />
+                    <action type="Redirect" url="bird" redirectType="Permanent" />
                   </rule>
 
-                  <!-- Bird static files -->
-                  <rule name="Bird Static Files" stopProcessing="true">
-                    <match url="^bird/(.*)\.([a-zA-Z0-9]+)$" />
-                    <action type="Rewrite" url="{R:1}.{R:2}" />
-                  </rule>
-
-                  <!-- Reporting static files -->
-                  <rule name="Reporting Static Files" stopProcessing="true">
-                    <match url="^reporting/(.*)\.([a-zA-Z0-9]+)$" />
-                    <action type="Rewrite" url="reporting/{R:1}.{R:2}" />
-                  </rule>
-
-                  <!-- Bird app routes -->
-                  <rule name="Bird SPA Routes" stopProcessing="true">
-                    <match url="^bird(/.*)?$" />
-                    <conditions logicalGrouping="MatchAll">
+                  <!-- Bird SPA -->
+                  <rule name="Bird SPA" stopProcessing="true">
+                    <match url="^bird" />
+                    <action type="Rewrite" url="bird/index.html" />
+                    <conditions>
                       <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
                       <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
                     </conditions>
-                    <action type="Rewrite" url="index.html" />
                   </rule>
 
-                  <!-- Reporting app routes -->
-                  <rule name="Reporting SPA Routes" stopProcessing="true">
-                    <match url="^reporting(/.*)?$" />
-                    <conditions logicalGrouping="MatchAll">
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-                    </conditions>
+                  <!-- Reporting SPA -->
+                  <rule name="Reporting SPA" stopProcessing="true">
+                    <match url="^reporting" />
                     <action type="Rewrite" url="reporting/index.html" />
+                    <conditions>
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
                   </rule>
                 </rules>
               </rewrite>
+              <handlers>
+                <clear />
+                <add name="StaticFile" path="*" verb="*" type="" modules="StaticFileModule,DefaultDocumentModule,DirectoryListingModule" scriptProcessor="" resourceType="Either" requireAccess="Read" allowPathInfo="false" preCondition="" responseBufferLimit="4194304" />
+              </handlers>
               <staticContent>
-                <mimeMap fileExtension=".js" mimeType="application/javascript" />
-                <mimeMap fileExtension=".jsx" mimeType="application/javascript" />
+                <remove fileExtension=".json" />
+                <remove fileExtension=".woff" />
+                <remove fileExtension=".woff2" />
+                <remove fileExtension=".ttf" />
                 <mimeMap fileExtension=".json" mimeType="application/json" />
-                <mimeMap fileExtension=".wasm" mimeType="application/wasm" />
                 <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
-                <mimeMap fileExtension=".woff2" mimeType="font/woff2" />
-                <mimeMap fileExtension=".ttf" mimeType="application/font-ttf" />
+                <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
+                <mimeMap fileExtension=".ttf" mimeType="application/x-font-ttf" />
               </staticContent>
+              <defaultDocument enabled="true">
+                <files>
+                  <clear />
+                  <add value="index.html" />
+                </files>
+              </defaultDocument>
               <httpProtocol>
                 <customHeaders>
+                  <remove name="X-Powered-By" />
                   <add name="Cache-Control" value="no-cache, no-store" />
                   <add name="Pragma" value="no-cache" />
                   <add name="Expires" value="-1" />
                 </customHeaders>
               </httpProtocol>
             </system.webServer>
+            <location path="bird">
+              <system.webServer>
+                <defaultDocument>
+                  <files>
+                    <clear />
+                    <add value="index.html" />
+                  </files>
+                </defaultDocument>
+              </system.webServer>
+            </location>
+            <location path="reporting">
+              <system.webServer>
+                <defaultDocument>
+                  <files>
+                    <clear />
+                    <add value="index.html" />
+                  </files>
+                </defaultDocument>
+              </system.webServer>
+            </location>
           </configuration>
           EOL
 

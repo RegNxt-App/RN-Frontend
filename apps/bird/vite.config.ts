@@ -9,8 +9,7 @@ export default defineConfig(({mode}): UserConfig => {
 
   return {
     plugins: [react()],
-    // base: '/bird/',
-    base: '/',
+    base: '/bird/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
