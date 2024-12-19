@@ -48,74 +48,79 @@ const PrivateRoute: React.FC = () => {
   return <Outlet />;
 };
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: 'auth/',
+      children: [
+        {
+          path: 'login',
+          element: <Login />,
+        },
+        {
+          path: 'register',
+          element: <Register />,
+        },
+        {
+          path: 'forgot-password',
+          element: <ForgotPassword />,
+        },
+      ],
+    },
+    {
+      path: '/',
+      element: <PrivateRoute />,
+      children: [
+        {
+          element: <Layout />,
+          children: [
+            {
+              path: '',
+              element: (
+                <Navigate
+                  to="/configuration"
+                  replace
+                />
+              ),
+            },
+            {
+              path: 'configuration',
+              children: [
+                {
+                  path: '',
+                  element: <Config />,
+                },
+                {
+                  path: 'dataset',
+                  element: <ConfigureDatasets />,
+                },
+                {
+                  path: 'dataview',
+                  element: <ConfigureDataviews />,
+                },
+                {
+                  path: 'groups',
+                  element: <ConfigureGrouping />,
+                },
+              ],
+            },
+            {
+              path: 'data',
+              element: <Data />,
+            },
+            {
+              path: 'relationships',
+              element: <Relationships />,
+            },
+          ],
+        },
+      ],
+    },
+  ],
   {
-    path: 'auth/',
-    children: [
-      {
-        path: 'login',
-        element: <Login />,
-      },
-      {
-        path: 'register',
-        element: <Register />,
-      },
-      {
-        path: 'forgot-password',
-        element: <ForgotPassword />,
-      },
-    ],
-  },
-  {
-    path: '/',
-    element: <PrivateRoute />,
-    children: [
-      {
-        element: <Layout />,
-        children: [
-          {
-            path: '',
-            element: (
-              <Navigate
-                to="/configuration"
-                replace
-              />
-            ),
-          },
-          {
-            path: 'configuration',
-            children: [
-              {
-                path: '',
-                element: <Config />,
-              },
-              {
-                path: 'dataset',
-                element: <ConfigureDatasets />,
-              },
-              {
-                path: 'dataview',
-                element: <ConfigureDataviews />,
-              },
-              {
-                path: 'groups',
-                element: <ConfigureGrouping />,
-              },
-            ],
-          },
-          {
-            path: 'data',
-            element: <Data />,
-          },
-          {
-            path: 'relationships',
-            element: <Relationships />,
-          },
-        ],
-      },
-    ],
-  },
-]);
+    basename: '/bird',
+  }
+);
 
 const swrConfig = {
   fetcher: (res: string) => axiosInstance.get(res).then((r) => r.data),
