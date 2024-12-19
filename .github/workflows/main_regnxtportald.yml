@@ -7,9 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -42,19 +41,14 @@ jobs:
         env:
           CI: false
 
-      # Create combined dist directory with proper structure
+      # Create combined dist directory
       - name: Setup Combined Distribution
         run: |
-          # Create base directory
           mkdir -p combined-dist
-
-          # Copy bird app files to the root (since it's the default app)
           cp -r apps/bird/dist/* combined-dist/
-
-          # Create and copy reporting app
           mkdir -p combined-dist/reporting
           cp -r apps/reporting/dist/* combined-dist/reporting/
-
+          
           # Create web.config
           cat > combined-dist/web.config << 'EOL'
           <?xml version="1.0" encoding="utf-8"?>
@@ -108,10 +102,30 @@ jobs:
           </configuration>
           EOL
 
-      - name: Deploy to Azure
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: combined-apps
+          path: combined-dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: combined-apps
+      
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "RegNxtPortalD"
-          slot-name: "Production"
-          package: combined-dist
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_044585DFA9D24C99ACAB8C0FAED7E995 }}
+          app-name: 'RegNxtPortalD'
+          slot-name: 'Production'
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E77D51FD04594742BD8C200FE54FDCDD }}
