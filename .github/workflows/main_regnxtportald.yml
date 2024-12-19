@@ -42,12 +42,18 @@ jobs:
         env:
           CI: false
 
-      # Create combined dist directory
-      - name: Combine dist directories
+      # Create combined dist directory with proper structure
+      - name: Setup Combined Distribution
         run: |
-          mkdir -p combined-dist
+          # Create necessary directories
+          mkdir -p combined-dist/reporting
+
+          # Copy bird app files (to root)
           cp -r apps/bird/dist/* combined-dist/
+
+          # Copy reporting app files (to /reporting subdirectory)
           cp -r apps/reporting/dist/* combined-dist/reporting/
+
           # Create web.config for routing
           cat > combined-dist/web.config << 'EOL'
           <?xml version="1.0" encoding="utf-8"?>
@@ -80,7 +86,17 @@ jobs:
                 <mimeMap fileExtension=".js" mimeType="application/javascript" />
                 <mimeMap fileExtension=".json" mimeType="application/json" />
                 <mimeMap fileExtension=".wasm" mimeType="application/wasm" />
+                <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
+                <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
+                <mimeMap fileExtension=".ttf" mimeType="application/font-ttf" />
               </staticContent>
+              <httpProtocol>
+                <customHeaders>
+                  <add name="Cache-Control" value="no-cache, no-store" />
+                  <add name="Pragma" value="no-cache" />
+                  <add name="Expires" value="-1" />
+                </customHeaders>
+              </httpProtocol>
             </system.webServer>
           </configuration>
           EOL
