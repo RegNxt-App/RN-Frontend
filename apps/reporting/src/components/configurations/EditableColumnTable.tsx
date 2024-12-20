@@ -2,11 +2,10 @@ import React, {useCallback, useMemo, useState} from 'react';
 
 // Add this import
 import {useToast} from '@/hooks/use-toast';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {cn} from '@/lib/utils';
 import {Column} from '@/types/databaseTypes';
-import {Edit, Trash2} from 'lucide-react';
-import {History, Plus} from 'lucide-react';
+import {Edit, History, Plus, Trash2} from 'lucide-react';
 import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
@@ -64,7 +63,7 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
     ? `/api/v1/datasets/${datasetId}/version-columns/?version_id=${versionId}`
     : null;
 
-  const {data: columns, mutate: mutateColumns} = useSWR<ColumnData>(columnKey, fastApiInstance);
+  const {data: columns, mutate: mutateColumns} = useSWR<ColumnData>(columnKey, birdBackendInstance);
 
   const handleFormSubmit = useCallback(
     async (data: any) => {
@@ -84,7 +83,7 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
           ],
         };
 
-        await fastApiInstance.post(
+        await birdBackendInstance.post(
           `/api/v1/datasets/${datasetId}/update-columns/?version_id=${versionId}`,
           payload
         );
@@ -124,10 +123,13 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
     if (!columnToDelete) return;
 
     try {
-      await fastApiInstance.post(`/api/v1/datasets/${datasetId}/update-columns/?version_id=${versionId}`, {
-        is_delete_operation: true,
-        columns_to_delete: [columnToDelete?.dataset_version_column_id],
-      });
+      await birdBackendInstance.post(
+        `/api/v1/datasets/${datasetId}/update-columns/?version_id=${versionId}`,
+        {
+          is_delete_operation: true,
+          columns_to_delete: [columnToDelete?.dataset_version_column_id],
+        }
+      );
 
       mutateColumns();
 

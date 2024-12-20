@@ -2,7 +2,7 @@ import {useCallback, useMemo, useState} from 'react';
 
 import {DatePicker} from '@/components/GDate';
 import {useToast} from '@/hooks/use-toast';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {InfoCircledIcon} from '@radix-ui/react-icons';
 import {format} from 'date-fns';
 import {Asterisk} from 'lucide-react';
@@ -39,11 +39,11 @@ interface Option {
   label: string;
 }
 
-const filterFieldsFetcher = (url: string) => fastApiInstance.get(url).then((res) => res.data);
+const filterFieldsFetcher = (url: string) => birdBackendInstance.get(url).then((res) => res.data);
 
 const fetchDropdownOptions = async (url: string, statement: string): Promise<Option[]> => {
   try {
-    const response = await fastApiInstance.get(url, {
+    const response = await birdBackendInstance.get(url, {
       params: {statement},
     });
     return response.data
@@ -108,13 +108,10 @@ export default function DatasetFilter({
         )
       );
 
-      return results.reduce(
-        (acc, {code, options}) => {
-          acc[code] = options;
-          return acc;
-        },
-        {} as Record<string, Option[]>
-      );
+      return results.reduce((acc, {code, options}) => {
+        acc[code] = options;
+        return acc;
+      }, {} as Record<string, Option[]>);
     },
     {
       dedupingInterval: 60000,

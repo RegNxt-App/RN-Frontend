@@ -2,7 +2,7 @@ import React, {useCallback, useMemo, useState} from 'react';
 
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {useToast} from '@/hooks/use-toast';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {
   Column,
   Dataset,
@@ -75,16 +75,16 @@ export const ConfigureDatasets: React.FC = () => {
     setSelectedVersionId((prev) => (prev === versionId ? null : versionId));
   };
   // Data fetching
-  const {data: layers} = useSWR<Layers>('/api/v1/layers/', fastApiInstance);
-  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', fastApiInstance);
+  const {data: layers} = useSWR<Layers>('/api/v1/layers/', birdBackendInstance);
+  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', birdBackendInstance);
   const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    fastApiInstance
+    birdBackendInstance
   );
 
   const {data: dataTableJson} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    fastApiInstance,
+    birdBackendInstance,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -96,7 +96,7 @@ export const ConfigureDatasets: React.FC = () => {
     if (!selectedDataset || !selectedVersionId) return;
 
     try {
-      await fastApiInstance.post(
+      await birdBackendInstance.post(
         `/api/v1/datasets/${selectedDataset.dataset_id}/update-columns/?version_id=${selectedVersionId}`,
         {columns: updatedColumns}
       );
@@ -123,14 +123,14 @@ export const ConfigureDatasets: React.FC = () => {
     isValidating: isLoadingVersions,
   } = useSWR<DatasetVersions>(
     selectedDataset ? `/api/v1/datasets/${selectedDataset.dataset_id}/versions_all/` : null,
-    fastApiInstance
+    birdBackendInstance
   );
 
   const {data: versionColumns, mutate: mutateVersionColumns} = useSWR<VersionColumnsData>(
     selectedVersionId
       ? `/api/v1/datasets/${selectedDataset?.dataset_id}/version-columns/?version_id=${selectedVersionId}`
       : null,
-    fastApiInstance
+    birdBackendInstance
   );
 
   const handleFrameworkChange = useCallback((value: string) => {
@@ -214,7 +214,7 @@ export const ConfigureDatasets: React.FC = () => {
   const handleCreateDataset = async (newDataset: Partial<Dataset>) => {
     try {
       // Make the API call
-      await fastApiInstance.post('/api/v1/datasets/', {
+      await birdBackendInstance.post('/api/v1/datasets/', {
         ...newDataset,
         is_system_generated: false,
       });
@@ -238,7 +238,7 @@ export const ConfigureDatasets: React.FC = () => {
   const handleUpdateDataset = async (updatedDataset: Dataset) => {
     if (updatedDataset.is_system_generated) return;
     try {
-      await fastApiInstance.put(`/api/v1/datasets/${updatedDataset.dataset_id}/`, updatedDataset);
+      await birdBackendInstance.put(`/api/v1/datasets/${updatedDataset.dataset_id}/`, updatedDataset);
       await mutateDatasets();
       toast({
         title: 'Success',
@@ -259,7 +259,7 @@ export const ConfigureDatasets: React.FC = () => {
   const handleDeleteDataset = async () => {
     if (!deletingDatasetId) return;
     try {
-      await fastApiInstance.delete(`/api/v1/datasets/${deletingDatasetId}/`);
+      await birdBackendInstance.delete(`/api/v1/datasets/${deletingDatasetId}/`);
       await mutateDatasets();
       toast({
         title: 'Success',
@@ -290,7 +290,7 @@ export const ConfigureDatasets: React.FC = () => {
         valid_to: dataset.valid_to,
       };
 
-      await fastApiInstance.post(`/api/v1/datasets/${dataset.dataset_id}/create_version/`, payload);
+      await birdBackendInstance.post(`/api/v1/datasets/${dataset.dataset_id}/create_version/`, payload);
       await mutateVersions();
       toast({
         title: 'Success',
@@ -309,7 +309,7 @@ export const ConfigureDatasets: React.FC = () => {
 
   const handleUpdateVersion = async (version: DatasetVersion) => {
     try {
-      await fastApiInstance.put(
+      await birdBackendInstance.put(
         `/api/v1/datasets/${version.dataset_id}/update_version/?version_id=${version.dataset_version_id}`,
         version
       );
@@ -332,7 +332,9 @@ export const ConfigureDatasets: React.FC = () => {
 
   const handleDeleteVersion = async (datasetId: number, versionId: number) => {
     try {
-      await fastApiInstance.delete(`/api/v1/datasets/${datasetId}/delete_version/?version_id=${versionId}`);
+      await birdBackendInstance.delete(
+        `/api/v1/datasets/${datasetId}/delete_version/?version_id=${versionId}`
+      );
       await mutateVersions();
       toast({
         title: 'Success',
@@ -353,13 +355,13 @@ export const ConfigureDatasets: React.FC = () => {
     if (!selectedDataset) return;
 
     try {
-      await fastApiInstance.put(`/api/v1/datasets/${selectedDataset.dataset_id}/`, {
+      await birdBackendInstance.put(`/api/v1/datasets/${selectedDataset.dataset_id}/`, {
         ...selectedDataset,
         is_visible: configData.is_visible,
       });
 
       if (selectedVersion) {
-        await fastApiInstance.put(`/api/v1/datasets/${selectedDataset.dataset_id}/update-columns/`, {
+        await birdBackendInstance.put(`/api/v1/datasets/${selectedDataset.dataset_id}/update-columns/`, {
           dataset_version_id: selectedVersion.dataset_version_id,
           historization_type: parseInt(configData.historization_type),
         });
@@ -385,7 +387,7 @@ export const ConfigureDatasets: React.FC = () => {
 
   const handleViewHistory = async (dataset: Dataset, version: DatasetVersion) => {
     try {
-      const response = await fastApiInstance.get(
+      const response = await birdBackendInstance.get(
         `/api/v1/datasets/${dataset.dataset_id}/version_history/?version_id=${version.dataset_version_id}`
       );
 

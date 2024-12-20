@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {NavLink, useLocation} from 'react-router-dom';
 
+import {cn} from '@/lib/utils';
 import * as Icons from 'lucide-react';
 import {LucideIcon} from 'lucide-react';
 
@@ -20,13 +21,12 @@ interface NavigationLink {
   dropdownItems?: DropdownItem[];
 }
 
-// Type for navigation sections
+
 interface NavigationSection {
   title: string;
   links: NavigationLink[];
 }
 
-// Type for navigation config structure
 interface NavigationConfig {
   [key: string]: {
     sections: NavigationSection[];
@@ -180,23 +180,29 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
   sidebarExpanded,
   setSidebarExpanded,
 }) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
   const Icon: LucideIcon = Icons[link.icon] as LucideIcon;
-
   const isDropdown = link.dropdownItems && link.dropdownItems.length > 0;
 
   if (isDropdown) {
     return (
       <SidebarLinkGroup
-        activeCondition={pathname === link.path || pathname.includes(link.path)}
+        activeCondition={currentPath.startsWith(link.path)}
         sidebarCollapsed={sidebarCollapsed}
       >
         {(handleClick: () => void, open: boolean) => (
           <>
             <NavLink
               to={link.path}
-              className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                (pathname === link.path || pathname.includes(link.path)) && 'bg-graydark dark:bg-meta-4'
-              } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
+              className={cn(
+                'group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4',
+                {
+                  'bg-graydark dark:bg-meta-4': currentPath.startsWith(link.path),
+                  'justify-center': sidebarCollapsed,
+                  'py-2 px-4': !sidebarCollapsed,
+                }
+              )}
               onClick={(e: React.MouseEvent) => {
                 e.preventDefault();
                 sidebarExpanded ? handleClick() : setSidebarExpanded(true);
@@ -210,9 +216,9 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
                 <>
                   {link.label}
                   <svg
-                    className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
-                      open && 'rotate-180'
-                    }`}
+                    className={cn('absolute right-4 top-1/2 -translate-y-1/2 fill-current', {
+                      'rotate-180': open,
+                    })}
                     width="20"
                     height="20"
                     viewBox="0 0 20 20"
@@ -237,8 +243,12 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
                       <NavLink
                         to={item.path}
                         className={({isActive}) =>
-                          'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
-                          (isActive && '!text-white')
+                          cn(
+                            'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white',
+                            {
+                              '!text-white': isActive || currentPath.startsWith(item.path),
+                            }
+                          )
                         }
                       >
                         {item.label}
@@ -258,9 +268,14 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
     <li>
       <NavLink
         to={link.path}
-        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-          pathname === link.path && 'bg-graydark dark:bg-meta-4'
-        } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
+        className={cn(
+          'group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4',
+          {
+            'bg-graydark dark:bg-meta-4': currentPath.startsWith(link.path),
+            'justify-center': sidebarCollapsed,
+            'py-2 px-4': !sidebarCollapsed,
+          }
+        )}
       >
         <Icon
           size={20}

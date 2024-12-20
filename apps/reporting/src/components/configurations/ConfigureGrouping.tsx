@@ -5,7 +5,7 @@ import {SharedColumnFilters} from '@/components/SharedFilters';
 import {GroupFormModal} from '@/components/configurations/GroupFormModal';
 import {GroupItemsModal} from '@/components/configurations/GroupItemsModal';
 import {useToast} from '@/hooks/use-toast';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {ColumnDef} from '@tanstack/react-table';
 import {Edit, Eye, Plus, Trash} from 'lucide-react';
 import useSWR from 'swr';
@@ -50,11 +50,11 @@ export const ConfigureGrouping: React.FC = () => {
     data: groupsResponse,
     mutate: mutateGroups,
     isLoading,
-  } = useSWR<Grouping>('/api/v1/groups/', fastApiInstance);
+  } = useSWR<Grouping>('/api/v1/groups/', birdBackendInstance);
 
   const handleCreateGroup = async (newGroup: Partial<Group>) => {
     try {
-      await fastApiInstance.post('/api/v1/groups/', newGroup);
+      await birdBackendInstance.post('/api/v1/groups/', newGroup);
       await mutateGroups();
       setIsGroupModalOpen(false); // Close modal first
       toast({title: 'Success', description: 'Group created successfully.'});
@@ -71,7 +71,7 @@ export const ConfigureGrouping: React.FC = () => {
 
   const handleUpdateGroup = async (updatedGroup: Group) => {
     try {
-      await fastApiInstance.put(`/api/v1/groups/${updatedGroup.code}/`, updatedGroup);
+      await birdBackendInstance.put(`/api/v1/groups/${updatedGroup.code}/`, updatedGroup);
       await mutateGroups();
       toast({title: 'Success', description: 'Group updated successfully.'});
       setIsGroupModalOpen(false);
@@ -88,7 +88,7 @@ export const ConfigureGrouping: React.FC = () => {
 
   const handleDeleteGroup = async (groupCode: string) => {
     try {
-      await fastApiInstance.delete(`/api/v1/groups/${groupCode}/`);
+      await birdBackendInstance.delete(`/api/v1/groups/${groupCode}/`);
       await mutateGroups();
       toast({title: 'Success', description: 'Group deleted successfully.'});
     } catch (error) {

@@ -5,7 +5,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import DatabaseDiagram from '@/components/DatabaseDiagram';
 import DatePicker from '@/components/DatePicker';
 import SelectableAccordion from '@/components/SelectableAccordion';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {DatasetResponse, Frameworks, Layers} from '@/types/databaseTypes';
 import {ReactFlowProvider} from '@xyflow/react';
 import ELK from 'elkjs/lib/elk.bundled.js';
@@ -90,11 +90,11 @@ export default function Relationship() {
   const [loading, setLoading] = useState(false);
   // const [allDatasets, setAllDatasets] = useState<any[]>([]);
 
-  const {data: layers} = useSWR<Layers>('/api/v1/layers/', fastApiInstance);
-  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', fastApiInstance);
+  const {data: layers} = useSWR<Layers>('/api/v1/layers/', birdBackendInstance);
+  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', birdBackendInstance);
   const {data: dataTableJson, isLoading} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${PAGE_SIZE}`,
-    fastApiInstance,
+    birdBackendInstance,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -188,7 +188,7 @@ export default function Relationship() {
       try {
         const responses = await Promise.all(
           selectedDatasetVersions.map((v) =>
-            fastApiInstance.get(`/api/v1/datasets/${v.dataset_version_id}/relationships/`)
+            birdBackendInstance.get(`/api/v1/datasets/${v.dataset_version_id}/relationships/`)
           )
         );
         const data = responses.map((r) => r.data);

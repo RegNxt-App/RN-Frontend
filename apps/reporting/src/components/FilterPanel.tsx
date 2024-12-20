@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {DatePicker} from '@/components/GDate';
 import {useToast} from '@/hooks/use-toast';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {format} from 'date-fns';
 import {AlertCircle, CircleDot, FileQuestion, InfoIcon, Loader, Loader2, X} from 'lucide-react';
 import useSWR from 'swr';
@@ -200,7 +200,7 @@ export default function FilterPanel({
   // Fetch filter fields configuration
   const {data: filterFields, isLoading: isFieldsLoading} = useSWR<FilterResponse>(
     versionId ? `/api/v1/datasets/${datasetId}/filters/?version_id=${versionId}` : null,
-    fastApiInstance,
+    birdBackendInstance,
     {
       revalidateOnFocus: false,
     }
@@ -209,13 +209,10 @@ export default function FilterPanel({
   // Initialize filter values
   useEffect(() => {
     if (filterFields?.data) {
-      const initialValues = filterFields.data.reduce(
-        (acc, field) => {
-          acc[field.code] = null;
-          return acc;
-        },
-        {} as Record<string, any>
-      );
+      const initialValues = filterFields.data.reduce((acc, field) => {
+        acc[field.code] = null;
+        return acc;
+      }, {} as Record<string, any>);
       setFilterValues(initialValues);
     }
   }, [filterFields, versionId]);
@@ -247,7 +244,7 @@ export default function FilterPanel({
       const results = await Promise.all(
         requests.map(async (req) => {
           try {
-            const response = await fastApiInstance.get(req.url, {
+            const response = await birdBackendInstance.get(req.url, {
               params: {statement: req.statement},
             });
             return {
@@ -264,13 +261,10 @@ export default function FilterPanel({
         })
       );
 
-      return results.reduce(
-        (acc, {code, options}) => {
-          acc[code] = options;
-          return acc;
-        },
-        {} as Record<string, DropdownOption[]>
-      );
+      return results.reduce((acc, {code, options}) => {
+        acc[code] = options;
+        return acc;
+      }, {} as Record<string, DropdownOption[]>);
     },
     {dedupingInterval: 60000, revalidateOnFocus: false}
   );
@@ -291,13 +285,10 @@ export default function FilterPanel({
   const handleClearFilters = useCallback(async () => {
     setIsClearing(true);
     try {
-      const clearedValues = Object.keys(filterValues).reduce(
-        (acc, code) => {
-          acc[code] = null;
-          return acc;
-        },
-        {} as Record<string, any>
-      );
+      const clearedValues = Object.keys(filterValues).reduce((acc, code) => {
+        acc[code] = null;
+        return acc;
+      }, {} as Record<string, any>);
 
       setFilterValues(clearedValues);
       setHasAppliedFilters(false);
