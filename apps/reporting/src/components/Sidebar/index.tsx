@@ -156,16 +156,17 @@ const navigationConfig: NavigationConfig = {
       {
         title: 'Bird Dashboard',
         links: [
-          {path: '/bird/configuration', icon: 'Settings', label: 'Configuration'},
+          {
+            path: '/bird/configuration',
+            icon: 'Settings',
+            label: 'Configuration',
+            dropdownItems: [
+              {path: '/bird/configuration/dataset', label: 'Configure Datasets'},
+              {path: '/bird/configuration/groups', label: 'Configure Groups'},
+            ],
+          },
           {path: '/bird/data', icon: 'Database', label: 'Data'},
           {path: '/bird/relationships', icon: 'GitBranch', label: 'Relationships'},
-        ],
-      },
-      {
-        title: 'Configuration',
-        links: [
-          {path: '/bird/configuration/dataset', icon: 'Database', label: 'Dataset'},
-          {path: '/bird/configuration/groups', icon: 'Users', label: 'Groups'},
         ],
       },
     ],
