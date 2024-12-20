@@ -1,4 +1,4 @@
-name: Build and Deploy RegNXT Apps
+name: Build and Deploy Reporting App
 
 on:
   push:
@@ -26,68 +26,36 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      # Build both apps
-      - name: Build Bird App
-        run: |
-          cd apps/bird
-          pnpm run build
-        env:
-          CI: false
-
-      - name: Build Reporting App
+      - name: Build Regnxt App
         run: |
           cd apps/reporting
           pnpm run build
         env:
           CI: false
 
-      # Create combined dist directory
-      - name: Setup Combined Distribution
+      - name: Setup Distribution
         run: |
-          # Create base directory with subdirectories
-          mkdir -p combined-dist/bird
-          mkdir -p combined-dist/reporting
+          # Create directory
+          mkdir -p dist
 
-          # Copy bird app files
-          cp -r apps/bird/dist/* combined-dist/bird/
+          cp -r apps/reporting/dist/* dist/
 
-          # Copy reporting app files
-          cp -r apps/reporting/dist/* combined-dist/reporting/
+          chmod -R 755 dist
 
-          # Set permissions
-          chmod -R 755 combined-dist
-
-          # Create web.config
-          cat > combined-dist/web.config << 'EOL'
+          cat > dist/web.config << 'EOL'
           <?xml version="1.0" encoding="utf-8"?>
           <configuration>
             <system.webServer>
               <rewrite>
                 <rules>
-                  <!-- Default route -->
-                  <rule name="Default Route" stopProcessing="true">
-                    <match url="^$" />
-                    <action type="Redirect" url="bird" redirectType="Permanent" />
-                  </rule>
-
-                  <!-- Bird SPA -->
-                  <rule name="Bird SPA" stopProcessing="true">
-                    <match url="^bird" />
-                    <action type="Rewrite" url="bird/index.html" />
-                    <conditions>
+                  <!-- SPA Routes -->
+                  <rule name="SPA Routes" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
                       <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
                       <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
                     </conditions>
-                  </rule>
-
-                  <!-- Reporting SPA -->
-                  <rule name="Reporting SPA" stopProcessing="true">
-                    <match url="^reporting" />
-                    <action type="Rewrite" url="reporting/index.html" />
-                    <conditions>
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-                    </conditions>
+                    <action type="Rewrite" url="index.html" />
                   </rule>
                 </rules>
               </rewrite>
@@ -120,34 +88,14 @@ jobs:
                 </customHeaders>
               </httpProtocol>
             </system.webServer>
-            <location path="bird">
-              <system.webServer>
-                <defaultDocument>
-                  <files>
-                    <clear />
-                    <add value="index.html" />
-                  </files>
-                </defaultDocument>
-              </system.webServer>
-            </location>
-            <location path="reporting">
-              <system.webServer>
-                <defaultDocument>
-                  <files>
-                    <clear />
-                    <add value="index.html" />
-                  </files>
-                </defaultDocument>
-              </system.webServer>
-            </location>
           </configuration>
           EOL
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
-          name: combined-apps
-          path: combined-dist
+          name: regnxt-app
+          path: dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -160,7 +108,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
-          name: combined-apps
+          name: regnxt-app
 
       - name: Deploy to Azure
         id: deploy-to-webapp
