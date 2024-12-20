@@ -350,9 +350,8 @@ const Sidebar: React.FC<SidebarProps> = ({sidebarOpen, setSidebarOpen, sidebarCo
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } ${sidebarCollapsed ? 'lg:w-20' : ''}`}
     >
-      {/* Sidebar Header */}
       <div
-        className={`flex items-center px-6 py-5.5 lg:py-6.5 ${
+        className={`flex items-center px-6 py-5.5 lg:py-6.5 my-6 ${
           sidebarCollapsed ? 'justify-center' : 'justify-between'
         }`}
       >
@@ -388,7 +387,6 @@ const Sidebar: React.FC<SidebarProps> = ({sidebarOpen, setSidebarOpen, sidebarCo
         </button>
       </div>
 
-      {/* Sidebar Content */}
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
         <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
           {navigationConfig[selectedApp]?.sections.map((section, index) => (

@@ -8,6 +8,8 @@ import {store} from './app/store';
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import PrivateRoute from './components/PrivateRoute';
+import {ConfigureDatasets} from './components/configurations/ConfigureDatasets';
+import {ConfigureGrouping} from './components/configurations/ConfigureGrouping';
 import {useAuth} from './contexts/AuthContext';
 import DefaultLayout from './layout/DefaultLayout';
 import AccountingConfig from './pages/AccountingLayer/AccountingConfig';
@@ -19,7 +21,9 @@ import Entity from './pages/Configuration/Entity';
 import RegulatoryCalender from './pages/Configuration/RegulatoryCalender';
 import Template from './pages/Configuration/Template';
 import Validation from './pages/Configuration/Validation';
+import ConfigureDataSetView from './pages/ConfigureDataSetView';
 import Dashboard from './pages/Dashboard/Dashboard';
+import DataSetView from './pages/DataSetView';
 import Inspect from './pages/Inspect/Inspect';
 import Messages from './pages/Messages/Messages';
 import BusinessRules from './pages/Orchestra/BusinessRules/BusinessRules';
@@ -37,6 +41,7 @@ import Overview from './pages/Overview/Overview';
 import OverviewRegulatoryReports from './pages/OverviewRegulatoryReports/OverviewRegulatoryReports';
 import Profile from './pages/Profile/Profile';
 import Reconciliations from './pages/Reconciliations/Reconciliations';
+import Relationship from './pages/Relationship';
 import TransactionLayer from './pages/TransactionLayer/TransactionLayer';
 
 // Route configuration object
@@ -77,11 +82,11 @@ const routeConfig = {
     {path: '/orchestra/processing', component: Processing, title: 'Orchestra'},
   ],
   bird: [
-    {path: '/bird/configuration', component: () => <div>Bird Configuration</div>, title: 'Bird'},
-    {path: '/bird/data', component: () => <div>Bird Data</div>, title: 'Bird'},
-    {path: '/bird/relationships', component: () => <div>Bird Relationships</div>, title: 'Bird'},
-    {path: '/bird/dataset', component: () => <div>Bird Dataset</div>, title: 'Bird'},
-    {path: '/bird/groups', component: () => <div>Bird Groups</div>, title: 'Bird'},
+    {path: '/bird/configuration', component: () => <ConfigureDataSetView />, title: 'Bird'},
+    {path: '/bird/data', component: () => <DataSetView />, title: 'Bird'},
+    {path: '/bird/relationships', component: () => <Relationship />, title: 'Bird'},
+    {path: '/bird/configuration/dataset', component: () => <ConfigureDatasets />, title: 'Bird'},
+    {path: '/bird/configuration/groups', component: () => <ConfigureGrouping />, title: 'Bird'},
   ],
 };
 

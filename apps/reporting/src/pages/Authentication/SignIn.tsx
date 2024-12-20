@@ -29,8 +29,6 @@ export default function SignIn() {
     },
   });
 
-  console.log('backend url: ', import.meta.env.VITE_API_BASE_URL);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       await login(values.email, values.password);
