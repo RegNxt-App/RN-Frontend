@@ -342,13 +342,13 @@ importers:
         specifier: ^15.9.0
         version: 15.13.0
       postcss:
-        specifier: ^8.4.47
+        specifier: ^8.4.49
         version: 8.4.49
       prettier-plugin-tailwindcss:
         specifier: ^0.4.1
         version: 0.4.1(@ianvs/prettier-plugin-sort-imports@3.7.2(prettier@3.4.2))(@trivago/prettier-plugin-sort-imports@4.3.0(prettier@3.4.2))(prettier@3.4.2)
       tailwindcss:
-        specifier: ^3.4.12
+        specifier: ^3.4.17
         version: 3.4.17
       typescript:
         specifier: ^5.5.3

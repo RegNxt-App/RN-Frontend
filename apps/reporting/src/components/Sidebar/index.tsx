@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import SidebarLinkGroup from './SidebarLinkGroup';
+import React, {useEffect, useRef, useState} from 'react';
+import {NavLink, useLocation} from 'react-router-dom';
+
 import {
   ArrowRight,
   BadgeDollarSign,
@@ -10,20 +10,23 @@ import {
   Cog,
   Database,
   DatabaseBackup,
-  DatabaseZap,
+  GitBranch,
   Handshake,
   HardDrive,
   LayoutDashboard,
   ListTodo,
   LoaderPinwheel,
   MonitorCog,
+  Settings,
   TableOfContents,
   Telescope,
-  Variable,
+  Users,
   View,
   Workflow,
   ZoomIn,
 } from 'lucide-react';
+
+import SidebarLinkGroup from './SidebarLinkGroup';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -32,32 +35,22 @@ interface SidebarProps {
   selectedApp: string;
 }
 
-const Sidebar = ({
-  sidebarOpen,
-  setSidebarOpen,
-  sidebarCollapsed,
-  selectedApp,
-}: SidebarProps) => {
+const Sidebar = ({sidebarOpen, setSidebarOpen, sidebarCollapsed, selectedApp}: SidebarProps) => {
   const location = useLocation();
-  const { pathname } = location;
+  const {pathname} = location;
 
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
 
   const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
   const [sidebarExpanded, setSidebarExpanded] = useState(
-    storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true',
+    storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
 
   useEffect(() => {
-    const clickHandler = ({ target }: MouseEvent) => {
+    const clickHandler = ({target}: MouseEvent) => {
       if (!sidebar.current || !trigger.current) return;
-      if (
-        !sidebarOpen ||
-        sidebar.current.contains(target) ||
-        trigger.current.contains(target)
-      )
-        return;
+      if (!sidebarOpen || sidebar.current.contains(target) || trigger.current.contains(target)) return;
       setSidebarOpen(false);
     };
     document.addEventListener('click', clickHandler);
@@ -66,7 +59,7 @@ const Sidebar = ({
 
   // close if the esc key is pressed
   useEffect(() => {
-    const keyHandler = ({ keyCode }: KeyboardEvent) => {
+    const keyHandler = ({keyCode}: KeyboardEvent) => {
       if (!sidebarOpen || keyCode !== 27) return;
       setSidebarOpen(false);
     };
@@ -88,7 +81,7 @@ const Sidebar = ({
         return (
           <>
             <div>
-              <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+              <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">
                 {!sidebarCollapsed && 'Management Reports'}
               </h3>
 
@@ -96,24 +89,28 @@ const Sidebar = ({
                 <li>
                   <NavLink
                     to="/"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      (pathname === '/' || pathname.includes('dashboard')) &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      (pathname === '/' || pathname.includes('dashboard')) && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <LayoutDashboard size={20} strokeWidth={1.5} />
+                    <LayoutDashboard
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && <span>My Dashboard</span>}
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
                     to="/reporting/overview"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/reporting/overview' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/reporting/overview' && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <TableOfContents size={20} strokeWidth={1.5} />
+                    <TableOfContents
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Overview'}
                   </NavLink>
                 </li>
@@ -121,7 +118,7 @@ const Sidebar = ({
             </div>
 
             <div>
-              <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+              <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">
                 {!sidebarCollapsed && 'Foundation Data Layer'}
               </h3>
 
@@ -136,19 +133,19 @@ const Sidebar = ({
                     <React.Fragment>
                       <NavLink
                         to="/reporting/accounting-layer"
-                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                          (pathname === '/accounting-layer' ||
-                            pathname.includes('accounting-layer')) &&
+                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                          (pathname === '/accounting-layer' || pathname.includes('accounting-layer')) &&
                           'bg-graydark dark:bg-meta-4'
                         }  ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                         onClick={(e) => {
                           e.preventDefault();
-                          sidebarExpanded
-                            ? handleClick()
-                            : setSidebarExpanded(true);
+                          sidebarExpanded ? handleClick() : setSidebarExpanded(true);
                         }}
                       >
-                        <ChartArea size={20} strokeWidth={1.5} />
+                        <ChartArea
+                          size={20}
+                          strokeWidth={1.5}
+                        />
                         {!sidebarCollapsed && 'Accounting Layer'}
                         <svg
                           className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
@@ -168,17 +165,13 @@ const Sidebar = ({
                           />
                         </svg>
                       </NavLink>
-                      <div
-                        className={`translate transform overflow-hidden ${
-                          !open && 'hidden'
-                        }`}
-                      >
+                      <div className={`translate transform overflow-hidden ${!open && 'hidden'}`}>
                         <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
                           <li>
                             <NavLink
                               to="/reporting/post-unpost"
-                              className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                              className={({isActive}) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                 (isActive && '!text-white')
                               }
                             >
@@ -188,8 +181,8 @@ const Sidebar = ({
                           <li>
                             <NavLink
                               to="/reporting/view-balance"
-                              className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                              className={({isActive}) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                 (isActive && '!text-white')
                               }
                             >
@@ -200,8 +193,8 @@ const Sidebar = ({
                           <li>
                             <NavLink
                               to="/reporting/accounting-configuration"
-                              className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                              className={({isActive}) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                 (isActive && '!text-white')
                               }
                             >
@@ -215,30 +208,26 @@ const Sidebar = ({
                 </SidebarLinkGroup>
 
                 <SidebarLinkGroup
-                  activeCondition={
-                    pathname === '/reporting/forms' ||
-                    pathname.includes('/reporting/forms')
-                  }
+                  activeCondition={pathname === '/reporting/forms' || pathname.includes('/reporting/forms')}
                 >
                   {(handleClick, open) => (
                     <React.Fragment>
                       <NavLink
                         to="/reporting/transaction-layer"
-                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                           (pathname === '/reporting/transaction-layer' ||
-                            pathname.includes(
-                              '/reporting/transaction-layer',
-                            )) &&
+                            pathname.includes('/reporting/transaction-layer')) &&
                           'bg-graydark dark:bg-meta-4'
                         }  ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                         onClick={(e) => {
                           e.preventDefault();
-                          sidebarExpanded
-                            ? handleClick()
-                            : setSidebarExpanded(true);
+                          sidebarExpanded ? handleClick() : setSidebarExpanded(true);
                         }}
                       >
-                        <BadgeDollarSign size={20} strokeWidth={1.5} />
+                        <BadgeDollarSign
+                          size={20}
+                          strokeWidth={1.5}
+                        />
                         {!sidebarCollapsed && 'Transaction Layer'}
                         <svg
                           className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
@@ -258,17 +247,13 @@ const Sidebar = ({
                           />
                         </svg>
                       </NavLink>
-                      <div
-                        className={`translate transform overflow-hidden ${
-                          !open && 'hidden'
-                        }`}
-                      >
+                      <div className={`translate transform overflow-hidden ${!open && 'hidden'}`}>
                         <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
                           <li>
                             <NavLink
                               to="/reporting/transaction-layer"
-                              className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                              className={({isActive}) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                 (isActive && '!text-white')
                               }
                             >
@@ -284,12 +269,14 @@ const Sidebar = ({
                 <li>
                   <NavLink
                     to="/reporting/reconciliations"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/reporting/reconciliations' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/reporting/reconciliations' && 'bg-graydark dark:bg-meta-4'
                     }  ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <MonitorCog size={20} strokeWidth={1.5} />
+                    <MonitorCog
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Reconciliations'}
                   </NavLink>
                 </li>
@@ -297,7 +284,7 @@ const Sidebar = ({
             </div>
 
             <div>
-              <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+              <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">
                 {!sidebarCollapsed && 'Regulatory Reports'}
               </h3>
 
@@ -305,40 +292,40 @@ const Sidebar = ({
                 <li>
                   <NavLink
                     to="/reporting/reports-overview"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/reporting/reports-overview' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/reporting/reports-overview' && 'bg-graydark dark:bg-meta-4'
                     }  ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <TableOfContents size={20} strokeWidth={1.5} />
+                    <TableOfContents
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Overview'}
                   </NavLink>
                 </li>
 
                 <SidebarLinkGroup
-                  activeCondition={
-                    pathname === '/reporting/forms' ||
-                    pathname.includes('/reporting/forms')
-                  }
+                  activeCondition={pathname === '/reporting/forms' || pathname.includes('/reporting/forms')}
                 >
                   {(handleClick, open) => {
                     return (
                       <React.Fragment>
                         <NavLink
                           to="/reporting/configuration"
-                          className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                          className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                             (pathname === '/reporting/configuration' ||
                               pathname.includes('/reporting/configuration')) &&
                             'bg-graydark dark:bg-meta-4'
                           } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                           onClick={(e) => {
                             e.preventDefault();
-                            sidebarExpanded
-                              ? handleClick()
-                              : setSidebarExpanded(true);
+                            sidebarExpanded ? handleClick() : setSidebarExpanded(true);
                           }}
                         >
-                          <Cog size={20} strokeWidth={1.5} />
+                          <Cog
+                            size={20}
+                            strokeWidth={1.5}
+                          />
                           {!sidebarCollapsed && 'Configuration'}
 
                           <svg
@@ -361,17 +348,13 @@ const Sidebar = ({
                         </NavLink>
                         {/* <!-- Dropdown Menu Start --> */}
 
-                        <div
-                          className={`translate transform overflow-hidden ${
-                            !open && 'hidden'
-                          }`}
-                        >
+                        <div className={`translate transform overflow-hidden ${!open && 'hidden'}`}>
                           <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
                             <li>
                               <NavLink
                                 to="/reporting/entity"
-                                className={({ isActive }) =>
-                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                className={({isActive}) =>
+                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                   (isActive && '!text-white')
                                 }
                               >
@@ -381,8 +364,8 @@ const Sidebar = ({
                             <li>
                               <NavLink
                                 to="/reporting/template"
-                                className={({ isActive }) =>
-                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                className={({isActive}) =>
+                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                   (isActive && '!text-white')
                                 }
                               >
@@ -392,8 +375,8 @@ const Sidebar = ({
                             <li>
                               <NavLink
                                 to="/reporting/regulatory-calender"
-                                className={({ isActive }) =>
-                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                className={({isActive}) =>
+                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                   (isActive && '!text-white')
                                 }
                               >
@@ -403,8 +386,8 @@ const Sidebar = ({
                             <li>
                               <NavLink
                                 to="/reporting/validation"
-                                className={({ isActive }) =>
-                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                className={({isActive}) =>
+                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                   (isActive && '!text-white')
                                 }
                               >
@@ -421,12 +404,14 @@ const Sidebar = ({
                 <li>
                   <NavLink
                     to="/reporting/inspect"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/reporting/inspect' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/reporting/inspect' && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <ZoomIn size={20} strokeWidth={1.5} />
+                    <ZoomIn
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Inspect'}
                   </NavLink>
                 </li>
@@ -438,7 +423,7 @@ const Sidebar = ({
         return (
           <>
             <div>
-              <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+              <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">
                 {!sidebarCollapsed && 'Orchestra Dashboard'}
               </h3>
 
@@ -446,129 +431,142 @@ const Sidebar = ({
                 <li>
                   <NavLink
                     to="/orchestra/connections"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      (pathname === '/orchestra/connections' ||
-                        pathname.includes('connections')) &&
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      (pathname === '/orchestra/connections' || pathname.includes('connections')) &&
                       'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <Cable size={20} strokeWidth={1.5} />
+                    <Cable
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && <span>Connections</span>}
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
                     to="/orchestra/variables"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/orchestra/variables' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/orchestra/variables' && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <BookA size={20} strokeWidth={1.5} />
+                    <BookA
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Variables'}
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
                     to="/orchestra/datasets"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/orchestra/datasets' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/orchestra/datasets' && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <HardDrive size={20} strokeWidth={1.5} />
+                    <HardDrive
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Datasets'}
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
                     to="/orchestra/dataviews"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                       pathname === '/dataviews' && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <Telescope size={20} strokeWidth={1.5} />
+                    <Telescope
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Dataviews'}
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
                     to="/orchestra/data-loaders"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/orchestra/data-loaders' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/orchestra/data-loaders' && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <DatabaseBackup size={20} strokeWidth={1.5} />
+                    <DatabaseBackup
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Data Loaders'}
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
                     to="/orchestra/tasks"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/orchestra/tasks' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/orchestra/tasks' && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <ListTodo size={20} strokeWidth={1.5} />
+                    <ListTodo
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Tasks'}
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
                     to="/orchestra/workflows"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/orchestra/workflows' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/orchestra/workflows' && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <Workflow size={20} strokeWidth={1.5} />
+                    <Workflow
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Workflows'}
                   </NavLink>
                 </li>
                 <li>
                   <NavLink
                     to="/orchestra/monitoring"
-                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                      pathname === '/orchestra/monitoring' &&
-                      'bg-graydark dark:bg-meta-4'
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/orchestra/monitoring' && 'bg-graydark dark:bg-meta-4'
                     } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                   >
-                    <View size={20} strokeWidth={1.5} />
+                    <View
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                     {!sidebarCollapsed && 'Monitoring'}
                   </NavLink>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+              <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">
                 {!sidebarCollapsed && 'Business Logic'}
               </h3>
 
               <ul className="mb-6 flex flex-col gap-1.5">
-                <SidebarLinkGroup
-                  activeCondition={
-                    pathname === '/data' || pathname.includes('data')
-                  }
-                >
+                <SidebarLinkGroup activeCondition={pathname === '/data' || pathname.includes('data')}>
                   {(handleClick, open) => (
                     <>
                       <NavLink
                         to="/orchestra/data"
-                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                          (pathname === '/orchestra/data' ||
-                            pathname.includes('/orchestra/data')) &&
+                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                          (pathname === '/orchestra/data' || pathname.includes('/orchestra/data')) &&
                           'bg-graydark dark:bg-meta-4'
                         } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                         onClick={(e) => {
                           e.preventDefault();
-                          sidebarExpanded
-                            ? handleClick()
-                            : setSidebarExpanded(true);
+                          sidebarExpanded ? handleClick() : setSidebarExpanded(true);
                         }}
                       >
-                        <Database size={20} strokeWidth={1.5} />
+                        <Database
+                          size={20}
+                          strokeWidth={1.5}
+                        />
                         {!sidebarCollapsed && (
                           <>
                             Data
@@ -599,8 +597,8 @@ const Sidebar = ({
                             <li>
                               <NavLink
                                 to="/orchestra/data"
-                                className={({ isActive }) =>
-                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                className={({isActive}) =>
+                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                   (isActive && '!text-white')
                                 }
                               >
@@ -616,27 +614,27 @@ const Sidebar = ({
 
                 <SidebarLinkGroup
                   activeCondition={
-                    pathname === '/orchestra/business-rules' ||
-                    pathname.includes('/orchestra/business-rules')
+                    pathname === '/orchestra/business-rules' || pathname.includes('/orchestra/business-rules')
                   }
                 >
                   {(handleClick, open) => (
                     <>
                       <NavLink
                         to="/orchestra/business-rules"
-                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                           (pathname === '/orchestra/business-rules' ||
                             pathname.includes('/orchestra/business-rules')) &&
                           'bg-graydark dark:bg-meta-4'
                         } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                         onClick={(e) => {
                           e.preventDefault();
-                          sidebarExpanded
-                            ? handleClick()
-                            : setSidebarExpanded(true);
+                          sidebarExpanded ? handleClick() : setSidebarExpanded(true);
                         }}
                       >
-                        <Handshake size={20} strokeWidth={1.5} />
+                        <Handshake
+                          size={20}
+                          strokeWidth={1.5}
+                        />
                         {!sidebarCollapsed && (
                           <>
                             Business Rules
@@ -667,8 +665,8 @@ const Sidebar = ({
                             <li>
                               <NavLink
                                 to="/orchestra/business-rules"
-                                className={({ isActive }) =>
-                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                className={({isActive}) =>
+                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                   (isActive && '!text-white')
                                 }
                               >
@@ -684,27 +682,27 @@ const Sidebar = ({
 
                 <SidebarLinkGroup
                   activeCondition={
-                    pathname === '/orchestra/processing' ||
-                    pathname.includes('/orchestra/processing')
+                    pathname === '/orchestra/processing' || pathname.includes('/orchestra/processing')
                   }
                 >
                   {(handleClick, open) => (
                     <>
                       <NavLink
                         to="/orchestra/processing"
-                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                           (pathname === '/orchestra/processing' ||
                             pathname.includes('/orchestra/processing')) &&
                           'bg-graydark dark:bg-meta-4'
                         } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
                         onClick={(e) => {
                           e.preventDefault();
-                          sidebarExpanded
-                            ? handleClick()
-                            : setSidebarExpanded(true);
+                          sidebarExpanded ? handleClick() : setSidebarExpanded(true);
                         }}
                       >
-                        <LoaderPinwheel size={20} strokeWidth={1.5} />
+                        <LoaderPinwheel
+                          size={20}
+                          strokeWidth={1.5}
+                        />
                         {!sidebarCollapsed && (
                           <>
                             Processing
@@ -735,8 +733,8 @@ const Sidebar = ({
                             <li>
                               <NavLink
                                 to="/orchestra/processing"
-                                className={({ isActive }) =>
-                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                className={({isActive}) =>
+                                  'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white ' +
                                   (isActive && '!text-white')
                                 }
                               >
@@ -757,9 +755,91 @@ const Sidebar = ({
         return (
           <>
             <div>
-              <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+              <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">
                 {!sidebarCollapsed && 'Bird Dashboard'}
               </h3>
+
+              <ul className="mb-6 flex flex-col gap-1.5">
+                <li>
+                  <NavLink
+                    to="/configuration"
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/configuration' && 'bg-graydark dark:bg-meta-4'
+                    } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
+                  >
+                    <Settings
+                      size={20}
+                      strokeWidth={1.5}
+                    />
+                    {!sidebarCollapsed && <span>Configuration</span>}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/data"
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/data' && 'bg-graydark dark:bg-meta-4'
+                    } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
+                  >
+                    <Database
+                      size={20}
+                      strokeWidth={1.5}
+                    />
+                    {!sidebarCollapsed && <span>Data</span>}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/relationships"
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/relationships' && 'bg-graydark dark:bg-meta-4'
+                    } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
+                  >
+                    <GitBranch
+                      size={20}
+                      strokeWidth={1.5}
+                    />
+                    {!sidebarCollapsed && <span>Relationships</span>}
+                  </NavLink>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">
+                {!sidebarCollapsed && 'Configuration'}
+              </h3>
+
+              <ul className="mb-6 flex flex-col gap-1.5">
+                <li>
+                  <NavLink
+                    to="/configuration/dataset"
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/configuration/dataset' && 'bg-graydark dark:bg-meta-4'
+                    } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
+                  >
+                    <Database
+                      size={20}
+                      strokeWidth={1.5}
+                    />
+                    {!sidebarCollapsed && <span>Dataset</span>}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/configuration/groups"
+                    className={`group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                      pathname === '/configuration/groups' && 'bg-graydark dark:bg-meta-4'
+                    } ${sidebarCollapsed ? 'justify-center' : 'py-2 px-4'}`}
+                  >
+                    <Users
+                      size={20}
+                      strokeWidth={1.5}
+                    />
+                    {!sidebarCollapsed && <span>Groups</span>}
+                  </NavLink>
+                </li>
+              </ul>
             </div>
           </>
         );
@@ -787,7 +867,11 @@ const Sidebar = ({
           className={sidebarCollapsed ? 'w-full flex justify-center' : 'w-full'}
         >
           {sidebarCollapsed ? (
-            <img src="/vite.svg" alt="R" className="h-10 w-10" />
+            <img
+              src="/vite.svg"
+              alt="R"
+              className="h-10 w-10"
+            />
           ) : (
             <img
               src="/white-logo.svg"
@@ -803,14 +887,15 @@ const Sidebar = ({
           aria-expanded={sidebarOpen}
           className="block lg:hidden"
         >
-          <ArrowRight size={20} strokeWidth={1.5} />
+          <ArrowRight
+            size={20}
+            strokeWidth={1.5}
+          />
         </button>
       </div>
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-        <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
-          {renderSidebarContent()}
-        </nav>
+        <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">{renderSidebarContent()}</nav>
       </div>
     </aside>
   );
