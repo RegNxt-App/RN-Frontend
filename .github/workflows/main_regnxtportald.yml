@@ -6,30 +6,34 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
+          cache: "pnpm"
 
-      - name: npm install, build, and test
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build Regnxt App
+        run: |
+          cd apps/reporting
+          pnpm run build
         env:
+          CI: false
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -48,19 +52,13 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
-          name: node-app
+          name: regnxt-app
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
-
-      - name: "Deploy to Azure Web App"
+      - name: Deploy to Azure
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: "RegNxtPortalD"
           slot-name: "Production"
-          package: ./dist
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E77D51FD04594742BD8C200FE54FDCDD }}
