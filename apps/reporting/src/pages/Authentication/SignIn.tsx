@@ -17,7 +17,7 @@ const formSchema = z.object({
 });
 
 export default function SignIn() {
-  console.log('VITE_API_BASE_URL: ', import.meta.env.VITE_API_BASE_URL);
+  console.log('VITE_API_BASE_URL test: ', import.meta.env.VITE_API_BASE_URL);
 
   const navigate = useNavigate();
   const location = useLocation();
