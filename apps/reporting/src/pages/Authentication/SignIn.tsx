@@ -31,30 +31,26 @@ export default function SignIn() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // First attempt login
       const userResponse = await login(values.email, values.password);
+      console.log('userResponse: ', userResponse);
 
-      // Verify token storage
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('Token not stored after login');
         throw new Error('Authentication failed - token storage error');
       }
 
-      // Add a brief delay to ensure storage is complete
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       toast({
         title: 'Login successful',
         description: 'You have been logged in successfully.',
       });
-
-      // const from = (location.state as {from?: {pathname: string}})?.from?.pathname || '/';
-      // navigate(from, {replace: true});
-      navigate('/reporting/reports-overview');
+      const from =
+        (location.state as {from?: {pathname: string}})?.from?.pathname || '/reporting/reports-overview';
+      navigate(from, {replace: true});
     } catch (error) {
       console.error('Login error:', error);
-      // Clear any partial auth state
       localStorage.removeItem('token');
 
       toast({
