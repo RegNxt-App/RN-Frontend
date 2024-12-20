@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
 import {SharedColumnFilters} from '@/components/SharedFilters';
@@ -32,7 +32,7 @@ interface Grouping {
   data: GroupsResponse;
 }
 
-export const ConfigureGrouping: React.FC = () => {
+const ConfigureGrouping = () => {
   const {toast} = useToast();
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
@@ -249,3 +249,5 @@ export const ConfigureGrouping: React.FC = () => {
     </div>
   );
 };
+
+export default ConfigureGrouping;

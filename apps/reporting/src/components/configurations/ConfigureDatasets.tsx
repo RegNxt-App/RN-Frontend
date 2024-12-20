@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {useToast} from '@/hooks/use-toast';
@@ -33,7 +33,7 @@ interface VersionColumnsData {
   data: any;
 }
 
-export const ConfigureDatasets: React.FC = () => {
+const ConfigureDatasets = () => {
   const {toast} = useToast();
 
   // Basic state
@@ -621,3 +621,5 @@ export const ConfigureDatasets: React.FC = () => {
     </div>
   );
 };
+
+export default ConfigureDatasets;
