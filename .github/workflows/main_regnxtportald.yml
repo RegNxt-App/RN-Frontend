@@ -1,5 +1,4 @@
 name: Build and deploy Node.js app to Azure Web App - RegNxtPortalD
-
 on:
   push:
     branches:
@@ -11,21 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: latest
-
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
           cache: "pnpm"
-
       - name: Install Dependencies
         run: pnpm install
-
       - name: Build Regnxt App
         run: |
           cd apps/reporting
@@ -34,12 +29,11 @@ jobs:
           CI: false
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
-
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: regnxt-app
-          path: dist
+          path: apps/reporting/dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,13 +41,11 @@ jobs:
     environment:
       name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
           name: regnxt-app
-
       - name: Deploy to Azure
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
