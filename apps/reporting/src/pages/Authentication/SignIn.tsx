@@ -17,8 +17,6 @@ const formSchema = z.object({
 });
 
 export default function SignIn() {
-  console.log('VITE_API_BASE_URL test: ', import.meta.env.VITE_API_BASE_URL);
-
   const navigate = useNavigate();
   const location = useLocation();
   const {toast} = useToast();
@@ -33,18 +31,34 @@ export default function SignIn() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await login(values.email, values.password);
+      // First attempt login
+      const userResponse = await login(values.email, values.password);
+
+      // Verify token storage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token not stored after login');
+        throw new Error('Authentication failed - token storage error');
+      }
+
+      // Add a brief delay to ensure storage is complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       toast({
         title: 'Login successful',
         description: 'You have been logged in successfully.',
       });
+
       const from = (location.state as {from?: {pathname: string}})?.from?.pathname || '/';
       navigate(from, {replace: true});
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_) {
+    } catch (error) {
+      console.error('Login error:', error);
+      // Clear any partial auth state
+      localStorage.removeItem('token');
+
       toast({
         title: 'Login failed',
-        description: 'Invalid email or password. Please try again.',
+        description: 'Authentication failed. Please try again.',
         variant: 'destructive',
       });
     }

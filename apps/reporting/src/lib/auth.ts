@@ -27,10 +27,29 @@ interface DecodedToken {
 let refreshTokenPromise: Promise<string> | null = null;
 
 export async function login(email: string, password: string): Promise<User> {
-  const response = await axiosInstance.post<AuthResponse>('/accounts/authenticate', {email, password});
-  const {jwtToken, ...user} = response.data;
-  localStorage.setItem('token', jwtToken);
-  return user;
+  try {
+    const response = await axiosInstance.post<AuthResponse>('/accounts/authenticate', {
+      email,
+      password,
+    });
+
+    const {jwtToken, ...user} = response.data;
+
+    // Add console logs for debugging
+    console.log('Login response received:', !!response.data);
+
+    // Force synchronous token storage
+    window.localStorage.setItem('token', jwtToken);
+
+    // Verify token was stored
+    const storedToken = window.localStorage.getItem('token');
+    console.log('Token stored successfully:', !!storedToken);
+
+    return user;
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
 }
 
 export function logout() {
@@ -39,21 +58,23 @@ export function logout() {
 
 export async function refreshToken(): Promise<string> {
   if (!refreshTokenPromise) {
-    refreshTokenPromise = axiosInstance
-      .post<AuthResponse>('/accounts/refresh-token')
-      .then((response) => {
+    refreshTokenPromise = (async () => {
+      try {
+        const response = await axiosInstance.post<AuthResponse>('/accounts/refresh-token', {
+          token: localStorage.getItem('token'),
+        });
         const {jwtToken} = response.data;
         localStorage.setItem('token', jwtToken);
+        localStorage.setItem('tokenExpiry', (Date.now() + 3600000).toString());
         return jwtToken;
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error('Error refreshing token:', error);
         logout();
         throw error;
-      })
-      .finally(() => {
+      } finally {
         refreshTokenPromise = null;
-      });
+      }
+    })();
   }
   return refreshTokenPromise;
 }
@@ -87,11 +108,13 @@ async function fetchUserDetails(userId: string): Promise<User | null> {
 
 export function isTokenValid(): boolean {
   const token = localStorage.getItem('token');
-  if (!token) return false;
+  const tokenExpiry = localStorage.getItem('tokenExpiry');
+
+  if (!token || !tokenExpiry) return false;
 
   try {
     const decodedToken = jwtDecode<DecodedToken>(token);
-    return decodedToken.exp * 1000 > Date.now();
+    return Number(tokenExpiry) > Date.now() && decodedToken.exp * 1000 > Date.now();
   } catch {
     return false;
   }
