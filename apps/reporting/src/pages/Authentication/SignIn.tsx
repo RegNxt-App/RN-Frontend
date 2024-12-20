@@ -1,23 +1,15 @@
-import { useForm } from 'react-hook-form';
-import { useLocation, useNavigate } from 'react-router-dom';
-
-
+import {useForm} from 'react-hook-form';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 import AuthLayout from '@/components/AuthLayout';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { zodResolver } from '@hookform/resolvers/zod';
+import {useAuth} from '@/contexts/AuthContext';
+import {useToast} from '@/hooks/use-toast';
+import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
-
-
-import { Button } from '@rn/ui/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@rn/ui/components/ui/form';
-import { Input } from '@rn/ui/components/ui/input';
-
-
-
-
+import {Button} from '@rn/ui/components/ui/button';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@rn/ui/components/ui/form';
+import {Input} from '@rn/ui/components/ui/input';
 
 const formSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -36,6 +28,8 @@ export default function SignIn() {
       password: '',
     },
   });
+
+  console.log('backend url: ', import.meta.env.VITE_API_BASE_URL);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -61,7 +55,7 @@ export default function SignIn() {
       subtitle="Sign in to continue using the BIRD"
       imageSrc="/white-logo.svg"
       imageAlt="BIRD"
-      description="Intuitive user interface for visualizing, managing and extending the BIRD model"
+      description="Streamlined regulatory compliance platform"
     >
       <Form {...form}>
         <form
@@ -93,6 +87,7 @@ export default function SignIn() {
                 <FormControl>
                   <Input
                     type="password"
+                    placeholder="*******"
                     {...field}
                   />
                 </FormControl>

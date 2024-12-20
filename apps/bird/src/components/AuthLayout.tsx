@@ -40,7 +40,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
             className="mx-auto mb-8"
           />
           <h3 className="mb-4 text-2xl font-bold text-white">Banks Integrated Reporting Dictionary</h3>
-          <p className="text-muted-foreground">{description}</p>
+          <p className="text-muted-foreground">
+            {description ?? 'Streamlined regulatory compliance platform'}
+          </p>
         </div>
       </div>
     </div>
