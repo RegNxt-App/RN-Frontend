@@ -164,8 +164,8 @@ const navigationConfig: NavigationConfig = {
       {
         title: 'Configuration',
         links: [
-          {path: '/configuration/dataset', icon: 'Database', label: 'Dataset'},
-          {path: '/configuration/groups', icon: 'Users', label: 'Groups'},
+          {path: '/bird/configuration/dataset', icon: 'Database', label: 'Dataset'},
+          {path: '/bird/configuration/groups', icon: 'Users', label: 'Groups'},
         ],
       },
     ],

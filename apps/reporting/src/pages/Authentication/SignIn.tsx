@@ -1,32 +1,34 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+
+
+import AuthLayout from '@/components/AuthLayout';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import Api from '../../utils/Api';
-import AuthLayout from '@/components/AuthLayout';
-import { useToast } from '@/hooks/use-toast';
+
+
+
+import { Button } from '@rn/ui/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@rn/ui/components/ui/form';
+import { Input } from '@rn/ui/components/ui/input';
+
+
+
+
 
 const formSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-const SignIn = () => {
+export default function SignIn() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [error, setError] = useState<string | null>(null);
-
+  const location = useLocation();
+  const {toast} = useToast();
+  const {login} = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,82 +37,46 @@ const SignIn = () => {
     },
   });
 
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    setError(null);
-
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await Api.post('/Accounts/authenticate', {
-        email: values.email,
-        password: values.password,
-      });
-
-      const data = response.data;
-      const username = data.firstName + ' ' + data.lastName;
-      localStorage.setItem('email', data.email);
-      localStorage.setItem('id', data.id.toString());
-      localStorage.setItem('jwtToken', data.jwtToken);
-      localStorage.setItem('username', username);
-
+      await login(values.email, values.password);
       toast({
-        title: 'Success',
-        description: 'You have been successfully signed in',
-        duration: 3000,
+        title: 'Login successful',
+        description: 'You have been logged in successfully.',
       });
-
-      console.log('Authentication successful', data);
-      navigate('/reporting/reports-overview');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Failed to sign in';
-      setError(errorMessage);
+      const from = (location.state as {from?: {pathname: string}})?.from?.pathname || '/configuration';
+      navigate(from, {replace: true});
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
       toast({
+        title: 'Login failed',
+        description: 'Invalid email or password. Please try again.',
         variant: 'destructive',
-        title: 'Error',
-        description: errorMessage,
-        duration: 3000,
       });
     }
-  };
-
+  }
   return (
     <AuthLayout
-      title="Sign In to RegNxt"
-      subtitle="Welcome back! Please enter your details"
-      logo={
-        <Link className="mb-8 inline-block" to="#">
-          <img
-            src="/white-logo.svg"
-            alt="RegNxt Logo"
-            className="h-26 w-auto"
-          />
-        </Link>
-      }
+      title="Welcome back"
+      subtitle="Sign in to continue using the BIRD"
+      imageSrc="/white-logo.svg"
+      imageAlt="BIRD"
+      description="Intuitive user interface for visualizing, managing and extending the BIRD model"
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
+            render={({field}) => (
               <FormItem>
-                <FormLabel className="text-black">Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-black">Password</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
-                    type="password"
-                    placeholder="6+ Characters, 1 Capital letter"
+                    placeholder="m@example.com"
                     {...field}
                   />
                 </FormControl>
@@ -118,20 +84,24 @@ const SignIn = () => {
               </FormItem>
             )}
           />
-
-          {error && <div className="text-destructive text-sm">{error}</div>}
-
-          <div className="text-right">
-            <Link
-              to="/auth/signup"
-              className="text-sm text-primary hover:underline"
-            >
-              Forgot Password?
-            </Link>
-          </div>
-
+          <FormField
+            control={form.control}
+            name="password"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <Button
-            className="w-full text-white bg-purple-500"
+            className="w-full"
             type="submit"
             disabled={form.formState.isSubmitting}
           >
@@ -141,13 +111,23 @@ const SignIn = () => {
       </Form>
 
       <div className="mt-6 text-center text-sm">
-        <span className="text-muted-foreground">Don't have any account? </span>
-        <Link to="/auth/signup" className="text-primary hover:underline">
-          Sign Up
-        </Link>
+        <a
+          className="text-muted-foreground underline underline-offset-4 hover:text-primary"
+          href="/auth/forgot-password"
+        >
+          Forgot password?
+        </a>
+      </div>
+
+      <div className="mt-6 text-center text-sm">
+        <span className="text-muted-foreground">Don&apos;t have an account? </span>
+        <a
+          className="font-semibold underline underline-offset-4 hover:text-primary"
+          href="/auth/register"
+        >
+          Sign up
+        </a>
       </div>
     </AuthLayout>
   );
-};
-
-export default SignIn;
+}
