@@ -24,10 +24,14 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
         run: pnpm install
 
       - name: Build Regnxt App
         run: |
+
           cd apps/reporting
           pnpm run build
         env:
