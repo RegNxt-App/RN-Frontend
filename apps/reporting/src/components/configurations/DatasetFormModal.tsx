@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 
 import {useToast} from '@/hooks/use-toast';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {Dataset} from '@/types/databaseTypes';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Wand2} from 'lucide-react';
@@ -102,7 +102,7 @@ export const DatasetFormModal: React.FC<DatasetFormModalProps> = ({
   const checkCodeExists = async (code: string) => {
     setIsCheckingCode(true);
     try {
-      const response = await fastApiInstance.get(`/api/v1/datasets/`, {
+      const response = await birdBackendInstance.get(`/api/v1/datasets/`, {
         params: {code},
       });
 
@@ -148,7 +148,7 @@ export const DatasetFormModal: React.FC<DatasetFormModalProps> = ({
 
   const handleSubmit = async (data: FormValues) => {
     try {
-      const response = await fastApiInstance.get(`/api/v1/datasets/`, {
+      const response = await birdBackendInstance.get(`/api/v1/datasets/`, {
         params: {code: data.code},
       });
 

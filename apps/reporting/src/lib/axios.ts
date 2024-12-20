@@ -12,10 +12,14 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-const fastApiInstance = axios.create({
+const birdBackendInstance = axios.create({
   baseURL: import.meta.env.VITE_FAST_API_BACKEND,
 });
 
-export {axiosInstance, fastApiInstance};
+const orchestraBackendInstance = axios.create({
+  baseURL: import.meta.env.VITE_ORCHESTRA_API_BACKED,
+});
+
+export {axiosInstance, birdBackendInstance};
 
 export default axiosInstance;

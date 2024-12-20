@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
 import GenericComboBox from '@/components/ComboBox';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {format} from 'date-fns';
 import useSWR from 'swr';
 
@@ -39,14 +39,14 @@ const DatasetVersionSelector: React.FC<DatasetVersionSelectorProps> = ({
     selectedDataset
       ? `/api/v1/datasets/${selectedDataset.dataset_id}/versions/?date=${format(date, 'yyyy-MM-dd')}`
       : null,
-    fastApiInstance
+    birdBackendInstance
   );
 
   const {data: dataVersionColumns} = useSWR<DataVersionColumnsResponse>(
     datasetVersion?.data
       ? `/api/v1/datasets/${selectedDataset.dataset_id}/columns/?version_id=${datasetVersion.data.dataset_version_id}`
       : null,
-    fastApiInstance
+    birdBackendInstance
   );
 
   useEffect(() => {

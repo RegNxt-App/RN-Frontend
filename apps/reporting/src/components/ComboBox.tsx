@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 
 import {useDebounce} from '@/hooks/use-debounce';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {Check, ChevronsUpDown} from 'lucide-react';
 import useSWRInfinite from 'swr/infinite';
 
@@ -47,7 +47,7 @@ export default function GenericComboBox({apiEndpoint, placeholder, onSelect}: Co
     }`;
   };
 
-  const {data, error, size, setSize} = useSWRInfinite<ApiResponse>(getKey, fastApiInstance);
+  const {data, error, size, setSize} = useSWRInfinite<ApiResponse>(getKey, birdBackendInstance);
 
   const isLoadingInitialData = !data && !error;
   const isLoadingMore = isLoadingInitialData || (size > 0 && data && typeof data[size - 1] === 'undefined');

@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
 import {useToast} from '@/hooks/use-toast';
-import {fastApiInstance} from '@/lib/axios';
+import {birdBackendInstance} from '@/lib/axios';
 import {ColumnDef} from '@tanstack/react-table';
 
 import {Button} from '@rn/ui/components/ui/button';
@@ -59,7 +59,7 @@ export const GroupItemsModal: React.FC<GroupItemsModalProps> = ({isOpen, onClose
 
   const fetchGroupItems = async () => {
     try {
-      const response = await fastApiInstance.get(`/api/v1/groups/${group.code}/items/`);
+      const response = await birdBackendInstance.get(`/api/v1/groups/${group.code}/items/`);
       setItems(response.data);
     } catch (error) {
       console.error('Error fetching group items:', error);
@@ -87,7 +87,7 @@ export const GroupItemsModal: React.FC<GroupItemsModalProps> = ({isOpen, onClose
         order: calculateNextOrder(),
       };
 
-      await fastApiInstance.post(`/api/v1/groups/${group.code}/add_item/`, itemToAdd);
+      await birdBackendInstance.post(`/api/v1/groups/${group.code}/add_item/`, itemToAdd);
       await fetchGroupItems();
       toast({title: 'Success', description: 'Item added successfully.'});
       setIsAddItemModalOpen(false);
@@ -104,7 +104,7 @@ export const GroupItemsModal: React.FC<GroupItemsModalProps> = ({isOpen, onClose
 
   const handleRemoveItem = async (datasetVersionId: string) => {
     try {
-      await fastApiInstance.delete(`/api/v1/groups/${group.code}/remove_item/`, {
+      await birdBackendInstance.delete(`/api/v1/groups/${group.code}/remove_item/`, {
         data: {dataset_version_id: datasetVersionId},
       });
       await fetchGroupItems();

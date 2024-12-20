@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {Suspense, lazy, useEffect, useState} from 'react';
 import {Provider} from 'react-redux';
 import {Navigate, Route, Routes, useLocation} from 'react-router-dom';
 
@@ -8,41 +8,52 @@ import {store} from './app/store';
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import PrivateRoute from './components/PrivateRoute';
-import {ConfigureDatasets} from './components/configurations/ConfigureDatasets';
-import {ConfigureGrouping} from './components/configurations/ConfigureGrouping';
 import {useAuth} from './contexts/AuthContext';
 import DefaultLayout from './layout/DefaultLayout';
-import AccountingConfig from './pages/AccountingLayer/AccountingConfig';
-import PostUnpost from './pages/AccountingLayer/PostUnpost';
-import {default as AccountingLayer, default as ViewBalance} from './pages/AccountingLayer/ViewBalance';
-import SignIn from './pages/Authentication/SignIn';
-import SignUp from './pages/Authentication/SignUp';
-import Entity from './pages/Configuration/Entity';
-import RegulatoryCalender from './pages/Configuration/RegulatoryCalender';
-import Template from './pages/Configuration/Template';
-import Validation from './pages/Configuration/Validation';
-import ConfigureDataSetView from './pages/ConfigureDataSetView';
-import Dashboard from './pages/Dashboard/Dashboard';
-import DataSetView from './pages/DataSetView';
-import Inspect from './pages/Inspect/Inspect';
-import Messages from './pages/Messages/Messages';
-import BusinessRules from './pages/Orchestra/BusinessRules/BusinessRules';
-import Connections from './pages/Orchestra/Connections';
-import Data from './pages/Orchestra/Data/Data';
-import DataLoaders from './pages/Orchestra/DataLoaders';
-import Datasets from './pages/Orchestra/Datasets';
-import Dataviews from './pages/Orchestra/Dataviews';
-import Monitoring from './pages/Orchestra/Monitoring';
-import Processing from './pages/Orchestra/Processing/Processing';
-import Tasks from './pages/Orchestra/Tasks';
-import Variables from './pages/Orchestra/Variables';
-import Workflows from './pages/Orchestra/Workflows';
-import Overview from './pages/Overview/Overview';
-import OverviewRegulatoryReports from './pages/OverviewRegulatoryReports/OverviewRegulatoryReports';
-import Profile from './pages/Profile/Profile';
-import Reconciliations from './pages/Reconciliations/Reconciliations';
-import Relationship from './pages/Relationship';
-import TransactionLayer from './pages/TransactionLayer/TransactionLayer';
+
+// Lazy load authentication pages
+const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
+const SignUp = lazy(() => import('./pages/Authentication/SignUp'));
+
+// Lazy load reporting pages
+const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
+const Overview = lazy(() => import('./pages/Overview/Overview'));
+const ViewBalance = lazy(() => import('./pages/AccountingLayer/ViewBalance'));
+const PostUnpost = lazy(() => import('./pages/AccountingLayer/PostUnpost'));
+const AccountingConfig = lazy(() => import('./pages/AccountingLayer/AccountingConfig'));
+const Messages = lazy(() => import('./pages/Messages/Messages'));
+const Inspect = lazy(() => import('./pages/Inspect/Inspect'));
+const Profile = lazy(() => import('./pages/Profile/Profile'));
+const OverviewRegulatoryReports = lazy(
+  () => import('./pages/OverviewRegulatoryReports/OverviewRegulatoryReports')
+);
+const Reconciliations = lazy(() => import('./pages/Reconciliations/Reconciliations'));
+const AccountingLayer = lazy(() => import('./pages/AccountingLayer/ViewBalance'));
+const TransactionLayer = lazy(() => import('./pages/TransactionLayer/TransactionLayer'));
+const Entity = lazy(() => import('./pages/Configuration/Entity'));
+const Template = lazy(() => import('./pages/Configuration/Template'));
+const RegulatoryCalender = lazy(() => import('./pages/Configuration/RegulatoryCalender'));
+const Validation = lazy(() => import('./pages/Configuration/Validation'));
+
+// Lazy load orchestra pages
+const Connections = lazy(() => import('./pages/Orchestra/Connections'));
+const Variables = lazy(() => import('./pages/Orchestra/Variables'));
+const Datasets = lazy(() => import('./pages/Orchestra/Datasets'));
+const Dataviews = lazy(() => import('./pages/Orchestra/Dataviews'));
+const DataLoaders = lazy(() => import('./pages/Orchestra/DataLoaders'));
+const Tasks = lazy(() => import('./pages/Orchestra/Tasks'));
+const Workflows = lazy(() => import('./pages/Orchestra/Workflows'));
+const Monitoring = lazy(() => import('./pages/Orchestra/Monitoring'));
+const Data = lazy(() => import('./pages/Orchestra/Data/Data'));
+const BusinessRules = lazy(() => import('./pages/Orchestra/BusinessRules/BusinessRules'));
+const Processing = lazy(() => import('./pages/Orchestra/Processing/Processing'));
+
+// Lazy load bird pages
+const ConfigureDataSetView = lazy(() => import('./pages/ConfigureDataSetView'));
+const DataSetView = lazy(() => import('./pages/DataSetView'));
+const Relationship = lazy(() => import('./pages/Relationship'));
+const ConfigureDatasets = lazy(() => import('./components/configurations/ConfigureDatasets'));
+const ConfigureGrouping = lazy(() => import('./components/configurations/ConfigureGrouping'));
 
 // Route configuration object
 const routeConfig = {
@@ -144,30 +155,32 @@ function App() {
   return (
     <Provider store={store}>
       <Toaster />
-      <Routes>
-        {routeConfig.auth.map(({path, component: Component}) => (
-          <Route
-            key={path}
-            path={path}
-            element={<Component />}
-          />
-        ))}
-
-        {[...routeConfig.reporting, ...routeConfig.orchestra, ...routeConfig.bird].map(
-          ({path, component: Component, title}) => (
+      <Suspense fallback={<Loader />}>
+        <Routes>
+          {routeConfig.auth.map(({path, component: Component}) => (
             <Route
               key={path}
               path={path}
-              element={
-                <ProtectedRoute
-                  component={Component}
-                  title={title}
-                />
-              }
+              element={<Component />}
             />
-          )
-        )}
-      </Routes>
+          ))}
+
+          {[...routeConfig.reporting, ...routeConfig.orchestra, ...routeConfig.bird].map(
+            ({path, component: Component, title}) => (
+              <Route
+                key={path}
+                path={path}
+                element={
+                  <ProtectedRoute
+                    component={Component}
+                    title={title}
+                  />
+                }
+              />
+            )
+          )}
+        </Routes>
+      </Suspense>
     </Provider>
   );
 }
