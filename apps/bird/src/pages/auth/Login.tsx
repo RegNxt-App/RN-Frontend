@@ -85,6 +85,7 @@ export default function Login() {
                 <FormControl>
                   <Input
                     type="password"
+                    placeholder="*******"
                     {...field}
                   />
                 </FormControl>
