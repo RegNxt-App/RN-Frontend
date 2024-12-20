@@ -34,17 +34,9 @@ export async function login(email: string, password: string): Promise<User> {
     });
 
     const {jwtToken, ...user} = response.data;
-
-    // Add console logs for debugging
-    console.log('Login response received:', !!response.data);
-
-    // Force synchronous token storage
     window.localStorage.setItem('token', jwtToken);
 
-    // Verify token was stored
     const storedToken = window.localStorage.getItem('token');
-    console.log('Token stored successfully:', !!storedToken);
-
     return user;
   } catch (error) {
     console.error('Login error:', error);

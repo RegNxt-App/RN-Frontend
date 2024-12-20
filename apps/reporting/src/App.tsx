@@ -1,4 +1,4 @@
-import {Suspense, lazy, useEffect, useState} from 'react';
+import {lazy, useEffect, useState} from 'react';
 import {Provider} from 'react-redux';
 import {Navigate, Route, Routes, useLocation} from 'react-router-dom';
 
@@ -151,32 +151,30 @@ function App() {
   return (
     <Provider store={store}>
       <Toaster />
-      <Suspense fallback={<Loader />}>
-        <Routes>
-          {routeConfig.auth.map(({path, component: Component}) => (
+      <Routes>
+        {routeConfig.auth.map(({path, component: Component}) => (
+          <Route
+            key={path}
+            path={path}
+            element={<Component />}
+          />
+        ))}
+
+        {[...routeConfig.reporting, ...routeConfig.orchestra, ...routeConfig.bird].map(
+          ({path, component: Component, title}) => (
             <Route
               key={path}
               path={path}
-              element={<Component />}
+              element={
+                <ProtectedRoute
+                  component={Component}
+                  title={title}
+                />
+              }
             />
-          ))}
-
-          {[...routeConfig.reporting, ...routeConfig.orchestra, ...routeConfig.bird].map(
-            ({path, component: Component, title}) => (
-              <Route
-                key={path}
-                path={path}
-                element={
-                  <ProtectedRoute
-                    component={Component}
-                    title={title}
-                  />
-                }
-              />
-            )
-          )}
-        </Routes>
-      </Suspense>
+          )
+        )}
+      </Routes>
     </Provider>
   );
 }

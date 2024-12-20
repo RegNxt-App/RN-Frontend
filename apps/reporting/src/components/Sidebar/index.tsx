@@ -7,13 +7,10 @@ import {LucideIcon} from 'lucide-react';
 
 import SidebarLinkGroup from './SidebarLinkGroup';
 
-// Type for dropdown items in navigation
 interface DropdownItem {
   path: string;
   label: string;
 }
-
-// Type for navigation links
 interface NavigationLink {
   path: string;
   icon: keyof typeof Icons;
@@ -32,7 +29,6 @@ interface NavigationConfig {
   };
 }
 
-// Props interface for the main Sidebar component
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
@@ -40,7 +36,6 @@ interface SidebarProps {
   selectedApp: string;
 }
 
-// Props interface for the SidebarLink component
 interface SidebarLinkProps {
   link: NavigationLink;
   sidebarCollapsed: boolean;
@@ -49,7 +44,6 @@ interface SidebarLinkProps {
   setSidebarExpanded: (expanded: boolean) => void;
 }
 
-// Props interface for the SidebarSection component
 interface SidebarSectionProps {
   section: NavigationSection;
   sidebarCollapsed: boolean;
@@ -245,7 +239,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
             {!sidebarCollapsed && open && (
               <div className="translate transform overflow-hidden">
                 <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
-                  {link.dropdownItems.map((item, index) => (
+                  {link?.dropdownItems?.map((item, index) => (
                     <li key={index}>
                       <NavLink
                         to={item.path}
@@ -332,7 +326,6 @@ const Sidebar: React.FC<SidebarProps> = ({sidebarOpen, setSidebarOpen, sidebarCo
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
 
-  // Click handler for closing sidebar
   useEffect(() => {
     const clickHandler = ({target}: MouseEvent) => {
       if (!sidebar.current || !trigger.current) return;
@@ -348,7 +341,6 @@ const Sidebar: React.FC<SidebarProps> = ({sidebarOpen, setSidebarOpen, sidebarCo
     return () => document.removeEventListener('click', clickHandler);
   });
 
-  // ESC key handler for closing sidebar
   useEffect(() => {
     const keyHandler = ({keyCode}: KeyboardEvent) => {
       if (!sidebarOpen || keyCode !== 27) return;
@@ -358,7 +350,6 @@ const Sidebar: React.FC<SidebarProps> = ({sidebarOpen, setSidebarOpen, sidebarCo
     return () => document.removeEventListener('keydown', keyHandler);
   });
 
-  // Sidebar expanded state handler
   useEffect(() => {
     localStorage.setItem('sidebar-expanded', sidebarExpanded.toString());
     if (sidebarExpanded) {
