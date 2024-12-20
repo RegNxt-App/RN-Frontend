@@ -1,14 +1,11 @@
 'use client';
 
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {Suspense, lazy, useCallback, useEffect, useMemo, useState} from 'react';
 
-import DatabaseDiagram from '@/components/DatabaseDiagram';
 import DatePicker from '@/components/DatePicker';
-import SelectableAccordion from '@/components/SelectableAccordion';
 import {birdBackendInstance} from '@/lib/axios';
+import {calculateNodeDimensions, getLayoutedElements} from '@/lib/layoutUtils';
 import {DatasetResponse, Frameworks, Layers} from '@/types/databaseTypes';
-import {ReactFlowProvider} from '@xyflow/react';
-import ELK from 'elkjs/lib/elk.bundled.js';
 import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
@@ -24,57 +21,17 @@ import {
 } from '@rn/ui/components/ui/sheet';
 import {Skeleton} from '@rn/ui/components/ui/skeleton';
 
+const ReactFlowProvider = lazy(() =>
+  import('@xyflow/react').then((module) => ({
+    default: module.ReactFlowProvider,
+  }))
+);
+
+const DatabaseDiagram = lazy(() => import('@/components/DatabaseDiagram'));
+const SelectableAccordion = lazy(() => import('@/components/SelectableAccordion'));
+
 const NO_FILTER = 'NO_FILTER';
 const PAGE_SIZE = 10000;
-
-const elk = new ELK();
-
-const calculateNodeDimensions = (columns: any[]) => {
-  const baseHeight = 40;
-  const rowHeight = 24;
-  const width = 250;
-  const height = baseHeight + columns.length * rowHeight;
-  return {width, height};
-};
-
-const getLayoutedElements = async (nodes: any[], edges: any[]) => {
-  const elkNodes = nodes.map((node) => ({
-    id: node.id,
-    width: node.width,
-    height: node.height,
-  }));
-
-  const elkEdges = edges.map((edge: any) => ({
-    id: edge.id,
-    sources: [edge.source],
-    targets: [edge.target],
-  }));
-
-  const elkGraph = await elk.layout({
-    id: 'root',
-    layoutOptions: {
-      'elk.algorithm': 'layered',
-      'elk.direction': 'RIGHT',
-      'elk.spacing.nodeNode': '50',
-      'elk.layered.spacing.nodeNodeBetweenLayers': '100',
-      'elk.padding': '[top=50,left=50,bottom=50,right=50]',
-      'elk.layered.nodePlacement.strategy': 'BRANDES_KOEPF',
-    },
-    children: elkNodes,
-    edges: elkEdges,
-  });
-
-  return {
-    nodes: nodes.map((node) => {
-      const elkNode = elkGraph.children?.find((n) => n.id === node.id);
-      return {
-        ...node,
-        position: {x: elkNode?.x || 0, y: elkNode?.y || 0},
-      };
-    }),
-    edges,
-  };
-};
 
 export default function Relationship() {
   const [selectedFramework, setSelectedFramework] = useState<string>(NO_FILTER);
@@ -349,21 +306,22 @@ export default function Relationship() {
             initialDate={selectedDate}
           />
         </div>
-
-        <ReactFlowProvider>
-          <DatabaseDiagram
-            nodes={nodes}
-            edges={edges}
-            loading={loading}
-            onReset={handleReset}
-            selectedDatasetVersions={selectedDatasetVersions}
-            onSelectionChange={handleDiagramSelectionChange}
-            setNodes={setNodes}
-            setEdges={setEdges}
-            getLayoutedElements={getLayoutedElements}
-            onNodeInfoLog={handleNodeInfoLog}
-          />
-        </ReactFlowProvider>
+        <Suspense fallback={<div>Loading diagram...</div>}>
+          <ReactFlowProvider>
+            <DatabaseDiagram
+              nodes={nodes}
+              edges={edges}
+              loading={loading}
+              onReset={handleReset}
+              selectedDatasetVersions={selectedDatasetVersions}
+              onSelectionChange={handleDiagramSelectionChange}
+              setNodes={setNodes}
+              setEdges={setEdges}
+              getLayoutedElements={getLayoutedElements}
+              onNodeInfoLog={handleNodeInfoLog}
+            />
+          </ReactFlowProvider>
+        </Suspense>
       </div>
       <Sheet
         open={isSheetOpen}
