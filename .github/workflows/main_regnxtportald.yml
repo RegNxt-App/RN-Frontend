@@ -24,18 +24,16 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-          VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
         run: pnpm install
 
       - name: Build Regnxt App
         run: |
-
           cd apps/reporting
           pnpm run build
         env:
           CI: false
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
 
       - name: Setup Distribution
         run: |
@@ -45,6 +43,12 @@ jobs:
           cp -r apps/reporting/dist/* dist/
 
           chmod -R 755 dist
+
+          # Create .env file in dist
+          cat > dist/.env << EOL
+          VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+          VITE_FAST_API_BACKEND=${{ secrets.VITE_FAST_API_BACKEND }}
+          EOL
 
           cat > dist/web.config << 'EOL'
           <?xml version="1.0" encoding="utf-8"?>
