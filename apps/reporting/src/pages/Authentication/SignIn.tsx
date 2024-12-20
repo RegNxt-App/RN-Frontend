@@ -49,8 +49,9 @@ export default function SignIn() {
         description: 'You have been logged in successfully.',
       });
 
-      const from = (location.state as {from?: {pathname: string}})?.from?.pathname || '/';
-      navigate(from, {replace: true});
+      // const from = (location.state as {from?: {pathname: string}})?.from?.pathname || '/';
+      // navigate(from, {replace: true});
+      navigate('/reporting/reports-overview');
     } catch (error) {
       console.error('Login error:', error);
       // Clear any partial auth state

@@ -11,11 +11,9 @@ import PrivateRoute from './components/PrivateRoute';
 import {useAuth} from './contexts/AuthContext';
 import DefaultLayout from './layout/DefaultLayout';
 
-// Lazy load authentication pages
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
 const SignUp = lazy(() => import('./pages/Authentication/SignUp'));
 
-// Lazy load reporting pages
 const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
 const Overview = lazy(() => import('./pages/Overview/Overview'));
 const ViewBalance = lazy(() => import('./pages/AccountingLayer/ViewBalance'));
@@ -35,7 +33,6 @@ const Template = lazy(() => import('./pages/Configuration/Template'));
 const RegulatoryCalender = lazy(() => import('./pages/Configuration/RegulatoryCalender'));
 const Validation = lazy(() => import('./pages/Configuration/Validation'));
 
-// Lazy load orchestra pages
 const Connections = lazy(() => import('./pages/Orchestra/Connections'));
 const Variables = lazy(() => import('./pages/Orchestra/Variables'));
 const Datasets = lazy(() => import('./pages/Orchestra/Datasets'));
@@ -48,7 +45,6 @@ const Data = lazy(() => import('./pages/Orchestra/Data/Data'));
 const BusinessRules = lazy(() => import('./pages/Orchestra/BusinessRules/BusinessRules'));
 const Processing = lazy(() => import('./pages/Orchestra/Processing/Processing'));
 
-// Lazy load bird pages
 const ConfigureDataSetView = lazy(() => import('./pages/ConfigureDataSetView'));
 const DataSetView = lazy(() => import('./pages/DataSetView'));
 const Relationship = lazy(() => import('./pages/Relationship'));
