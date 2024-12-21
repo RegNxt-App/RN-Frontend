@@ -24,7 +24,7 @@ jobs:
       - name: Build Regnxt App
         run: |
           cd apps/regnxt
-          pnpm run build
+          npm run build
         env:
           CI: false
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
