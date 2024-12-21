@@ -65,7 +65,7 @@ export default function Register() {
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
-            placeholder="m@example.com"
+            placeholder="abdullah@example.com"
             required
             type="email"
           />

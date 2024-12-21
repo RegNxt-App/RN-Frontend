@@ -34,7 +34,7 @@ export default function ForgotPassword() {
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
-            placeholder="m@example.com"
+            placeholder="abdullah@example.com"
             required
             type="email"
           />

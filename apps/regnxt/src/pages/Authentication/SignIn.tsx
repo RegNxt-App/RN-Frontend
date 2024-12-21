@@ -50,9 +50,9 @@ export default function SignIn() {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Sign in to continue using the BIRD"
+      subtitle="Sign in to continue using the app"
       imageSrc="/white-logo.svg"
-      imageAlt="BIRD"
+      imageAlt="Regnxt"
       description="Streamlined regulatory compliance platform"
     >
       <Form {...form}>
@@ -68,7 +68,7 @@ export default function SignIn() {
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="m@example.com"
+                    placeholder="abdullah@example.com"
                     {...field}
                   />
                 </FormControl>
