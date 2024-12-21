@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
@@ -23,20 +23,20 @@ jobs:
         run: pnpm install
       - name: Build Regnxt App
         run: |
-          cd apps/reporting
+          cd apps/regnxt
           pnpm run build
         env:
           CI: false
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: regnxt-app
-          path: apps/reporting/dist
+          path: apps/regnxt/dist
 
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: build
     environment:
       name: "Production"
