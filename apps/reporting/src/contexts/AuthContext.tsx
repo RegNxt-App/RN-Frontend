@@ -25,49 +25,29 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
 
   const refreshUserSession = async () => {
     try {
-      if (!isTokenValid()) {
-        await refreshToken();
-      }
+      await refreshToken();
       const currentUser = await getUser();
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        setUser(null);
-      }
+      setUser(currentUser);
     } catch (error) {
       console.error('Failed to refresh user session:', error);
       setUser(null);
     }
   };
-  useEffect(() => {
-    let refreshInterval: NodeJS.Timeout;
-
-    if (user) {
-      refreshInterval = setInterval(refreshUserSession, 840000);
-    }
-
-    return () => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-    };
-  }, [user]);
 
   useEffect(() => {
     async function loadUser() {
-      try {
-        if (isTokenValid()) {
+      if (isTokenValid()) {
+        try {
           const currentUser = await getUser();
           setUser(currentUser);
-        } else {
+        } catch (error) {
+          console.error('Failed to load user:', error);
           await refreshUserSession();
         }
-      } catch (error) {
-        console.error('Failed to load user:', error);
-        setUser(null);
-      } finally {
-        setLoading(false);
+      } else {
+        await refreshUserSession();
       }
+      setLoading(false);
     }
     loadUser();
   }, []);
