@@ -40,7 +40,7 @@ importers:
         specifier: ^1.11.3
         version: 1.13.4
 
-  apps/reporting:
+  apps/regnxt:
     dependencies:
       '@headlessui/react':
         specifier: ^2.2.0
