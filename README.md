@@ -164,7 +164,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🤝 Support
 
-For support, email abdullahmujahidali1@gmail.com or join our [Slack channel](https://teams.live.com/l/community/FEAHtEmtb0jGdAARgI).
+For support, email abdullahmujahidali1@gmail.com or join our [Slack channel](https://teams.live.com/l/community/FEAHtEmtb0jGdAARgI)
 
 ## 🙏 Acknowledgments
 
