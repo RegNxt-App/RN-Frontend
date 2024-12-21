@@ -1,4 +1,4 @@
-import {lazy, useEffect, useState} from 'react';
+import {Suspense, lazy, useEffect, useState} from 'react';
 import {Provider} from 'react-redux';
 import {Navigate, Route, Routes, useLocation} from 'react-router-dom';
 
@@ -6,6 +6,7 @@ import {Toaster} from '@/components/ui/toaster';
 
 import {store} from './app/store';
 import Loader from './common/Loader';
+import ErrorBoundary from './components/ErrorBoundary';
 import PageTitle from './components/PageTitle';
 import PrivateRoute from './components/PrivateRoute';
 import {useAuth} from './contexts/AuthContext';
@@ -122,15 +123,18 @@ const ProtectedRoute = ({component: Component, title}: {component: React.Compone
   }
 
   return (
-    <DefaultLayout>
-      <PrivateRoute>
-        <PageTitle title={`RegNxt | ${title}`} />
-        <Component />
-      </PrivateRoute>
-    </DefaultLayout>
+    <ErrorBoundary>
+      <DefaultLayout>
+        <PrivateRoute>
+          <ErrorBoundary>
+            <PageTitle title={`RegNxt | ${title}`} />
+            <Component />
+          </ErrorBoundary>
+        </PrivateRoute>
+      </DefaultLayout>
+    </ErrorBoundary>
   );
 };
-
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const {pathname} = useLocation();
@@ -155,7 +159,13 @@ function App() {
           <Route
             key={path}
             path={path}
-            element={<Component />}
+            element={
+              <Suspense fallback={<Loader />}>
+                <ErrorBoundary>
+                  <Component />
+                </ErrorBoundary>
+              </Suspense>
+            }
           />
         ))}
 
@@ -165,10 +175,14 @@ function App() {
               key={path}
               path={path}
               element={
-                <ProtectedRoute
-                  component={Component}
-                  title={title}
-                />
+                <Suspense fallback={<Loader />}>
+                  <ErrorBoundary>
+                    <ProtectedRoute
+                      component={Component}
+                      title={title}
+                    />
+                  </ErrorBoundary>
+                </Suspense>
               }
             />
           )
@@ -177,5 +191,4 @@ function App() {
     </Provider>
   );
 }
-
 export default App;
