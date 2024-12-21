@@ -5,21 +5,37 @@ import {useAuth} from '@/contexts/AuthContext';
 import {BookUser, ChevronDown, LogOut, User} from 'lucide-react';
 
 import {Avatar, AvatarFallback, AvatarImage} from '@rn/ui/components/ui/avatar';
+import {Button} from '@rn/ui/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@rn/ui/components/ui/dialog';
 
 import ClickOutside from '../ClickOutside';
 
 const DropdownUser = () => {
   const navigate = useNavigate();
   const {logout, user} = useAuth();
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('email');
-    localStorage.removeItem('id');
-    localStorage.removeItem('jwtToken');
+    setIsLogoutDialogOpen(true);
+  };
 
-    navigate('/auth/signin');
+  const confirmLogout = async () => {
+    try {
+      await logout();
+      setIsLogoutDialogOpen(false);
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   return (
@@ -34,11 +50,11 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            {user?.firstName || 'User Name'}
+            {user?.firstName + ' ' + user?.lastName || 'User Name'}
           </span>
           <span className="block text-xs">{user?.email || 'Software Engineer'}</span>
         </span>
-        <Avatar className="h-10 w-10">
+        <Avatar className="b-12 h-10 w-10">
           <AvatarImage
             // src={user?.avatar}
             alt={user?.firstName}
@@ -94,6 +110,31 @@ const DropdownUser = () => {
           </button>
         </div>
       )}
+      <Dialog
+        open={isLogoutDialogOpen}
+        onOpenChange={setIsLogoutDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogDescription>Are you sure you want to log out of the system?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsLogoutDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmLogout}
+            >
+              Log out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ClickOutside>
   );
 };
