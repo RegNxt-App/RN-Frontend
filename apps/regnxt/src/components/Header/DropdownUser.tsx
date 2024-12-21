@@ -55,10 +55,7 @@ const DropdownUser = () => {
           <span className="block text-xs">{user?.email || 'Software Engineer'}</span>
         </span>
         <Avatar className="b-12 h-10 w-10">
-          <AvatarImage
-            // src={user?.avatar}
-            alt={user?.firstName}
-          />
+          <AvatarImage alt={user?.firstName} />
           <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
         </Avatar>
 
