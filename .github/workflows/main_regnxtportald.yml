@@ -35,6 +35,63 @@ jobs:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
 
+      - name: Setup Distribution
+        run: |
+          mkdir -p dist
+
+          cp -r apps/regnxt/dist/* dist/
+
+          chmod -R 755 dist
+
+          cat > dist/web.config << 'EOL'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <rewrite>
+                <rules>
+                  <!-- SPA Routes -->
+                  <rule name="SPA Routes" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                      <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="index.html" />
+                  </rule>
+                </rules>
+              </rewrite>
+              <handlers>
+                <clear />
+                <add name="StaticFile" path="*" verb="*" type="" modules="StaticFileModule,DefaultDocumentModule,DirectoryListingModule" scriptProcessor="" resourceType="Either" requireAccess="Read" allowPathInfo="false" preCondition="" responseBufferLimit="4194304" />
+              </handlers>
+              <staticContent>
+                <remove fileExtension=".json" />
+                <remove fileExtension=".woff" />
+                <remove fileExtension=".woff2" />
+                <remove fileExtension=".ttf" />
+                <mimeMap fileExtension=".json" mimeType="application/json" />
+                <mimeMap fileExtension=".woff" mimeType="application/font-woff" />
+                <mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />
+                <mimeMap fileExtension=".ttf" mimeType="application/x-font-ttf" />
+              </staticContent>
+              <defaultDocument enabled="true">
+                <files>
+                  <clear />
+                  <add value="index.html" />
+                </files>
+              </defaultDocument>
+              <httpProtocol>
+                <customHeaders>
+                  <remove name="X-Powered-By" />
+                  <add name="Cache-Control" value="no-cache, no-store" />
+                  <add name="Pragma" value="no-cache" />
+                  <add name="Expires" value="-1" />
+                </customHeaders>
+              </httpProtocol>
+            </system.webServer>
+          </configuration>
+          EOL
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
