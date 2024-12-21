@@ -23,7 +23,6 @@ export function DatePicker({value, onChange, disabled = false, className}: DateP
   const parseDate = (dateString: string | null): Date | undefined => {
     if (!dateString) return undefined;
 
-    // Try parsing with different formats
     const formats = ['yyyy-MM-dd', "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"];
     for (const format of formats) {
       const parsedDate = parse(dateString, format, new Date());

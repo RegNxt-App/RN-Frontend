@@ -97,7 +97,6 @@ export function isTokenValid(): boolean {
   }
 }
 
-// Modify axios instance to handle token refresh
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {

@@ -1,4 +1,3 @@
-// Configuration.tsx
 import React from 'react';
 
 import {ConfigureDatasets} from '@/components/configurations/ConfigureDatasets';

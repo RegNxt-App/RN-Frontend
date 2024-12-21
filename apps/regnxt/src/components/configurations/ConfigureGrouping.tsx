@@ -56,10 +56,10 @@ const ConfigureGrouping = () => {
     try {
       await birdBackendInstance.post('/api/v1/groups/', newGroup);
       await mutateGroups();
-      setIsGroupModalOpen(false); // Close modal first
+      setIsGroupModalOpen(false);
       toast({title: 'Success', description: 'Group created successfully.'});
     } catch (error: any) {
-      setIsGroupModalOpen(false); // Close modal
+      setIsGroupModalOpen(false);
       const errorMessage = error.response?.data?.error || 'Failed to create group. Please try again.';
       toast({
         title: 'Error',

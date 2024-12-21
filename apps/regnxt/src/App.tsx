@@ -52,7 +52,6 @@ const Relationship = lazy(() => import('./pages/Relationship'));
 const ConfigureDatasets = lazy(() => import('./components/configurations/ConfigureDatasets'));
 const ConfigureGrouping = lazy(() => import('./components/configurations/ConfigureGrouping'));
 
-// Route configuration object
 const routeConfig = {
   auth: [
     {path: '/auth/signin', component: SignIn, layout: null},

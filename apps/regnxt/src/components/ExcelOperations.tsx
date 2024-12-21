@@ -49,17 +49,12 @@ export const ExcelOperations: React.FC<ExcelOperationsProps> = ({
       const dataSheet = workbook.addWorksheet('Data') as any;
       const headers = columns.map((col) => col.code);
 
-      // Create Validation sheet
       const validationSheet = workbook.addWorksheet('Validation');
       const columnsWithValidation = columns.filter((col) => col.value_options?.length);
 
-      // Add validation data vertically for each column
       let currentCol = 1;
       for (const col of columnsWithValidation) {
-        // Add column header
         validationSheet.getCell(1, currentCol).value = col.code;
-
-        // Add validation values
         col.value_options?.forEach((option, index) => {
           const value = option?.item_name || option?.value || option?.reporting_date || option?.entity || '';
           validationSheet.getCell(index + 2, currentCol).value = value;
@@ -112,7 +107,6 @@ export const ExcelOperations: React.FC<ExcelOperationsProps> = ({
     }
   };
 
-  // Helper function to convert column index to Excel column letter
   function getExcelColumn(columnNumber: number): string {
     let dividend = columnNumber;
     let columnName = '';
@@ -209,7 +203,6 @@ export const ExcelOperations: React.FC<ExcelOperationsProps> = ({
           if (cellValue !== null && cellValue !== undefined && cellValue !== '') {
             const column = columns.find((col) => col.code === code);
             if (column?.value_options) {
-              // Find the corresponding item_code for the displayed item_name
               const option = column.value_options.find((opt) => opt.item_name === cellValue.toString());
               rowData[code] = option?.item_code || cellValue.toString();
             } else {

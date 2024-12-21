@@ -24,9 +24,9 @@ const SelectableAccordion: React.FC<SelectableAccordionProps> = ({
     const allSelected = isGroupSelected(items);
     items.forEach((item) => {
       if (allSelected) {
-        onItemSelect(item); // Deselect
+        onItemSelect(item);
       } else if (!selectedItems.some((selected) => selected.dataset_id === item.dataset_id)) {
-        onItemSelect(item); // Select
+        onItemSelect(item);
       }
     });
   };

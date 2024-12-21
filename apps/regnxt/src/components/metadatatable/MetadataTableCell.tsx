@@ -46,7 +46,6 @@ const normalizeValueOptions = (valueOptions: any[] | undefined): NormalizedOptio
 
   return valueOptions
     .map((option) => {
-      // If the option has item_code and item_name
       if (option.item_code !== undefined && option.item_name !== undefined) {
         return {
           value: option.item_code?.toString() || '',
@@ -54,7 +53,6 @@ const normalizeValueOptions = (valueOptions: any[] | undefined): NormalizedOptio
         };
       }
 
-      // If option has reporting_date
       if (option.reporting_date) {
         const formattedDate = option.reporting_date.toString();
         const dateValue =
@@ -67,7 +65,6 @@ const normalizeValueOptions = (valueOptions: any[] | undefined): NormalizedOptio
         };
       }
 
-      // Handle direct value object
       if (typeof option === 'object' && option !== null) {
         const value = Object.values(option)[0];
         return {
@@ -126,7 +123,6 @@ export const MetadataTableCell: React.FC<MetadataTableCellProps> = ({
   };
 
   const renderInput = () => {
-    // Handle Select for value_options
     if (normalizedOptions.length > 0) {
       return (
         <Select
@@ -154,7 +150,6 @@ export const MetadataTableCell: React.FC<MetadataTableCellProps> = ({
       );
     }
 
-    // Handle Date inputs
     if (inputType === 'date' && item.datatype === 'GregorianDay') {
       const dateValue = row[item.code];
       const datePattern = item.datatype_format?.split('#!#')[1]?.split('=')[1] || '';
@@ -170,7 +165,6 @@ export const MetadataTableCell: React.FC<MetadataTableCellProps> = ({
       );
     }
 
-    // Default Input
     return (
       <Input
         type={inputType}

@@ -76,7 +76,6 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
     setLocalTableData((prevData) => [...prevData, newRow]);
     setIsDataModified(true);
 
-    // If adding a new row would be on a new page, switch to that page
     const newTotalRows = localTableData.length + 1;
     const newLastPage = Math.ceil(newTotalRows / PAGE_SIZE);
     setCurrentPage(newLastPage);
@@ -85,14 +84,10 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
   const handleSave = useCallback(async () => {
     setIsSaving(true);
     try {
-      // Get current and original IDs to determine deletes
       const currentIds = new Set(localTableData.map((row) => row.id));
       const originalIds = new Set(tableData.map((row) => row.id));
-
-      // Find deleted IDs by comparing original and current IDs
       const deletedIds = Array.from(originalIds).filter((id) => !currentIds.has(id));
 
-      // Pass both data and deletions to onSave
       await onSave({
         data: localTableData,
         deletions: deletedIds,

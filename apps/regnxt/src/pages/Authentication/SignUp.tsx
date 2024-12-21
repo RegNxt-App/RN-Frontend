@@ -32,7 +32,6 @@ const SignUp = () => {
     setIsLoading(true);
     try {
       console.log(values);
-      // Form submission logic here
     } catch (error) {
       console.error(error);
     } finally {
@@ -73,7 +72,7 @@ const SignUp = () => {
                     <Input
                       placeholder="Enter your full name"
                       {...field}
-                      className="pl-6 pr-10 py-4"
+                      className="py-4 pl-6 pr-10"
                     />
                     <span className="absolute right-4 top-3 text-muted-foreground">
                       <User
@@ -100,7 +99,7 @@ const SignUp = () => {
                       placeholder="Enter your email"
                       type="email"
                       {...field}
-                      className="pl-6 pr-10 py-4"
+                      className="py-4 pl-6 pr-10"
                     />
                     <span className="absolute right-4 top-3 text-muted-foreground">
                       <Mail
@@ -127,7 +126,7 @@ const SignUp = () => {
                       placeholder="Enter your password"
                       type="password"
                       {...field}
-                      className="pl-6 pr-10 py-4"
+                      className="py-4 pl-6 pr-10"
                     />
                     <span className="absolute right-4 top-3 text-muted-foreground">
                       <Lock
@@ -152,7 +151,7 @@ const SignUp = () => {
 
           <Button
             variant="outline"
-            className="w-full bg-black text-white py-4 flex items-center justify-center gap-3.5"
+            className="flex w-full items-center justify-center gap-3.5 bg-black py-4 text-white"
             type="button"
           >
             <img
@@ -169,7 +168,7 @@ const SignUp = () => {
         <span className="text-muted-foreground">Already have an account? </span>
         <Link
           to="/auth/signin"
-          className="font-semibold hover:text-primary underline underline-offset-4"
+          className="font-semibold underline underline-offset-4 hover:text-primary"
         >
           Sign in
         </Link>

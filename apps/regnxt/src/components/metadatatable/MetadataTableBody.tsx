@@ -1,4 +1,3 @@
-// MetadataTableBody.tsx
 import React from 'react';
 
 import {MetadataItem, ValidationResult} from '@/types/databaseTypes';

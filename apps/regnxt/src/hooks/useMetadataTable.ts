@@ -1,4 +1,3 @@
-// useMetadataTable.ts
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {MetadataItem} from '@/types/databaseTypes';

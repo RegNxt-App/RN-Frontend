@@ -91,10 +91,10 @@ export const DatasetFormModal: React.FC<DatasetFormModalProps> = ({
 
     const validCode = label
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_') // Replace invalid chars with underscore
-      .replace(/^[^a-z]+/, '') // Remove leading non-letters
-      .replace(/_+/g, '_') // Replace multiple underscores with single
-      .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^[^a-z]+/, '')
+      .replace(/_+/g, '_')
+      .replace(/^_+|_+$/g, '');
 
     checkCodeExists(validCode);
   };
@@ -111,7 +111,6 @@ export const DatasetFormModal: React.FC<DatasetFormModalProps> = ({
       );
 
       if (exists) {
-        // If code exists, append a number
         let counter = 1;
         let newCode = `${code}_${counter}`;
 

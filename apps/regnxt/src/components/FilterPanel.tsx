@@ -14,7 +14,6 @@ import {Input} from '@rn/ui/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/ui/components/ui/tooltip';
 
-// Types
 interface FilterField {
   code: string;
   label: string;
@@ -46,7 +45,6 @@ interface FilterResponse {
   data: FilterField[];
 }
 
-// Helper Components
 const NoResults: React.FC<{title?: string; message?: string}> = ({
   title = 'No results found',
   message = "Try adjusting your filters to find what you're looking for.",
@@ -197,7 +195,6 @@ export default function FilterPanel({
   const [isApplying, setIsApplying] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
 
-  // Fetch filter fields configuration
   const {data: filterFields, isLoading: isFieldsLoading} = useSWR<FilterResponse>(
     versionId ? `/api/v1/datasets/${datasetId}/filters/?version_id=${versionId}` : null,
     birdBackendInstance,
@@ -206,7 +203,6 @@ export default function FilterPanel({
     }
   );
 
-  // Initialize filter values
   useEffect(() => {
     if (filterFields?.data) {
       const initialValues = filterFields.data.reduce((acc, field) => {
@@ -217,7 +213,6 @@ export default function FilterPanel({
     }
   }, [filterFields, versionId]);
 
-  // Separate snapshot and regular filters
   const {snapshotFields, filterFields: regularFilters} = useMemo(() => {
     if (!filterFields?.data) return {snapshotFields: [], filterFields: []};
 
@@ -229,7 +224,6 @@ export default function FilterPanel({
     };
   }, [filterFields]);
 
-  // Fetch dropdown options
   const {data: dropdownOptions, isLoading: isOptionsLoading} = useSWR(
     filterFields?.data
       ? filterFields.data

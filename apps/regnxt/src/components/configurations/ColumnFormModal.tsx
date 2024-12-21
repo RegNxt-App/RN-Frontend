@@ -13,7 +13,6 @@ import {Input} from '@rn/ui/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Switch} from '@rn/ui/components/ui/switch';
 
-// Column types configuration
 const COLUMN_TYPES = [
   {value: 'string', label: 'String'},
   {value: 'number', label: 'Number'},

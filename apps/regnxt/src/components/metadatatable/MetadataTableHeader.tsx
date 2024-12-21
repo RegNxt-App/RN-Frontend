@@ -1,4 +1,3 @@
-// MetadataTableHeader.tsx
 import React from 'react';
 
 import {CheckCircle, Loader, Plus, Save, Search} from 'lucide-react';

@@ -36,7 +36,6 @@ interface VersionColumnsData {
 const ConfigureDatasets = () => {
   const {toast} = useToast();
 
-  // Basic state
   const [selectedFramework, setSelectedFramework] = useState<string>(NO_FILTER);
   const [selectedLayer, setSelectedLayer] = useState<string>(NO_FILTER);
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,7 +43,6 @@ const ConfigureDatasets = () => {
 
   const [selectedTable, setSelectedTable] = useState<any | null>(null);
 
-  // Modal states
   const [isDatasetModalOpen, setIsDatasetModalOpen] = useState(false);
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
@@ -52,14 +50,12 @@ const ConfigureDatasets = () => {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // Selected item states
   const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<DatasetVersion | null>(null);
   const [editingDataset, setEditingDataset] = useState<Dataset | null>(null);
   const [editingVersion, setEditingVersion] = useState<DatasetVersion | null>(null);
   const [deletingDatasetId, setDeletingDatasetId] = useState<number | null>(null);
 
-  // Column filters
   const [columnFilters, setColumnFilters] = useState({
     code: '',
     label: '',
@@ -69,12 +65,11 @@ const ConfigureDatasets = () => {
     description: '',
   });
 
-  // History data
   const [historyData, setHistoryData] = useState<any[]>([]);
   const handleVersionSelect = (versionId: number) => {
     setSelectedVersionId((prev) => (prev === versionId ? null : versionId));
   };
-  // Data fetching
+
   const {data: layers} = useSWR<Layers>('/api/v1/layers/', birdBackendInstance);
   const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', birdBackendInstance);
   const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
@@ -213,7 +208,6 @@ const ConfigureDatasets = () => {
 
   const handleCreateDataset = async (newDataset: Partial<Dataset>) => {
     try {
-      // Make the API call
       await birdBackendInstance.post('/api/v1/datasets/', {
         ...newDataset,
         is_system_generated: false,
@@ -350,7 +344,6 @@ const ConfigureDatasets = () => {
     }
   };
 
-  // Configuration and History handlers
   const handleConfigurationSave = async (configData: {is_visible: boolean; historization_type: string}) => {
     if (!selectedDataset) return;
 

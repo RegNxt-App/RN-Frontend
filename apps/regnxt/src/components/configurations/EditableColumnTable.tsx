@@ -1,6 +1,5 @@
 import React, {useCallback, useMemo, useState} from 'react';
 
-// Add this import
 import {useToast} from '@/hooks/use-toast';
 import {birdBackendInstance} from '@/lib/axios';
 import {cn} from '@/lib/utils';

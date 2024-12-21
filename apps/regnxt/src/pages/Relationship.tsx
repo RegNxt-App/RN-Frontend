@@ -45,7 +45,6 @@ export default function Relationship() {
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  // const [allDatasets, setAllDatasets] = useState<any[]>([]);
 
   const {data: layers} = useSWR<Layers>('/api/v1/layers/', birdBackendInstance);
   const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', birdBackendInstance);
@@ -85,23 +84,6 @@ export default function Relationship() {
     setSelectedDatasetVersions(pendingSelections);
     setIsSheetOpen(false);
   }, [pendingSelections]);
-
-  // const handleRemoveDataset = useCallback((id: number) => {
-  //   setSelectedDatasetVersions((prev) =>
-  //     prev.filter((v) => v.dataset_version_id !== id)
-  //   );
-  //   setPendingSelections((prev) =>
-  //     prev.filter((v) => v.dataset_version_id !== id)
-  //   );
-  //   setNodes((prevNodes) =>
-  //     prevNodes.filter((node) => node.id !== id.toString())
-  //   );
-  //   setEdges((prevEdges) =>
-  //     prevEdges.filter(
-  //       (edge) => edge.source !== id.toString() && edge.target !== id.toString()
-  //     )
-  //   );
-  // }, []);
 
   const filteredData = useMemo(() => {
     if (!dataTableJson?.data?.results) return {};
@@ -232,12 +214,6 @@ export default function Relationship() {
             newEdges.push(createEdge(rel, rel.from_table, rel.to_table, 'outbound'));
           });
         });
-
-        // setAllDatasets(
-        //   Array.from(allDatasetsSet).map((dataset) =>
-        //     JSON.parse(dataset as string)
-        //   )
-        // );
 
         const {nodes: layoutedNodes, edges: layoutedEdges} = await getLayoutedElements(newNodes, newEdges);
 

@@ -1,4 +1,3 @@
-// Create a separate file: layoutUtils.ts
 import ELK from 'elkjs/lib/elk.bundled.js';
 
 const elk = new ELK();

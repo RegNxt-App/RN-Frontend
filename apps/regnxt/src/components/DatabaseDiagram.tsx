@@ -65,13 +65,6 @@ export default function DatabaseDiagram({
     setPendingConnection(params);
     setIsModalOpen(true);
   }, []);
-  // const onConnect = useCallback(
-  //   (params: Connection) =>
-  //     setEdges((eds) =>
-  //       addEdge({ ...params, type: "custom", animated: true }, eds)
-  //     ),
-  //   [setEdges]
-  // );
 
   const handleColumnSelection = useCallback(
     (sourceColumn: string, targetColumn: string, sourceCardinality: string, targetCardinality: string) => {
@@ -106,7 +99,6 @@ export default function DatabaseDiagram({
 
   const onNodeClick = useCallback(
     (event: React.MouseEvent, node: Node) => {
-      // Only log table information
       onNodeInfoLog(node as any);
     },
     [onNodeInfoLog]
