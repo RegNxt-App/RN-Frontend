@@ -4,8 +4,11 @@
     "exclude": ["/images/*.{png,jpg,gif}", "/css/*"]
   },
   "mimeTypes": {
-    ".json": "text/json",
-    ".js": "text/javascript",
+    ".json": "application/json",
+    ".js": "application/javascript",
+    ".jsx": "application/javascript",
+    ".tsx": "application/javascript",
+    ".wasm": "application/wasm",
     ".css": "text/css",
     ".html": "text/html"
   }
