@@ -39,8 +39,23 @@ jobs:
         run: |
           mkdir -p dist
           cp -r apps/regnxt/dist/* dist/
-          cp web.config dist/
+          cp apps/regnxt/web.config dist/
           chmod -R 755 dist
+
+      - name: List Distribution Contents
+        run: |
+          echo "Distribution contents:"
+          ls -la dist/
+
+      - name: Verify web.config
+        run: |
+          if [ -f "dist/web.config" ]; then
+            echo "web.config exists in dist folder"
+            cat dist/web.config
+          else
+            echo "Error: web.config not found in dist folder"
+            exit 1
+          fi
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -60,6 +75,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: regnxt-app
+
+      - name: List Downloaded Artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          ls -la
 
       - name: Deploy to Azure
         id: deploy-to-webapp
