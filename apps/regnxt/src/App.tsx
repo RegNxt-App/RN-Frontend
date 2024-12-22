@@ -159,7 +159,7 @@ function App() {
             key={path}
             path={path}
             element={
-              <Suspense fallback={<span />}>
+              <Suspense fallback={<Loader />}>
                 <ErrorBoundary>
                   <Component />
                 </ErrorBoundary>
@@ -174,7 +174,7 @@ function App() {
               key={path}
               path={path}
               element={
-                <Suspense fallback={<span />}>
+                <Suspense fallback={<Loader />}>
                   <ErrorBoundary>
                     <ProtectedRoute
                       component={Component}
