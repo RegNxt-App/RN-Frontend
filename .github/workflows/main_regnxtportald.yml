@@ -39,6 +39,7 @@ jobs:
         run: |
           mkdir -p dist
           cp -r apps/regnxt/dist/* dist/
+          cp web.config dist/
           chmod -R 755 dist
 
       - name: Upload artifact for deployment job
