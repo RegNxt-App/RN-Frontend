@@ -17,6 +17,12 @@ export default defineConfig({
       }
     }
   },
+  server: {
+    headers: {
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff'
+    }
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
