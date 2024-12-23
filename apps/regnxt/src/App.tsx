@@ -9,6 +9,8 @@ import Loader from './common/Loader';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageTitle from './components/PageTitle';
 import PrivateRoute from './components/PrivateRoute';
+import OrchestraConfigureDatasets from './components/configurations/OrchestraConfigureDatasets';
+import OrchestraConfigureGrouping from './components/configurations/OrchestraConfigureGrouping';
 import {useAuth} from './contexts/AuthContext';
 import DefaultLayout from './layout/DefaultLayout';
 
@@ -51,6 +53,8 @@ const DataSetView = lazy(() => import('./pages/DataSetView'));
 const Relationship = lazy(() => import('./pages/Relationship'));
 const ConfigureDatasets = lazy(() => import('./components/configurations/ConfigureDatasets'));
 const ConfigureGrouping = lazy(() => import('./components/configurations/ConfigureGrouping'));
+const OrchestraRelationship = lazy(() => import('./pages/Orchestra/OrchestraRelationship'));
+const OrchestraDataSetView = lazy(() => import('./pages/Orchestra/OrchestraDataSetView'));
 
 const routeConfig = {
   auth: [
@@ -76,6 +80,19 @@ const routeConfig = {
     {path: '/reporting/validation', component: Validation, title: 'Reporting'},
   ],
   orchestra: [
+    {path: '/orchestra/configuration', component: () => <ConfigureDataSetView />, title: 'Orchestra'},
+    {path: '/orchestra/data', component: () => <OrchestraDataSetView />, title: 'Orchestra'},
+    {path: '/orchestra/relationships', component: () => <OrchestraRelationship />, title: 'Orchestra'},
+    {
+      path: '/orchestra/configuration/dataset',
+      component: () => <OrchestraConfigureDatasets />,
+      title: 'Orchestra',
+    },
+    {
+      path: '/orchestra/configuration/groups',
+      component: () => <OrchestraConfigureGrouping />,
+      title: 'Orchestra',
+    },
     {path: '/orchestra/connections', component: Connections, title: 'Orchestra'},
     {path: '/orchestra/variables', component: Variables, title: 'Orchestra'},
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},

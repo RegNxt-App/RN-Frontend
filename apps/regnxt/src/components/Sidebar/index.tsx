@@ -125,6 +125,16 @@ const navigationConfig: NavigationConfig = {
       {
         title: 'Orchestra Dashboard',
         links: [
+          {
+            path: '/orchestra/configuration',
+            icon: 'Settings',
+            label: 'Configuration',
+            dropdownItems: [
+              {path: '/orchestra/configuration/dataset', label: 'Configure Datasets'},
+              {path: '/orchestra/configuration/groups', label: 'Configure Groups'},
+            ],
+          },
+          {path: '/orchestra/data', icon: 'Database', label: 'Data'},
           {path: '/orchestra/connections', icon: 'Cable', label: 'Connections'},
           {path: '/orchestra/variables', icon: 'BookA', label: 'Variables'},
           {path: '/orchestra/datasets', icon: 'HardDrive', label: 'Datasets'},
