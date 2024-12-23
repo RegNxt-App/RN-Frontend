@@ -34,8 +34,8 @@ jobs:
         env:
           CI: false
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-          VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
           VITE_ORCHESTRA_API_BACKED: ${{ secrets.VITE_ORCHESTRA_API_BACKED }}
+          VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
 
       - name: Setup Distribution
         run: |
