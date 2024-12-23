@@ -1,16 +1,46 @@
-import {useEffect, useRef, useState} from 'react';
-import {NavLink, useLocation} from 'react-router-dom';
+import * as React from 'react';
+import {NavLink, useLocation, useNavigate} from 'react-router-dom';
 
+import {useAuth} from '@/contexts/AuthContext';
 import {cn} from '@/lib/utils';
 import * as Icons from 'lucide-react';
-import {LucideIcon} from 'lucide-react';
+import {ChevronDown, ChevronLeft, ChevronRight, LogOut, Settings} from 'lucide-react';
 
-import SidebarLinkGroup from './SidebarLinkGroup';
+import {Avatar, AvatarFallback, AvatarImage} from '@rn/ui/components/ui/avatar';
+import {Button} from '@rn/ui/components/ui/button';
+import {Collapsible, CollapsibleContent, CollapsibleTrigger} from '@rn/ui/components/ui/collapsible';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@rn/ui/components/ui/dialog';
+import {Separator} from '@rn/ui/components/ui/separator';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+  SidebarRail,
+} from '@rn/ui/components/ui/sidebar';
 
 interface DropdownItem {
   path: string;
   label: string;
 }
+
 interface NavigationLink {
   path: string;
   icon: keyof typeof Icons;
@@ -31,25 +61,11 @@ interface NavigationConfig {
 
 interface SidebarProps {
   sidebarOpen: boolean;
+
+  setSidebarCollapsed: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   sidebarCollapsed: boolean;
   selectedApp: string;
-}
-
-interface SidebarLinkProps {
-  link: NavigationLink;
-  sidebarCollapsed: boolean;
-  pathname: string;
-  sidebarExpanded: boolean;
-  setSidebarExpanded: (expanded: boolean) => void;
-}
-
-interface SidebarSectionProps {
-  section: NavigationSection;
-  sidebarCollapsed: boolean;
-  pathname: string;
-  sidebarExpanded: boolean;
-  setSidebarExpanded: (expanded: boolean) => void;
 }
 
 const navigationConfig: NavigationConfig = {
@@ -166,259 +182,248 @@ const navigationConfig: NavigationConfig = {
   },
 };
 
-const SidebarLink: React.FC<SidebarLinkProps> = ({
-  link,
+const SidebarComponent: React.FC<SidebarProps> = ({
+  sidebarOpen,
+  setSidebarOpen,
   sidebarCollapsed,
-  pathname,
-  sidebarExpanded,
-  setSidebarExpanded,
+  setSidebarCollapsed,
+  selectedApp,
 }) => {
   const location = useLocation();
-  const currentPath = location.pathname;
-  const Icon: LucideIcon = Icons[link.icon] as LucideIcon;
-  const isDropdown = link.dropdownItems && link.dropdownItems.length > 0;
+  const navigate = useNavigate();
+  const {logout, user} = useAuth();
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = React.useState(false);
+  const [currentApp, setCurrentApp] = React.useState(selectedApp);
 
-  const isChildActive =
-    isDropdown &&
-    link.dropdownItems?.some((item) => currentPath === item.path || currentPath.startsWith(item.path));
+  const handleAppChange = (app: string) => {
+    setCurrentApp(app);
+    switch (app) {
+      case 'reporting':
+        navigate('/');
+        break;
+      case 'orchestra':
+        navigate('/orchestra/connections');
+        break;
+      case 'bird':
+        navigate('/bird/data');
+        break;
+    }
+  };
 
-  const isCurrentActive = currentPath === link.path || currentPath.startsWith(link.path);
-
-  const isActive = isCurrentActive || isChildActive;
-
-  if (isDropdown) {
-    return (
-      <SidebarLinkGroup
-        activeCondition={isActive}
-        sidebarCollapsed={sidebarCollapsed}
-      >
-        {(handleClick: () => void, open: boolean) => (
-          <>
-            <NavLink
-              to={link.path}
-              className={cn(
-                'group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4',
-                {
-                  'bg-graydark dark:bg-meta-4': isActive,
-                  'justify-center': sidebarCollapsed,
-                  'py-2 px-4': !sidebarCollapsed,
-                }
+  return (
+    <div className="relative z-50">
+      <SidebarProvider defaultOpen={!sidebarCollapsed}>
+        <Sidebar
+          className={cn(
+            'fixed left-0 top-0 min-h-screen border-r border-border bg-background transition-all duration-300 ease-in-out',
+            sidebarCollapsed ? 'w-16' : 'w-[240px]'
+          )}
+        >
+          {/* Header Section */}
+          <SidebarHeader className="border-b border-border p-4">
+            <div className="flex items-center justify-between">
+              {!sidebarCollapsed ? (
+                <img
+                  src="/white-logo.svg"
+                  alt="RegNxt"
+                  className="h-14 w-auto dark:brightness-0 dark:invert"
+                />
+              ) : (
+                <img
+                  src="/vite.svg"
+                  alt="R"
+                  className="mx-auto h-8 w-8 dark:brightness-0 dark:invert"
+                />
               )}
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                sidebarExpanded ? handleClick() : setSidebarExpanded(true);
+            </div>
+
+            {/* App Selection Buttons */}
+            <div className={cn('mt-4 flex gap-2', sidebarCollapsed ? 'flex-col items-center' : '')}>
+              {['reporting', 'orchestra', 'bird'].map((app) => (
+                <Button
+                  key={app}
+                  variant={currentApp === app ? 'default' : 'ghost'}
+                  className={cn(
+                    'justify-start truncate',
+                    sidebarCollapsed ? 'w-10 justify-center p-0' : 'flex-1'
+                  )}
+                  onClick={() => handleAppChange(app)}
+                  title={sidebarCollapsed ? app.charAt(0).toUpperCase() + app.slice(1) : undefined}
+                >
+                  <span
+                    className={cn('transition-all duration-200', sidebarCollapsed ? 'scale-75' : 'scale-100')}
+                  >
+                    {sidebarCollapsed
+                      ? app.charAt(0).toUpperCase()
+                      : app.charAt(0).toUpperCase() + app.slice(1)}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </SidebarHeader>
+
+          {/* Main Content */}
+          <SidebarContent className="flex-grow overflow-y-auto">
+            {navigationConfig[currentApp]?.sections.map((section, index) => (
+              <Collapsible
+                key={index}
+                defaultOpen
+              >
+                <SidebarGroup>
+                  {!sidebarCollapsed && (
+                    <CollapsibleTrigger className="w-full">
+                      <SidebarGroupLabel className="flex items-center justify-between px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+                        {section.title}
+                        <ChevronDown className="h-4 w-4" />
+                      </SidebarGroupLabel>
+                    </CollapsibleTrigger>
+                  )}
+                  <CollapsibleContent>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {section.links.map((item, itemIndex) => (
+                          <SidebarMenuItem key={itemIndex}>
+                            <SidebarMenuButton asChild>
+                              <NavLink
+                                to={item.path}
+                                className={({isActive}) =>
+                                  cn(
+                                    'flex items-center gap-3 rounded-lg px-4 py-2 text-sm transition-all hover:bg-accent',
+                                    isActive
+                                      ? 'bg-accent font-medium text-accent-foreground'
+                                      : 'text-foreground/70 hover:text-accent-foreground',
+                                    sidebarCollapsed && 'justify-center px-2'
+                                  )
+                                }
+                                title={sidebarCollapsed ? item.label : undefined}
+                              >
+                                {React.createElement(Icons[item.icon as keyof typeof Icons], {
+                                  className: cn('h-4 w-4', sidebarCollapsed && 'h-5 w-5'),
+                                })}
+                                {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+                              </NavLink>
+                            </SidebarMenuButton>
+                            {!sidebarCollapsed && item.dropdownItems && (
+                              <SidebarMenuSub>
+                                {item.dropdownItems.map((subItem, subIndex) => (
+                                  <SidebarMenuSubItem key={subIndex}>
+                                    <SidebarMenuSubButton asChild>
+                                      <NavLink
+                                        to={subItem.path}
+                                        className={({isActive}) =>
+                                          cn(
+                                            'block rounded-lg px-8 py-2 text-sm transition-all hover:bg-accent',
+                                            isActive
+                                              ? 'bg-accent font-medium text-accent-foreground'
+                                              : 'text-foreground/70 hover:text-accent-foreground'
+                                          )
+                                        }
+                                      >
+                                        <span className="truncate">{subItem.label}</span>
+                                      </NavLink>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                ))}
+                              </SidebarMenuSub>
+                            )}
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </CollapsibleContent>
+                </SidebarGroup>
+              </Collapsible>
+            ))}
+          </SidebarContent>
+
+          {/* Footer */}
+          <SidebarFooter className="border-t border-border p-4">
+            <div className={cn('flex flex-col gap-4', sidebarCollapsed ? 'items-center' : '')}>
+              <Button
+                variant="ghost"
+                className={cn('justify-start', sidebarCollapsed ? 'w-10 justify-center p-0' : '')}
+                asChild
+              >
+                <NavLink
+                  to="/settings"
+                  className="flex items-center"
+                >
+                  <Settings className="h-4 w-4" />
+                  {!sidebarCollapsed && <span className="ml-2 truncate">Settings</span>}
+                </NavLink>
+              </Button>
+              <Separator />
+              <div className={cn('flex items-center gap-4', sidebarCollapsed ? 'flex-col' : '')}>
+                <Avatar>
+                  <AvatarImage
+                    //  src={user?.avatar}
+                    alt={user?.firstName}
+                  />
+                  <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
+                </Avatar>
+                {!sidebarCollapsed && (
+                  <div className="flex flex-1 flex-col">
+                    <span className="truncate text-sm font-medium">
+                      {user?.firstName} {user?.lastName}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                  </div>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsLogoutDialogOpen(true)}
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </SidebarFooter>
+
+          {/* Collapse/Expand Button */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="absolute right-[-12px] top-6 z-50 flex h-6 w-6 items-center justify-center rounded-full border bg-background shadow-md transition-all hover:bg-accent focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
+
+          <SidebarRail />
+        </Sidebar>
+      </SidebarProvider>
+
+      {/* Logout Dialog */}
+      <Dialog
+        open={isLogoutDialogOpen}
+        onOpenChange={setIsLogoutDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogDescription>Are you sure you want to log out of the system?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsLogoutDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                await logout();
+                setIsLogoutDialogOpen(false);
+                navigate('/auth/login');
               }}
             >
-              <Icon
-                size={20}
-                strokeWidth={1.5}
-              />
-              {!sidebarCollapsed && (
-                <>
-                  {link.label}
-                  <svg
-                    className={cn('absolute right-4 top-1/2 -translate-y-1/2 fill-current', {
-                      'rotate-180': open,
-                    })}
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z"
-                      fill=""
-                    />
-                  </svg>
-                </>
-              )}
-            </NavLink>
-            {!sidebarCollapsed && open && (
-              <div className="translate transform overflow-hidden">
-                <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
-                  {link?.dropdownItems?.map((item, index) => (
-                    <li key={index}>
-                      <NavLink
-                        to={item.path}
-                        className={({isActive: itemIsActive}) =>
-                          cn(
-                            'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-gray-400 duration-300 ease-in-out hover:text-white',
-                            {
-                              '!text-white': itemIsActive || currentPath.startsWith(item.path),
-                            }
-                          )
-                        }
-                      >
-                        {item.label}
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </>
-        )}
-      </SidebarLinkGroup>
-    );
-  }
-
-  return (
-    <li>
-      <NavLink
-        to={link.path}
-        className={({isActive: navIsActive}) =>
-          cn(
-            'group relative flex items-center gap-2.5 rounded-sm font-medium text-white duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4',
-            {
-              'bg-graydark dark:bg-meta-4': navIsActive || currentPath.startsWith(link.path),
-              'justify-center': sidebarCollapsed,
-              'py-2 px-4': !sidebarCollapsed,
-            }
-          )
-        }
-      >
-        <Icon
-          size={20}
-          strokeWidth={1.5}
-        />
-        {!sidebarCollapsed && <span>{link.label}</span>}
-      </NavLink>
-    </li>
+              Log out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
-const SidebarSection: React.FC<SidebarSectionProps> = ({
-  section,
-  sidebarCollapsed,
-  pathname,
-  sidebarExpanded,
-  setSidebarExpanded,
-}) => (
-  <div>
-    <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">{!sidebarCollapsed && section.title}</h3>
-    <ul className="mb-6 flex flex-col gap-1.5">
-      {section.links.map((link, index) => (
-        <SidebarLink
-          key={index}
-          link={link}
-          sidebarCollapsed={sidebarCollapsed}
-          pathname={pathname}
-          sidebarExpanded={sidebarExpanded}
-          setSidebarExpanded={setSidebarExpanded}
-        />
-      ))}
-    </ul>
-  </div>
-);
-
-const Sidebar: React.FC<SidebarProps> = ({sidebarOpen, setSidebarOpen, sidebarCollapsed, selectedApp}) => {
-  const location = useLocation();
-  const {pathname} = location;
-
-  const trigger = useRef<HTMLButtonElement>(null);
-  const sidebar = useRef<HTMLElement>(null);
-
-  const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
-  const [sidebarExpanded, setSidebarExpanded] = useState<boolean>(
-    storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
-  );
-
-  useEffect(() => {
-    const clickHandler = ({target}: MouseEvent) => {
-      if (!sidebar.current || !trigger.current) return;
-      if (
-        !sidebarOpen ||
-        sidebar.current.contains(target as Node) ||
-        trigger.current.contains(target as Node)
-      )
-        return;
-      setSidebarOpen(false);
-    };
-    document.addEventListener('click', clickHandler);
-    return () => document.removeEventListener('click', clickHandler);
-  });
-
-  useEffect(() => {
-    const keyHandler = ({keyCode}: KeyboardEvent) => {
-      if (!sidebarOpen || keyCode !== 27) return;
-      setSidebarOpen(false);
-    };
-    document.addEventListener('keydown', keyHandler);
-    return () => document.removeEventListener('keydown', keyHandler);
-  });
-
-  useEffect(() => {
-    localStorage.setItem('sidebar-expanded', sidebarExpanded.toString());
-    if (sidebarExpanded) {
-      document.querySelector('body')?.classList.add('sidebar-expanded');
-    } else {
-      document.querySelector('body')?.classList.remove('sidebar-expanded');
-    }
-  }, [sidebarExpanded]);
-
-  return (
-    <aside
-      ref={sidebar}
-      className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } ${sidebarCollapsed ? 'lg:w-20' : ''}`}
-    >
-      <div
-        className={`flex items-center px-6 py-5.5 lg:py-6.5 my-6 ${
-          sidebarCollapsed ? 'justify-center' : 'justify-between'
-        }`}
-      >
-        <NavLink
-          to="/"
-          className={sidebarCollapsed ? 'w-full flex justify-center' : 'w-full'}
-        >
-          {sidebarCollapsed ? (
-            <img
-              src="/vite.svg"
-              alt="R"
-              className="h-10 w-10"
-            />
-          ) : (
-            <img
-              src="/white-logo.svg"
-              alt="RegNxt"
-              className="h-14 w-auto px-6"
-            />
-          )}
-        </NavLink>
-        <button
-          ref={trigger}
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-controls="sidebar"
-          aria-expanded={sidebarOpen}
-          className="block lg:hidden"
-        >
-          <Icons.ArrowRight
-            size={20}
-            strokeWidth={1.5}
-          />
-        </button>
-      </div>
-
-      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-        <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
-          {navigationConfig[selectedApp]?.sections.map((section, index) => (
-            <SidebarSection
-              key={index}
-              section={section}
-              sidebarCollapsed={sidebarCollapsed}
-              pathname={pathname}
-              sidebarExpanded={sidebarExpanded}
-              setSidebarExpanded={setSidebarExpanded}
-            />
-          ))}
-        </nav>
-      </div>
-    </aside>
-  );
-};
-
-export default Sidebar;
+export default SidebarComponent;
