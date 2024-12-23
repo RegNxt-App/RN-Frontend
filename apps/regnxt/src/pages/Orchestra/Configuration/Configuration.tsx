@@ -1,8 +1,7 @@
 import React from 'react';
 
-import ConfigureDatasets from '@/components/configurations/ConfigureDatasets';
 import {ConfigureDataviews} from '@/components/configurations/ConfigureDataviews';
-import ConfigureGrouping from '@/components/configurations/ConfigureGrouping';
+import OrchestraConfigureGrouping from '@/components/configurations/OrchestraConfigureGrouping';
 import {Database, LayersIcon, Table} from 'lucide-react';
 
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
@@ -33,7 +32,7 @@ const Configuration: React.FC = () => {
               <CardDescription>Manage datasets, versions, and columns</CardDescription>
             </CardHeader>
             <CardContent>
-              <ConfigureDatasets />
+              <OrchestraConfigureGrouping />
             </CardContent>
           </Card>
         </TabsContent>
@@ -63,7 +62,7 @@ const Configuration: React.FC = () => {
               <CardDescription>Manage groups and dataset versions</CardDescription>
             </CardHeader>
             <CardContent>
-              <ConfigureGrouping />
+              <OrchestraConfigureGrouping />
             </CardContent>
           </Card>
         </TabsContent>
