@@ -135,29 +135,6 @@ const navigationConfig: NavigationConfig = {
           {path: '/orchestra/monitoring', icon: 'View', label: 'Monitoring'},
         ],
       },
-      {
-        title: 'Business Logic',
-        links: [
-          {
-            path: '/orchestra/data',
-            icon: 'Database',
-            label: 'Data',
-            dropdownItems: [{path: '/orchestra/data', label: 'Data 1'}],
-          },
-          {
-            path: '/orchestra/business-rules',
-            icon: 'Handshake',
-            label: 'Business Rules',
-            dropdownItems: [{path: '/orchestra/business-rules', label: 'Business 1'}],
-          },
-          {
-            path: '/orchestra/processing',
-            icon: 'LoaderPinwheel',
-            label: 'Processing',
-            dropdownItems: [{path: '/orchestra/processing', label: 'Process 1'}],
-          },
-        ],
-      },
     ],
   },
   bird: {
@@ -223,7 +200,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
             <div className="flex items-center justify-between">
               {!sidebarCollapsed ? (
                 <img
-                  src="/white-logo.svg"
+                  src="/logo.svg"
                   alt="RegNxt"
                   className="h-14 w-auto dark:brightness-0 dark:invert"
                 />
