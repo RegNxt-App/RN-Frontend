@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import {NavLink, useLocation, useNavigate} from 'react-router-dom';
 
@@ -63,6 +61,8 @@ interface NavigationConfig {
 
 interface SidebarProps {
   sidebarOpen: boolean;
+
+  setSidebarCollapsed: (open: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   sidebarCollapsed: boolean;
   selectedApp: string;
@@ -355,7 +355,10 @@ const SidebarComponent: React.FC<SidebarProps> = ({
               <Separator />
               <div className={cn('flex items-center gap-4', sidebarCollapsed ? 'flex-col' : '')}>
                 <Avatar>
-                  <AvatarImage src={user?.avatar} />
+                  <AvatarImage
+                    //  src={user?.avatar}
+                    alt={user?.firstName}
+                  />
                   <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 {!sidebarCollapsed && (
