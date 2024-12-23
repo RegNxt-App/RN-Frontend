@@ -16,6 +16,8 @@ const birdBackendInstance = axios.create({
   baseURL: import.meta.env.VITE_FAST_API_BACKEND,
 });
 
+console.log('orchestra: ', import.meta.env.VITE_ORCHESTRA_API_BACKED);
+
 const orchestraBackendInstance = axios.create({
   baseURL: import.meta.env.VITE_ORCHESTRA_API_BACKED,
 });
