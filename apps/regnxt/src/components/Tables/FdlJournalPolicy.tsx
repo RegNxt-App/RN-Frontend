@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
+
+import {CheckCircle, Filter, XCircle} from 'lucide-react';
+
 import Pagination from '../Pagination';
-import { Filter, CheckCircle, XCircle } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
+import {Table, TableBody, TableCell, TableHeader, TableRow} from '../ui/table';
 
 interface JournalPolicyData {
   id: string;
@@ -44,7 +40,7 @@ type FilterType =
   | 'Equals'
   | 'NotEquals';
 
-const FdlJournalPolicy = ({ data }: DataTableProps) => {
+const FdlJournalPolicy = ({data}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [filteredData, setFilteredData] = useState<JournalPolicyData[]>(data);
@@ -74,9 +70,7 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
     let result = data;
     Object.entries(filters).forEach(([key, filter]) => {
       result = result.filter((item) => {
-        const itemValue = String(
-          item[key as keyof JournalPolicyData],
-        ).toLowerCase();
+        const itemValue = String(item[key as keyof JournalPolicyData]).toLowerCase();
         const filterValue = filter.value.toLowerCase();
         if (filter.type === 'matchAll') {
           return itemValue.includes(filterValue);
@@ -89,20 +83,16 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
     setCurrentPage(1);
   };
 
-  const handleFilterChange = (
-    column: string,
-    type: FilterType,
-    value: string,
-  ) => {
+  const handleFilterChange = (column: string, type: FilterType, value: string) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      [column]: { type, value },
+      [column]: {type, value},
     }));
   };
 
   const clearFilter = (column: string) => {
     setFilters((prev) => {
-      const newFilters = { ...prev };
+      const newFilters = {...prev};
       delete newFilters[column];
       return newFilters;
     });
@@ -116,11 +106,7 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'matchAll'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="matchAll">Match All</option>
@@ -130,11 +116,7 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'startsWith'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="startsWith">Starts With</option>
@@ -148,13 +130,7 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
           type="text"
           className="mt-2 w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.value || ''}
-          onChange={(e) =>
-            handleFilterChange(
-              column,
-              filters[column]?.type || 'matchAll',
-              e.target.value,
-            )
-          }
+          onChange={(e) => handleFilterChange(column, filters[column]?.type || 'matchAll', e.target.value)}
           placeholder="Search..."
         />
         <div className="mt-2 flex justify-between">
@@ -177,9 +153,15 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
 
   const renderBooleanIcon = (value: boolean) => {
     return value ? (
-      <CheckCircle className="text-green-500" size={20} />
+      <CheckCircle
+        className="text-green-500"
+        size={20}
+      />
     ) : (
-      <XCircle className="text-red-500" size={20} />
+      <XCircle
+        className="text-red-500"
+        size={20}
+      />
     );
   };
 
@@ -206,15 +188,15 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
                     {header}
                     <button
                       className="ml-2"
-                      onClick={() =>
-                        setActiveFilter(activeFilter === header ? null : header)
-                      }
+                      onClick={() => setActiveFilter(activeFilter === header ? null : header)}
                     >
-                      <Filter size={16} strokeWidth={1.5} />
+                      <Filter
+                        size={16}
+                        strokeWidth={1.5}
+                      />
                     </button>
                   </div>
-                  {activeFilter === header &&
-                    renderFilterDropdown(header.toLowerCase())}
+                  {activeFilter === header && renderFilterDropdown(header.toLowerCase())}
                 </TableCell>
               ))}
             </TableRow>
@@ -225,18 +207,10 @@ const FdlJournalPolicy = ({ data }: DataTableProps) => {
                 <TableCell>{item.code}</TableCell>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.description}</TableCell>
-                <TableCell>
-                  {renderBooleanIcon(item.allowManualEntries)}
-                </TableCell>
-                <TableCell>
-                  {renderBooleanIcon(item.allowAutomatedEntries)}
-                </TableCell>
-                <TableCell>
-                  {renderBooleanIcon(item.allowMultipleEntries)}
-                </TableCell>
-                <TableCell>
-                  {renderBooleanIcon(item.applyAutoApprove)}
-                </TableCell>
+                <TableCell>{renderBooleanIcon(item.allowManualEntries)}</TableCell>
+                <TableCell>{renderBooleanIcon(item.allowAutomatedEntries)}</TableCell>
+                <TableCell>{renderBooleanIcon(item.allowMultipleEntries)}</TableCell>
+                <TableCell>{renderBooleanIcon(item.applyAutoApprove)}</TableCell>
                 <TableCell>{item.inbalanceThreshold}</TableCell>
                 <TableCell>{item.lastJournalNr}</TableCell>
                 <TableCell>{renderBooleanIcon(item.mustBeReversed)}</TableCell>

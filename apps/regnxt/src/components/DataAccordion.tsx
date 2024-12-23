@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
 import {ColumnDef} from '@tanstack/react-table';
+import {Edit} from 'lucide-react';
 
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@rn/ui/components/ui/accordion';
 import {Button} from '@rn/ui/components/ui/button';
@@ -41,6 +42,18 @@ const columns: ColumnDef<DataItem>[] = [
     accessorKey: 'description',
     header: 'Description',
     cell: ({row}) => <div>{row.getValue('description')}</div>,
+  },
+  {
+    id: 'edit',
+    header: 'Actions',
+    cell: ({row}) => (
+      <Button
+        variant="outline"
+        size="sm"
+      >
+        <Edit className="h-4 w-4" />
+      </Button>
+    ),
   },
 ];
 

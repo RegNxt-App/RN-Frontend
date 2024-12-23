@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
+import React, {useEffect, useRef, useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {CheckCircle2, ChevronDown, ChevronRight, XCircle} from 'lucide-react';
+
 import Api from '../../../../utils/Api';
-import { Button } from '@/components/ui/button';
 
 interface ValidationResponse {
   rulecount: number;
@@ -39,34 +41,26 @@ interface CheckboxState {
   indeterminate: boolean;
 }
 
-const ActionsValidate: React.FC<WorkbookTablesProps> = ({
-  workbookId,
-  onClose,
-  onUpdate,
-}) => {
+const ActionsValidate: React.FC<WorkbookTablesProps> = ({workbookId, onClose, onUpdate}) => {
   const [tableData, setTableData] = useState<TableItem[]>([]);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState<
-    Record<string, CheckboxState>
-  >({});
+  const [selectedItems, setSelectedItems] = useState<Record<string, CheckboxState>>({});
   const [isValidating, setIsValidating] = useState(false);
-  const [toast, setToast] = useState<Toast>({ visible: false, data: null });
+  const [toast, setToast] = useState<Toast>({visible: false, data: null});
 
   const formatTime = (ms: number) => (ms / 1000).toFixed(2);
 
   const showToast = (data: ValidationResponse) => {
-    setToast({ visible: true, data });
+    setToast({visible: true, data});
     setTimeout(() => {
-      setToast({ visible: false, data: null });
+      setToast({visible: false, data: null});
     }, 5000);
   };
 
   useEffect(() => {
     const fetchTableData = async () => {
       try {
-        const response = await Api.get(
-          `/RI/Workbook/Tables?workbookId=${workbookId}&includeSheets=false`,
-        );
+        const response = await Api.get(`/RI/Workbook/Tables?workbookId=${workbookId}&includeSheets=false`);
         setTableData(response.data);
       } catch (error) {
         console.error('Error fetching workbook tables:', error);
@@ -77,17 +71,15 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
   }, [workbookId]);
 
   const toggleExpand = (key: string) => {
-    setExpandedItems((prev) =>
-      prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key],
-    );
+    setExpandedItems((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]));
   };
 
   const handleCheckboxChange = (key: string, hasChildren: boolean = false) => {
     setSelectedItems((prev) => {
-      const newSelectedItems = { ...prev };
+      const newSelectedItems = {...prev};
 
       const updateItemAndChildren = (item: TableItem, checked: boolean) => {
-        newSelectedItems[item.key] = { checked, indeterminate: false };
+        newSelectedItems[item.key] = {checked, indeterminate: false};
         if (item.children) {
           item.children.forEach((child) => {
             updateItemAndChildren(child, checked);
@@ -95,10 +87,7 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
         }
       };
 
-      const findAndUpdateItem = (
-        items: TableItem[],
-        targetKey: string,
-      ): boolean => {
+      const findAndUpdateItem = (items: TableItem[], targetKey: string): boolean => {
         for (const item of items) {
           if (item.key === targetKey) {
             const newState = !newSelectedItems[item.key]?.checked;
@@ -117,13 +106,9 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
       const updateParentStates = (items: TableItem[]) => {
         items.forEach((item) => {
           if (item.children) {
-            const childStates = item.children.map(
-              (child) => newSelectedItems[child.key],
-            );
+            const childStates = item.children.map((child) => newSelectedItems[child.key]);
             const allChecked = childStates.every((state) => state?.checked);
-            const someChecked = childStates.some(
-              (state) => state?.checked || state?.indeterminate,
-            );
+            const someChecked = childStates.some((state) => state?.checked || state?.indeterminate);
 
             newSelectedItems[item.key] = {
               checked: allChecked,
@@ -185,7 +170,7 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
     item: TableItem;
     state: CheckboxState;
     onChange: () => void;
-  }> = React.memo(({ item, state, onChange }) => {
+  }> = React.memo(({item, state, onChange}) => {
     const checkboxRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -206,22 +191,20 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
     );
   });
 
-  const Toast: React.FC<{ data: ValidationResponse }> = ({ data }) => (
+  const Toast: React.FC<{data: ValidationResponse}> = ({data}) => (
     <div className="fixed top-4 right-4 z-50 animate-slide-left">
       <div className="min-w-[400px] bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
-              {data.rulecompileerrorcount === 0 &&
-              data.expressionerrorcount === 0 ? (
+              {data.rulecompileerrorcount === 0 && data.expressionerrorcount === 0 ? (
                 <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
               ) : (
                 <XCircle className="h-5 w-5 text-red-500 mr-2" />
               )}
               <h3 className="text-lg font-semibold">
                 Validation{' '}
-                {data.rulecompileerrorcount === 0 &&
-                data.expressionerrorcount === 0
+                {data.rulecompileerrorcount === 0 && data.expressionerrorcount === 0
                   ? 'Successful'
                   : 'Completed with Errors'}
               </h3>
@@ -235,9 +218,7 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Data Fetch Time:</span>
-              <span className="font-medium">
-                {formatTime(data.datafetchtime)}s
-              </span>
+              <span className="font-medium">{formatTime(data.datafetchtime)}s</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Rules Count:</span>
@@ -247,17 +228,12 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
               <span className="text-gray-600">Data Updates:</span>
               <span className="font-medium">{data.dataupdates}</span>
             </div>
-            {(data.rulecompileerrorcount > 0 ||
-              data.expressionerrorcount > 0) && (
+            {(data.rulecompileerrorcount > 0 || data.expressionerrorcount > 0) && (
               <div className="mt-2 text-red-500">
                 {data.rulecompileerrorcount > 0 && (
-                  <div>
-                    Rule Compilation Errors: {data.rulecompileerrorcount}
-                  </div>
+                  <div>Rule Compilation Errors: {data.rulecompileerrorcount}</div>
                 )}
-                {data.expressionerrorcount > 0 && (
-                  <div>Expression Errors: {data.expressionerrorcount}</div>
-                )}
+                {data.expressionerrorcount > 0 && <div>Expression Errors: {data.expressionerrorcount}</div>}
               </div>
             )}
           </div>
@@ -266,7 +242,7 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
         <div className="h-1 bg-gray-100">
           <div
             className="h-full bg-blue-500 transition-all duration-5000 ease-linear"
-            style={{ width: '100%', animation: 'shrink 5s linear forwards' }}
+            style={{width: '100%', animation: 'shrink 5s linear forwards'}}
           />
         </div>
       </div>
@@ -282,7 +258,10 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
       const hasChildren = item.children && item.children.length > 0;
 
       return (
-        <div key={item.key} className="my-2">
+        <div
+          key={item.key}
+          className="my-2"
+        >
           <div className="flex items-center">
             {hasChildren && (
               <span
@@ -301,7 +280,10 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
               state={state}
               onChange={() => handleCheckboxChange(item.key, hasChildren)}
             />
-            <label htmlFor={item.key} className="ml-2 text-sm">
+            <label
+              htmlFor={item.key}
+              className="ml-2 text-sm"
+            >
               {item.label}
             </label>
           </div>
@@ -318,22 +300,21 @@ const ActionsValidate: React.FC<WorkbookTablesProps> = ({
       <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <Button
           className={`px-4 py-2 bg-purple-500 text-white rounded-md mb-4 ${
-            isValidating
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-indigo-800	'
+            isValidating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-800	'
           }`}
           onClick={handleValidate}
           disabled={isValidating}
         >
           {isValidating ? 'Validating...' : 'Validate'}
         </Button>
-        <div className="max-h-[60vh] overflow-y-auto">
-          {renderTableItems(tableData)}
-        </div>
+        <div className="max-h-[60vh] overflow-y-auto">{renderTableItems(tableData)}</div>
       </div>
       {toast.visible && toast.data && <Toast data={toast.data} />}
 
-      <style jsx global>{`
+      <style
+        jsx
+        global
+      >{`
         @keyframes shrink {
           from {
             width: 100%;

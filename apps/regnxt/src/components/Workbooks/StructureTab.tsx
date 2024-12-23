@@ -1,20 +1,22 @@
 // StructureTab.tsx
-import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Database, Save } from 'lucide-react';
-import Tree from './Tree';
-import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import React, {useEffect, useState} from 'react';
+import {Tooltip as ReactTooltip} from 'react-tooltip';
+
+import {AlertTriangle, Database, Save} from 'lucide-react';
+
+import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {
-  selectChangedRows,
-  selectTotalCounts,
   fetchTableStructure,
+  selectChangedRows,
+  selectStructureError,
   selectTableStructure,
   selectTableStructureLoading,
-  selectStructureError,
+  selectTotalCounts,
 } from '../../features/sheetData/sheetDataSlice';
-import { Tooltip as ReactTooltip } from 'react-tooltip';
-import { Input } from '../ui/input';
+import {Input} from '../ui/input';
+import Tree from './Tree';
 
-const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
+const StructureTab: React.FC<StructureTabProps> = ({workbookId}) => {
   const dispatch = useAppDispatch();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredData, setFilteredData] = useState<ApiResponse[]>([]);
@@ -24,9 +26,7 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   const isLoading = useAppSelector(selectTableStructureLoading);
   const error = useAppSelector(selectStructureError);
   const changedRows = useAppSelector(selectChangedRows);
-  const selectedSheet = useAppSelector(
-    (state) => state.sheetData.selectedSheet,
-  );
+  const selectedSheet = useAppSelector((state) => state.sheetData.selectedSheet);
   const totalCounts = useAppSelector(selectTotalCounts);
 
   // Initial data fetch
@@ -79,11 +79,7 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center p-4">
-        Loading structure...
-      </div>
-    );
+    return <div className="flex justify-center items-center p-4">Loading structure...</div>;
   }
 
   if (error) {
@@ -99,22 +95,40 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
       <div className="flex-none">
         <div className="flex mb-4">
           {/* Stats section */}
-          <div className="relative mr-2" id="total-rows-tooltip">
-            <Database className="text-blue-500 cursor-pointer" size={32} />
+          <div
+            className="relative mr-2"
+            id="total-rows-tooltip"
+          >
+            <Database
+              className="text-blue-500 cursor-pointer"
+              size={32}
+            />
             <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
               {totalCounts.totalCellCount}
             </span>
           </div>
 
-          <div className="relative mr-2" id="changed-rows-tooltip">
-            <Save className="text-orange-500 cursor-pointer" size={32} />
+          <div
+            className="relative mr-2"
+            id="changed-rows-tooltip"
+          >
+            <Save
+              className="text-orange-500 cursor-pointer"
+              size={32}
+            />
             <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
               {changedRows.length}
             </span>
           </div>
 
-          <div className="relative mr-2" id="invalid-cells-tooltip">
-            <AlertTriangle className="text-red-500 cursor-pointer" size={32} />
+          <div
+            className="relative mr-2"
+            id="invalid-cells-tooltip"
+          >
+            <AlertTriangle
+              className="text-red-500 cursor-pointer"
+              size={32}
+            />
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
               {selectedSheet.invalidcount || 0}
             </span>
@@ -152,7 +166,10 @@ const StructureTab: React.FC<StructureTabProps> = ({ workbookId }) => {
 
         {/* Tree section */}
         {filteredData.length > 0 ? (
-          <Tree data={filteredData} workbookId={workbookId} />
+          <Tree
+            data={filteredData}
+            workbookId={workbookId}
+          />
         ) : (
           <div className="text-gray-500 p-4">
             {searchTerm ? 'No matching items found' : 'No data available'}

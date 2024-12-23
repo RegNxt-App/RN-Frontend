@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 
 import WorkbookPopup from './Workbooks/WorkbookPopup';
 import WorkbookSlider from './Workbooks/WorkbookSlider';
@@ -13,7 +13,7 @@ interface WorkbookData {
 }
 
 // WorkbookView Component
-const WorkbookView: React.FC<{ workbook: WorkbookData }> = ({ workbook }) => {
+const WorkbookView: React.FC<{workbook: WorkbookData}> = ({workbook}) => {
   const [showPopup, setShowPopup] = useState(false);
   const [showSlider, setShowSlider] = useState(false);
 

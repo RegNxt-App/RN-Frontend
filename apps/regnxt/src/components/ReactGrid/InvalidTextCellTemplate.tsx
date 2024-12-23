@@ -1,13 +1,14 @@
 import * as React from 'react';
+
 import {
-  CellTemplate,
   Cell,
+  CellTemplate,
   Compatible,
   Uncertain,
   UncertainCompatible,
   getCellProperty,
-  isNavigationKey,
   isAlphaNumericKey,
+  isNavigationKey,
   keyCodes,
 } from '@silevis/reactgrid';
 
@@ -22,9 +23,7 @@ export interface InvalidTextCell extends Cell {
 export class InvalidTextCellTemplate implements CellTemplate<InvalidTextCell> {
   private wasEscKeyPressed = false;
 
-  getCompatibleCell(
-    uncertainCell: Uncertain<InvalidTextCell>,
-  ): Compatible<InvalidTextCell> {
+  getCompatibleCell(uncertainCell: Uncertain<InvalidTextCell>): Compatible<InvalidTextCell> {
     const text = getCellProperty(uncertainCell, 'text', 'string');
     let placeholder: string | undefined;
     try {
@@ -33,12 +32,12 @@ export class InvalidTextCellTemplate implements CellTemplate<InvalidTextCell> {
       placeholder = '';
     }
     const value = parseFloat(text);
-    return { ...uncertainCell, text, value, placeholder };
+    return {...uncertainCell, text, value, placeholder};
   }
 
   update(
     cell: Compatible<InvalidTextCell>,
-    cellToMerge: UncertainCompatible<InvalidTextCell>,
+    cellToMerge: UncertainCompatible<InvalidTextCell>
   ): Compatible<InvalidTextCell> {
     return this.getCompatibleCell({
       ...cell,
@@ -47,31 +46,22 @@ export class InvalidTextCellTemplate implements CellTemplate<InvalidTextCell> {
     });
   }
 
-  getClassName(
-    cell: Compatible<InvalidTextCell>,
-    isInEditMode: boolean,
-  ): string {
+  getClassName(cell: Compatible<InvalidTextCell>, isInEditMode: boolean): string {
     const isValid = cell.validator ? cell.validator(cell.text) : true;
-    const baseClasses =
-      cell.placeholder && cell.text === '' ? 'text-gray-400' : '';
+    const baseClasses = cell.placeholder && cell.text === '' ? 'text-gray-400' : '';
     return `${isValid ? '' : 'bg-red-100'} ${baseClasses}`;
   }
 
   render(
     cell: Compatible<InvalidTextCell>,
     isInEditMode: boolean,
-    onCellChanged: (cell: Compatible<InvalidTextCell>, commit: boolean) => void,
+    onCellChanged: (cell: Compatible<InvalidTextCell>, commit: boolean) => void
   ): React.ReactNode {
     if (!isInEditMode) {
       const isValid = cell.validator ? cell.validator(cell.text) : true;
       const cellText = cell.text || cell.placeholder || '';
-      const textToDisplay =
-        !isValid && cell.errorMessage ? cell.errorMessage : cellText;
-      return (
-        <div className={this.getClassName(cell, isInEditMode)}>
-          {textToDisplay}
-        </div>
-      );
+      const textToDisplay = !isValid && cell.errorMessage ? cell.errorMessage : cellText;
+      return <div className={this.getClassName(cell, isInEditMode)}>{textToDisplay}</div>;
     }
 
     return (
@@ -84,16 +74,11 @@ export class InvalidTextCellTemplate implements CellTemplate<InvalidTextCell> {
           }
         }}
         defaultValue={cell.text}
-        onChange={(e) =>
-          onCellChanged(
-            this.getCompatibleCell({ ...cell, text: e.currentTarget.value }),
-            false,
-          )
-        }
+        onChange={(e) => onCellChanged(this.getCompatibleCell({...cell, text: e.currentTarget.value}), false)}
         onBlur={(e) => {
           onCellChanged(
-            this.getCompatibleCell({ ...cell, text: e.currentTarget.value }),
-            !this.wasEscKeyPressed,
+            this.getCompatibleCell({...cell, text: e.currentTarget.value}),
+            !this.wasEscKeyPressed
           );
           this.wasEscKeyPressed = false;
         }}

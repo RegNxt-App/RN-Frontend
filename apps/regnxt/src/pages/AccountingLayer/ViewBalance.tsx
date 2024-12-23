@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import {useEffect, useState} from 'react';
 import Select from 'react-select';
-import Api from '../../utils/Api';
+
+import {Button} from '@/components/ui/button';
+
 import ViewBalanceData from '../../components/Tables/ViewBalancesTable';
-import { Button } from '@/components/ui/button';
+import Api from '../../utils/Api';
 
 interface Option {
   value: string;
@@ -10,46 +12,43 @@ interface Option {
 }
 
 const balanceAmountFields: Option[] = [
-  { value: 'DtdCcyAmount', label: 'DTD CCY Amount' },
-  { value: 'DtdLclAmount', label: 'DTD LCL Amount' },
-  { value: 'MtdccyAmount', label: 'MTD CCY Amount' },
-  { value: 'YtdCcyAmount', label: 'YTD CCY Amount' },
-  { value: 'YtdLclAmount', label: 'YTD LCL Amount' },
-  { value: 'LtdCcyAmount', label: 'LTD CCY Amount' },
-  { value: 'LtdLclAmount', label: 'LTD LCL Amount' },
+  {value: 'DtdCcyAmount', label: 'DTD CCY Amount'},
+  {value: 'DtdLclAmount', label: 'DTD LCL Amount'},
+  {value: 'MtdccyAmount', label: 'MTD CCY Amount'},
+  {value: 'YtdCcyAmount', label: 'YTD CCY Amount'},
+  {value: 'YtdLclAmount', label: 'YTD LCL Amount'},
+  {value: 'LtdCcyAmount', label: 'LTD CCY Amount'},
+  {value: 'LtdLclAmount', label: 'LTD LCL Amount'},
 ];
 
 const ViewBalance = () => {
-  const [selectedAnalyticalKeys, setSelectedAnalyticalKeys] = useState<
-    Option[]
-  >([
-    { value: 'AccountCode', label: 'Account Code' },
-    { value: 'AmountClass', label: 'Amount Class' },
-    { value: 'DomainId', label: 'Domain ID' },
-    { value: 'Currency', label: 'Currency' },
+  const [selectedAnalyticalKeys, setSelectedAnalyticalKeys] = useState<Option[]>([
+    {value: 'AccountCode', label: 'Account Code'},
+    {value: 'AmountClass', label: 'Amount Class'},
+    {value: 'DomainId', label: 'Domain ID'},
+    {value: 'Currency', label: 'Currency'},
   ]);
 
-  const [selectedBalanceAmountFields, setSelectedBalanceAmountFields] =
-    useState<Option[]>([
-      { value: 'DtdLclAmount', label: 'DTD LCL Amount' },
-      { value: 'YtdLclAmount', label: 'YTD LCL Amount' },
-      { value: 'LtdLclAmount', label: 'LTD LCL Amount' },
-    ]);
+  const [selectedBalanceAmountFields, setSelectedBalanceAmountFields] = useState<Option[]>([
+    {value: 'DtdLclAmount', label: 'DTD LCL Amount'},
+    {value: 'YtdLclAmount', label: 'YTD LCL Amount'},
+    {value: 'LtdLclAmount', label: 'LTD LCL Amount'},
+  ]);
 
   const [analyticalKeys, setAnalyticalKeys] = useState<Option[]>([
-    { value: 'AccountCode', label: 'Account Code' },
-    { value: 'AmountClass', label: 'Amount Class' },
-    { value: 'DomainId', label: 'Domain ID' },
-    { value: 'Currency', label: 'Currency' },
-    { value: 'FreeField1', label: 'Free Field 1' },
-    { value: 'FreeField2', label: 'Free Field 2' },
-    { value: 'FreeField3', label: 'Free Field 3' },
-    { value: 'FreeField4', label: 'Free Field 4' },
-    { value: 'FreeField5', label: 'Free Field 5' },
-    { value: 'FreeField6', label: 'Free Field 6' },
-    { value: 'FreeField7', label: 'Free Field 7' },
-    { value: 'FreeField8', label: 'Free Field 8' },
-    { value: 'FreeField9', label: 'Free Field 9' },
+    {value: 'AccountCode', label: 'Account Code'},
+    {value: 'AmountClass', label: 'Amount Class'},
+    {value: 'DomainId', label: 'Domain ID'},
+    {value: 'Currency', label: 'Currency'},
+    {value: 'FreeField1', label: 'Free Field 1'},
+    {value: 'FreeField2', label: 'Free Field 2'},
+    {value: 'FreeField3', label: 'Free Field 3'},
+    {value: 'FreeField4', label: 'Free Field 4'},
+    {value: 'FreeField5', label: 'Free Field 5'},
+    {value: 'FreeField6', label: 'Free Field 6'},
+    {value: 'FreeField7', label: 'Free Field 7'},
+    {value: 'FreeField8', label: 'Free Field 8'},
+    {value: 'FreeField9', label: 'Free Field 9'},
   ]);
   const [balancesData, setBalancesData] = useState<any[]>([]);
   const [showBalances, setShowBalances] = useState(false);
@@ -60,11 +59,10 @@ const ViewBalance = () => {
         const response = await Api.get('/FDL/AccountingLabel');
         const updatedKeys = analyticalKeys.map((key) => {
           const field = response.data.find(
-            (item: any) =>
-              item.column.toLowerCase() === key.value.toLowerCase(),
+            (item: any) => item.column.toLowerCase() === key.value.toLowerCase()
           );
           if (field) {
-            return { value: field.column, label: field.label };
+            return {value: field.column, label: field.label};
           }
           return key;
         });
@@ -78,12 +76,8 @@ const ViewBalance = () => {
   }, []);
 
   const handleShowBalances = async () => {
-    const granularityFields = selectedAnalyticalKeys
-      .map((key) => key.value)
-      .join(',');
-    const measureFields = selectedBalanceAmountFields
-      .map((field) => field.value)
-      .join(',');
+    const granularityFields = selectedAnalyticalKeys.map((key) => key.value).join(',');
+    const measureFields = selectedBalanceAmountFields.map((field) => field.value).join(',');
 
     const lowerBoundary = '20240101';
     const upperBoundary = '20240331';
@@ -105,9 +99,7 @@ const ViewBalance = () => {
   return (
     <div className="p-4 space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Analytical Keys
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Analytical Keys</label>
         <Select
           isMulti
           name="analyticalKeys"
@@ -115,15 +107,11 @@ const ViewBalance = () => {
           className="basic-multi-select"
           classNamePrefix="select"
           value={selectedAnalyticalKeys}
-          onChange={(selected) =>
-            setSelectedAnalyticalKeys(selected as Option[])
-          }
+          onChange={(selected) => setSelectedAnalyticalKeys(selected as Option[])}
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Balance Amount Fields
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Balance Amount Fields</label>
         <Select
           isMulti
           name="balanceAmountFields"
@@ -131,9 +119,7 @@ const ViewBalance = () => {
           className="basic-multi-select"
           classNamePrefix="select"
           value={selectedBalanceAmountFields}
-          onChange={(selected) =>
-            setSelectedBalanceAmountFields(selected as Option[])
-          }
+          onChange={(selected) => setSelectedBalanceAmountFields(selected as Option[])}
         />
       </div>
       <Button

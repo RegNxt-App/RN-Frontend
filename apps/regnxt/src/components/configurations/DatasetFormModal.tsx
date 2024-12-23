@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useForm} from 'react-hook-form';
+import {useLocation} from 'react-router-dom';
 
 import {useToast} from '@/hooks/use-toast';
-import {birdBackendInstance} from '@/lib/axios';
+import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {Dataset} from '@/types/databaseTypes';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Wand2} from 'lucide-react';
@@ -48,6 +49,19 @@ export const DatasetFormModal: React.FC<DatasetFormModalProps> = ({
   layers,
 }) => {
   const {toast} = useToast();
+  const location = useLocation();
+
+  const getBackendInstance = () => {
+    if (location.pathname.includes('/bird/')) {
+      return birdBackendInstance;
+    }
+    if (location.pathname.includes('/orchestra/')) {
+      return orchestraBackendInstance;
+    }
+    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
+  };
+
+  const backendInstance = getBackendInstance();
   const [isCheckingCode, setIsCheckingCode] = useState(false);
 
   const form = useForm<FormValues>({
@@ -102,7 +116,7 @@ export const DatasetFormModal: React.FC<DatasetFormModalProps> = ({
   const checkCodeExists = async (code: string) => {
     setIsCheckingCode(true);
     try {
-      const response = await birdBackendInstance.get(`/api/v1/datasets/`, {
+      const response = await backendInstance.get(`/api/v1/datasets/`, {
         params: {code},
       });
 
@@ -147,7 +161,7 @@ export const DatasetFormModal: React.FC<DatasetFormModalProps> = ({
 
   const handleSubmit = async (data: FormValues) => {
     try {
-      const response = await birdBackendInstance.get(`/api/v1/datasets/`, {
+      const response = await backendInstance.get(`/api/v1/datasets/`, {
         params: {code: data.code},
       });
 

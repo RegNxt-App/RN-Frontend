@@ -1,8 +1,7 @@
-import axios, { InternalAxiosRequestConfig } from 'axios';
+import axios, {InternalAxiosRequestConfig} from 'axios';
 
 const api = axios.create({
-  baseURL:
-    import.meta.env.VITE_BASE_URL || 'https://regnxtengined.azurewebsites.net/',
+  baseURL: import.meta.env.VITE_BASE_URL || 'https://regnxtengined.azurewebsites.net/',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -28,7 +27,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 
 api.interceptors.response.use(
@@ -51,7 +50,7 @@ api.interceptors.response.use(
 
       try {
         const refreshToken = getRefreshTokenFromCookies();
-        const { data } = await api.post('/Accounts/refresh-token', {
+        const {data} = await api.post('/Accounts/refresh-token', {
           token: refreshToken,
         });
 
@@ -71,7 +70,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 const getRefreshTokenFromCookies = (): string | null => {
@@ -88,7 +87,7 @@ const getRefreshTokenFromCookies = (): string | null => {
 };
 
 const Api = {
-  get: (url: string, params = {}) => api.get(url, { params }),
+  get: (url: string, params = {}) => api.get(url, {params}),
   post: (url: string, data: any) => api.post(url, data),
   delete: (url: string) => api.delete(url),
 };

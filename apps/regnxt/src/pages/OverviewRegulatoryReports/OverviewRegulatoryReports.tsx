@@ -1,18 +1,14 @@
-import { useState, useEffect } from 'react';
-import DataTable from '../../components/Tables/DataTable';
-import KanbanView from '../../components/KanbanView';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import {useEffect, useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {ChevronDown, ChevronUp} from 'lucide-react';
+
 import AddWorkbookModel from '../../components/CModels/WordbookModels/AddWorkbookModel';
+import KanbanView from '../../components/KanbanView';
+import DataTable from '../../components/Tables/DataTable';
 import Api from '../../utils/Api';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 
 interface WorkbookData {
   id: number;
@@ -60,9 +56,7 @@ const OverviewRegulatoryReports = () => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((item) =>
-        Object.values(item).some((value) =>
-          String(value).toLowerCase().includes(query),
-        ),
+        Object.values(item).some((value) => String(value).toLowerCase().includes(query))
       );
     }
 
@@ -80,12 +74,8 @@ const OverviewRegulatoryReports = () => {
       setData(result);
       setFilteredData(result);
 
-      const uniqueModules = Array.from(
-        new Set(result.map((item) => item.module)),
-      );
-      const uniqueStatuses = Array.from(
-        new Set(result.map((item) => item.status)),
-      );
+      const uniqueModules = Array.from(new Set(result.map((item) => item.module)));
+      const uniqueStatuses = Array.from(new Set(result.map((item) => item.status)));
 
       setModules(uniqueModules);
       setStatuses(uniqueStatuses);
@@ -164,7 +154,10 @@ const OverviewRegulatoryReports = () => {
                 <SelectContent>
                   <SelectItem value="all_modules">All Modules</SelectItem>
                   {modules.map((module) => (
-                    <SelectItem key={module} value={module}>
+                    <SelectItem
+                      key={module}
+                      value={module}
+                    >
                       {module}
                     </SelectItem>
                   ))}
@@ -183,7 +176,10 @@ const OverviewRegulatoryReports = () => {
                 <SelectContent>
                   <SelectItem value="all_statuses">All Statuses</SelectItem>
                   {statuses.map((status) => (
-                    <SelectItem key={status} value={status}>
+                    <SelectItem
+                      key={status}
+                      value={status}
+                    >
                       {status}
                     </SelectItem>
                   ))}
@@ -202,11 +198,7 @@ const OverviewRegulatoryReports = () => {
           </div>
         </div>
       </div>
-      {view === 'list' ? (
-        <DataTable data={filteredData} />
-      ) : (
-        <KanbanView data={filteredData} />
-      )}
+      {view === 'list' ? <DataTable data={filteredData} /> : <KanbanView data={filteredData} />}
 
       <AddWorkbookModel
         isOpen={isOpen}

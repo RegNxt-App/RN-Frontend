@@ -29,8 +29,7 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
         <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
         <p className="mb-4">
           You are about to delete version {deleteConfirmationData.versionId} (
-          {deleteConfirmationData.versionName}). It has{' '}
-          {deleteConfirmationData.cellCount} cells.
+          {deleteConfirmationData.versionName}). It has {deleteConfirmationData.cellCount} cells.
         </p>
         <div className="flex justify-between space-x-4">
           <button

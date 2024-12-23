@@ -1,20 +1,9 @@
-import { useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import {useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+
 import UpdateTemplateModel from '../CModels/TemplateModels/UpdateTemplateModel';
 
 interface TemplateData {
@@ -33,13 +22,11 @@ interface DataTableProps {
   onDataChange: () => void;
 }
 
-const TemplateTable = ({ data, onDataChange }: DataTableProps) => {
+const TemplateTable = ({data, onDataChange}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<TemplateData | null>(
-    null,
-  );
+  const [selectedRecord, setSelectedRecord] = useState<TemplateData | null>(null);
 
   const indexOfLastItem = currentPage * pageSize;
   const indexOfFirstItem = indexOfLastItem - pageSize;
@@ -88,8 +75,7 @@ const TemplateTable = ({ data, onDataChange }: DataTableProps) => {
 
       <div className="flex items-center justify-between px-2">
         <div className="flex-1 text-sm text-muted-foreground">
-          Showing {indexOfFirstItem + 1} to{' '}
-          {Math.min(indexOfLastItem, data.length)} of {data.length} entries
+          Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, data.length)} of {data.length} entries
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">
@@ -106,7 +92,10 @@ const TemplateTable = ({ data, onDataChange }: DataTableProps) => {
               </SelectTrigger>
               <SelectContent side="top">
                 {[10, 20, 30, 50, 100].map((size) => (
-                  <SelectItem key={size} value={size.toString()}>
+                  <SelectItem
+                    key={size}
+                    value={size.toString()}
+                  >
                     {size}
                   </SelectItem>
                 ))}
@@ -128,9 +117,7 @@ const TemplateTable = ({ data, onDataChange }: DataTableProps) => {
             <Button
               variant="outline"
               className="h-8 w-8 p-0"
-              onClick={() =>
-                setCurrentPage((current) => Math.max(1, current - 1))
-              }
+              onClick={() => setCurrentPage((current) => Math.max(1, current - 1))}
               disabled={currentPage === 1}
             >
               {'<'}
@@ -138,9 +125,7 @@ const TemplateTable = ({ data, onDataChange }: DataTableProps) => {
             <Button
               variant="outline"
               className="h-8 w-8 p-0"
-              onClick={() =>
-                setCurrentPage((current) => Math.min(totalPages, current + 1))
-              }
+              onClick={() => setCurrentPage((current) => Math.min(totalPages, current + 1))}
               disabled={currentPage === totalPages}
             >
               {'>'}

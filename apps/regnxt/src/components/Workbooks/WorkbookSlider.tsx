@@ -1,10 +1,12 @@
-import { ChevronLeft } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import LayersTab from './LayersTab';
+import {useEffect, useRef, useState} from 'react';
+import {useSelector} from 'react-redux';
+
+import {ChevronLeft} from 'lucide-react';
+
+import {selectDialogState} from '../../features/sheetData/sheetDataSlice';
 import ActionsTab from './ActionsTab';
+import LayersTab from './LayersTab';
 import StructureTab from './StructureTab';
-import { useSelector } from 'react-redux';
-import { selectDialogState } from '../../features/sheetData/sheetDataSlice';
 
 interface WorkbookData {
   id: number;
@@ -38,14 +40,8 @@ interface WorkbookSliderProps {
   changedRows: SheetRow[];
 }
 
-const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
-  workbook,
-  onClose,
-  changedRows,
-}) => {
-  const [activeTab, setActiveTab] = useState<
-    'structure' | 'actions' | 'layers'
-  >('structure');
+const WorkbookSlider: React.FC<WorkbookSliderProps> = ({workbook, onClose, changedRows}) => {
+  const [activeTab, setActiveTab] = useState<'structure' | 'actions' | 'layers'>('structure');
   const [activeActionTab, setActiveActionTab] = useState<
     'save' | 'allocate' | 'validate' | 'import' | 'export' | 'transmission'
   >('save');
@@ -58,10 +54,7 @@ const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
       // Don't close if dialog is open
       if (dialogState.isOpen) return;
 
-      if (
-        sidebarRef.current &&
-        !sidebarRef.current.contains(event.target as Node)
-      ) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
@@ -99,18 +92,14 @@ const WorkbookSlider: React.FC<WorkbookSliderProps> = ({
                 className={`px-4 py-2 mr-2 border-b-2 ${
                   activeTab === tab ? 'border-purple-500	' : 'border-transparent'
                 }`}
-                onClick={() =>
-                  setActiveTab(tab as 'structure' | 'actions' | 'layers')
-                }
+                onClick={() => setActiveTab(tab as 'structure' | 'actions' | 'layers')}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </div>
           <div className="flex-grow p-4 overflow-y-auto">
-            {activeTab === 'structure' && (
-              <StructureTab workbookId={workbook.id} />
-            )}
+            {activeTab === 'structure' && <StructureTab workbookId={workbook.id} />}
             {activeTab === 'actions' && (
               <ActionsTab
                 activeActionTab={activeActionTab}

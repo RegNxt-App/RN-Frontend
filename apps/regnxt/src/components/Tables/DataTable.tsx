@@ -1,23 +1,12 @@
-import { useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import WorkbookView from '../WorkbookView';
+import {useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {cn} from '@/lib/utils';
+
 import ViewRecordPopup from '../ViewRecordPopup';
-import { cn } from '@/lib/utils';
+import WorkbookView from '../WorkbookView';
 
 interface WorkbookData {
   id: number;
@@ -36,13 +25,11 @@ interface DataTableProps {
   data: WorkbookData[];
 }
 
-const DataTable = ({ data }: DataTableProps) => {
+const DataTable = ({data}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [showWorkbookPopup, setShowWorkbookPopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
-    null,
-  );
+  const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(null);
 
   const pageCount = Math.ceil(data.length / pageSize);
   const start = currentPage * pageSize;
@@ -79,9 +66,7 @@ const DataTable = ({ data }: DataTableProps) => {
                   <p
                     className={cn(
                       'inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium',
-                      item.status === 'Initial'
-                        ? 'bg-warning text-warning'
-                        : 'bg-success text-success',
+                      item.status === 'Initial' ? 'bg-warning text-warning' : 'bg-success text-success'
                     )}
                   >
                     {item.status}
@@ -114,7 +99,10 @@ const DataTable = ({ data }: DataTableProps) => {
               </SelectTrigger>
               <SelectContent side="top">
                 {[10, 20, 30, 50, 100].map((size) => (
-                  <SelectItem key={size} value={`${size}`}>
+                  <SelectItem
+                    key={size}
+                    value={`${size}`}
+                  >
                     {size}
                   </SelectItem>
                 ))}
@@ -136,9 +124,7 @@ const DataTable = ({ data }: DataTableProps) => {
             <Button
               variant="outline"
               className="h-8 w-8 p-0"
-              onClick={() =>
-                setCurrentPage((current) => Math.max(0, current - 1))
-              }
+              onClick={() => setCurrentPage((current) => Math.max(0, current - 1))}
               disabled={currentPage === 0}
             >
               {'<'}
@@ -146,11 +132,7 @@ const DataTable = ({ data }: DataTableProps) => {
             <Button
               variant="outline"
               className="h-8 w-8 p-0"
-              onClick={() =>
-                setCurrentPage((current) =>
-                  Math.min(pageCount - 1, current + 1),
-                )
-              }
+              onClick={() => setCurrentPage((current) => Math.min(pageCount - 1, current + 1))}
               disabled={currentPage === pageCount - 1}
             >
               {'>'}

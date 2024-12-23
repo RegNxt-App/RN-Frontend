@@ -1,16 +1,11 @@
-import { useState } from 'react';
-import Pagination from '../../../Pagination';
-import Api from '../../../../utils/Api';
+import {useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import Swal from 'sweetalert2';
-import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+
+import Api from '../../../../utils/Api';
+import Pagination from '../../../Pagination';
 
 interface SaveTableData {
   cellid: number;
@@ -31,7 +26,7 @@ interface DataTableProps {
 
 const itemsPerPage = 10;
 
-const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
+const SaveTable = ({data, workbookId, onSuccess}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [pageSize, setPageSize] = useState(1);
@@ -110,9 +105,7 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text:
-          error.response?.data?.message ||
-          'Failed to save data. Please try again.',
+        text: error.response?.data?.message || 'Failed to save data. Please try again.',
         confirmButtonColor: '#EF4444',
         allowOutsideClick: false,
       });
@@ -122,11 +115,7 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
   };
 
   const isButtonDisabled = isLoading || data.length === 0;
-  const buttonText = isLoading
-    ? 'Saving...'
-    : data.length === 0
-      ? 'No Data to Save'
-      : 'Save to DB';
+  const buttonText = isLoading ? 'Saving...' : data.length === 0 ? 'No Data to Save' : 'Save to DB';
 
   return (
     <div className="flex flex-col h-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -141,11 +130,7 @@ const SaveTable = ({ data, workbookId, onSuccess }: DataTableProps) => {
           `}
           onClick={handleSaveToDb}
           disabled={isButtonDisabled}
-          title={
-            data.length === 0
-              ? 'No data available to save'
-              : 'Save data to database'
-          }
+          title={data.length === 0 ? 'No data available to save' : 'Save data to database'}
         >
           {isLoading ? (
             <div className="flex items-center gap-2">

@@ -1,14 +1,8 @@
-import { useState } from 'react';
+import {useState} from 'react';
+
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 
 import Pagination from '../../../Pagination';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 
 interface LayersTableData {
   workbookId: number;
@@ -30,7 +24,7 @@ interface DataTableProps {
   onRemove?: (versionId: number) => void;
 }
 
-const ViewLayer = ({ data, onView, onRemove }: DataTableProps) => {
+const ViewLayer = ({data, onView, onRemove}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(5);
 
@@ -72,9 +66,7 @@ const ViewLayer = ({ data, onView, onRemove }: DataTableProps) => {
               </TableHeader>
               <TableBody>
                 {currentItems.map((item) => (
-                  <TableRow
-                    key={`${item.workbookId}-${item.sheetId}-${item.cellId}`}
-                  >
+                  <TableRow key={`${item.workbookId}-${item.sheetId}-${item.cellId}`}>
                     <TableCell>{item.sheetId}</TableCell>
                     <TableCell>{item.cellId}</TableCell>
                     <TableCell>{item.rowNr}</TableCell>

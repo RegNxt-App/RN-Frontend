@@ -1,34 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import React, {useEffect, useState} from 'react';
+import {useForm} from 'react-hook-form';
+
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/Dialog';
+import {Button} from '@/components/ui/button';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
+import {Input} from '@/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {useToast} from '@/hooks/use-toast';
+import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import Api from '../../../utils/Api';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/Dialog';
 
 interface AddEntityModelProps {
   onClose: () => void;
@@ -52,25 +34,17 @@ const formSchema = z.object({
   kboCode: z.string().min(1, 'KBO code is required'),
   leiCode: z.string().min(1, 'LEI code is required'),
   reportingCurrency: z.string().min(1, 'Reporting currency is required'),
-  significantCurrencies: z
-    .string()
-    .min(1, 'Significant currencies are required'),
+  significantCurrencies: z.string().min(1, 'Significant currencies are required'),
   email: z.string().email('Invalid email address'),
   consolidationScope: z.string().min(1, 'Consolidation scope is required'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const AddEntityModel = ({
-  onClose,
-  onSuccess,
-  isOpen,
-}: AddEntityModelProps) => {
-  const [identificationTypes, setIdentificationTypes] = useState<
-    { name: string; code: number }[]
-  >([]);
+const AddEntityModel = ({onClose, onSuccess, isOpen}: AddEntityModelProps) => {
+  const [identificationTypes, setIdentificationTypes] = useState<{name: string; code: number}[]>([]);
   const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
-  const { toast } = useToast();
+  const {toast} = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -107,9 +81,7 @@ const AddEntityModel = ({
 
     const fetchCurrencies = async () => {
       try {
-        const response = await Api.get<CurrencyOption[]>(
-          'RI/UIInput?type=Currency',
-        );
+        const response = await Api.get<CurrencyOption[]>('RI/UIInput?type=Currency');
         setCurrencies(response.data);
       } catch (error) {
         toast({
@@ -164,23 +136,32 @@ const AddEntityModel = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}
+    >
       <DialogContent className="sm:max-w-[780px]">
         <DialogHeader>
           <DialogTitle>Add New Entity</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8"
+          >
             <div className="grid grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="entityCode"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Entity Code</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter entity code" {...field} />
+                      <Input
+                        placeholder="Enter entity code"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,11 +171,14 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="entityLabel"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Entity Label</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter entity label" {...field} />
+                      <Input
+                        placeholder="Enter entity label"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -204,11 +188,14 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="country"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Country</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter country" {...field} />
+                      <Input
+                        placeholder="Enter country"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -218,11 +205,14 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="city"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>City</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter city" {...field} />
+                      <Input
+                        placeholder="Enter city"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -232,10 +222,13 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="identificationType"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Identification Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select identification type" />
@@ -260,11 +253,14 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="vat"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>VAT</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter VAT" {...field} />
+                      <Input
+                        placeholder="Enter VAT"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -274,11 +270,14 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="bicCode"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>BIC Code</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter BIC code" {...field} />
+                      <Input
+                        placeholder="Enter BIC code"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -288,11 +287,14 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="kboCode"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>KBO Code</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter KBO code" {...field} />
+                      <Input
+                        placeholder="Enter KBO code"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -302,11 +304,14 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="leiCode"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>LEI Code</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter LEI code" {...field} />
+                      <Input
+                        placeholder="Enter LEI code"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -316,10 +321,13 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="reportingCurrency"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Reporting Currency</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select currency" />
@@ -327,7 +335,10 @@ const AddEntityModel = ({
                       </FormControl>
                       <SelectContent>
                         {currencies.map((currency) => (
-                          <SelectItem key={currency.code} value={currency.code}>
+                          <SelectItem
+                            key={currency.code}
+                            value={currency.code}
+                          >
                             {currency.name}
                           </SelectItem>
                         ))}
@@ -341,7 +352,7 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="significantCurrencies"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Significant Currencies</FormLabel>
                     <FormControl>
@@ -358,7 +369,7 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="email"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
@@ -376,7 +387,7 @@ const AddEntityModel = ({
               <FormField
                 control={form.control}
                 name="consolidationScope"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Consolidation Scope</FormLabel>
                     <FormControl>
@@ -392,10 +403,17 @@ const AddEntityModel = ({
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+              >
                 Cancel
               </Button>
-              <Button className="bg-purple-500 text-white" type="submit">
+              <Button
+                className="bg-purple-500 text-white"
+                type="submit"
+              >
                 Create Entity
               </Button>
             </DialogFooter>

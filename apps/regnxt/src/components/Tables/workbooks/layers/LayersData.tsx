@@ -1,18 +1,14 @@
-import { useState, useMemo, useEffect } from 'react';
-import Pagination from '../../../Pagination';
-import ViewLayer from './ViewLayer';
+import {useEffect, useMemo, useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+
 import Api from '../../../../utils/Api';
-import { Dialog } from '../../../ui/Dialog';
+import Pagination from '../../../Pagination';
+import {Dialog} from '../../../ui/Dialog';
 import DeleteDialog from './DeleteDialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+import ViewLayer from './ViewLayer';
+
 interface LayersTableData {
   versionId: number;
   from: string;
@@ -46,19 +42,17 @@ interface DeleteConfirmationData {
   cellCount: number;
 }
 
-const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
+const LayersTable = ({data, workbookId, onDataChange}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [versionDetails, setVersionDetails] = useState<VersionDetailData[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [selectedVersion, setSelectedVersion] =
-    useState<LayersTableData | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<LayersTableData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteConfirmationData, setDeleteConfirmationData] =
-    useState<DeleteConfirmationData | null>(null);
+  const [deleteConfirmationData, setDeleteConfirmationData] = useState<DeleteConfirmationData | null>(null);
 
   const sortedData = useMemo(() => {
     return [...data].sort((a, b) => a.versionId - b.versionId);
@@ -86,12 +80,10 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
       setSelectedVersion(version);
 
       const response = await Api.get(
-        `/RI/Workbook/version/data?workbookId=${workbookId}&versionId=${version.versionId}`,
+        `/RI/Workbook/version/data?workbookId=${workbookId}&versionId=${version.versionId}`
       );
 
-      const detailsData = Array.isArray(response.data)
-        ? response.data
-        : [response.data];
+      const detailsData = Array.isArray(response.data) ? response.data : [response.data];
       setVersionDetails(detailsData);
       setIsModalOpen(true); // Open modal when version is selected
     } catch (err) {
@@ -115,12 +107,10 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
       setError(null);
 
       const response = await Api.get(
-        `/RI/Workbook/version/data?workbookId=${workbookId}&versionId=${version.versionId}`,
+        `/RI/Workbook/version/data?workbookId=${workbookId}&versionId=${version.versionId}`
       );
 
-      const versionData = Array.isArray(response.data)
-        ? response.data
-        : [response.data];
+      const versionData = Array.isArray(response.data) ? response.data : [response.data];
 
       setDeleteConfirmationData({
         version,
@@ -143,7 +133,7 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
       setError(null);
 
       await Api.delete(
-        `/RI/Workbook/version?workbookId=${workbookId}&versionId=${deleteConfirmationData.version.versionId}`,
+        `/RI/Workbook/version?workbookId=${workbookId}&versionId=${deleteConfirmationData.version.versionId}`
       );
 
       // Close the dialog before refreshing data
@@ -173,11 +163,7 @@ const LayersTable = ({ data, workbookId, onDataChange }: DataTableProps) => {
   return (
     <>
       <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        {error && (
-          <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
-            {error}
-          </div>
-        )}
+        {error && <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">{error}</div>}
         <div className="max-w-full">
           <div className="overflow-x-auto">
             <div className="max-h-[580px] overflow-y-auto">

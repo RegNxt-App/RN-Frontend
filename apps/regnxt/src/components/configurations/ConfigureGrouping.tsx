@@ -1,11 +1,12 @@
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
+import {useLocation} from 'react-router-dom';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {GroupFormModal} from '@/components/configurations/GroupFormModal';
 import {GroupItemsModal} from '@/components/configurations/GroupItemsModal';
 import {useToast} from '@/hooks/use-toast';
-import {birdBackendInstance} from '@/lib/axios';
+import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {ColumnDef} from '@tanstack/react-table';
 import {Edit, Eye, Plus, Trash} from 'lucide-react';
 import useSWR from 'swr';
@@ -34,6 +35,19 @@ interface Grouping {
 
 const ConfigureGrouping = () => {
   const {toast} = useToast();
+  const location = useLocation();
+
+  const getBackendInstance = () => {
+    if (location.pathname.includes('/bird/')) {
+      return birdBackendInstance;
+    }
+    if (location.pathname.includes('/orchestra/')) {
+      return orchestraBackendInstance;
+    }
+    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
+  };
+
+  const backendInstance = getBackendInstance();
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);
@@ -50,11 +64,11 @@ const ConfigureGrouping = () => {
     data: groupsResponse,
     mutate: mutateGroups,
     isLoading,
-  } = useSWR<Grouping>('/api/v1/groups/', birdBackendInstance);
+  } = useSWR<Grouping>('/api/v1/groups/', backendInstance);
 
   const handleCreateGroup = async (newGroup: Partial<Group>) => {
     try {
-      await birdBackendInstance.post('/api/v1/groups/', newGroup);
+      await backendInstance.post('/api/v1/groups/', newGroup);
       await mutateGroups();
       setIsGroupModalOpen(false);
       toast({title: 'Success', description: 'Group created successfully.'});
@@ -71,7 +85,7 @@ const ConfigureGrouping = () => {
 
   const handleUpdateGroup = async (updatedGroup: Group) => {
     try {
-      await birdBackendInstance.put(`/api/v1/groups/${updatedGroup.code}/`, updatedGroup);
+      await backendInstance.put(`/api/v1/groups/${updatedGroup.code}/`, updatedGroup);
       await mutateGroups();
       toast({title: 'Success', description: 'Group updated successfully.'});
       setIsGroupModalOpen(false);
@@ -88,7 +102,7 @@ const ConfigureGrouping = () => {
 
   const handleDeleteGroup = async (groupCode: string) => {
     try {
-      await birdBackendInstance.delete(`/api/v1/groups/${groupCode}/`);
+      await backendInstance.delete(`/api/v1/groups/${groupCode}/`);
       await mutateGroups();
       toast({title: 'Success', description: 'Group deleted successfully.'});
     } catch (error) {

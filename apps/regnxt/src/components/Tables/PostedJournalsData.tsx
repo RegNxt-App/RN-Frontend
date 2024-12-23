@@ -1,26 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Filter } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import {useEffect, useState} from 'react';
 
-import FdlPostedJournalDetailsTable from './FdlPostedJournalDetailsTable';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {Filter} from 'lucide-react';
+
 import Api from '../../utils/Api';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import {Popover, PopoverContent, PopoverTrigger} from '../ui/popover';
+import FdlPostedJournalDetailsTable from './FdlPostedJournalDetailsTable';
 
 interface PostedJournalData {
   id: string;
@@ -60,18 +48,13 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const PostedJournalsData = ({
-  data,
-  updateUnpostedJournals,
-}: DataTableProps) => {
+const PostedJournalsData = ({data, updateUnpostedJournals}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredData, setFilteredData] = useState<PostedJournalData[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [journalDetails, setJournalDetails] = useState<any | null>(null);
-  const [clickedjournalCode, setClickedjournalCode] = useState<string | null>(
-    null,
-  );
+  const [clickedjournalCode, setClickedjournalCode] = useState<string | null>(null);
   const [clickedjournalNr, setClickedjournalNr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -82,9 +65,7 @@ const PostedJournalsData = ({
     let result = data;
     Object.entries(filters).forEach(([key, filter]) => {
       result = result.filter((item) => {
-        const itemValue = String(
-          item[key as keyof PostedJournalData],
-        ).toLowerCase();
+        const itemValue = String(item[key as keyof PostedJournalData]).toLowerCase();
         const filterValue = filter.value.toLowerCase();
 
         switch (filter.type) {
@@ -111,20 +92,16 @@ const PostedJournalsData = ({
     setCurrentPage(1);
   };
 
-  const handleFilterChange = (
-    column: string,
-    type: FilterType,
-    value: string,
-  ) => {
+  const handleFilterChange = (column: string, type: FilterType, value: string) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      [column]: { type, value },
+      [column]: {type, value},
     }));
   };
 
   const clearFilter = (column: string) => {
     setFilters((prev) => {
-      const newFilters = { ...prev };
+      const newFilters = {...prev};
       delete newFilters[column];
       return newFilters;
     });
@@ -145,9 +122,7 @@ const PostedJournalsData = ({
     setClickedjournalNr(journalNr);
 
     try {
-      const response = await Api.get(
-        `/FDL/PostedJournal?JournalCode=${journalCode}&JournalNr=${journalNr}`,
-      );
+      const response = await Api.get(`/FDL/PostedJournal?JournalCode=${journalCode}&JournalNr=${journalNr}`);
       setJournalDetails(response.data);
     } catch (error) {
       console.error('Failed to fetch journal details:', error);
@@ -160,10 +135,9 @@ const PostedJournalsData = ({
 
       if (journalDetails) {
         const updatedData = data.map((journal) =>
-          journal.journalCode === clickedjournalCode &&
-          journal.journalNr === clickedjournalNr
+          journal.journalCode === clickedjournalCode && journal.journalNr === clickedjournalNr
             ? journalDetails
-            : journal,
+            : journal
         );
         updateUnpostedJournals(updatedData);
       }
@@ -204,14 +178,12 @@ const PostedJournalsData = ({
                       <PopoverContent className="w-80">
                         <div className="space-y-4">
                           <Select
-                            value={
-                              filters[header.toLowerCase()]?.type || 'matchAll'
-                            }
+                            value={filters[header.toLowerCase()]?.type || 'matchAll'}
                             onValueChange={(value) =>
                               handleFilterChange(
                                 header.toLowerCase(),
                                 value as FilterType,
-                                filters[header.toLowerCase()]?.value || '',
+                                filters[header.toLowerCase()]?.value || ''
                               )
                             }
                           >
@@ -219,26 +191,14 @@ const PostedJournalsData = ({
                               <SelectValue placeholder="Select match type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="matchAll">
-                                Match All
-                              </SelectItem>
-                              <SelectItem value="matchAny">
-                                Match Any
-                              </SelectItem>
-                              <SelectItem value="startsWith">
-                                Starts With
-                              </SelectItem>
+                              <SelectItem value="matchAll">Match All</SelectItem>
+                              <SelectItem value="matchAny">Match Any</SelectItem>
+                              <SelectItem value="startsWith">Starts With</SelectItem>
                               <SelectItem value="Contains">Contains</SelectItem>
-                              <SelectItem value="NotContains">
-                                Not Contains
-                              </SelectItem>
-                              <SelectItem value="EndsWith">
-                                Ends With
-                              </SelectItem>
+                              <SelectItem value="NotContains">Not Contains</SelectItem>
+                              <SelectItem value="EndsWith">Ends With</SelectItem>
                               <SelectItem value="Equals">Equals</SelectItem>
-                              <SelectItem value="NotEquals">
-                                Not Equals
-                              </SelectItem>
+                              <SelectItem value="NotEquals">Not Equals</SelectItem>
                             </SelectContent>
                           </Select>
 
@@ -248,9 +208,8 @@ const PostedJournalsData = ({
                             onChange={(e) =>
                               handleFilterChange(
                                 header.toLowerCase(),
-                                filters[header.toLowerCase()]?.type ||
-                                  'matchAll',
-                                e.target.value,
+                                filters[header.toLowerCase()]?.type || 'matchAll',
+                                e.target.value
                               )
                             }
                           />
@@ -262,9 +221,7 @@ const PostedJournalsData = ({
                             >
                               Clear
                             </Button>
-                            <Button onClick={() => setActiveFilter(null)}>
-                              Apply
-                            </Button>
+                            <Button onClick={() => setActiveFilter(null)}>Apply</Button>
                           </div>
                         </div>
                       </PopoverContent>
@@ -299,7 +256,9 @@ const PostedJournalsData = ({
 
       <div className="flex items-center justify-between px-2">
         <div className="flex-1 text-sm text-muted-foreground">
-          {`${indexOfFirstItem + 1}-${Math.min(indexOfLastItem, filteredData.length)} of ${filteredData.length} entries`}
+          {`${indexOfFirstItem + 1}-${Math.min(indexOfLastItem, filteredData.length)} of ${
+            filteredData.length
+          } entries`}
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">
@@ -315,7 +274,10 @@ const PostedJournalsData = ({
               </SelectTrigger>
               <SelectContent side="top">
                 {[10, 20, 30, 50].map((size) => (
-                  <SelectItem key={size} value={size.toString()}>
+                  <SelectItem
+                    key={size}
+                    value={size.toString()}
+                  >
                     {size}
                   </SelectItem>
                 ))}
@@ -362,17 +324,14 @@ const PostedJournalsData = ({
         </div>
       </div>
 
-      {journalDetails &&
-        clickedjournalNr &&
-        clickedjournalCode &&
-        journalDetails.length > 0 && (
-          <FdlPostedJournalDetailsTable
-            data={journalDetails}
-            clickedjournalNr={clickedjournalNr}
-            clickedjournalCode={clickedjournalCode}
-            onUpdateSuccess={handleUpdateSuccess}
-          />
-        )}
+      {journalDetails && clickedjournalNr && clickedjournalCode && journalDetails.length > 0 && (
+        <FdlPostedJournalDetailsTable
+          data={journalDetails}
+          clickedjournalNr={clickedjournalNr}
+          clickedjournalCode={clickedjournalCode}
+          onUpdateSuccess={handleUpdateSuccess}
+        />
+      )}
     </div>
   );
 };

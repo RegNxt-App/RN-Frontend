@@ -1,14 +1,15 @@
 import * as React from 'react';
+
 import {
-  CellTemplate,
   Cell,
+  CellTemplate,
   Compatible,
   Uncertain,
   UncertainCompatible,
   getCellProperty,
-  isNavigationKey,
   inNumericKey,
   isAllowedOnNumberTypingKey,
+  isNavigationKey,
   isNumpadNumericKey,
   keyCodes,
 } from '@silevis/reactgrid';
@@ -23,30 +24,23 @@ export interface InvalidNumberCell extends Cell {
   errorMessage?: string;
 }
 
-export class InvalidNumberCellTemplate
-  implements CellTemplate<InvalidNumberCell>
-{
+export class InvalidNumberCellTemplate implements CellTemplate<InvalidNumberCell> {
   private wasEscKeyPressed = false;
 
-  getCompatibleCell(
-    uncertainCell: Uncertain<InvalidNumberCell>,
-  ): Compatible<InvalidNumberCell> {
+  getCompatibleCell(uncertainCell: Uncertain<InvalidNumberCell>): Compatible<InvalidNumberCell> {
     let value: number;
     try {
       value = getCellProperty(uncertainCell, 'value', 'number');
     } catch (error) {
       value = NaN;
     }
-    const numberFormat =
-      uncertainCell.format || new Intl.NumberFormat(window.navigator.language);
-    const displayValue =
-      uncertainCell.nanToZero && Number.isNaN(value) ? 0 : value;
+    const numberFormat = uncertainCell.format || new Intl.NumberFormat(window.navigator.language);
+    const displayValue = uncertainCell.nanToZero && Number.isNaN(value) ? 0 : value;
     const text =
-      Number.isNaN(displayValue) ||
-      (uncertainCell.hideZero && displayValue === 0)
+      Number.isNaN(displayValue) || (uncertainCell.hideZero && displayValue === 0)
         ? ''
         : numberFormat.format(displayValue);
-    return { ...uncertainCell, value: displayValue, text };
+    return {...uncertainCell, value: displayValue, text};
   }
 
   private isCharAllowedOnNumberInput = (char: string): boolean => {
@@ -69,10 +63,7 @@ export class InvalidNumberCellTemplate
     }
   };
 
-  getClassName(
-    cell: Compatible<InvalidNumberCell>,
-    isInEditMode: boolean,
-  ): string {
+  getClassName(cell: Compatible<InvalidNumberCell>, isInEditMode: boolean): string {
     const isValid = cell.validator?.(cell.value) ?? true;
     const baseClasses = 'text-right'; // Numbers are right-aligned
     return `${!isValid ? 'bg-red-100' : 'bg-white'} ${baseClasses} p-2`;
@@ -80,33 +71,23 @@ export class InvalidNumberCellTemplate
 
   update(
     cell: Compatible<InvalidNumberCell>,
-    cellToMerge: UncertainCompatible<InvalidNumberCell>,
+    cellToMerge: UncertainCompatible<InvalidNumberCell>
   ): Compatible<InvalidNumberCell> {
-    return this.getCompatibleCell({ ...cell, value: cellToMerge.value });
+    return this.getCompatibleCell({...cell, value: cellToMerge.value});
   }
 
   render(
     cell: Compatible<InvalidNumberCell>,
     isInEditMode: boolean,
-    onCellChanged: (
-      cell: Compatible<InvalidNumberCell>,
-      commit: boolean,
-    ) => void,
+    onCellChanged: (cell: Compatible<InvalidNumberCell>, commit: boolean) => void
   ): React.ReactNode {
     if (!isInEditMode) {
       const isValid = cell.validator?.(cell.value) ?? true;
-      const textToDisplay =
-        !isValid && cell.errorMessage ? cell.errorMessage : cell.text;
-      return (
-        <div className={this.getClassName(cell, isInEditMode)}>
-          {textToDisplay}
-        </div>
-      );
+      const textToDisplay = !isValid && cell.errorMessage ? cell.errorMessage : cell.text;
+      return <div className={this.getClassName(cell, isInEditMode)}>{textToDisplay}</div>;
     }
 
-    const locale = cell.format
-      ? cell.format.resolvedOptions().locale
-      : window.navigator.languages[0];
+    const locale = cell.format ? cell.format.resolvedOptions().locale : window.navigator.languages[0];
     const format = new Intl.NumberFormat(locale, {
       useGrouping: false,
       maximumFractionDigits: 20,
@@ -123,9 +104,7 @@ export class InvalidNumberCellTemplate
           }
         }}
         defaultValue={
-          Number.isNaN(cell.value)
-            ? this.getTextFromCharCode(cell.text)
-            : format.format(cell.value)
+          Number.isNaN(cell.value) ? this.getTextFromCharCode(cell.text) : format.format(cell.value)
         }
         onChange={(e) =>
           onCellChanged(
@@ -133,7 +112,7 @@ export class InvalidNumberCellTemplate
               ...cell,
               value: parseFloat(e.currentTarget.value.replace(/,/g, '.')),
             }),
-            false,
+            false
           )
         }
         onBlur={(e) => {
@@ -142,7 +121,7 @@ export class InvalidNumberCellTemplate
               ...cell,
               value: parseFloat(e.currentTarget.value.replace(/,/g, '.')),
             }),
-            !this.wasEscKeyPressed,
+            !this.wasEscKeyPressed
           );
           this.wasEscKeyPressed = false;
         }}

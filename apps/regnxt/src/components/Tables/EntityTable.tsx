@@ -1,15 +1,8 @@
-import { useState, useEffect } from 'react';
+import {useEffect, useState} from 'react';
 
-import Pagination from '../Pagination';
 import UpdateEntityModel from '../CModels/EntityModels/UpdateEntityModel';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
+import Pagination from '../Pagination';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '../ui/table';
 
 interface WorkbookData {
   id: number;
@@ -32,13 +25,11 @@ interface DataTableProps {
   onDataChange: () => void;
 }
 
-const EntityTable = ({ data, onDataChange }: DataTableProps) => {
+const EntityTable = ({data, onDataChange}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [showUpdatePopup, setShowUpdatePopup] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(
-    null,
-  );
+  const [selectedRecord, setSelectedRecord] = useState<WorkbookData | null>(null);
   const [tableData, setTableData] = useState<WorkbookData[]>(data);
   useEffect(() => {
     setTableData(data);
@@ -108,8 +99,7 @@ const EntityTable = ({ data, onDataChange }: DataTableProps) => {
                 <TableCell>{item.lei}</TableCell>
                 <TableCell>{item.reportingCurrency}</TableCell>
                 <TableCell>
-                  {item.significantCurrencies &&
-                  Array.isArray(item.significantCurrencies)
+                  {item.significantCurrencies && Array.isArray(item.significantCurrencies)
                     ? item.significantCurrencies.join(', ')
                     : 'N/A'}
                 </TableCell>

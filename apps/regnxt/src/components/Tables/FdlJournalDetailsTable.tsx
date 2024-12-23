@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import Pagination from '../Pagination';
-import { Filter } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+
+import {Filter} from 'lucide-react';
+
 import Api from '../../utils/Api';
-import { Button } from '../ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
+import Pagination from '../Pagination';
+import {Button} from '../ui/button';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '../ui/table';
 
 interface JournalEntry {
   journalCode: string;
@@ -73,7 +68,7 @@ const FdlJournalDetailsTable = ({
   const [filteredData, setFilteredData] = useState<JournalEntry[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const [fieldLabels, setFieldLabels] = useState<{ [key: string]: string }>({});
+  const [fieldLabels, setFieldLabels] = useState<{[key: string]: string}>({});
 
   const indexOfLastItem = (currentPage + 1) * pageSize;
   const indexOfFirstItem = indexOfLastItem - pageSize;
@@ -98,8 +93,8 @@ const FdlJournalDetailsTable = ({
       try {
         const response = await Api.get('/FDL/AccountingLabel');
         const labelData = response.data;
-        const labelsMap: { [key: string]: string } = {};
-        labelData.forEach((item: { column: string; label: string }) => {
+        const labelsMap: {[key: string]: string} = {};
+        labelData.forEach((item: {column: string; label: string}) => {
           labelsMap[item.column] = item.label;
         });
         setFieldLabels(labelsMap);
@@ -127,20 +122,16 @@ const FdlJournalDetailsTable = ({
     setCurrentPage(1);
   };
 
-  const handleFilterChange = (
-    column: string,
-    type: FilterType,
-    value: string,
-  ) => {
+  const handleFilterChange = (column: string, type: FilterType, value: string) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      [column]: { type, value },
+      [column]: {type, value},
     }));
   };
 
   const clearFilter = (column: string) => {
     setFilters((prev) => {
-      const newFilters = { ...prev };
+      const newFilters = {...prev};
       delete newFilters[column];
       return newFilters;
     });
@@ -154,11 +145,7 @@ const FdlJournalDetailsTable = ({
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'matchAll'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="matchAll">Match All</option>
@@ -168,11 +155,7 @@ const FdlJournalDetailsTable = ({
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'startsWith'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="startsWith">Starts With</option>
@@ -186,13 +169,7 @@ const FdlJournalDetailsTable = ({
           type="text"
           className="mt-2 w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.value || ''}
-          onChange={(e) =>
-            handleFilterChange(
-              column,
-              filters[column]?.type || 'matchAll',
-              e.target.value,
-            )
-          }
+          onChange={(e) => handleFilterChange(column, filters[column]?.type || 'matchAll', e.target.value)}
           placeholder="Search..."
         />
         <div className="mt-2 flex justify-between">
@@ -219,15 +196,9 @@ const FdlJournalDetailsTable = ({
 
       const response = await Api.post(url, {});
 
-      const isJsonBlob = (data: any) =>
-        data instanceof Blob && data.type === 'application/json';
-      const responseData = isJsonBlob(response?.data)
-        ? await response?.data?.text()
-        : response?.data || {};
-      const responseJson =
-        typeof responseData === 'string'
-          ? JSON.parse(responseData)
-          : responseData;
+      const isJsonBlob = (data: any) => data instanceof Blob && data.type === 'application/json';
+      const responseData = isJsonBlob(response?.data) ? await response?.data?.text() : response?.data || {};
+      const responseJson = typeof responseData === 'string' ? JSON.parse(responseData) : responseData;
 
       console.log('Success:', responseJson);
       onUpdateSuccess();
@@ -253,16 +224,16 @@ const FdlJournalDetailsTable = ({
           <TableHeader>
             <TableRow>
               {[
-                { key: 'journalLineNr', label: 'Line Nr' },
-                { key: 'domainId', label: 'Domain Id' },
-                { key: 'amountClass', label: 'Amount Class' },
-                { key: 'entity', label: 'Entity' },
-                { key: 'accountCode', label: 'Account Code' },
-                { key: 'counterparty', label: 'Counterparty' },
-                { key: 'currency', label: 'Currency' },
-                { key: 'dealId', label: 'Deal Id' },
-                { key: 'effectiveDate', label: 'Effective Date' },
-                { key: 'amountInOrigCCy', label: 'Amount In Orig CCy' },
+                {key: 'journalLineNr', label: 'Line Nr'},
+                {key: 'domainId', label: 'Domain Id'},
+                {key: 'amountClass', label: 'Amount Class'},
+                {key: 'entity', label: 'Entity'},
+                {key: 'accountCode', label: 'Account Code'},
+                {key: 'counterparty', label: 'Counterparty'},
+                {key: 'currency', label: 'Currency'},
+                {key: 'dealId', label: 'Deal Id'},
+                {key: 'effectiveDate', label: 'Effective Date'},
+                {key: 'amountInOrigCCy', label: 'Amount In Orig CCy'},
                 {
                   key: 'freeField1',
                   label: fieldLabels.freefield1 || 'Free Field 1',
@@ -303,9 +274,9 @@ const FdlJournalDetailsTable = ({
                   key: 'freeField10',
                   label: fieldLabels.freefield10 || 'Free Field 10',
                 },
-                { key: 'journalCode', label: 'Source' },
-                { key: 'description', label: 'Description' },
-              ].map(({ key, label }) => (
+                {key: 'journalCode', label: 'Source'},
+                {key: 'description', label: 'Description'},
+              ].map(({key, label}) => (
                 <TableHead key={key}>
                   <div className="flex items-center gap-2">
                     <span>{label}</span>

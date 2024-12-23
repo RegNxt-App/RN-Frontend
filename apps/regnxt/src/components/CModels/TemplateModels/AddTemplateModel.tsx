@@ -1,36 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import {useEffect, useState} from 'react';
+import {useForm} from 'react-hook-form';
+
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/Dialog';
+import {Button} from '@/components/ui/button';
+import {Checkbox} from '@/components/ui/checkbox';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
+import {Input} from '@/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {useToast} from '@/hooks/use-toast';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {ChevronDown, ChevronRight} from 'lucide-react';
 import * as z from 'zod';
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import Api from '../../../utils/Api';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/Dialog';
-import { Checkbox } from '@/components/ui/checkbox';
 
 interface AddTemplateModelProps {
   onClose: () => void;
@@ -75,12 +57,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const AddTemplateModel = ({
-  onClose,
-  onSuccess,
-  isOpen,
-}: AddTemplateModelProps) => {
-  const { toast } = useToast();
+const AddTemplateModel = ({onClose, onSuccess, isOpen}: AddTemplateModelProps) => {
+  const {toast} = useToast();
   const [regulators, setRegulators] = useState<Regulator[]>([]);
   const [reportGroups, setReportGroups] = useState<ReportGroup[]>([]);
   const [reportSets, setReportSets] = useState<ReportSet[]>([]);
@@ -121,9 +99,7 @@ const AddTemplateModel = ({
 
   const fetchReportGroups = async (regulatorId: string) => {
     try {
-      const response = await Api.get(
-        `/RD/RegportGroupUI?regulatorid=${regulatorId}`,
-      );
+      const response = await Api.get(`/RD/RegportGroupUI?regulatorid=${regulatorId}`);
       setReportGroups(response.data);
       setReportSets([]);
       setReportSubsets([]);
@@ -142,7 +118,7 @@ const AddTemplateModel = ({
   const fetchReportSets = async (regulatorId: string, groupCode: string) => {
     try {
       const response = await Api.get(
-        `/RD/RegportSetUI?regulatorid=${regulatorId}&reportGroupCode=${groupCode}`,
+        `/RD/RegportSetUI?regulatorid=${regulatorId}&reportGroupCode=${groupCode}`
       );
       setReportSets(response.data);
       setReportSubsets([]);
@@ -157,14 +133,10 @@ const AddTemplateModel = ({
     }
   };
 
-  const fetchReportSubsets = async (
-    regulatorId: string,
-    groupCode: string,
-    setCode: string,
-  ) => {
+  const fetchReportSubsets = async (regulatorId: string, groupCode: string, setCode: string) => {
     try {
       const response = await Api.get(
-        `/RD/RegportSubSetUI?regulatorid=${regulatorId}&reportGroupCode=${groupCode}&reportSetcode=${setCode}`,
+        `/RD/RegportSubSetUI?regulatorid=${regulatorId}&reportGroupCode=${groupCode}&reportSetcode=${setCode}`
       );
       setReportSubsets(response.data);
       form.setValue('reportSubset', '');
@@ -179,9 +151,7 @@ const AddTemplateModel = ({
 
   const fetchReportTables = async (subsetId: string) => {
     try {
-      const response = await Api.get(
-        `/RD/Table?reportSubsetId=${subsetId}&refReportSubsetId=0`,
-      );
+      const response = await Api.get(`/RD/Table?reportSubsetId=${subsetId}&refReportSubsetId=0`);
       setReportTables(response.data);
     } catch (error) {
       toast({
@@ -201,16 +171,14 @@ const AddTemplateModel = ({
 
       if (selectedTables.includes(key)) {
         updatedSelectedTables = updatedSelectedTables.filter(
-          (item) => item !== key && !childrenKeys.includes(item),
+          (item) => item !== key && !childrenKeys.includes(item)
         );
       } else {
         updatedSelectedTables.push(key, ...childrenKeys);
       }
     } else {
       if (selectedTables.includes(key)) {
-        updatedSelectedTables = updatedSelectedTables.filter(
-          (item) => item !== key,
-        );
+        updatedSelectedTables = updatedSelectedTables.filter((item) => item !== key);
       } else {
         updatedSelectedTables.push(key);
       }
@@ -220,35 +188,30 @@ const AddTemplateModel = ({
   };
 
   const toggleExpand = (key: string) => {
-    setExpandedParents((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
-    );
+    setExpandedParents((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   };
 
   const onSubmit = async (data: FormValues) => {
     try {
-      const formattedTables = reportTables.reduce(
-        (acc, table) => {
-          const isChecked = selectedTables.includes(table.key);
-          acc[table.key] = {
-            checked: isChecked,
-            partialChecked: !isChecked,
-          };
+      const formattedTables = reportTables.reduce((acc, table) => {
+        const isChecked = selectedTables.includes(table.key);
+        acc[table.key] = {
+          checked: isChecked,
+          partialChecked: !isChecked,
+        };
 
-          if (table.children) {
-            table.children.forEach((child) => {
-              const isChildChecked = selectedTables.includes(child.key);
-              acc[child.key] = {
-                checked: isChildChecked,
-                partialChecked: !isChildChecked,
-              };
-            });
-          }
+        if (table.children) {
+          table.children.forEach((child) => {
+            const isChildChecked = selectedTables.includes(child.key);
+            acc[child.key] = {
+              checked: isChildChecked,
+              partialChecked: !isChildChecked,
+            };
+          });
+        }
 
-          return acc;
-        },
-        {} as Record<string, { checked: boolean; partialChecked: boolean }>,
-      );
+        return acc;
+      }, {} as Record<string, {checked: boolean; partialChecked: boolean}>);
 
       const payload = {
         name: data.templateName,
@@ -279,23 +242,32 @@ const AddTemplateModel = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}
+    >
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Template</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="templateName"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Template Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter template name" {...field} />
+                      <Input
+                        placeholder="Enter template name"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -305,7 +277,7 @@ const AddTemplateModel = ({
               <FormField
                 control={form.control}
                 name="regulatoryField"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Regulatory Field</FormLabel>
                     <Select
@@ -339,17 +311,14 @@ const AddTemplateModel = ({
               <FormField
                 control={form.control}
                 name="reportGroup"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Report Group</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);
                         if (form.getValues('regulatoryField')) {
-                          fetchReportSets(
-                            form.getValues('regulatoryField'),
-                            value,
-                          );
+                          fetchReportSets(form.getValues('regulatoryField'), value);
                         }
                       }}
                       value={field.value}
@@ -362,7 +331,10 @@ const AddTemplateModel = ({
                       </FormControl>
                       <SelectContent>
                         {reportGroups.map((group) => (
-                          <SelectItem key={group.code} value={group.code}>
+                          <SelectItem
+                            key={group.code}
+                            value={group.code}
+                          >
                             {group.name}
                           </SelectItem>
                         ))}
@@ -376,20 +348,17 @@ const AddTemplateModel = ({
               <FormField
                 control={form.control}
                 name="reportSet"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Report Set</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);
-                        if (
-                          form.getValues('regulatoryField') &&
-                          form.getValues('reportGroup')
-                        ) {
+                        if (form.getValues('regulatoryField') && form.getValues('reportGroup')) {
                           fetchReportSubsets(
                             form.getValues('regulatoryField'),
                             form.getValues('reportGroup'),
-                            value,
+                            value
                           );
                         }
                       }}
@@ -403,7 +372,10 @@ const AddTemplateModel = ({
                       </FormControl>
                       <SelectContent>
                         {reportSets.map((set) => (
-                          <SelectItem key={set.code} value={set.code}>
+                          <SelectItem
+                            key={set.code}
+                            value={set.code}
+                          >
                             {set.name}
                           </SelectItem>
                         ))}
@@ -417,7 +389,7 @@ const AddTemplateModel = ({
               <FormField
                 control={form.control}
                 name="reportSubset"
-                render={({ field }) => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>Report Subset</FormLabel>
                     <Select
@@ -455,7 +427,10 @@ const AddTemplateModel = ({
                 <h4 className="text-lg font-semibold">Select Tables</h4>
                 <div className="space-y-2">
                   {reportTables.map((table) => (
-                    <div key={table.key} className="space-y-2">
+                    <div
+                      key={table.key}
+                      className="space-y-2"
+                    >
                       <div className="flex items-center space-x-2">
                         <Button
                           type="button"
@@ -474,9 +449,7 @@ const AddTemplateModel = ({
                           className="text-white"
                           id={table.key}
                           checked={selectedTables.includes(table.key)}
-                          onCheckedChange={() =>
-                            handleCheckboxChange(table.key, true)
-                          }
+                          onCheckedChange={() => handleCheckboxChange(table.key, true)}
                         />
                         <label
                           htmlFor={table.key}
@@ -486,32 +459,29 @@ const AddTemplateModel = ({
                         </label>
                       </div>
 
-                      {expandedParents.includes(table.key) &&
-                        table.children && (
-                          <div className="ml-6 space-y-2">
-                            {table.children.map((child) => (
-                              <div
-                                key={child.key}
-                                className="flex items-center space-x-2"
+                      {expandedParents.includes(table.key) && table.children && (
+                        <div className="ml-6 space-y-2">
+                          {table.children.map((child) => (
+                            <div
+                              key={child.key}
+                              className="flex items-center space-x-2"
+                            >
+                              <Checkbox
+                                className="text-white"
+                                id={child.key}
+                                checked={selectedTables.includes(child.key)}
+                                onCheckedChange={() => handleCheckboxChange(child.key, false)}
+                              />
+                              <label
+                                htmlFor={child.key}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
-                                <Checkbox
-                                  className="text-white"
-                                  id={child.key}
-                                  checked={selectedTables.includes(child.key)}
-                                  onCheckedChange={() =>
-                                    handleCheckboxChange(child.key, false)
-                                  }
-                                />
-                                <label
-                                  htmlFor={child.key}
-                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                >
-                                  {child.label}
-                                </label>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                                {child.label}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -519,10 +489,17 @@ const AddTemplateModel = ({
             )}
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+              >
                 Cancel
               </Button>
-              <Button className="bg-purple-500 text-white" type="submit">
+              <Button
+                className="bg-purple-500 text-white"
+                type="submit"
+              >
                 Save Template
               </Button>
             </DialogFooter>

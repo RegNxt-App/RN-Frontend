@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import {useState} from 'react';
 
 import AccountCodeTable from '../../components/Tables/AccountCodeTable';
-import Api from '../../utils/Api';
 import Loader from '../../components/loader';
+import Api from '../../utils/Api';
 
 interface AccountingCategory {
   id: string;
@@ -18,7 +18,7 @@ interface AccountCodeProps {
   accountingCategories: AccountingCategory[];
 }
 
-const AccountCode = ({ accountingCategories }: AccountCodeProps) => {
+const AccountCode = ({accountingCategories}: AccountCodeProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [tableData, setTableData] = useState<LedgerData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -36,9 +36,7 @@ const AccountCode = ({ accountingCategories }: AccountCodeProps) => {
       setLoading(false);
     }
   };
-  const handleCategoryChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
     setSelectedCategory(selectedValue);
 
@@ -48,16 +46,12 @@ const AccountCode = ({ accountingCategories }: AccountCodeProps) => {
   };
 
   const handleDelete = (id: string) => {
-    setTableData((prevData) =>
-      prevData.filter((item) => item.ledgerCode !== id),
-    );
+    setTableData((prevData) => prevData.filter((item) => item.ledgerCode !== id));
   };
 
   const handleUpdate = (updatedRecord: LedgerData) => {
     setTableData((prevData) =>
-      prevData.map((item) =>
-        item.ledgerCode === updatedRecord.ledgerCode ? updatedRecord : item,
-      ),
+      prevData.map((item) => (item.ledgerCode === updatedRecord.ledgerCode ? updatedRecord : item))
     );
   };
 
@@ -70,11 +64,17 @@ const AccountCode = ({ accountingCategories }: AccountCodeProps) => {
           onChange={handleCategoryChange}
           value={selectedCategory}
         >
-          <option value="" disabled>
+          <option
+            value=""
+            disabled
+          >
             Select a Category
           </option>
           {accountingCategories.map((category) => (
-            <option key={category.id} value={category.name}>
+            <option
+              key={category.id}
+              value={category.name}
+            >
               {category.name}
             </option>
           ))}

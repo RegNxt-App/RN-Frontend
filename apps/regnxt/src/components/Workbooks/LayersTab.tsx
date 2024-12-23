@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import LayersTable from '../Tables/workbooks/layers/LayersData';
+import {useEffect, useState} from 'react';
+
 import Api from '../../utils/Api';
+import LayersTable from '../Tables/workbooks/layers/LayersData';
 import Loader from '../loader';
 
 interface LayersTableData {
@@ -25,7 +26,7 @@ interface LayersTabProps {
   workbookId: string;
 }
 
-const LayersTab: React.FC<LayersTabProps> = ({ workbookId }) => {
+const LayersTab: React.FC<LayersTabProps> = ({workbookId}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [versions, setVersions] = useState<LayersTableData[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -33,19 +34,15 @@ const LayersTab: React.FC<LayersTabProps> = ({ workbookId }) => {
   const fetchVersions = async () => {
     try {
       setIsLoading(true);
-      const response = await Api.get(
-        `/RI/Workbook/version?workbookId=${workbookId}`,
-      );
+      const response = await Api.get(`/RI/Workbook/version?workbookId=${workbookId}`);
 
-      const transformedData: LayersTableData[] = response.data.map(
-        (version: VersionResponse) => ({
-          versionId: version.versionId,
-          from: new Date(version.fromDate).toLocaleString(),
-          to: new Date(version.toDate).toLocaleString(),
-          reason: version.reason,
-          modifier: `User ${version.modifierId}`,
-        }),
-      );
+      const transformedData: LayersTableData[] = response.data.map((version: VersionResponse) => ({
+        versionId: version.versionId,
+        from: new Date(version.fromDate).toLocaleString(),
+        to: new Date(version.toDate).toLocaleString(),
+        reason: version.reason,
+        modifier: `User ${version.modifierId}`,
+      }));
 
       setVersions(transformedData);
       setError(null);

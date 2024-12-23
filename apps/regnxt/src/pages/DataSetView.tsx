@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {useLocation} from 'react-router-dom';
 
 import {ConfigurationDataTable} from '@/components/ConfigurationDataTable';
 import {DataAccordion} from '@/components/DataAccordion';
@@ -7,12 +8,21 @@ import FilterPanel from '@/components/FilterPanel';
 import {SelectionDisplay} from '@/components/SelectionDisplay';
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {TableInfoHeader} from '@/components/TableInfoHeader';
+import DatasetFormModal from '@/components/configurations/DatasetFormModal';
 import {MetadataTable} from '@/components/metadatatable/MetadataTable';
 import DataSkeleton from '@/components/skeletons/DataSkeleton';
 import {useToast} from '@/hooks/use-toast';
-import {birdBackendInstance} from '@/lib/axios';
-import {DatasetItem, DatasetResponse, Frameworks, Layers, ValidationResult} from '@/types/databaseTypes';
+import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
+import {
+  Dataset,
+  DatasetItem,
+  DatasetResponse,
+  Frameworks,
+  Layers,
+  ValidationResult,
+} from '@/types/databaseTypes';
 import {format} from 'date-fns';
+import {Plus} from 'lucide-react';
 import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
@@ -21,6 +31,19 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn
 const NO_FILTER = 'NO_FILTER';
 
 const DataSetView: React.FC = () => {
+  const location = useLocation();
+
+  const getBackendInstance = () => {
+    if (location.pathname.includes('/bird/')) {
+      return birdBackendInstance;
+    }
+    if (location.pathname.includes('/orchestra/')) {
+      return orchestraBackendInstance;
+    }
+    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
+  };
+
+  const backendInstance = getBackendInstance();
   const [selectedFramework, setSelectedFramework] = useState<string>(NO_FILTER);
   const [selectedLayer, setSelectedLayer] = useState<string>(NO_FILTER);
   const [selectedTable, setSelectedTable] = useState<any | null>(null);
@@ -30,8 +53,11 @@ const DataSetView: React.FC = () => {
   const [datasetVersion, setDatasetVersion] = useState<any>(null);
   const [hasAppliedFilters, setHasAppliedFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDatasetModalOpen, setIsDatasetModalOpen] = useState(false);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [pageSize, _] = useState(10000);
+  const [editingDataset, setEditingDataset] = useState<Dataset | null>(null);
 
   const [metadataTableData, setMetadataTableData] = useState<Record<string, string>[]>([]);
   const [isMetadataLoading, setIsMetadataLoading] = useState(false);
@@ -45,11 +71,15 @@ const DataSetView: React.FC = () => {
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const {toast} = useToast();
 
-  const {data: layers} = useSWR<Layers>('/api/v1/layers/', birdBackendInstance);
-  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', birdBackendInstance);
+  const {data: layers} = useSWR<Layers>('/api/v1/layers/', backendInstance);
+  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', backendInstance);
+  const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
+    `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
+    backendInstance
+  );
   const {data: dataTableJson} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    birdBackendInstance,
+    backendInstance,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -111,7 +141,7 @@ const DataSetView: React.FC = () => {
           }
         });
 
-        const response = await birdBackendInstance.get(
+        const response = await backendInstance.get(
           `/api/v1/datasets/${selectedTable.dataset_id}/get_filtered_data/?${params}`
         );
         setMetadataTableData(response.data);
@@ -192,12 +222,9 @@ const DataSetView: React.FC = () => {
   const fetchDatasetVersion = useCallback(async () => {
     if (!selectedTable) return;
     try {
-      const response = await birdBackendInstance.get(
-        `/api/v1/datasets/${selectedTable.dataset_id}/versions/`,
-        {
-          params: {date: format(selectedDate, 'yyyy-MM-dd')},
-        }
-      );
+      const response = await backendInstance.get(`/api/v1/datasets/${selectedTable.dataset_id}/versions/`, {
+        params: {date: format(selectedDate, 'yyyy-MM-dd')},
+      });
       setDatasetVersion(response.data && Object.keys(response.data).length > 0 ? response.data : null);
       if (!response.data || Object.keys(response.data).length === 0) {
         toast({
@@ -223,10 +250,10 @@ const DataSetView: React.FC = () => {
     if (!selectedTable || !datasetVersion) return;
     try {
       const [metadataResponse, dataResponse] = await Promise.all([
-        birdBackendInstance.get(`/api/v1/datasets/${selectedTable.dataset_id}/version-columns/`, {
+        backendInstance.get(`/api/v1/datasets/${selectedTable.dataset_id}/version-columns/`, {
           params: {version_id: datasetVersion.dataset_version_id},
         }),
-        birdBackendInstance.get(
+        backendInstance.get(
           `/api/v1/datasets/${selectedTable.dataset_id}/get_data/?version_id=${datasetVersion.dataset_version_id}`
         ),
       ]);
@@ -243,17 +270,58 @@ const DataSetView: React.FC = () => {
   useEffect(() => {
     fetchTableData();
   }, [fetchTableData]);
+  const handleUpdateDataset = async (updatedDataset: Dataset) => {
+    if (updatedDataset.is_system_generated) return;
+    try {
+      await backendInstance.put(`/api/v1/datasets/${updatedDataset.dataset_id}/`, updatedDataset);
+      await mutateDatasets();
+      toast({
+        title: 'Success',
+        description: 'Dataset updated successfully.',
+      });
+      setIsDatasetModalOpen(false);
+      setEditingDataset(null);
+    } catch (error) {
+      console.error('Error updating dataset:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update dataset. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+  const handleCreateDataset = async (newDataset: Partial<Dataset>) => {
+    try {
+      await backendInstance.post('/api/v1/datasets/', {
+        ...newDataset,
+        is_system_generated: false,
+      });
+      await mutateDatasets();
+      setIsDatasetModalOpen(false);
 
+      toast({
+        title: 'Success',
+        description: 'Dataset created successfully.',
+      });
+    } catch (error: any) {
+      console.error('Error creating dataset:', error);
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.error || 'Failed to create dataset. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
   const fetchMetadata = useCallback(async () => {
     if (!selectedTable || !datasetVersion) return;
 
     setIsMetadataLoading(true);
     try {
       const [columnsResponse, dataResponse] = await Promise.all([
-        birdBackendInstance.get(`/api/v1/datasets/${selectedTable.dataset_id}/version-columns/`, {
+        backendInstance.get(`/api/v1/datasets/${selectedTable.dataset_id}/version-columns/`, {
           params: {version_id: datasetVersion.dataset_version_id},
         }),
-        birdBackendInstance.get(
+        backendInstance.get(
           `/api/v1/datasets/${selectedTable.dataset_id}/get_data/?version_id=${datasetVersion.dataset_version_id}`
         ),
       ]);
@@ -297,18 +365,15 @@ const DataSetView: React.FC = () => {
   }, []);
 
   const handleSaveMetadata = useCallback(
-    async (saveData: {
-      data: Record<string, string | null>[];
-      deletions: number[];
-    }) => {
+    async (saveData: {data: Record<string, string | null>[]; deletions: number[]}) => {
       try {
         const payload = {
           data: saveData.data,
-          deletions: saveData.deletions, 
+          deletions: saveData.deletions,
           dataset_version_id: selectedTable.dataset_version_id,
         };
 
-        await birdBackendInstance.post(`/api/v1/datasets/${selectedTable.dataset_id}/save_data/`, payload);
+        await backendInstance.post(`/api/v1/datasets/${selectedTable.dataset_id}/save_data/`, payload);
 
         toast({
           title: 'Success',
@@ -346,7 +411,7 @@ const DataSetView: React.FC = () => {
           return transformed;
         });
 
-        const response = await birdBackendInstance.post<ValidationResult[]>(
+        const response = await backendInstance.post<ValidationResult[]>(
           `/api/v1/datasets/${selectedTable.dataset_id}/validate/`,
           {
             table_data: preparedData,
@@ -459,6 +524,12 @@ const DataSetView: React.FC = () => {
         filters={columnFilters}
         setFilter={(key, value) => setColumnFilters((prev) => ({...prev, [key]: value}))}
       />
+      <div className="mt-4 mb-4 flex flex-row-reverse">
+        <Button onClick={() => setIsDatasetModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create New Dataset
+        </Button>
+      </div>
       {selectedLayer === NO_FILTER ? (
         <DataAccordion
           data={filteredData}
@@ -493,6 +564,23 @@ const DataSetView: React.FC = () => {
           </div>
         </div>
       )}
+      <DatasetFormModal
+        isOpen={isDatasetModalOpen}
+        onClose={() => {
+          setIsDatasetModalOpen(false);
+          setEditingDataset(null);
+        }}
+        onSubmit={(dataset) => {
+          if (editingDataset) {
+            handleUpdateDataset({...editingDataset, ...dataset} as Dataset);
+          } else {
+            handleCreateDataset(dataset);
+          }
+        }}
+        initialData={editingDataset || undefined}
+        frameworks={frameworks?.data || []}
+        layers={layers?.data || []}
+      />
 
       {selectedTable && (
         <div className="mt-8">

@@ -1,16 +1,12 @@
-import { useState, useEffect } from 'react';
-import Pagination from '../Pagination';
-import { Filter } from 'lucide-react';
+import {useEffect, useState} from 'react';
+
+import {Filter} from 'lucide-react';
+
 import Api from '../../utils/Api';
-import { Button } from '../ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
+import Pagination from '../Pagination';
+import {Button} from '../ui/button';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '../ui/table';
+
 interface JournalEntry {
   journalCode: string;
   journalNr: number;
@@ -73,7 +69,7 @@ const FdlPostedJournalDetailsTable = ({
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [fieldLabels, setFieldLabels] = useState<{ [key: string]: string }>({});
+  const [fieldLabels, setFieldLabels] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
     applyFilters();
@@ -84,8 +80,8 @@ const FdlPostedJournalDetailsTable = ({
         const response = await Api.get('/FDL/AccountingLabel');
         const labelData = response.data;
 
-        const labelsMap: { [key: string]: string } = {};
-        labelData.forEach((item: { column: string; label: string }) => {
+        const labelsMap: {[key: string]: string} = {};
+        labelData.forEach((item: {column: string; label: string}) => {
           labelsMap[item.column] = item.label;
         });
         setFieldLabels(labelsMap);
@@ -114,20 +110,16 @@ const FdlPostedJournalDetailsTable = ({
     setCurrentPage(1);
   };
 
-  const handleFilterChange = (
-    column: string,
-    type: FilterType,
-    value: string,
-  ) => {
+  const handleFilterChange = (column: string, type: FilterType, value: string) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      [column]: { type, value },
+      [column]: {type, value},
     }));
   };
 
   const clearFilter = (column: string) => {
     setFilters((prev) => {
-      const newFilters = { ...prev };
+      const newFilters = {...prev};
       delete newFilters[column];
       return newFilters;
     });
@@ -156,11 +148,7 @@ const FdlPostedJournalDetailsTable = ({
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'matchAll'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="matchAll">Match All</option>
@@ -170,11 +158,7 @@ const FdlPostedJournalDetailsTable = ({
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'startsWith'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="startsWith">Starts With</option>
@@ -188,13 +172,7 @@ const FdlPostedJournalDetailsTable = ({
           type="text"
           className="mt-2 w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.value || ''}
-          onChange={(e) =>
-            handleFilterChange(
-              column,
-              filters[column]?.type || 'matchAll',
-              e.target.value,
-            )
-          }
+          onChange={(e) => handleFilterChange(column, filters[column]?.type || 'matchAll', e.target.value)}
           placeholder="Search..."
         />
         <div className="mt-2 flex justify-between">
@@ -221,10 +199,7 @@ const FdlPostedJournalDetailsTable = ({
       const response = await Api.delete(url);
 
       const responseData = response.data || {};
-      const responseJson =
-        typeof responseData === 'string'
-          ? JSON.parse(responseData)
-          : responseData;
+      const responseJson = typeof responseData === 'string' ? JSON.parse(responseData) : responseData;
 
       console.log('Success:', responseJson);
       onUpdateSuccess();
@@ -254,8 +229,7 @@ const FdlPostedJournalDetailsTable = ({
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded shadow-lg">
               <p className="mb-4">
-                Are you sure to remove the journal with code{' '}
-                <strong>{clickedjournalCode}</strong> and nr{' '}
+                Are you sure to remove the journal with code <strong>{clickedjournalCode}</strong> and nr{' '}
                 <strong>{clickedjournalNr}</strong> from the balances?
               </p>
               <div className="flex justify-end">

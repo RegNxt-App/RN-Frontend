@@ -1,8 +1,9 @@
 import {useCallback, useMemo, useState} from 'react';
+import {useLocation} from 'react-router-dom';
 
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {useToast} from '@/hooks/use-toast';
-import {birdBackendInstance} from '@/lib/axios';
+import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {
   Column,
   Dataset,
@@ -35,7 +36,19 @@ interface VersionColumnsData {
 
 const ConfigureDatasets = () => {
   const {toast} = useToast();
+  const location = useLocation();
 
+  const getBackendInstance = () => {
+    if (location.pathname.includes('/bird/')) {
+      return birdBackendInstance;
+    }
+    if (location.pathname.includes('/orchestra/')) {
+      return orchestraBackendInstance;
+    }
+    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
+  };
+
+  const backendInstance = getBackendInstance();
   const [selectedFramework, setSelectedFramework] = useState<string>(NO_FILTER);
   const [selectedLayer, setSelectedLayer] = useState<string>(NO_FILTER);
   const [currentPage, setCurrentPage] = useState(1);
@@ -70,16 +83,16 @@ const ConfigureDatasets = () => {
     setSelectedVersionId((prev) => (prev === versionId ? null : versionId));
   };
 
-  const {data: layers} = useSWR<Layers>('/api/v1/layers/', birdBackendInstance);
-  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', birdBackendInstance);
+  const {data: layers} = useSWR<Layers>('/api/v1/layers/', backendInstance);
+  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', backendInstance);
   const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    birdBackendInstance
+    backendInstance
   );
 
   const {data: dataTableJson} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    birdBackendInstance,
+    backendInstance,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -118,14 +131,14 @@ const ConfigureDatasets = () => {
     isValidating: isLoadingVersions,
   } = useSWR<DatasetVersions>(
     selectedDataset ? `/api/v1/datasets/${selectedDataset.dataset_id}/versions_all/` : null,
-    birdBackendInstance
+    backendInstance
   );
 
   const {data: versionColumns, mutate: mutateVersionColumns} = useSWR<VersionColumnsData>(
     selectedVersionId
       ? `/api/v1/datasets/${selectedDataset?.dataset_id}/version-columns/?version_id=${selectedVersionId}`
       : null,
-    birdBackendInstance
+    backendInstance
   );
 
   const handleFrameworkChange = useCallback((value: string) => {

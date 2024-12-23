@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, {useEffect, useRef} from 'react';
 
 interface Props {
   children: React.ReactNode;
@@ -7,12 +7,7 @@ interface Props {
   className?: string;
 }
 
-const ClickOutside = ({
-  children,
-  exceptionRef,
-  onClick,
-  className,
-}: Props) => {
+const ClickOutside = ({children, exceptionRef, onClick, className}: Props) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,15 +15,11 @@ const ClickOutside = ({
       let clickedInside: null | boolean = false;
       if (exceptionRef) {
         clickedInside =
-          (wrapperRef.current &&
-            wrapperRef.current.contains(event.target as Node)) ||
+          (wrapperRef.current && wrapperRef.current.contains(event.target as Node)) ||
           (exceptionRef.current && exceptionRef.current === event.target) ||
-          (exceptionRef.current &&
-            exceptionRef.current.contains(event.target as Node));
+          (exceptionRef.current && exceptionRef.current.contains(event.target as Node));
       } else {
-        clickedInside =
-          wrapperRef.current &&
-          wrapperRef.current.contains(event.target as Node);
+        clickedInside = wrapperRef.current && wrapperRef.current.contains(event.target as Node);
       }
 
       if (!clickedInside) onClick();
@@ -42,7 +33,10 @@ const ClickOutside = ({
   }, [exceptionRef, onClick]);
 
   return (
-    <div ref={wrapperRef} className={`${className || ''}`}>
+    <div
+      ref={wrapperRef}
+      className={`${className || ''}`}
+    >
       {children}
     </div>
   );

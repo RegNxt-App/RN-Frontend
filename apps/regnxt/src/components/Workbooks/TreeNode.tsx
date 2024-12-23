@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Settings, X } from 'lucide-react';
-import { Dialog } from '@headlessui/react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  setDialogState,
-  selectDialogState,
-} from '../../features/sheetData/sheetDataSlice';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+
+import {Dialog} from '@headlessui/react';
+import {ChevronDown, ChevronRight, Settings, X} from 'lucide-react';
+
+import {selectDialogState, setDialogState} from '../../features/sheetData/sheetDataSlice';
 import ManageSheetsDialog from '../ManageSheetsDialog';
+
 interface ApiResponse {
   key: string;
   label: string;
@@ -22,13 +22,7 @@ interface TreeNodeProps {
   onToggleExpand: (nodeKey: string) => void;
 }
 
-const TreeNode: React.FC<TreeNodeProps> = ({
-  node,
-  onClick,
-  workbookId,
-  expandedNodes,
-  onToggleExpand,
-}) => {
+const TreeNode: React.FC<TreeNodeProps> = ({node, onClick, workbookId, expandedNodes, onToggleExpand}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
 
@@ -72,14 +66,14 @@ const TreeNode: React.FC<TreeNodeProps> = ({
       setCurrentTableId(tableId);
       console.log('Found Table ID:', tableId);
 
-      dispatch(setDialogState({ isOpen: true, dialogType: 'manage-sheets' }));
+      dispatch(setDialogState({isOpen: true, dialogType: 'manage-sheets'}));
     } else {
       onClick(node);
     }
   };
 
   const handleCloseDialog = () => {
-    dispatch(setDialogState({ isOpen: false, dialogType: null }));
+    dispatch(setDialogState({isOpen: false, dialogType: null}));
     setCurrentTableId(null);
   };
 
@@ -95,7 +89,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     if (node.label === '<openaxis>') {
       return (
         <div className="flex items-center gap-2">
-          <Settings size={16} strokeWidth={1.75} />
+          <Settings
+            size={16}
+            strokeWidth={1.75}
+          />
           <span>Manage Sheets</span>
         </div>
       );
@@ -106,26 +103,26 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   console.log('WorkbookId in treenode', workbookId);
   return (
     <>
-      <div className="ml-4" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center cursor-pointer" onClick={toggleOpen}>
+      <div
+        className="ml-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={toggleOpen}
+        >
           {hasChildren && (
             <span className="mr-2">
-              {isExpanded ? (
-                <ChevronDown size={16} />
-              ) : (
-                <ChevronRight size={16} />
-              )}
+              {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
             </span>
           )}
           <div className="flex items-center gap-2">
             <strong onClick={handleClick}>{renderLabel()}</strong>
-            {node.cellcount !== undefined &&
-              node.invalidcount !== undefined && (
-                <span className="text-sm text-gray-500">
-                  ( {node.cellcount} | {node.invalidcount} | {node.invalidcount}{' '}
-                  )
-                </span>
-              )}
+            {node.cellcount !== undefined && node.invalidcount !== undefined && (
+              <span className="text-sm text-gray-500">
+                ( {node.cellcount} | {node.invalidcount} | {node.invalidcount} )
+              </span>
+            )}
           </div>
         </div>
 
@@ -145,20 +142,24 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         )}
       </div>
 
-      {dialogState.isOpen &&
-        dialogState.dialogType === 'manage-sheets' &&
-        currentTableId &&
-        workbookId && (
-          <Dialog open={true} onClose={handleCloseDialog} className="relative">
-            <div className="fixed" aria-hidden="true" />
-            <ManageSheetsDialog
-              isOpen={true}
-              onClose={handleCloseDialog}
-              workbookId={workbookId}
-              tableId={currentTableId}
-            />
-          </Dialog>
-        )}
+      {dialogState.isOpen && dialogState.dialogType === 'manage-sheets' && currentTableId && workbookId && (
+        <Dialog
+          open={true}
+          onClose={handleCloseDialog}
+          className="relative"
+        >
+          <div
+            className="fixed"
+            aria-hidden="true"
+          />
+          <ManageSheetsDialog
+            isOpen={true}
+            onClose={handleCloseDialog}
+            workbookId={workbookId}
+            tableId={currentTableId}
+          />
+        </Dialog>
+      )}
     </>
   );
 };

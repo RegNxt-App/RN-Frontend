@@ -3,12 +3,15 @@ import ReactDOM from 'react-dom/client';
 import {BrowserRouter as Router} from 'react-router-dom';
 
 import axiosInstance from '@/lib/axios';
+
 import 'flatpickr/dist/flatpickr.min.css';
+
 import {SWRConfig} from 'swr';
 
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import {AuthProvider} from './contexts/AuthContext';
+
 import './index.css';
 
 const swrConfig = {

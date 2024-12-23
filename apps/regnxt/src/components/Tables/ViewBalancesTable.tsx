@@ -1,12 +1,7 @@
-import { useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import {useState} from 'react';
+
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+
 import Pagination from '../Pagination';
 
 interface ViewBalanceData {
@@ -24,7 +19,7 @@ interface DataTableProps {
   data: ViewBalanceData[];
 }
 
-const ViewBalanceData = ({ data }: DataTableProps) => {
+const ViewBalanceData = ({data}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const indexOfLastItem = (currentPage + 1) * pageSize;

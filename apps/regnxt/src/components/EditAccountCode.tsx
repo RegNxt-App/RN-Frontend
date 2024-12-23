@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
+import {useState} from 'react';
+
+import {Button} from './ui/button';
+import {Input} from './ui/input';
 
 interface LedgerData {
   ledgerCode: string;
@@ -13,7 +14,7 @@ interface EditRecordPopupProps {
   record: LedgerData;
 }
 
-const EditAccountCode = ({ onClose, record }: EditRecordPopupProps) => {
+const EditAccountCode = ({onClose, record}: EditRecordPopupProps) => {
   const [ledgerCode, setLedgerCode] = useState(record.ledgerCode);
   const [accountCode, setAccountCode] = useState(record.accountCode);
   const [description, setDescription] = useState(record.description);
@@ -24,7 +25,7 @@ const EditAccountCode = ({ onClose, record }: EditRecordPopupProps) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ledgerCode, accountCode, description }),
+      body: JSON.stringify({ledgerCode, accountCode, description}),
     })
       .then((response) => response.json())
       .then(() => {
@@ -38,9 +39,7 @@ const EditAccountCode = ({ onClose, record }: EditRecordPopupProps) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="border border-stroke bg-white shadow-default p-6 w-full max-w-md rounded-md">
-        <h3 className="text-2xl font-extrabold text-black mb-4">
-          Edit Account Code
-        </h3>
+        <h3 className="text-2xl font-extrabold text-black mb-4">Edit Account Code</h3>
         <div className="mb-4">
           <label
             className="block text-sm font-medium mb-1"

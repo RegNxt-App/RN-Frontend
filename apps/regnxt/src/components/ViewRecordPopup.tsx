@@ -15,7 +15,7 @@ interface ViewRecordPopupProps {
   record: WorkbookData;
 }
 
-const ViewRecordPopup = ({ onClose, record }: ViewRecordPopupProps) => {
+const ViewRecordPopup = ({onClose, record}: ViewRecordPopupProps) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="rounded-sm border border-stroke bg-white shadow-default p-6 w-full max-w-md">

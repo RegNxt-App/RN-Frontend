@@ -1,16 +1,11 @@
-import { useState, useEffect } from 'react';
-import Pagination from '../Pagination';
-import { Filter, Edit, Trash2 } from 'lucide-react';
+import {useEffect, useState} from 'react';
+
+import {Edit, Filter, Trash2} from 'lucide-react';
 import Swal from 'sweetalert2';
+
 import EditAccountingCat from '../EditAccountingCat';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
+import Pagination from '../Pagination';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '../ui/table';
 
 interface AccountingCategory {
   id: string;
@@ -39,16 +34,14 @@ type FilterType =
   | 'Equals'
   | 'NotEquals';
 
-const FdlAccountingConfig = ({ data }: DataTableProps) => {
+const FdlAccountingConfig = ({data}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [filteredData, setFilteredData] = useState<AccountingCategory[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
-  const [recordToEdit, setRecordToEdit] = useState<AccountingCategory | null>(
-    null,
-  );
+  const [recordToEdit, setRecordToEdit] = useState<AccountingCategory | null>(null);
   const indexOfLastItem = (currentPage + 1) * pageSize;
   const indexOfFirstItem = indexOfLastItem - pageSize;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
@@ -72,9 +65,7 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
     let result = data;
     Object.entries(filters).forEach(([key, filter]) => {
       result = result.filter((item) => {
-        const itemValue = String(
-          item[key as keyof AccountingCategory],
-        ).toLowerCase();
+        const itemValue = String(item[key as keyof AccountingCategory]).toLowerCase();
         const filterValue = filter.value.toLowerCase();
         if (filter.type === 'matchAll') {
           return itemValue.includes(filterValue);
@@ -87,20 +78,16 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
     setCurrentPage(0);
   };
 
-  const handleFilterChange = (
-    column: string,
-    type: FilterType,
-    value: string,
-  ) => {
+  const handleFilterChange = (column: string, type: FilterType, value: string) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      [column]: { type, value },
+      [column]: {type, value},
     }));
   };
 
   const clearFilter = (column: string) => {
     setFilters((prev) => {
-      const newFilters = { ...prev };
+      const newFilters = {...prev};
       delete newFilters[column];
       return newFilters;
     });
@@ -127,11 +114,7 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
             setFilteredData(filteredData.filter((item) => item.id !== id));
           })
           .catch(() => {
-            Swal.fire(
-              'Error!',
-              'There was an error deleting the record.',
-              'error',
-            );
+            Swal.fire('Error!', 'There was an error deleting the record.', 'error');
           });
       }
     });
@@ -154,11 +137,7 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'matchAll'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="matchAll">Match All</option>
@@ -168,11 +147,7 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'startsWith'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="startsWith">Starts With</option>
@@ -186,13 +161,7 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
           type="text"
           className="mt-2 w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.value || ''}
-          onChange={(e) =>
-            handleFilterChange(
-              column,
-              filters[column]?.type || 'matchAll',
-              e.target.value,
-            )
-          }
+          onChange={(e) => handleFilterChange(column, filters[column]?.type || 'matchAll', e.target.value)}
           placeholder="Search..."
         />
         <div className="mt-2 flex justify-between">
@@ -226,13 +195,12 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
                     {header !== 'Actions' && (
                       <button
                         className="ml-2"
-                        onClick={() =>
-                          setActiveFilter(
-                            activeFilter === header ? null : header,
-                          )
-                        }
+                        onClick={() => setActiveFilter(activeFilter === header ? null : header)}
                       >
-                        <Filter size={16} strokeWidth={1.5} />
+                        <Filter
+                          size={16}
+                          strokeWidth={1.5}
+                        />
                       </button>
                     )}
                   </div>
@@ -277,7 +245,10 @@ const FdlAccountingConfig = ({ data }: DataTableProps) => {
         onPageChange={handlePageChange}
       />
       {isEditPopupOpen && recordToEdit && (
-        <EditAccountingCat onClose={closeEditPopup} record={recordToEdit} />
+        <EditAccountingCat
+          onClose={closeEditPopup}
+          record={recordToEdit}
+        />
       )}
     </div>
   );
