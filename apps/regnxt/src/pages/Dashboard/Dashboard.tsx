@@ -1,4 +1,3 @@
-import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {
   Activity,
@@ -12,6 +11,7 @@ import {
 } from 'lucide-react';
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 
+import {Alert, AlertDescription, AlertTitle} from '@rn/ui/components/ui/alert';
 import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
 
@@ -56,7 +56,7 @@ const Dashboard = () => {
         </Alert>
 
         <Alert
-          variant="warning"
+          variant="destructive"
           className="border-yellow-600"
         >
           <Clock className="h-4 w-4" />
@@ -65,7 +65,7 @@ const Dashboard = () => {
         </Alert>
 
         <Alert
-          variant="success"
+          variant="default"
           className="border-green-600"
         >
           <CheckCircle2 className="h-4 w-4" />
