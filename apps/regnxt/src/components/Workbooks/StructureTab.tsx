@@ -1,4 +1,3 @@
-// StructureTab.tsx
 import React, {useEffect, useState} from 'react';
 import {Tooltip as ReactTooltip} from 'react-tooltip';
 
@@ -21,7 +20,6 @@ const StructureTab: React.FC<StructureTabProps> = ({workbookId}) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredData, setFilteredData] = useState<ApiResponse[]>([]);
 
-  // Redux selectors
   const tableStructure = useAppSelector(selectTableStructure);
   const isLoading = useAppSelector(selectTableStructureLoading);
   const error = useAppSelector(selectStructureError);
@@ -29,12 +27,10 @@ const StructureTab: React.FC<StructureTabProps> = ({workbookId}) => {
   const selectedSheet = useAppSelector((state) => state.sheetData.selectedSheet);
   const totalCounts = useAppSelector(selectTotalCounts);
 
-  // Initial data fetch
   useEffect(() => {
     dispatch(fetchTableStructure(workbookId));
   }, [workbookId, dispatch]);
 
-  // Handle filtering when tableStructure or searchTerm changes
   useEffect(() => {
     if (tableStructure) {
       if (searchTerm) {
@@ -89,12 +85,11 @@ const StructureTab: React.FC<StructureTabProps> = ({workbookId}) => {
   if (!tableStructure) {
     return <div className="p-4">No structure data available</div>;
   }
-
+  console.log(filteredData, 'filteredData');
   return (
     <div className="flex flex-col h-full">
       <div className="flex-none">
         <div className="flex mb-4">
-          {/* Stats section */}
           <div
             className="relative mr-2"
             id="total-rows-tooltip"
@@ -134,7 +129,6 @@ const StructureTab: React.FC<StructureTabProps> = ({workbookId}) => {
             </span>
           </div>
 
-          {/* Tooltips */}
           <ReactTooltip
             anchorId="total-rows-tooltip"
             content="Persisted Cells"
@@ -155,7 +149,6 @@ const StructureTab: React.FC<StructureTabProps> = ({workbookId}) => {
           />
         </div>
 
-        {/* Search section */}
         <div className="mb-4">
           <Input
             placeholder="Search..."
@@ -163,8 +156,6 @@ const StructureTab: React.FC<StructureTabProps> = ({workbookId}) => {
             onChange={handleSearch}
           />
         </div>
-
-        {/* Tree section */}
         {filteredData.length > 0 ? (
           <Tree
             data={filteredData}

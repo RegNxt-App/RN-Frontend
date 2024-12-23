@@ -1,8 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 
+import Api from '@/utils/Api';
 import {CheckCircle2, ChevronDown, ChevronRight, XCircle} from 'lucide-react';
-
-import Api from '../../../../utils/Api';
 
 interface ValidationResponse {
   rulecount: number;
@@ -19,6 +18,14 @@ interface Toast {
   visible: boolean;
   data: ValidationResponse | null;
 }
+const formatTime = (time: number): string => {
+  if (time < 60) {
+    return time.toFixed(2);
+  }
+  const minutes = Math.floor(time / 60);
+  const seconds = (time % 60).toFixed(2);
+  return `${minutes}m ${seconds}s`;
+};
 
 const Toast: React.FC<{data: ValidationResponse}> = ({data}) => (
   <div className="fixed top-4 right-4 z-50 animate-slide-left">

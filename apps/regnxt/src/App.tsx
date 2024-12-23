@@ -78,7 +78,6 @@ const routeConfig = {
   orchestra: [
     {path: '/orchestra/configuration', component: () => <ConfigureDataSetView />, title: 'Orchestra'},
     {path: '/orchestra/data', component: () => <DataSetView />, title: 'Orchestra'},
-    {path: '/orchestra/relationships', component: () => <Relationship />, title: 'Orchestra'},
     {
       path: '/orchestra/configuration/dataset',
       component: () => <ConfigureDatasets />,
