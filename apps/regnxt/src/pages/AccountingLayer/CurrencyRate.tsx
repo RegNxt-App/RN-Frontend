@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Api from '../../utils/Api';
+import React, {useEffect, useState} from 'react';
+
 import CurrencyRateData from '../../components/Tables/CurrencyRateData';
 import Loader from '../../components/loader';
+import Api from '../../utils/Api';
+
 interface AccountingRateType {
   id: string;
   name: string;
@@ -20,7 +22,7 @@ interface CurrencyRateProps {
   data: AccountingRateType[];
 }
 
-const CurrencyRate = ({ data }: CurrencyRateProps) => {
+const CurrencyRate = ({data}: CurrencyRateProps) => {
   const [selectedType, setSelectedType] = useState<string>('');
   const [currencyRates, setCurrencyRates] = useState<CurrencyRate[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -35,9 +37,7 @@ const CurrencyRate = ({ data }: CurrencyRateProps) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await Api.get(
-          `FDL/Currencyrate?ratingType=${selectedType}`,
-        );
+        const response = await Api.get(`FDL/Currencyrate?ratingType=${selectedType}`);
         setCurrencyRates(response.data);
         console.log(response.data);
       } catch (err: any) {
@@ -58,12 +58,18 @@ const CurrencyRate = ({ data }: CurrencyRateProps) => {
           value={selectedType}
           className="h-12 border border-gray-300 text-gray-600 text-base rounded-lg block w-full py-2.5 px-4 focus:outline-none"
         >
-          <option value="" disabled>
+          <option
+            value=""
+            disabled
+          >
             Select a Type
           </option>
           {data.length > 0 ? (
             data.map((rateType) => (
-              <option key={rateType.id} value={rateType.code}>
+              <option
+                key={rateType.id}
+                value={rateType.code}
+              >
                 {rateType.name}
               </option>
             ))
@@ -73,11 +79,7 @@ const CurrencyRate = ({ data }: CurrencyRateProps) => {
         </select>
       </div>
 
-      {loading ? (
-        <Loader />
-      ) : (
-        <>{selectedType && <CurrencyRateData data={currencyRates} />}</>
-      )}
+      {loading ? <Loader /> : <>{selectedType && <CurrencyRateData data={currencyRates} />}</>}
     </div>
   );
 };

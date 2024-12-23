@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
+
 import PostedJournalsData from '../../components/Tables/PostedJournalsData';
 import UnpostedJournalsData from '../../components/Tables/UnpostedJournalsData';
-import Api from '../../utils/Api';
 import Loader from '../../components/loader';
+import Api from '../../utils/Api';
 import UploadPan from './UploadJournalPan';
+
 interface Item {
   id: string;
   journalCode: string;
@@ -109,7 +111,10 @@ const PostUnpost = () => {
           role="tablist"
         >
           {tabs.map((tab) => (
-            <li key={tab.id} className="z-30 flex-auto text-center">
+            <li
+              key={tab.id}
+              className="z-30 flex-auto text-center"
+            >
               <a
                 className={`z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-md cursor-pointer ${
                   activeTab === tab.id

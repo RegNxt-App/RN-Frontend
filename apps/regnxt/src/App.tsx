@@ -76,6 +76,18 @@ const routeConfig = {
     {path: '/reporting/validation', component: Validation, title: 'Reporting'},
   ],
   orchestra: [
+    {path: '/orchestra/configuration', component: () => <ConfigureDataSetView />, title: 'Orchestra'},
+    {path: '/orchestra/data', component: () => <DataSetView />, title: 'Orchestra'},
+    {
+      path: '/orchestra/configuration/dataset',
+      component: () => <ConfigureDatasets />,
+      title: 'Orchestra',
+    },
+    {
+      path: '/orchestra/configuration/groups',
+      component: () => <ConfigureGrouping />,
+      title: 'Orchestra',
+    },
     {path: '/orchestra/connections', component: Connections, title: 'Orchestra'},
     {path: '/orchestra/variables', component: Variables, title: 'Orchestra'},
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},

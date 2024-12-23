@@ -1,11 +1,5 @@
-import { Button } from './ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
+import {Button} from './ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from './ui/select';
 
 interface PaginationWithPageSizeProps {
   currentPage: number;
@@ -42,7 +36,10 @@ const Pagination: React.FC<PaginationWithPageSizeProps> = ({
             </SelectTrigger>
             <SelectContent side="top">
               {pageSizeOptions.map((size) => (
-                <SelectItem key={size} value={`${size}`}>
+                <SelectItem
+                  key={size}
+                  value={`${size}`}
+                >
                   {size}
                 </SelectItem>
               ))}
@@ -76,9 +73,7 @@ const Pagination: React.FC<PaginationWithPageSizeProps> = ({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={() =>
-              onPageChange(Math.min(totalPages - 1, currentPage + 1))
-            }
+            onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
             disabled={currentPage === totalPages - 1}
           >
             {'>'}

@@ -1,27 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import Pagination from '../Pagination';
-import { Filter } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+
+import {Filter} from 'lucide-react';
+
 import Api from '../../utils/Api';
-import FdlJournalDetailsTable from './FdlJournalDetailsTable';
+import Pagination from '../Pagination';
 import Loader from '../loader';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Button } from '../ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
-import { Input } from '../ui/input';
+import {Button} from '../ui/button';
+import {Input} from '../ui/input';
+import {Popover, PopoverContent, PopoverTrigger} from '../ui/popover';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '../ui/select';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '../ui/table';
+import FdlJournalDetailsTable from './FdlJournalDetailsTable';
 
 interface UnpostedJournalsData {
   id: string;
@@ -61,19 +50,13 @@ type FilterType =
 
 const itemsPerPage = 10;
 
-const UnpostedJournalsData = ({
-  data,
-  updateUnpostedJournals,
-}: DataTableProps) => {
+const UnpostedJournalsData = ({data, updateUnpostedJournals}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredData, setFilteredData] =
-    useState<UnpostedJournalsData[]>(data);
+  const [filteredData, setFilteredData] = useState<UnpostedJournalsData[]>(data);
   const [filters, setFilters] = useState<FilterState>({});
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [journalDetails, setJournalDetails] = useState<any | null>(null);
-  const [clickedjournalCode, setClickedjournalCode] = useState<string | null>(
-    null,
-  );
+  const [clickedjournalCode, setClickedjournalCode] = useState<string | null>(null);
   const [clickedjournalNr, setClickedjournalNr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -84,9 +67,7 @@ const UnpostedJournalsData = ({
     let result = data;
     Object.entries(filters).forEach(([key, filter]) => {
       result = result.filter((item) => {
-        const itemValue = String(
-          item[key as keyof UnpostedJournalsData],
-        ).toLowerCase();
+        const itemValue = String(item[key as keyof UnpostedJournalsData]).toLowerCase();
         const filterValue = filter.value.toLowerCase();
         if (filter.type === 'matchAll') {
           return itemValue.includes(filterValue);
@@ -99,20 +80,16 @@ const UnpostedJournalsData = ({
     setCurrentPage(1);
   };
 
-  const handleFilterChange = (
-    column: string,
-    type: FilterType,
-    value: string,
-  ) => {
+  const handleFilterChange = (column: string, type: FilterType, value: string) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      [column]: { type, value },
+      [column]: {type, value},
     }));
   };
 
   const clearFilter = (column: string) => {
     setFilters((prev) => {
-      const newFilters = { ...prev };
+      const newFilters = {...prev};
       delete newFilters[column];
       return newFilters;
     });
@@ -135,7 +112,7 @@ const UnpostedJournalsData = ({
 
     try {
       const response = await Api.get(
-        `/FDL/UnpostedJournal?JournalCode=${journalCode}&JournalNr=${journalNr}`,
+        `/FDL/UnpostedJournal?JournalCode=${journalCode}&JournalNr=${journalNr}`
       );
       setJournalDetails(response.data);
       console.log(response.data);
@@ -151,11 +128,7 @@ const UnpostedJournalsData = ({
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'matchAll'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="matchAll">Match All</option>
@@ -165,11 +138,7 @@ const UnpostedJournalsData = ({
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'startsWith'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="startsWith">Starts With</option>
@@ -183,13 +152,7 @@ const UnpostedJournalsData = ({
           type="text"
           className="mt-2 w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.value || ''}
-          onChange={(e) =>
-            handleFilterChange(
-              column,
-              filters[column]?.type || 'matchAll',
-              e.target.value,
-            )
-          }
+          onChange={(e) => handleFilterChange(column, filters[column]?.type || 'matchAll', e.target.value)}
           placeholder="Search..."
         />
         <div className="mt-2 flex justify-between">
@@ -216,10 +179,9 @@ const UnpostedJournalsData = ({
 
       if (journalDetails) {
         const updatedData = data.map((journal) =>
-          journal.journalCode === clickedjournalCode &&
-          journal.journalNr === clickedjournalNr
+          journal.journalCode === clickedjournalCode && journal.journalNr === clickedjournalNr
             ? journalDetails
-            : journal,
+            : journal
         );
         updateUnpostedJournals(updatedData);
       }
@@ -260,14 +222,12 @@ const UnpostedJournalsData = ({
                       <PopoverContent className="w-80">
                         <div className="space-y-4">
                           <Select
-                            value={
-                              filters[header.toLowerCase()]?.type || 'matchAll'
-                            }
+                            value={filters[header.toLowerCase()]?.type || 'matchAll'}
                             onValueChange={(value) =>
                               handleFilterChange(
                                 header.toLowerCase(),
                                 value as FilterType,
-                                filters[header.toLowerCase()]?.value || '',
+                                filters[header.toLowerCase()]?.value || ''
                               )
                             }
                           >
@@ -275,26 +235,14 @@ const UnpostedJournalsData = ({
                               <SelectValue placeholder="Select match type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="matchAll">
-                                Match All
-                              </SelectItem>
-                              <SelectItem value="matchAny">
-                                Match Any
-                              </SelectItem>
-                              <SelectItem value="startsWith">
-                                Starts With
-                              </SelectItem>
+                              <SelectItem value="matchAll">Match All</SelectItem>
+                              <SelectItem value="matchAny">Match Any</SelectItem>
+                              <SelectItem value="startsWith">Starts With</SelectItem>
                               <SelectItem value="Contains">Contains</SelectItem>
-                              <SelectItem value="NotContains">
-                                Not Contains
-                              </SelectItem>
-                              <SelectItem value="EndsWith">
-                                Ends With
-                              </SelectItem>
+                              <SelectItem value="NotContains">Not Contains</SelectItem>
+                              <SelectItem value="EndsWith">Ends With</SelectItem>
                               <SelectItem value="Equals">Equals</SelectItem>
-                              <SelectItem value="NotEquals">
-                                Not Equals
-                              </SelectItem>
+                              <SelectItem value="NotEquals">Not Equals</SelectItem>
                             </SelectContent>
                           </Select>
 
@@ -304,9 +252,8 @@ const UnpostedJournalsData = ({
                             onChange={(e) =>
                               handleFilterChange(
                                 header.toLowerCase(),
-                                filters[header.toLowerCase()]?.type ||
-                                  'matchAll',
-                                e.target.value,
+                                filters[header.toLowerCase()]?.type || 'matchAll',
+                                e.target.value
                               )
                             }
                           />
@@ -318,9 +265,7 @@ const UnpostedJournalsData = ({
                             >
                               Clear
                             </Button>
-                            <Button onClick={() => setActiveFilter(null)}>
-                              Apply
-                            </Button>
+                            <Button onClick={() => setActiveFilter(null)}>Apply</Button>
                           </div>
                         </div>
                       </PopoverContent>
@@ -355,7 +300,9 @@ const UnpostedJournalsData = ({
 
       <div className="flex items-center justify-between px-2">
         <div className="flex-1 text-sm text-muted-foreground">
-          {`${indexOfFirstItem + 1}-${Math.min(indexOfLastItem, filteredData.length)} of ${filteredData.length} entries`}
+          {`${indexOfFirstItem + 1}-${Math.min(indexOfLastItem, filteredData.length)} of ${
+            filteredData.length
+          } entries`}
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">
@@ -371,7 +318,10 @@ const UnpostedJournalsData = ({
               </SelectTrigger>
               <SelectContent side="top">
                 {[10, 20, 30, 50].map((size) => (
-                  <SelectItem key={size} value={size.toString()}>
+                  <SelectItem
+                    key={size}
+                    value={size.toString()}
+                  >
                     {size}
                   </SelectItem>
                 ))}
@@ -418,17 +368,14 @@ const UnpostedJournalsData = ({
         </div>
       </div>
 
-      {journalDetails &&
-        clickedjournalNr &&
-        clickedjournalCode &&
-        journalDetails.length > 0 && (
-          <FdlJournalDetailsTable
-            data={journalDetails}
-            clickedjournalNr={clickedjournalNr}
-            clickedjournalCode={clickedjournalCode}
-            onUpdateSuccess={handleUpdateSuccess}
-          />
-        )}
+      {journalDetails && clickedjournalNr && clickedjournalCode && journalDetails.length > 0 && (
+        <FdlJournalDetailsTable
+          data={journalDetails}
+          clickedjournalNr={clickedjournalNr}
+          clickedjournalCode={clickedjournalCode}
+          onUpdateSuccess={handleUpdateSuccess}
+        />
+      )}
     </div>
   );
 };

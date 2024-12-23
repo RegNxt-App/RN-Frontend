@@ -1,13 +1,14 @@
-import React, { useMemo } from 'react';
-import { useAppSelector, useAppDispatch } from '../../app/hooks';
-import { selectChangedRows } from '../../features/sheetData/sheetDataSlice';
-import SaveTable from '../Tables/workbooks/actions/SaveTable';
+import React, {useMemo} from 'react';
+
+import {useAppDispatch, useAppSelector} from '../../app/hooks';
+import {selectChangedRows} from '../../features/sheetData/sheetDataSlice';
+import {clearChangedRows} from '../../features/sheetData/sheetDataSlice';
 import ActionsAllocate from '../Tables/workbooks/actions/ActionsAllocate';
 import ActionsExport from '../Tables/workbooks/actions/ActionsExport';
-import ActionsValidate from '../Tables/workbooks/actions/ActionsValidate';
 import ActionsImport from '../Tables/workbooks/actions/ActionsImport';
 import ActionsTransmission from '../Tables/workbooks/actions/ActionsTransmission';
-import { clearChangedRows } from '../../features/sheetData/sheetDataSlice';
+import ActionsValidate from '../Tables/workbooks/actions/ActionsValidate';
+import SaveTable from '../Tables/workbooks/actions/SaveTable';
 
 interface SaveTableData {
   cellid: number;
@@ -22,35 +23,25 @@ interface SaveTableData {
 
 const ActionsTab: React.FC<{
   activeActionTab: string;
-  setActiveActionTab: (
-    tab:
-      | 'save'
-      | 'allocate'
-      | 'validate'
-      | 'import'
-      | 'export'
-      | 'transmission',
-  ) => void;
+  setActiveActionTab: (tab: 'save' | 'allocate' | 'validate' | 'import' | 'export' | 'transmission') => void;
   workbookId: number;
-}> = ({ activeActionTab, setActiveActionTab, workbookId }) => {
+}> = ({activeActionTab, setActiveActionTab, workbookId}) => {
   const dispatch = useAppDispatch();
   const changedRows = useAppSelector(selectChangedRows);
 
   const handleSaveSuccess = () => {
-    // Clear the changed rows from Redux store
     dispatch(clearChangedRows());
   };
 
   const saveData: SaveTableData[] = useMemo(() => {
-    // Create a Set to track unique cell IDs
     const processedCells = new Set<number>();
     const transformedData: SaveTableData[] = [];
 
     changedRows.forEach((row) => {
       row.changedCells.forEach((cell) => {
-        // Only add the cell if we haven't processed it yet
-        if (!processedCells.has(cell.cellid)) {
-          processedCells.add(cell.cellid);
+        const cellId = cell.cellid ?? 0;
+        if (!processedCells.has(cellId)) {
+          processedCells.add(cellId);
           transformedData.push({
             sheetid: cell.sheetid,
             cellid: cell.cellid || 0,
@@ -65,7 +56,6 @@ const ActionsTab: React.FC<{
       });
     });
 
-    // Optional: Sort the data by rowNr and colNr for consistent display
     return transformedData.sort((a, b) => {
       if (a.rowNr === b.rowNr) {
         return a.colNr - b.colNr;
@@ -83,30 +73,15 @@ const ActionsTab: React.FC<{
   return (
     <div className="flex flex-col h-full">
       <div className="flex border-b border-stroke">
-        {[
-          'save',
-          'allocate',
-          'validate',
-          'import',
-          'export',
-          'transmission',
-        ].map((action) => (
+        {['save', 'allocate', 'validate', 'import', 'export', 'transmission'].map((action) => (
           <button
             key={action}
             className={`px-4 py-2 mr-2 border-b-2 ${
-              activeActionTab === action
-                ? 'border-purple-500'
-                : 'border-transparent'
+              activeActionTab === action ? 'border-purple-500' : 'border-transparent'
             }`}
             onClick={() =>
               setActiveActionTab(
-                action as
-                  | 'save'
-                  | 'allocate'
-                  | 'validate'
-                  | 'import'
-                  | 'export'
-                  | 'transmission',
+                action as 'save' | 'allocate' | 'validate' | 'import' | 'export' | 'transmission'
               )
             }
           >
@@ -125,13 +100,16 @@ const ActionsTab: React.FC<{
           )}
           {activeActionTab === 'allocate' && <ActionsAllocate />}
           {activeActionTab === 'validate' && (
-            <ActionsValidate workbookId={workbookId} />
+            <ActionsValidate
+              workbookId={workbookId}
+              onClose={() => {}}
+              onUpdate={() => {}}
+            />
           )}
+
           {activeActionTab === 'import' && <ActionsImport />}
           {activeActionTab === 'export' && <ActionsExport />}
-          {activeActionTab === 'transmission' && (
-            <ActionsTransmission workbookId={workbookId} />
-          )}
+          {activeActionTab === 'transmission' && <ActionsTransmission workbookId={workbookId} />}
         </div>
       </div>
     </div>

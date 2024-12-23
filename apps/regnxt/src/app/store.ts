@@ -1,6 +1,7 @@
-import { configureStore } from '@reduxjs/toolkit';
-import sheetDataReducer from '../features/sheetData/sheetDataSlice';
+import {configureStore} from '@reduxjs/toolkit';
+
 import selectionReducer from '../features/sheetData/selectionSlice';
+import sheetDataReducer from '../features/sheetData/sheetDataSlice';
 
 export const store = configureStore({
   reducer: {

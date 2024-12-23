@@ -1,19 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import React, {useEffect, useRef, useState} from 'react';
+
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/Dialog';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {ChevronDown, ChevronRight} from 'lucide-react';
 
 import Api from '../../../utils/Api';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/Dialog';
 
 interface UpdateTemplateModelProps {
-  existingData: { id: number; reportSubsetId?: number };
+  existingData: {id: number; reportSubsetId?: number};
   onClose: () => void;
   onUpdate: () => void;
   isOpen: boolean;
@@ -69,7 +64,7 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
       const fetchTableFields = async () => {
         try {
           const response = await Api.get(
-            `/RD/Table?reportSubsetId=${existingData.reportSubsetId}&refReportSubsetId=0`,
+            `/RD/Table?reportSubsetId=${existingData.reportSubsetId}&refReportSubsetId=0`
           );
           setTableFields(response.data);
         } catch (error) {
@@ -82,21 +77,19 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
   }, [existingData.reportSubsetId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const {name, value} = e.target;
+    setFormData((prev) => ({...prev, [name]: value}));
   };
 
   const handleCheckboxChange = (key: string, hasChildren: boolean = false) => {
     setFormData((prev) => {
-      const newSelectedItems = { ...prev.selectedItems };
+      const newSelectedItems = {...prev.selectedItems};
 
       const updateItemAndChildren = (itemKey: string, checked: boolean) => {
-        newSelectedItems[itemKey] = { checked, indeterminate: false };
+        newSelectedItems[itemKey] = {checked, indeterminate: false};
         const item = findItemByKey(tableFields, itemKey);
         if (item?.children) {
-          item.children.forEach((child) =>
-            updateItemAndChildren(child.key, checked),
-          );
+          item.children.forEach((child) => updateItemAndChildren(child.key, checked));
         }
       };
 
@@ -111,13 +104,9 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
       const updateParentState = (items: Item[]) => {
         items.forEach((item) => {
           if (item.children) {
-            const childStates = item.children.map(
-              (child) => newSelectedItems[child.key],
-            );
+            const childStates = item.children.map((child) => newSelectedItems[child.key]);
             const allChecked = childStates.every((state) => state?.checked);
-            const someChecked = childStates.some(
-              (state) => state?.checked || state?.indeterminate,
-            );
+            const someChecked = childStates.some((state) => state?.checked || state?.indeterminate);
 
             newSelectedItems[item.key] = {
               checked: allChecked,
@@ -151,9 +140,7 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
 
   const toggleExpand = (key: string) => {
     setExpandedParents((prevExpanded) =>
-      prevExpanded.includes(key)
-        ? prevExpanded.filter((item) => item !== key)
-        : [...prevExpanded, key],
+      prevExpanded.includes(key) ? prevExpanded.filter((item) => item !== key) : [...prevExpanded, key]
     );
   };
 
@@ -161,7 +148,7 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
     item: Item;
     state: CheckboxState;
     onChange: () => void;
-  }> = React.memo(({ item, state, onChange }) => {
+  }> = React.memo(({item, state, onChange}) => {
     const checkboxRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -206,7 +193,10 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
               state={state}
               onChange={() => handleCheckboxChange(item.key, !!item.children)}
             />
-            <label htmlFor={item.key} className="ml-2">
+            <label
+              htmlFor={item.key}
+              className="ml-2"
+            >
               {item.label}
             </label>
           </div>
@@ -239,7 +229,10 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}
+    >
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Template</DialogTitle>
@@ -260,16 +253,21 @@ const UpdateTemplateModel: React.FC<UpdateTemplateModelProps> = ({
 
             <div>
               <h4 className="text-lg font-semibold mb-4">Select Tables</h4>
-              <div className="border rounded-lg p-4">
-                {renderItems(tableFields)}
-              </div>
+              <div className="border rounded-lg p-4">{renderItems(tableFields)}</div>
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+              >
                 Cancel
               </Button>
-              <Button className="bg-purple-500 text-white" type="submit">
+              <Button
+                className="bg-purple-500 text-white"
+                type="submit"
+              >
                 Save Changes
               </Button>
             </DialogFooter>

@@ -20,6 +20,6 @@ const orchestraBackendInstance = axios.create({
   baseURL: import.meta.env.VITE_ORCHESTRA_API_BACKED,
 });
 
-export {axiosInstance, birdBackendInstance};
+export {axiosInstance, birdBackendInstance, orchestraBackendInstance};
 
 export default axiosInstance;

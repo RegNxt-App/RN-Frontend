@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf build",
     "build": "vite build",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf build",
+    "dev": "vite",
     "lint": "TIMING=1 eslint src/**/*.{js,ts,tsx} --fix",
     "prettier": "prettier --write \"./**/!(*.d).{js,jsx,ts,tsx}\"",
     "prettier-check": "prettier --check \"./**/!(*.d).{js,jsx,ts,tsx}\"",
-    "type-check": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "type-check": "tsc"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
@@ -82,3 +82,4 @@
     "vite": "^5.4.1"
   }
 }
+

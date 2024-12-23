@@ -17,9 +17,7 @@ const Loader = () => {
           />
         </svg>
       </div>
-      <div className="absolute mt-64  text-xl font-bold text-black">
-        Loading...
-      </div>
+      <div className="absolute mt-64  text-xl font-bold text-black">Loading...</div>
     </div>
   );
 };

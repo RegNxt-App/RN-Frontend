@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog } from '@headlessui/react';
-import { X, Plus } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {useDispatch} from 'react-redux';
+
+import {Dialog} from '@headlessui/react';
+import {Plus, X} from 'lucide-react';
+
+import {fetchTableStructure} from '../features/sheetData/sheetDataSlice';
 import Api from '../utils/Api';
-import { fetchTableStructure } from '../features/sheetData/sheetDataSlice';
-import { useDispatch } from 'react-redux';
 
 interface Member {
   regulatorId: number;
@@ -34,17 +36,12 @@ interface SheetPayload {
   MemberId2: number;
 }
 
-const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
-  isOpen,
-  onClose,
-  workbookId,
-  tableId,
-}) => {
+const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({isOpen, onClose, workbookId, tableId}) => {
   const dispatch = useDispatch();
   const [sheetMembers, setSheetMembers] = useState<SheetMember[]>([]);
-  const [selectedSheets, setSelectedSheets] = useState<
-    { member1: string; member2: string }[]
-  >([{ member1: '', member2: '' }]);
+  const [selectedSheets, setSelectedSheets] = useState<{member1: string; member2: string}[]>([
+    {member1: '', member2: ''},
+  ]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -52,10 +49,10 @@ const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
       try {
         setIsLoading(true);
         const response = await Api.get<SheetMember[]>(
-          `/RI/Workbook/SheetMember?workbookId=${workbookId}&tableId=${tableId}`,
+          `/RI/Workbook/SheetMember?workbookId=${workbookId}&tableId=${tableId}`
         );
         setSheetMembers(response.data);
-        setSelectedSheets([{ member1: '', member2: '' }]);
+        setSelectedSheets([{member1: '', member2: ''}]);
       } catch (error) {
         console.error('Error fetching sheet members:', error);
       } finally {
@@ -69,13 +66,13 @@ const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
   }, [isOpen, workbookId, tableId]);
 
   const handleAddSheet = () => {
-    setSelectedSheets([...selectedSheets, { member1: '', member2: '' }]);
+    setSelectedSheets([...selectedSheets, {member1: '', member2: ''}]);
   };
 
   const handleSheetChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
     index: number,
-    memberType: 'member1' | 'member2',
+    memberType: 'member1' | 'member2'
   ) => {
     const newSelectedSheets = [...selectedSheets];
     newSelectedSheets[index] = {
@@ -88,9 +85,7 @@ const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
   const handleCreateSheet = async () => {
     try {
       const validSheets = selectedSheets.filter((sheet) =>
-        sheetMembers.length === 1
-          ? sheet.member1
-          : sheet.member1 && sheet.member2,
+        sheetMembers.length === 1 ? sheet.member1 : sheet.member1 && sheet.member2
       );
 
       if (validSheets.length === 0) return;
@@ -125,13 +120,11 @@ const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
   return (
     <div
       className="fixed inset-0 flex items-center justify-center p-4"
-      style={{ zIndex: 10001 }}
+      style={{zIndex: 10001}}
     >
       <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-lg bg-slate-50 p-6 shadow-sm">
         <div className="flex justify-between items-center mb-4">
-          <Dialog.Title className="text-lg font-medium">
-            Manage Sheets
-          </Dialog.Title>
+          <Dialog.Title className="text-lg font-medium">Manage Sheets</Dialog.Title>
 
           <button
             onClick={onClose}
@@ -148,9 +141,7 @@ const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
               className={`flex gap-4 ${sheetMembers.length > 1 ? 'flex-row' : 'flex-col'}`}
             >
               {/* First Select Field */}
-              <div
-                className={`space-y-2 ${sheetMembers.length > 1 ? 'w-1/2' : 'w-full'}`}
-              >
+              <div className={`space-y-2 ${sheetMembers.length > 1 ? 'w-1/2' : 'w-full'}`}>
                 <label className="block text-sm font-medium text-gray-700">
                   {sheetMembers[0]?.structureLabel || 'Select first dimension'}
                 </label>
@@ -163,7 +154,10 @@ const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
                   >
                     <option value="">Select a value...</option>
                     {sheetMembers[0]?.members.map((member) => (
-                      <option key={member.id} value={member.id}>
+                      <option
+                        key={member.id}
+                        value={member.id}
+                      >
                         {member.name}
                       </option>
                     ))}
@@ -175,8 +169,7 @@ const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
               {sheetMembers.length > 1 && (
                 <div className="space-y-2 w-1/2">
                   <label className="block text-sm font-medium text-gray-700">
-                    {sheetMembers[1]?.structureLabel ||
-                      'Select second dimension'}
+                    {sheetMembers[1]?.structureLabel || 'Select second dimension'}
                   </label>
                   <div className="relative">
                     <select
@@ -187,7 +180,10 @@ const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
                     >
                       <option value="">Select a value...</option>
                       {sheetMembers[1]?.members.map((member) => (
-                        <option key={member.id} value={member.id}>
+                        <option
+                          key={member.id}
+                          value={member.id}
+                        >
                           {member.name}
                         </option>
                       ))}
@@ -213,9 +209,7 @@ const ManageSheetsDialog: React.FC<ManageSheetsDialogProps> = ({
             disabled={
               isLoading ||
               selectedSheets.every((sheet) =>
-                sheetMembers.length === 1
-                  ? !sheet.member1
-                  : !sheet.member1 || !sheet.member2,
+                sheetMembers.length === 1 ? !sheet.member1 : !sheet.member1 || !sheet.member2
               )
             }
             className="w-32 inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"

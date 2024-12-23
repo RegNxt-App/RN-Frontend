@@ -1,23 +1,13 @@
-import { useState, useEffect } from 'react';
+import {useEffect, useState} from 'react';
+
+import {Filter} from 'lucide-react';
+
 import Pagination from '../Pagination';
-import { Select, SelectItem } from '../ui/select';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
-import { Filter } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+import {Button} from '../ui/button';
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from '../ui/dropdown-menu';
+import {Input} from '../ui/input';
+import {Select, SelectItem} from '../ui/select';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '../ui/table';
 
 interface CurrencyRateData {
   rateType: string;
@@ -48,7 +38,7 @@ type FilterType =
   | 'Equals'
   | 'NotEquals';
 
-const CurrencyRateData = ({ data }: DataTableProps) => {
+const CurrencyRateData = ({data}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [filteredData, setFilteredData] = useState<CurrencyRateData[]>(data);
@@ -77,9 +67,7 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
     let result = data;
     Object.entries(filters).forEach(([key, filter]) => {
       result = result.filter((item) => {
-        const itemValue = String(
-          item[key as keyof CurrencyRateData],
-        ).toLowerCase();
+        const itemValue = String(item[key as keyof CurrencyRateData]).toLowerCase();
         const filterValue = filter.value.toLowerCase();
 
         switch (filter.type) {
@@ -106,20 +94,16 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
     setCurrentPage(1);
   };
 
-  const handleFilterChange = (
-    column: string,
-    type: FilterType,
-    value: string,
-  ) => {
+  const handleFilterChange = (column: string, type: FilterType, value: string) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      [column]: { type, value },
+      [column]: {type, value},
     }));
   };
 
   const clearFilter = (column: string) => {
     setFilters((prev) => {
-      const newFilters = { ...prev };
+      const newFilters = {...prev};
       delete newFilters[column];
       return newFilters;
     });
@@ -133,11 +117,7 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'matchAll'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="matchAll">Match All</option>
@@ -147,11 +127,7 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
           className="w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.type || 'startsWith'}
           onChange={(e) =>
-            handleFilterChange(
-              column,
-              e.target.value as FilterType,
-              filters[column]?.value || '',
-            )
+            handleFilterChange(column, e.target.value as FilterType, filters[column]?.value || '')
           }
         >
           <option value="startsWith">Starts With</option>
@@ -165,13 +141,7 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
           type="text"
           className="mt-2 w-full rounded-md border-gray-300 shadow-sm"
           value={filters[column]?.value || ''}
-          onChange={(e) =>
-            handleFilterChange(
-              column,
-              filters[column]?.type || 'matchAll',
-              e.target.value,
-            )
-          }
+          onChange={(e) => handleFilterChange(column, filters[column]?.type || 'matchAll', e.target.value)}
           placeholder="Search..."
         />
         <div className="mt-2 flex justify-between">
@@ -203,51 +173,45 @@ const CurrencyRateData = ({ data }: DataTableProps) => {
                   Rate Date
                   <button
                     className="ml-2"
-                    onClick={() =>
-                      setActiveFilter(
-                        activeFilter === 'rateDate' ? null : 'rateDate',
-                      )
-                    }
+                    onClick={() => setActiveFilter(activeFilter === 'rateDate' ? null : 'rateDate')}
                   >
-                    <Filter size={16} strokeWidth={1.5} />
+                    <Filter
+                      size={16}
+                      strokeWidth={1.5}
+                    />
                   </button>
                 </div>
-                {activeFilter === 'rateDate' &&
-                  renderFilterDropdown('rateDate')}
+                {activeFilter === 'rateDate' && renderFilterDropdown('rateDate')}
               </TableHead>
               <TableHead>
                 <div className="flex items-center">
                   From Currency
                   <button
                     className="ml-2"
-                    onClick={() =>
-                      setActiveFilter(
-                        activeFilter === 'fromCurrency' ? null : 'fromCurrency',
-                      )
-                    }
+                    onClick={() => setActiveFilter(activeFilter === 'fromCurrency' ? null : 'fromCurrency')}
                   >
-                    <Filter size={16} strokeWidth={1.5} />
+                    <Filter
+                      size={16}
+                      strokeWidth={1.5}
+                    />
                   </button>
                 </div>
-                {activeFilter === 'fromCurrency' &&
-                  renderFilterDropdown('fromCurrency')}
+                {activeFilter === 'fromCurrency' && renderFilterDropdown('fromCurrency')}
               </TableHead>
               <TableHead>
                 <div className="flex items-center">
                   To Currency
                   <button
                     className="ml-2"
-                    onClick={() =>
-                      setActiveFilter(
-                        activeFilter === 'toCurrency' ? null : 'toCurrency',
-                      )
-                    }
+                    onClick={() => setActiveFilter(activeFilter === 'toCurrency' ? null : 'toCurrency')}
                   >
-                    <Filter size={16} strokeWidth={1.5} />
+                    <Filter
+                      size={16}
+                      strokeWidth={1.5}
+                    />
                   </button>
                 </div>
-                {activeFilter === 'toCurrency' &&
-                  renderFilterDropdown('toCurrency')}
+                {activeFilter === 'toCurrency' && renderFilterDropdown('toCurrency')}
               </TableHead>
               <TableHead>Multiplication Factor</TableHead>
             </TableRow>

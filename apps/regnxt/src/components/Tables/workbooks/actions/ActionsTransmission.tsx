@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+
 import Api from '../../../../utils/Api';
-import { Button } from '@/components/ui/button';
 
 interface ActionsTransmissionProps {
   workbookId: string | number;
@@ -13,11 +15,8 @@ interface ApiResponse {
   };
 }
 
-const ActionsTransmission: React.FC<ActionsTransmissionProps> = ({
-  workbookId,
-}) => {
-  const [transmissionfileReady, setTransmissionfileReady] =
-    useState<boolean>(false);
+const ActionsTransmission: React.FC<ActionsTransmissionProps> = ({workbookId}) => {
+  const [transmissionfileReady, setTransmissionfileReady] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,9 +26,7 @@ const ActionsTransmission: React.FC<ActionsTransmissionProps> = ({
       try {
         setIsLoading(true);
         setError(null);
-        const response = await Api.get(
-          `/RT/xbrl/filecheck?workbookId=${workbookId}`,
-        );
+        const response = await Api.get(`/RT/xbrl/filecheck?workbookId=${workbookId}`);
         setTransmissionfileReady(response.data);
       } catch (error) {
         console.error('Error checking file status:', error);
@@ -48,23 +45,16 @@ const ActionsTransmission: React.FC<ActionsTransmissionProps> = ({
       setError(null);
 
       if (transmissionfileReady) {
-        const response = await Api.get(
-          `/RT/xbrl/file?workbookId=${workbookId}&zip=true`,
-          {
-            responseType: 'blob',
-            headers: {
-              Accept: 'application/octet-stream',
-            },
+        const response = await Api.get(`/RT/xbrl/file?workbookId=${workbookId}&zip=true`, {
+          responseType: 'blob',
+          headers: {
+            Accept: 'application/octet-stream',
           },
-        );
+        });
 
         const contentDisposition = response.headers['content-disposition'];
         const filename = contentDisposition
-          ? contentDisposition
-              .split(';')[1]
-              .trim()
-              .split('=')[1]
-              .replace(/"/g, '')
+          ? contentDisposition.split(';')[1].trim().split('=')[1].replace(/"/g, '')
           : 'transmission-file.zip';
 
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -97,11 +87,8 @@ const ActionsTransmission: React.FC<ActionsTransmissionProps> = ({
 
   const getButtonText = () => {
     if (isLoading) return 'Loading...';
-    if (isProcessing)
-      return transmissionfileReady ? 'Downloading...' : 'Generating...';
-    return transmissionfileReady
-      ? 'Download Transmission File'
-      : 'Generate Transmission File';
+    if (isProcessing) return transmissionfileReady ? 'Downloading...' : 'Generating...';
+    return transmissionfileReady ? 'Download Transmission File' : 'Generate Transmission File';
   };
 
   return (

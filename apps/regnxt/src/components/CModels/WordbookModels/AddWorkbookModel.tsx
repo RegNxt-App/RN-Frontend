@@ -1,35 +1,17 @@
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import {useEffect, useState} from 'react';
+import {useForm} from 'react-hook-form';
+
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@/components/ui/Dialog';
+import {Button} from '@/components/ui/button';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
+import {Input} from '@/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {useToast} from '@/hooks/use-toast';
+import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import Api from '../../../utils/Api';
-import { useToast } from '@/hooks/use-toast';
 import Loader from '../../loader';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/Dialog';
 
 interface EntityOption {
   name: string;
@@ -54,24 +36,20 @@ interface AddWorkbookModelProps {
 
 const formSchema = z.object({
   name: z.string().min(1, 'Report name is required'),
-  entityId: z.number({ required_error: 'Entity is required' }),
-  templateId: z.number({ required_error: 'Template is required' }),
+  entityId: z.number({required_error: 'Entity is required'}),
+  templateId: z.number({required_error: 'Template is required'}),
   reportingCurrency: z.string().optional(),
   reportingDate: z.string().min(1, 'Reporting date is required'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const AddWorkbookModel = ({
-  onClose,
-  onWorkbookAdded,
-  isOpen,
-}: AddWorkbookModelProps) => {
+const AddWorkbookModel = ({onClose, onWorkbookAdded, isOpen}: AddWorkbookModelProps) => {
   const [entities, setEntities] = useState<EntityOption[]>([]);
   const [templates, setTemplates] = useState<TemplateOption[]>([]);
   const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const {toast} = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -88,12 +66,11 @@ const AddWorkbookModel = ({
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [entityResponse, templateResponse, currencyResponse] =
-          await Promise.all([
-            Api.get<EntityOption[]>('RI/UIInput?type=Entity'),
-            Api.get<TemplateOption[]>('RI/UIInput?type=Template'),
-            Api.get<CurrencyOption[]>('RI/UIInput?type=Currency'),
-          ]);
+        const [entityResponse, templateResponse, currencyResponse] = await Promise.all([
+          Api.get<EntityOption[]>('RI/UIInput?type=Entity'),
+          Api.get<TemplateOption[]>('RI/UIInput?type=Template'),
+          Api.get<CurrencyOption[]>('RI/UIInput?type=Currency'),
+        ]);
 
         setEntities(entityResponse.data);
         setTemplates(templateResponse.data);
@@ -102,10 +79,7 @@ const AddWorkbookModel = ({
         toast({
           variant: 'destructive',
           title: 'Error',
-          description:
-            err instanceof Error
-              ? err.message
-              : 'An error occurred while fetching data',
+          description: err instanceof Error ? err.message : 'An error occurred while fetching data',
           duration: 3000,
         });
       } finally {
@@ -144,8 +118,7 @@ const AddWorkbookModel = ({
       toast({
         variant: 'destructive',
         title: 'Error',
-        description:
-          err instanceof Error ? err.message : 'Failed to create workbook',
+        description: err instanceof Error ? err.message : 'Failed to create workbook',
         duration: 3000,
       });
     }
@@ -153,7 +126,10 @@ const AddWorkbookModel = ({
 
   if (isLoading) {
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={onClose}
+      >
         <DialogContent>
           <div className="flex items-center justify-center p-6">
             <Loader />
@@ -164,22 +140,31 @@ const AddWorkbookModel = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}
+    >
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-black">Add New Workbook</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="name"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Report Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter report name" {...field} />
+                    <Input
+                      placeholder="Enter report name"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -189,7 +174,7 @@ const AddWorkbookModel = ({
             <FormField
               control={form.control}
               name="entityId"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Reporting Entity</FormLabel>
                   <Select
@@ -220,7 +205,7 @@ const AddWorkbookModel = ({
             <FormField
               control={form.control}
               name="templateId"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Template</FormLabel>
                   <Select
@@ -251,10 +236,13 @@ const AddWorkbookModel = ({
             <FormField
               control={form.control}
               name="reportingCurrency"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Reporting Currency (Optional)</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select Reporting Currency" />
@@ -262,7 +250,10 @@ const AddWorkbookModel = ({
                     </FormControl>
                     <SelectContent>
                       {currencies.map((currency) => (
-                        <SelectItem key={currency.code} value={currency.code}>
+                        <SelectItem
+                          key={currency.code}
+                          value={currency.code}
+                        >
                           {currency.name}
                         </SelectItem>
                       ))}
@@ -276,11 +267,14 @@ const AddWorkbookModel = ({
             <FormField
               control={form.control}
               name="reportingDate"
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem>
                   <FormLabel>Reporting Date</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input
+                      type="date"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -288,7 +282,11 @@ const AddWorkbookModel = ({
             />
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+              >
                 Cancel
               </Button>
               <Button

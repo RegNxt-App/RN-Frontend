@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import {useEffect, useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {ArrowDownToLine, ArrowUpFromLine, Plus} from 'lucide-react';
+
 import AddTemplateModel from '../../components/CModels/TemplateModels/AddTemplateModel';
-import { ArrowDownToLine, ArrowUpFromLine, Plus } from 'lucide-react';
-import Api from '../../utils/Api';
 import TemplateTable from '../../components/Tables/TemplateTable';
 import Loader from '../../components/loader';
-import { Button } from '@/components/ui/button';
+import Api from '../../utils/Api';
+
 function Template() {
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const [showPopup, setShowPopup] = useState(false);
@@ -50,14 +53,20 @@ function Template() {
             className="flex items-center gap-2 bg-purple-500 text-white"
           >
             Import
-            <ArrowUpFromLine size={20} strokeWidth={1.75} />
+            <ArrowUpFromLine
+              size={20}
+              strokeWidth={1.75}
+            />
           </Button>
           <Button
             onClick={() => setView('kanban')}
             className="flex items-center gap-2 bg-purple-500 text-white"
           >
             Export
-            <ArrowDownToLine size={20} strokeWidth={1.75} />
+            <ArrowDownToLine
+              size={20}
+              strokeWidth={1.75}
+            />
           </Button>
         </div>
 
@@ -65,7 +74,10 @@ function Template() {
           className="flex items-center gap-2 bg-purple-500 text-white"
           onClick={() => setIsOpen(true)}
         >
-          <Plus size={20} strokeWidth={1.75} />
+          <Plus
+            size={20}
+            strokeWidth={1.75}
+          />
           Add Template
         </Button>
       </div>

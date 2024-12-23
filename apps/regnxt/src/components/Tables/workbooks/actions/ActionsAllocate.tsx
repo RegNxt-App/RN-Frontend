@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import {useState} from 'react';
+
+import {Button} from '@/components/ui/button';
 
 const ActionsAllocate = () => {
   const [selectedDataset, setSelectedDataset] = useState<string | null>(null);
@@ -29,7 +30,10 @@ const ActionsAllocate = () => {
           value={selectedDataset || ''}
           onChange={(e) => setSelectedDataset(e.target.value)}
         >
-          <option value="" disabled>
+          <option
+            value=""
+            disabled
+          >
             Select a Dataset
           </option>
           <option value="Dataset 1">Dataset 1</option>
@@ -42,7 +46,10 @@ const ActionsAllocate = () => {
           value={selectedRuleset || ''}
           onChange={(e) => setSelectedRuleset(e.target.value)}
         >
-          <option value="" disabled>
+          <option
+            value=""
+            disabled
+          >
             Select a Ruleset
           </option>
           <option value="Ruleset 1">Ruleset 1</option>
@@ -50,7 +57,10 @@ const ActionsAllocate = () => {
           <option value="Ruleset 3">Ruleset 3</option>
         </select>
 
-        <Button className="bg-purple-500 text-white" onClick={handleCapture}>
+        <Button
+          className="bg-purple-500 text-white"
+          onClick={handleCapture}
+        >
           Capture
         </Button>
       </div>
@@ -60,7 +70,10 @@ const ActionsAllocate = () => {
         Full Allocation (from generic dimension+metric table)
       </h2>
 
-      <Button className="bg-purple-500 text-white" onClick={handleAllocate}>
+      <Button
+        className="bg-purple-500 text-white"
+        onClick={handleAllocate}
+      >
         Allocate
       </Button>
     </div>

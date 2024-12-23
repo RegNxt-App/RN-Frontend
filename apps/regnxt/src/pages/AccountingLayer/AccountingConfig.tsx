@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
+
 import FdlAccountingConfig from '../../components/Tables/FdlAccountingConfig';
-import AccountCode from './AccountCode';
 import FdlJournalPolicy from '../../components/Tables/FdlJournalPolicy';
-import CurrencyRate from './CurrencyRate';
-import Api from '../../utils/Api';
 import Loader from '../../components/loader';
+import Api from '../../utils/Api';
+import AccountCode from './AccountCode';
+import CurrencyRate from './CurrencyRate';
 
 interface TabContent {
   id: string;
@@ -38,14 +39,9 @@ interface JournalPolicy {
 
 const AccountingConfig = () => {
   const [activeTab, setActiveTab] = useState<string>('AccountingCategory');
-  const [accountingCategoryData, setAccountingCategoryData] = useState<
-    AccountingCategory[]
-  >([]);
-  const [accountingRateTypeData, setAccountingRateTypeData] = useState<
-    AccountingRateType[]
-  >([]);
-  const [accountingJournalPolicyData, setAccountingJournalPolicyData] =
-    useState<JournalPolicy[]>([]);
+  const [accountingCategoryData, setAccountingCategoryData] = useState<AccountingCategory[]>([]);
+  const [accountingRateTypeData, setAccountingRateTypeData] = useState<AccountingRateType[]>([]);
+  const [accountingJournalPolicyData, setAccountingJournalPolicyData] = useState<JournalPolicy[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -132,7 +128,10 @@ const AccountingConfig = () => {
           role="tablist"
         >
           {tabs.map((tab) => (
-            <li key={tab.id} className="z-30 flex-auto text-center">
+            <li
+              key={tab.id}
+              className="z-30 flex-auto text-center"
+            >
               <a
                 className={`z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-md cursor-pointer ${
                   activeTab === tab.id

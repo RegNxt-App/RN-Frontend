@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {PayloadAction, createSlice} from '@reduxjs/toolkit';
 
 interface SelectionState {
   label: string | null;
@@ -14,10 +14,7 @@ const selectionSlice = createSlice({
   name: 'selection',
   initialState,
   reducers: {
-    setSelection: (
-      state,
-      action: PayloadAction<{ label: string; table: string | null }>,
-    ) => {
+    setSelection: (state, action: PayloadAction<{label: string; table: string | null}>) => {
       state.label = action.payload.label;
       state.table = action.payload.table;
     },
@@ -28,6 +25,6 @@ const selectionSlice = createSlice({
   },
 });
 
-export const { setSelection, clearSelection } = selectionSlice.actions;
+export const {setSelection, clearSelection} = selectionSlice.actions;
 
 export default selectionSlice.reducer;

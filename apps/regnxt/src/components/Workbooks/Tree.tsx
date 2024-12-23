@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import TreeNode from './TreeNode';
-import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import React, {useEffect, useState} from 'react';
+
+import {useAppDispatch, useAppSelector} from '../../app/hooks';
 import {
   fetchSheetData,
+  selectSelectedSheet,
   updateSelectedSheet,
   updateTotalCounts,
-  selectSelectedSheet,
 } from '../../features/sheetData/sheetDataSlice';
+import TreeNode from './TreeNode';
 
 interface ApiResponse {
   key: string;
@@ -23,7 +24,7 @@ interface TreeProps {
   workbookId: number;
 }
 
-const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
+const Tree: React.FC<TreeProps> = ({data, workbookId}) => {
   const dispatch = useAppDispatch();
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const selectedSheet = useAppSelector(selectSelectedSheet);
@@ -50,14 +51,8 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
 
     const processedChildren = node.children.map(calculateNodeCounts);
 
-    const totalCellCount = processedChildren.reduce(
-      (sum, child) => sum + (child.cellcount || 0),
-      0,
-    );
-    const totalInvalidCount = processedChildren.reduce(
-      (sum, child) => sum + (child.invalidcount || 0),
-      0,
-    );
+    const totalCellCount = processedChildren.reduce((sum, child) => sum + (child.cellcount || 0), 0);
+    const totalInvalidCount = processedChildren.reduce((sum, child) => sum + (child.invalidcount || 0), 0);
 
     return {
       ...node,
@@ -99,7 +94,7 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
       if (node.key.startsWith('tg-')) {
         if (node.children && node.children.length > 0) {
           const firstTableNode = node.children.find(
-            (child) => child.key.startsWith('t-') && child.data === 'table',
+            (child) => child.key.startsWith('t-') && child.data === 'table'
           );
           if (firstTableNode) {
             return firstTableNode;
@@ -122,7 +117,7 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
     const sheetId = sheetIdMatch ? sheetIdMatch[1] : null;
 
     if (sheetId) {
-      dispatch(fetchSheetData({ workbookId, sheetId }));
+      dispatch(fetchSheetData({workbookId, sheetId}));
       dispatch(
         updateSelectedSheet({
           table: node.table || node.data,
@@ -130,7 +125,7 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
           sheetId: sheetId,
           cellcount: node.cellcount || 0,
           invalidcount: node.invalidcount || 0,
-        }),
+        })
       );
       localStorage.setItem(
         `lastSelectedSheet-${workbookId}`,
@@ -140,7 +135,7 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
           sheetId: sheetId,
           cellcount: node.cellcount || 0,
           invalidcount: node.invalidcount || 0,
-        }),
+        })
       );
     }
   };
@@ -148,20 +143,17 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
   useEffect(() => {
     if (data.length > 0) {
       const processedData = processTreeData(data);
-      const { totalCellCount, totalInvalidCount } =
-        calculateTotalCounts(processedData);
+      const {totalCellCount, totalInvalidCount} = calculateTotalCounts(processedData);
 
       dispatch(
         updateTotalCounts({
           totalCellCount,
           totalInvalidCount,
-        }),
+        })
       );
 
       // Check if there's a stored selected sheet
-      const storedSheet = localStorage.getItem(
-        `lastSelectedSheet-${workbookId}`,
-      );
+      const storedSheet = localStorage.getItem(`lastSelectedSheet-${workbookId}`);
 
       // Only select first sheet if no sheet is currently selected AND no stored sheet exists
       if (!selectedSheet?.sheetId && !storedSheet) {
@@ -172,7 +164,7 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
           const sheetId = sheetIdMatch ? sheetIdMatch[1] : null;
 
           if (sheetId) {
-            dispatch(fetchSheetData({ workbookId, sheetId }));
+            dispatch(fetchSheetData({workbookId, sheetId}));
             dispatch(
               updateSelectedSheet({
                 table: firstTableNode.label,
@@ -180,14 +172,14 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
                 sheetId,
                 cellcount: firstSheet.cellcount || 0,
                 invalidcount: firstSheet.invalidcount || 0,
-              }),
+              })
             );
           }
         }
       } else if (!selectedSheet?.sheetId && storedSheet) {
         // If there's a stored sheet but no currently selected sheet, restore the stored selection
         const lastSheet = JSON.parse(storedSheet);
-        dispatch(fetchSheetData({ workbookId, sheetId: lastSheet.sheetId }));
+        dispatch(fetchSheetData({workbookId, sheetId: lastSheet.sheetId}));
         dispatch(updateSelectedSheet(lastSheet));
       }
     }
@@ -201,10 +193,7 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(
-      'treeExpandedNodes',
-      JSON.stringify([...expandedNodes]),
-    );
+    localStorage.setItem('treeExpandedNodes', JSON.stringify([...expandedNodes]));
   }, [expandedNodes]);
 
   const processedData = processTreeData(data);
@@ -214,7 +203,7 @@ const Tree: React.FC<TreeProps> = ({ data, workbookId }) => {
   return (
     <div
       className=" rounded-lg shadow-sm overflow-y-auto p-4"
-      style={{ maxHeight: '440px' }}
+      style={{maxHeight: '440px'}}
     >
       {processedData.map((item) => (
         <TreeNode

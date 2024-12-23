@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import Api from '../../../utils/Api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React, {useEffect, useState} from 'react';
+
 import Loader from '@/components/loader';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+
+import Api from '../../../utils/Api';
 
 interface UpdateRecordPopupProps {
   onClose: () => void;
@@ -15,11 +17,7 @@ interface CurrencyOption {
   code: string;
 }
 
-const UpdateEntityModel = ({
-  onClose,
-  existingData,
-  onUpdate,
-}: UpdateRecordPopupProps) => {
+const UpdateEntityModel = ({onClose, existingData, onUpdate}: UpdateRecordPopupProps) => {
   const [formData, setFormData] = useState({
     entityCode: '',
     entityLabel: '',
@@ -35,9 +33,7 @@ const UpdateEntityModel = ({
     email: '',
     consolidationScope: '',
   });
-  const [identificationTypes, setIdentificationTypes] = useState<
-    { name: string; code: number }[]
-  >([]);
+  const [identificationTypes, setIdentificationTypes] = useState<{name: string; code: number}[]>([]);
   const [currencies, setCurrencies] = useState<CurrencyOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,11 +62,7 @@ const UpdateEntityModel = ({
 
   // Set form data when existing data and dependencies are available
   useEffect(() => {
-    if (
-      existingData &&
-      identificationTypes.length > 0 &&
-      currencies.length > 0
-    ) {
+    if (existingData && identificationTypes.length > 0 && currencies.length > 0) {
       setFormData({
         entityCode: existingData.code || '',
         entityLabel: existingData.label || '',
@@ -89,11 +81,9 @@ const UpdateEntityModel = ({
     }
   }, [existingData, identificationTypes, currencies]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const {name, value} = e.target;
+    setFormData((prev) => ({...prev, [name]: value}));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -144,9 +134,7 @@ const UpdateEntityModel = ({
         </div>
         {error && (
           <div className="p-6.5">
-            <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
-              {error}
-            </div>
+            <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">{error}</div>
           </div>
         )}
         <form onSubmit={handleSubmit}>
@@ -194,11 +182,17 @@ const UpdateEntityModel = ({
               value={formData.identificationType}
               required
             >
-              <option value="" disabled>
+              <option
+                value=""
+                disabled
+              >
                 Select Identification Type
               </option>
               {identificationTypes.map((type) => (
-                <option key={type.code} value={type.code}>
+                <option
+                  key={type.code}
+                  value={type.code}
+                >
                   {type.name}
                 </option>
               ))}
@@ -246,11 +240,17 @@ const UpdateEntityModel = ({
               value={formData.reportingCurrency}
               required
             >
-              <option value="" disabled>
+              <option
+                value=""
+                disabled
+              >
                 Select Reporting Currency
               </option>
               {currencies.map((currency) => (
-                <option key={currency.code} value={currency.code}>
+                <option
+                  key={currency.code}
+                  value={currency.code}
+                >
                   {currency.name}
                 </option>
               ))}
@@ -290,7 +290,10 @@ const UpdateEntityModel = ({
             >
               Cancel
             </Button>
-            <Button type="submit" className="bg-purple-500 text-white">
+            <Button
+              type="submit"
+              className="bg-purple-500 text-white"
+            >
               Update
             </Button>
           </div>

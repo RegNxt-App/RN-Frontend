@@ -1,17 +1,12 @@
-import { useState } from 'react';
-import Pagination from '../Pagination';
-import { Edit, Trash2 } from 'lucide-react';
+import {useState} from 'react';
+
+import {Edit, Trash2} from 'lucide-react';
 import Swal from 'sweetalert2';
+
 import EditAccountCode from '../EditAccountCode';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table';
-import { Button } from '../ui/button';
+import Pagination from '../Pagination';
+import {Button} from '../ui/button';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '../ui/table';
 
 interface LedgerData {
   ledgerCode: string;
@@ -25,7 +20,7 @@ interface DataTableProps {
   onUpdate: (updatedRecord: LedgerData) => void;
 }
 
-const AccountCodeTable = ({ data, onDelete, onUpdate }: DataTableProps) => {
+const AccountCodeTable = ({data, onDelete, onUpdate}: DataTableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);

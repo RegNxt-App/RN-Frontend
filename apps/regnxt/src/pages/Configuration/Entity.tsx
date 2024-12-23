@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
-import EntityTable from '../../components/Tables/EntityTable';
+import {useEffect, useState} from 'react';
+
+import {Button} from '@/components/ui/button';
+import {ArrowDownToLine, ArrowUpFromLine, Plus} from 'lucide-react';
+
 import AddEntityModel from '../../components/CModels/EntityModels/AddEntityModel';
-import { ArrowDownToLine, ArrowUpFromLine, Plus } from 'lucide-react';
-import Api from '../../utils/Api';
+import EntityTable from '../../components/Tables/EntityTable';
 import Loader from '../../components/loader';
-import { Button } from '@/components/ui/button';
+import Api from '../../utils/Api';
 
 function Entity() {
   const [view, setView] = useState<'list' | 'kanban'>('list');
@@ -52,7 +54,10 @@ function Entity() {
             className="flex items-center gap-2 bg-purple-500 text-white"
           >
             Import
-            <ArrowUpFromLine size={20} strokeWidth={1.75} />
+            <ArrowUpFromLine
+              size={20}
+              strokeWidth={1.75}
+            />
           </Button>
 
           <Button
@@ -60,7 +65,10 @@ function Entity() {
             className="flex items-center gap-2 bg-purple-500 text-white"
           >
             Export
-            <ArrowDownToLine size={20} strokeWidth={1.75} />
+            <ArrowDownToLine
+              size={20}
+              strokeWidth={1.75}
+            />
           </Button>
         </div>
 
@@ -68,11 +76,17 @@ function Entity() {
           onClick={() => setIsOpen(true)}
           className="flex items-center gap-2 bg-purple-500 text-white"
         >
-          <Plus size={20} strokeWidth={1.75} />
+          <Plus
+            size={20}
+            strokeWidth={1.75}
+          />
           Add Entity
         </Button>
       </div>
-      <EntityTable data={entityData} onDataChange={handleUpdateEntitySuccess} />
+      <EntityTable
+        data={entityData}
+        onDataChange={handleUpdateEntitySuccess}
+      />
 
       <AddEntityModel
         isOpen={isOpen}

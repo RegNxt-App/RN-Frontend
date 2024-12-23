@@ -1,8 +1,9 @@
 import {useCallback, useMemo, useState} from 'react';
+import {useLocation} from 'react-router-dom';
 
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {useToast} from '@/hooks/use-toast';
-import {birdBackendInstance} from '@/lib/axios';
+import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {
   Column,
   Dataset,
@@ -35,7 +36,19 @@ interface VersionColumnsData {
 
 const ConfigureDatasets = () => {
   const {toast} = useToast();
+  const location = useLocation();
 
+  const getBackendInstance = () => {
+    if (location.pathname.includes('/bird/')) {
+      return birdBackendInstance;
+    }
+    if (location.pathname.includes('/orchestra/')) {
+      return orchestraBackendInstance;
+    }
+    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
+  };
+
+  const backendInstance = getBackendInstance();
   const [selectedFramework, setSelectedFramework] = useState<string>(NO_FILTER);
   const [selectedLayer, setSelectedLayer] = useState<string>(NO_FILTER);
   const [currentPage, setCurrentPage] = useState(1);
@@ -70,16 +83,16 @@ const ConfigureDatasets = () => {
     setSelectedVersionId((prev) => (prev === versionId ? null : versionId));
   };
 
-  const {data: layers} = useSWR<Layers>('/api/v1/layers/', birdBackendInstance);
-  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', birdBackendInstance);
+  const {data: layers} = useSWR<Layers>('/api/v1/layers/', backendInstance);
+  const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', backendInstance);
   const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    birdBackendInstance
+    backendInstance
   );
 
   const {data: dataTableJson} = useSWR<DatasetResponse>(
     `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    birdBackendInstance,
+    backendInstance,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -91,7 +104,7 @@ const ConfigureDatasets = () => {
     if (!selectedDataset || !selectedVersionId) return;
 
     try {
-      await birdBackendInstance.post(
+      await backendInstance.post(
         `/api/v1/datasets/${selectedDataset.dataset_id}/update-columns/?version_id=${selectedVersionId}`,
         {columns: updatedColumns}
       );
@@ -118,14 +131,14 @@ const ConfigureDatasets = () => {
     isValidating: isLoadingVersions,
   } = useSWR<DatasetVersions>(
     selectedDataset ? `/api/v1/datasets/${selectedDataset.dataset_id}/versions_all/` : null,
-    birdBackendInstance
+    backendInstance
   );
 
   const {data: versionColumns, mutate: mutateVersionColumns} = useSWR<VersionColumnsData>(
     selectedVersionId
       ? `/api/v1/datasets/${selectedDataset?.dataset_id}/version-columns/?version_id=${selectedVersionId}`
       : null,
-    birdBackendInstance
+    backendInstance
   );
 
   const handleFrameworkChange = useCallback((value: string) => {
@@ -208,7 +221,7 @@ const ConfigureDatasets = () => {
 
   const handleCreateDataset = async (newDataset: Partial<Dataset>) => {
     try {
-      await birdBackendInstance.post('/api/v1/datasets/', {
+      await backendInstance.post('/api/v1/datasets/', {
         ...newDataset,
         is_system_generated: false,
       });
@@ -232,7 +245,7 @@ const ConfigureDatasets = () => {
   const handleUpdateDataset = async (updatedDataset: Dataset) => {
     if (updatedDataset.is_system_generated) return;
     try {
-      await birdBackendInstance.put(`/api/v1/datasets/${updatedDataset.dataset_id}/`, updatedDataset);
+      await backendInstance.put(`/api/v1/datasets/${updatedDataset.dataset_id}/`, updatedDataset);
       await mutateDatasets();
       toast({
         title: 'Success',
@@ -253,7 +266,7 @@ const ConfigureDatasets = () => {
   const handleDeleteDataset = async () => {
     if (!deletingDatasetId) return;
     try {
-      await birdBackendInstance.delete(`/api/v1/datasets/${deletingDatasetId}/`);
+      await backendInstance.delete(`/api/v1/datasets/${deletingDatasetId}/`);
       await mutateDatasets();
       toast({
         title: 'Success',
@@ -284,7 +297,7 @@ const ConfigureDatasets = () => {
         valid_to: dataset.valid_to,
       };
 
-      await birdBackendInstance.post(`/api/v1/datasets/${dataset.dataset_id}/create_version/`, payload);
+      await backendInstance.post(`/api/v1/datasets/${dataset.dataset_id}/create_version/`, payload);
       await mutateVersions();
       toast({
         title: 'Success',
@@ -303,7 +316,7 @@ const ConfigureDatasets = () => {
 
   const handleUpdateVersion = async (version: DatasetVersion) => {
     try {
-      await birdBackendInstance.put(
+      await backendInstance.put(
         `/api/v1/datasets/${version.dataset_id}/update_version/?version_id=${version.dataset_version_id}`,
         version
       );
@@ -326,9 +339,7 @@ const ConfigureDatasets = () => {
 
   const handleDeleteVersion = async (datasetId: number, versionId: number) => {
     try {
-      await birdBackendInstance.delete(
-        `/api/v1/datasets/${datasetId}/delete_version/?version_id=${versionId}`
-      );
+      await backendInstance.delete(`/api/v1/datasets/${datasetId}/delete_version/?version_id=${versionId}`);
       await mutateVersions();
       toast({
         title: 'Success',
@@ -348,13 +359,13 @@ const ConfigureDatasets = () => {
     if (!selectedDataset) return;
 
     try {
-      await birdBackendInstance.put(`/api/v1/datasets/${selectedDataset.dataset_id}/`, {
+      await backendInstance.put(`/api/v1/datasets/${selectedDataset.dataset_id}/`, {
         ...selectedDataset,
         is_visible: configData.is_visible,
       });
 
       if (selectedVersion) {
-        await birdBackendInstance.put(`/api/v1/datasets/${selectedDataset.dataset_id}/update-columns/`, {
+        await backendInstance.put(`/api/v1/datasets/${selectedDataset.dataset_id}/update-columns/`, {
           dataset_version_id: selectedVersion.dataset_version_id,
           historization_type: parseInt(configData.historization_type),
         });
@@ -380,7 +391,7 @@ const ConfigureDatasets = () => {
 
   const handleViewHistory = async (dataset: Dataset, version: DatasetVersion) => {
     try {
-      const response = await birdBackendInstance.get(
+      const response = await backendInstance.get(
         `/api/v1/datasets/${dataset.dataset_id}/version_history/?version_id=${version.dataset_version_id}`
       );
 
