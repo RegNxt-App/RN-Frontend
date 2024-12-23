@@ -4,7 +4,7 @@ import {NavLink, useLocation, useNavigate} from 'react-router-dom';
 import {useAuth} from '@/contexts/AuthContext';
 import {cn} from '@/lib/utils';
 import * as Icons from 'lucide-react';
-import {ChevronDown, ChevronLeft, ChevronRight, LogOut, Settings} from 'lucide-react';
+import {ChevronDown, ChevronLeft, ChevronRight, LogOut, LucideProps, Settings} from 'lucide-react';
 
 import {Avatar, AvatarFallback, AvatarImage} from '@rn/ui/components/ui/avatar';
 import {Button} from '@rn/ui/components/ui/button';
@@ -272,9 +272,13 @@ const SidebarComponent: React.FC<SidebarProps> = ({
                                 }
                                 title={sidebarCollapsed ? item.label : undefined}
                               >
-                                {React.createElement(Icons[item.icon as keyof typeof Icons], {
-                                  className: cn('h-4 w-4', sidebarCollapsed && 'h-5 w-5'),
-                                })}
+                                {React.createElement(
+                                  Icons[item.icon as keyof typeof Icons] as React.FC<LucideProps>,
+                                  {
+                                    className: cn('h-4 w-4', sidebarCollapsed && 'h-5 w-5'),
+                                  }
+                                )}
+
                                 {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                               </NavLink>
                             </SidebarMenuButton>

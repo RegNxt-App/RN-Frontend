@@ -62,7 +62,7 @@ export default function ForgotPassword() {
         <span className="text-muted-foreground">Don&apos;t have an account? </span>
         <a
           className="font-semibold underline underline-offset-4 hover:text-primary"
-          href="/register"
+          href="/signup"
         >
           Sign up
         </a>

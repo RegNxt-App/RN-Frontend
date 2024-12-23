@@ -43,18 +43,8 @@ const SignUp = () => {
     <AuthLayout
       title="Sign Up to RegNxt"
       subtitle="Create your account"
-      imgSrc={
-        <Link
-          className="mb-8 inline-block"
-          to="#"
-        >
-          <img
-            src="/white-logo.svg"
-            alt="RegNxt Logo"
-            className="h-26 w-auto"
-          />
-        </Link>
-      }
+      imageSrc="/white-logo.svg"
+      imageAlt="RegNxt Logo"
     >
       <Form {...form}>
         <form

@@ -6,7 +6,7 @@ interface AuthLayoutProps {
   subtitle: string;
   imageSrc: string;
   imageAlt: string;
-  description: string;
+  description?: string;
 }
 
 /**
