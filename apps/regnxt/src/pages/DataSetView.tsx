@@ -1,4 +1,3 @@
-// Data.tsx
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {ConfigurationDataTable} from '@/components/ConfigurationDataTable';
@@ -300,12 +299,12 @@ const DataSetView: React.FC = () => {
   const handleSaveMetadata = useCallback(
     async (saveData: {
       data: Record<string, string | null>[];
-      deletions: number[]; // Add deletions to the parameter type
+      deletions: number[];
     }) => {
       try {
         const payload = {
           data: saveData.data,
-          deletions: saveData.deletions, // Include deletions in payload
+          deletions: saveData.deletions, 
           dataset_version_id: selectedTable.dataset_version_id,
         };
 

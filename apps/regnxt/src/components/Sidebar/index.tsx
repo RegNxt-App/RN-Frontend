@@ -212,14 +212,13 @@ const SidebarComponent: React.FC<SidebarProps> = ({
 
   return (
     <div className="relative z-50">
-      <SidebarProvider defaultOpen={!sidebarCollapsed}>
+      <SidebarProvider>
         <Sidebar
           className={cn(
             'fixed left-0 top-0 min-h-screen border-r border-border bg-background transition-all duration-300 ease-in-out',
-            sidebarCollapsed ? 'w-16' : 'w-[240px]'
+            sidebarCollapsed ? 'w-16' : 'w-[280px]'
           )}
         >
-          {/* Header Section */}
           <SidebarHeader className="border-b border-border p-4">
             <div className="flex items-center justify-between">
               {!sidebarCollapsed ? (
@@ -237,15 +236,15 @@ const SidebarComponent: React.FC<SidebarProps> = ({
               )}
             </div>
 
-            {/* App Selection Buttons */}
             <div className={cn('mt-4 flex gap-2', sidebarCollapsed ? 'flex-col items-center' : '')}>
               {['reporting', 'orchestra', 'bird'].map((app) => (
                 <Button
+                  size="icon"
                   key={app}
                   variant={currentApp === app ? 'default' : 'ghost'}
                   className={cn(
-                    'justify-start truncate',
-                    sidebarCollapsed ? 'w-10 justify-center p-0' : 'flex-1'
+                    'justify-center px-8',
+                    sidebarCollapsed ? 'w-10 justify-center p-0' : 'flex-1 '
                   )}
                   onClick={() => handleAppChange(app)}
                   title={sidebarCollapsed ? app.charAt(0).toUpperCase() + app.slice(1) : undefined}
@@ -262,7 +261,6 @@ const SidebarComponent: React.FC<SidebarProps> = ({
             </div>
           </SidebarHeader>
 
-          {/* Main Content */}
           <SidebarContent className="flex-grow overflow-y-auto">
             {navigationConfig[currentApp]?.sections.map((section, index) => (
               <Collapsible
@@ -336,7 +334,6 @@ const SidebarComponent: React.FC<SidebarProps> = ({
             ))}
           </SidebarContent>
 
-          {/* Footer */}
           <SidebarFooter className="border-t border-border p-4">
             <div className={cn('flex flex-col gap-4', sidebarCollapsed ? 'items-center' : '')}>
               <Button
@@ -380,7 +377,6 @@ const SidebarComponent: React.FC<SidebarProps> = ({
             </div>
           </SidebarFooter>
 
-          {/* Collapse/Expand Button */}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             className="absolute right-[-12px] top-6 z-50 flex h-6 w-6 items-center justify-center rounded-full border bg-background shadow-md transition-all hover:bg-accent focus:outline-none focus:ring-2 focus:ring-primary"

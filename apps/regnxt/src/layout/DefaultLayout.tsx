@@ -18,7 +18,9 @@ const DefaultLayout = ({children}: DefaultLayoutProps) => {
   return (
     <ErrorBoundary>
       <div className="dark:bg-boxdark-2 dark:text-bodydark flex h-screen overflow-hidden">
-        <div className={cn('transition-all duration-300 ease-in-out', sidebarCollapsed ? 'w-16' : 'w-64')}>
+        <div
+          className={cn('transition-all duration-300 ease-in-out', sidebarCollapsed ? 'w-16' : 'w-[280px]')}
+        >
           <Sidebar
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
