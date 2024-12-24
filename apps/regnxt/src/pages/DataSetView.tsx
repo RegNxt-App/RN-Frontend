@@ -12,6 +12,7 @@ import DatasetFormModal from '@/components/configurations/DatasetFormModal';
 import {MetadataTable} from '@/components/metadatatable/MetadataTable';
 import DataSkeleton from '@/components/skeletons/DataSkeleton';
 import {useToast} from '@/hooks/use-toast';
+import {useResetState} from '@/hooks/useResetState';
 import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {
   Dataset,
@@ -71,23 +72,54 @@ const DataSetView: React.FC = () => {
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const {toast} = useToast();
 
+  const swrKey = useMemo(() => {
+    const backend = location.pathname.includes('/bird/') ? 'bird' : 'orchestra';
+    return `${backend}/api/v1/datasets/`;
+  }, [location.pathname]);
+
   const {data: layers} = useSWR<Layers>('/api/v1/layers/', backendInstance);
   const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', backendInstance);
   const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
-    `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    backendInstance
+    `${swrKey}?page=1&page_size=10000`,
+    () => backendInstance(`/api/v1/datasets/?page=1&page_size=10000`)
   );
   const {data: dataTableJson} = useSWR<DatasetResponse>(
-    `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    backendInstance,
+    swrKey,
+    () => backendInstance(`/api/v1/datasets/?page=1&page_size=10000`),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      dedupingInterval: 3600000,
     }
   );
 
   const isLoading = !layers || !frameworks || !dataTableJson;
+  useResetState({
+    resetStates: () => {
+      setSelectedFramework(NO_FILTER);
+      setSelectedLayer(NO_FILTER);
+      setSelectedTable(null);
+      setIsFilterLoading(false);
+      setMetadata(null);
+      setSelectedDate(new Date());
+      setDatasetVersion(null);
+      setHasAppliedFilters(false);
+      setCurrentPage(1);
+      setIsDatasetModalOpen(false);
+      setEditingDataset(null);
+      setMetadataTableData([]);
+      setIsMetadataLoading(false);
+      setColumnFilters({
+        code: '',
+        label: '',
+        type: '',
+        group: '',
+        description: '',
+      });
+      setValidationResults([]);
+      mutateDatasets(undefined, true);
+    },
+    dependencies: [location.pathname],
+  });
 
   const groupedData = useMemo(() => {
     if (!dataTableJson?.data?.results) return {};

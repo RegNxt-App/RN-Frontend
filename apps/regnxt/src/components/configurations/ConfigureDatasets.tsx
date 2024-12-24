@@ -3,6 +3,7 @@ import {useLocation} from 'react-router-dom';
 
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {useToast} from '@/hooks/use-toast';
+import {useResetState} from '@/hooks/useResetState';
 import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {
   Column,
@@ -82,23 +83,49 @@ const ConfigureDatasets = () => {
   const handleVersionSelect = (versionId: number) => {
     setSelectedVersionId((prev) => (prev === versionId ? null : versionId));
   };
+  const swrKey = useMemo(() => {
+    const backend = location.pathname.includes('/bird/') ? 'bird' : 'orchestra';
+    return `${backend}/api/v1/datasets/`;
+  }, [location.pathname]);
 
   const {data: layers} = useSWR<Layers>('/api/v1/layers/', backendInstance);
   const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', backendInstance);
   const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
-    `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    backendInstance
+    `${swrKey}?page=${currentPage}`,
+    () => backendInstance(`/api/v1/datasets/?page=${currentPage}`),
+    {revalidateOnFocus: false}
   );
 
   const {data: dataTableJson} = useSWR<DatasetResponse>(
-    `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    backendInstance,
+    `${swrKey}?page=${currentPage}&page_size=${pageSize}`,
+    () => backendInstance(`/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       dedupingInterval: 3600000,
     }
   );
+  useResetState({
+    resetStates: () => {
+      setSelectedFramework(NO_FILTER);
+      setSelectedLayer(NO_FILTER);
+      setCurrentPage(1);
+      setSelectedTable(null);
+      setIsDatasetModalOpen(false);
+      setIsVersionModalOpen(false);
+      setSelectedVersionId(null);
+      setColumnFilters({
+        code: '',
+        label: '',
+        framework: '',
+        group: '',
+        type: '',
+        description: '',
+      });
+      mutateDatasets(undefined, true);
+    },
+    dependencies: [location.pathname],
+  });
 
   const handleUpdateColumns = async (updatedColumns: Column[]) => {
     if (!selectedDataset || !selectedVersionId) return;

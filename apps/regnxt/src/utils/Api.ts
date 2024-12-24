@@ -21,7 +21,7 @@ const onRefreshed = (token: string) => {
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem('token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -54,8 +54,8 @@ api.interceptors.response.use(
           token: refreshToken,
         });
 
-        const newToken = data.jwtToken;
-        localStorage.setItem('jwtToken', newToken);
+        const newToken = data.token;
+        localStorage.setItem('token', newToken);
 
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
 

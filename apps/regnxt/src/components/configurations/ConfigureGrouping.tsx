@@ -6,6 +6,7 @@ import {SharedColumnFilters} from '@/components/SharedFilters';
 import {GroupFormModal} from '@/components/configurations/GroupFormModal';
 import {GroupItemsModal} from '@/components/configurations/GroupItemsModal';
 import {useToast} from '@/hooks/use-toast';
+import {useResetState} from '@/hooks/useResetState';
 import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {ColumnDef} from '@tanstack/react-table';
 import {Edit, Eye, Plus, Trash} from 'lucide-react';
@@ -59,12 +60,38 @@ const ConfigureGrouping = () => {
     type: '',
     description: '',
   });
+  const swrKey = useMemo(() => {
+    const backend = location.pathname.includes('/bird/') ? 'bird' : 'orchestra';
+    return `${backend}/api/v1/groups/`;
+  }, [location.pathname]);
 
   const {
     data: groupsResponse,
     mutate: mutateGroups,
     isLoading,
-  } = useSWR<Grouping>('/api/v1/groups/', backendInstance);
+  } = useSWR<Grouping>(swrKey, () => backendInstance('/api/v1/groups/'), {
+    revalidateOnMount: true,
+    onError: () => {
+      mutateGroups(undefined, false);
+    },
+  });
+  useResetState({
+    resetStates: () => {
+      setSelectedGroup(null);
+      setIsGroupModalOpen(false);
+      setIsItemsModalOpen(false);
+      setEditingGroup(null);
+      setColumnFilters({
+        code: '',
+        label: '',
+        group: '',
+        type: '',
+        description: '',
+      });
+      mutateGroups(undefined, true);
+    },
+    dependencies: [location.pathname],
+  });
 
   const handleCreateGroup = async (newGroup: Partial<Group>) => {
     try {
