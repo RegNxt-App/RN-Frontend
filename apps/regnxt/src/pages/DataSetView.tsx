@@ -12,6 +12,7 @@ import DatasetFormModal from '@/components/configurations/DatasetFormModal';
 import {MetadataTable} from '@/components/metadatatable/MetadataTable';
 import DataSkeleton from '@/components/skeletons/DataSkeleton';
 import {useToast} from '@/hooks/use-toast';
+import {useResetState} from '@/hooks/useResetState';
 import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {
   Dataset,
@@ -79,12 +80,12 @@ const DataSetView: React.FC = () => {
   const {data: layers} = useSWR<Layers>('/api/v1/layers/', backendInstance);
   const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', backendInstance);
   const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
-    `${swrKey}?page=${currentPage}&page_size=${pageSize}`,
-    () => backendInstance(`/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`)
+    `${swrKey}?page=1&page_size=10000`,
+    () => backendInstance(`/api/v1/datasets/?page=1&page_size=10000`)
   );
-  const {data: dataTableJson, mutate: mutateTableJson} = useSWR<DatasetResponse>(
+  const {data: dataTableJson} = useSWR<DatasetResponse>(
     swrKey,
-    () => backendInstance(`/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`),
+    () => backendInstance(`/api/v1/datasets/?page=1&page_size=10000`),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -92,30 +93,33 @@ const DataSetView: React.FC = () => {
   );
 
   const isLoading = !layers || !frameworks || !dataTableJson;
-  useEffect(() => {
-    setSelectedFramework(NO_FILTER);
-    setSelectedLayer(NO_FILTER);
-    setSelectedTable(null);
-    setIsFilterLoading(false);
-    setMetadata(null);
-    setSelectedDate(new Date());
-    setDatasetVersion(null);
-    setHasAppliedFilters(false);
-    setCurrentPage(1);
-    setIsDatasetModalOpen(false);
-    setEditingDataset(null);
-    setMetadataTableData([]);
-    setIsMetadataLoading(false);
-    setColumnFilters({
-      code: '',
-      label: '',
-      type: '',
-      group: '',
-      description: '',
-    });
-    setValidationResults([]);
-    mutateDatasets(undefined, true);
-  }, [location.pathname, mutateDatasets]);
+  useResetState({
+    resetStates: () => {
+      setSelectedFramework(NO_FILTER);
+      setSelectedLayer(NO_FILTER);
+      setSelectedTable(null);
+      setIsFilterLoading(false);
+      setMetadata(null);
+      setSelectedDate(new Date());
+      setDatasetVersion(null);
+      setHasAppliedFilters(false);
+      setCurrentPage(1);
+      setIsDatasetModalOpen(false);
+      setEditingDataset(null);
+      setMetadataTableData([]);
+      setIsMetadataLoading(false);
+      setColumnFilters({
+        code: '',
+        label: '',
+        type: '',
+        group: '',
+        description: '',
+      });
+      setValidationResults([]);
+      mutateDatasets(undefined, true);
+    },
+    dependencies: [location.pathname],
+  });
 
   const groupedData = useMemo(() => {
     if (!dataTableJson?.data?.results) return {};

@@ -1,8 +1,9 @@
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {useToast} from '@/hooks/use-toast';
+import {useResetState} from '@/hooks/useResetState';
 import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {
   Column,
@@ -89,12 +90,10 @@ const ConfigureDatasets = () => {
 
   const {data: layers} = useSWR<Layers>('/api/v1/layers/', backendInstance);
   const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', backendInstance);
-  const {
-    data: datasetsResponse,
-    mutate: mutateDatasets,
-    isValidating: isLoadingDatasets,
-  } = useSWR<DatasetResponse>(`${swrKey}?page=${currentPage}&page_size=${pageSize}`, () =>
-    backendInstance(`/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`)
+  const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
+    `${swrKey}?page=${currentPage}`,
+    () => backendInstance(`/api/v1/datasets/?page=${currentPage}`),
+    {revalidateOnFocus: false}
   );
 
   const {data: dataTableJson} = useSWR<DatasetResponse>(
@@ -106,33 +105,27 @@ const ConfigureDatasets = () => {
       dedupingInterval: 3600000,
     }
   );
-  useEffect(() => {
-    setSelectedFramework(NO_FILTER);
-    setSelectedLayer(NO_FILTER);
-    setCurrentPage(1);
-    setSelectedTable(null);
-    setIsDatasetModalOpen(false);
-    setIsVersionModalOpen(false);
-    setSelectedVersionId(null);
-    setIsConfigModalOpen(false);
-    setIsHistoryModalOpen(false);
-    setIsDeleteDialogOpen(false);
-    setSelectedDataset(null);
-    setSelectedVersion(null);
-    setEditingDataset(null);
-    setEditingVersion(null);
-    setDeletingDatasetId(null);
-    setColumnFilters({
-      code: '',
-      label: '',
-      framework: '',
-      group: '',
-      type: '',
-      description: '',
-    });
-    setHistoryData([]);
-    mutateDatasets(undefined, true);
-  }, [location.pathname, mutateDatasets]);
+  useResetState({
+    resetStates: () => {
+      setSelectedFramework(NO_FILTER);
+      setSelectedLayer(NO_FILTER);
+      setCurrentPage(1);
+      setSelectedTable(null);
+      setIsDatasetModalOpen(false);
+      setIsVersionModalOpen(false);
+      setSelectedVersionId(null);
+      setColumnFilters({
+        code: '',
+        label: '',
+        framework: '',
+        group: '',
+        type: '',
+        description: '',
+      });
+      mutateDatasets(undefined, true);
+    },
+    dependencies: [location.pathname],
+  });
 
   const handleUpdateColumns = async (updatedColumns: Column[]) => {
     if (!selectedDataset || !selectedVersionId) return;

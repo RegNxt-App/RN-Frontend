@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useMemo, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
@@ -6,6 +6,7 @@ import {SharedColumnFilters} from '@/components/SharedFilters';
 import {GroupFormModal} from '@/components/configurations/GroupFormModal';
 import {GroupItemsModal} from '@/components/configurations/GroupItemsModal';
 import {useToast} from '@/hooks/use-toast';
+import {useResetState} from '@/hooks/useResetState';
 import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {ColumnDef} from '@tanstack/react-table';
 import {Edit, Eye, Plus, Trash} from 'lucide-react';
@@ -64,12 +65,6 @@ const ConfigureGrouping = () => {
     return `${backend}/api/v1/groups/`;
   }, [location.pathname]);
 
-  // const {
-  //   data: groupsResponse,
-  //   mutate: mutateGroups,
-  //   isLoading,
-  // } = useSWR<Grouping>('/api/v1/groups/', backendInstance);
-
   const {
     data: groupsResponse,
     mutate: mutateGroups,
@@ -80,20 +75,24 @@ const ConfigureGrouping = () => {
       mutateGroups(undefined, false);
     },
   });
-  useEffect(() => {
-    setSelectedGroup(null);
-    setIsGroupModalOpen(false);
-    setIsItemsModalOpen(false);
-    setEditingGroup(null);
-    setColumnFilters({
-      code: '',
-      label: '',
-      group: '',
-      type: '',
-      description: '',
-    });
-    mutateGroups(undefined, true);
-  }, [location.pathname]);
+  useResetState({
+    resetStates: () => {
+      setSelectedGroup(null);
+      setIsGroupModalOpen(false);
+      setIsItemsModalOpen(false);
+      setEditingGroup(null);
+      setColumnFilters({
+        code: '',
+        label: '',
+        group: '',
+        type: '',
+        description: '',
+      });
+      mutateGroups(undefined, true);
+    },
+    dependencies: [location.pathname],
+  });
+
   const handleCreateGroup = async (newGroup: Partial<Group>) => {
     try {
       await backendInstance.post('/api/v1/groups/', newGroup);
