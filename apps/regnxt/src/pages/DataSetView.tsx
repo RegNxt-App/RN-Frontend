@@ -71,23 +71,51 @@ const DataSetView: React.FC = () => {
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const {toast} = useToast();
 
+  const swrKey = useMemo(() => {
+    const backend = location.pathname.includes('/bird/') ? 'bird' : 'orchestra';
+    return `${backend}/api/v1/datasets/`;
+  }, [location.pathname]);
+
   const {data: layers} = useSWR<Layers>('/api/v1/layers/', backendInstance);
   const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', backendInstance);
   const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
-    `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    backendInstance
+    `${swrKey}?page=${currentPage}&page_size=${pageSize}`,
+    () => backendInstance(`/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`)
   );
-  const {data: dataTableJson} = useSWR<DatasetResponse>(
-    `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    backendInstance,
+  const {data: dataTableJson, mutate: mutateTableJson} = useSWR<DatasetResponse>(
+    swrKey,
+    () => backendInstance(`/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      dedupingInterval: 3600000,
     }
   );
 
   const isLoading = !layers || !frameworks || !dataTableJson;
+  useEffect(() => {
+    setSelectedFramework(NO_FILTER);
+    setSelectedLayer(NO_FILTER);
+    setSelectedTable(null);
+    setIsFilterLoading(false);
+    setMetadata(null);
+    setSelectedDate(new Date());
+    setDatasetVersion(null);
+    setHasAppliedFilters(false);
+    setCurrentPage(1);
+    setIsDatasetModalOpen(false);
+    setEditingDataset(null);
+    setMetadataTableData([]);
+    setIsMetadataLoading(false);
+    setColumnFilters({
+      code: '',
+      label: '',
+      type: '',
+      group: '',
+      description: '',
+    });
+    setValidationResults([]);
+    mutateDatasets(undefined, true);
+  }, [location.pathname, mutateDatasets]);
 
   const groupedData = useMemo(() => {
     if (!dataTableJson?.data?.results) return {};

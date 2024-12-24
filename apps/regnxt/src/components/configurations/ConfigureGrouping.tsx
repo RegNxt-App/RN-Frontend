@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
@@ -59,13 +59,41 @@ const ConfigureGrouping = () => {
     type: '',
     description: '',
   });
+  const swrKey = useMemo(() => {
+    const backend = location.pathname.includes('/bird/') ? 'bird' : 'orchestra';
+    return `${backend}/api/v1/groups/`;
+  }, [location.pathname]);
+
+  // const {
+  //   data: groupsResponse,
+  //   mutate: mutateGroups,
+  //   isLoading,
+  // } = useSWR<Grouping>('/api/v1/groups/', backendInstance);
 
   const {
     data: groupsResponse,
     mutate: mutateGroups,
     isLoading,
-  } = useSWR<Grouping>('/api/v1/groups/', backendInstance);
-
+  } = useSWR<Grouping>(swrKey, () => backendInstance('/api/v1/groups/'), {
+    revalidateOnMount: true,
+    onError: () => {
+      mutateGroups(undefined, false);
+    },
+  });
+  useEffect(() => {
+    setSelectedGroup(null);
+    setIsGroupModalOpen(false);
+    setIsItemsModalOpen(false);
+    setEditingGroup(null);
+    setColumnFilters({
+      code: '',
+      label: '',
+      group: '',
+      type: '',
+      description: '',
+    });
+    mutateGroups(undefined, true);
+  }, [location.pathname]);
   const handleCreateGroup = async (newGroup: Partial<Group>) => {
     try {
       await backendInstance.post('/api/v1/groups/', newGroup);

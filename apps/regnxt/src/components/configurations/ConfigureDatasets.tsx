@@ -1,4 +1,4 @@
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 
 import {SharedColumnFilters} from '@/components/SharedFilters';
@@ -82,23 +82,57 @@ const ConfigureDatasets = () => {
   const handleVersionSelect = (versionId: number) => {
     setSelectedVersionId((prev) => (prev === versionId ? null : versionId));
   };
+  const swrKey = useMemo(() => {
+    const backend = location.pathname.includes('/bird/') ? 'bird' : 'orchestra';
+    return `${backend}/api/v1/datasets/`;
+  }, [location.pathname]);
 
   const {data: layers} = useSWR<Layers>('/api/v1/layers/', backendInstance);
   const {data: frameworks} = useSWR<Frameworks>('/api/v1/frameworks/', backendInstance);
-  const {data: datasetsResponse, mutate: mutateDatasets} = useSWR<DatasetResponse>(
-    `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    backendInstance
+  const {
+    data: datasetsResponse,
+    mutate: mutateDatasets,
+    isValidating: isLoadingDatasets,
+  } = useSWR<DatasetResponse>(`${swrKey}?page=${currentPage}&page_size=${pageSize}`, () =>
+    backendInstance(`/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`)
   );
 
   const {data: dataTableJson} = useSWR<DatasetResponse>(
-    `/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`,
-    backendInstance,
+    `${swrKey}?page=${currentPage}&page_size=${pageSize}`,
+    () => backendInstance(`/api/v1/datasets/?page=${currentPage}&page_size=${pageSize}`),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       dedupingInterval: 3600000,
     }
   );
+  useEffect(() => {
+    setSelectedFramework(NO_FILTER);
+    setSelectedLayer(NO_FILTER);
+    setCurrentPage(1);
+    setSelectedTable(null);
+    setIsDatasetModalOpen(false);
+    setIsVersionModalOpen(false);
+    setSelectedVersionId(null);
+    setIsConfigModalOpen(false);
+    setIsHistoryModalOpen(false);
+    setIsDeleteDialogOpen(false);
+    setSelectedDataset(null);
+    setSelectedVersion(null);
+    setEditingDataset(null);
+    setEditingVersion(null);
+    setDeletingDatasetId(null);
+    setColumnFilters({
+      code: '',
+      label: '',
+      framework: '',
+      group: '',
+      type: '',
+      description: '',
+    });
+    setHistoryData([]);
+    mutateDatasets(undefined, true);
+  }, [location.pathname, mutateDatasets]);
 
   const handleUpdateColumns = async (updatedColumns: Column[]) => {
     if (!selectedDataset || !selectedVersionId) return;
