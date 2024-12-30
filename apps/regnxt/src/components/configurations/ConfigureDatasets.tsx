@@ -15,8 +15,9 @@ import {
   Frameworks,
   Layers,
 } from '@/types/databaseTypes';
+import {updateCache} from '@/utils/swrCache';
 import {Plus} from 'lucide-react';
-import useSWR from 'swr';
+import useSWR, {mutate} from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
@@ -248,11 +249,19 @@ const ConfigureDatasets = () => {
 
   const handleCreateDataset = async (newDataset: Partial<Dataset>) => {
     try {
-      await backendInstance.post('/api/v1/datasets/', {
+      const response = await backendInstance.post('/api/v1/datasets/', {
         ...newDataset,
         is_system_generated: false,
       });
+
+      updateCache(`${swrKey}?page=${currentPage}&page_size=${pageSize}`, response.data, mutate);
+      if (datasetsResponse) {
+        updateCache(`${swrKey}?page=${currentPage}`, response.data, mutateDatasets);
+      }
+
       await mutateDatasets();
+      await mutate(`${swrKey}?page=${currentPage}&page_size=${pageSize}`);
+
       setIsDatasetModalOpen(false);
 
       toast({
