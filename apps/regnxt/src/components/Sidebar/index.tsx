@@ -132,6 +132,7 @@ const navigationConfig: NavigationConfig = {
             icon: 'Database',
             label: 'Datasets',
             dropdownItems: [
+              {path: '/orchestra/data', label: 'Data'},
               {path: '/orchestra/configuration/dataset', label: 'Configure Datasets'},
               {path: '/orchestra/configuration/groups', label: 'Configure Groups'},
             ],

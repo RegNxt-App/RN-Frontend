@@ -556,12 +556,7 @@ const DataSetView: React.FC = () => {
         filters={columnFilters}
         setFilter={(key, value) => setColumnFilters((prev) => ({...prev, [key]: value}))}
       />
-      <div className="mt-4 mb-4 flex flex-row-reverse">
-        <Button onClick={() => setIsDatasetModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create New Dataset
-        </Button>
-      </div>
+
       {selectedLayer === NO_FILTER ? (
         <DataAccordion
           data={filteredData}
