@@ -1,7 +1,8 @@
 import React, {useCallback, useMemo, useState} from 'react';
+import {useLocation} from 'react-router-dom';
 
 import {useToast} from '@/hooks/use-toast';
-import {birdBackendInstance} from '@/lib/axios';
+import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {cn} from '@/lib/utils';
 import {Column} from '@/types/databaseTypes';
 import {Edit, History, Plus, Trash2} from 'lucide-react';
@@ -52,6 +53,18 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
   isLoading,
 }) => {
   const {toast} = useToast();
+  const location = useLocation();
+  const getBackendInstance = () => {
+    if (location.pathname.includes('/bird/')) {
+      return birdBackendInstance;
+    }
+    if (location.pathname.includes('/orchestra/')) {
+      return orchestraBackendInstance;
+    }
+    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
+  };
+
+  const backendInstance = getBackendInstance();
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState<Column | null>(null);
@@ -62,7 +75,7 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
     ? `/api/v1/datasets/${datasetId}/version-columns/?version_id=${versionId}`
     : null;
 
-  const {data: columns, mutate: mutateColumns} = useSWR<ColumnData>(columnKey, birdBackendInstance);
+  const {data: columns, mutate: mutateColumns} = useSWR<ColumnData>(columnKey, backendInstance);
 
   const handleFormSubmit = useCallback(
     async (data: any) => {
@@ -82,7 +95,7 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
           ],
         };
 
-        await birdBackendInstance.post(
+        await backendInstance.post(
           `/api/v1/datasets/${datasetId}/update-columns/?version_id=${versionId}`,
           payload
         );
@@ -122,13 +135,10 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
     if (!columnToDelete) return;
 
     try {
-      await birdBackendInstance.post(
-        `/api/v1/datasets/${datasetId}/update-columns/?version_id=${versionId}`,
-        {
-          is_delete_operation: true,
-          columns_to_delete: [columnToDelete?.dataset_version_column_id],
-        }
-      );
+      await backendInstance.post(`/api/v1/datasets/${datasetId}/update-columns/?version_id=${versionId}`, {
+        is_delete_operation: true,
+        columns_to_delete: [columnToDelete?.dataset_version_column_id],
+      });
 
       mutateColumns();
 
