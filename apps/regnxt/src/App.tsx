@@ -11,6 +11,7 @@ import PageTitle from './components/PageTitle';
 import PrivateRoute from './components/PrivateRoute';
 import {useAuth} from './contexts/AuthContext';
 import DefaultLayout from './layout/DefaultLayout';
+import {TaskAccordion} from './pages/Orchestra/Tasks';
 
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
 const SignUp = lazy(() => import('./pages/Authentication/SignUp'));
@@ -39,7 +40,6 @@ const Variables = lazy(() => import('./pages/Orchestra/Variables'));
 const Datasets = lazy(() => import('./pages/Orchestra/Datasets'));
 const Dataviews = lazy(() => import('./pages/Orchestra/Dataviews'));
 const DataLoaders = lazy(() => import('./pages/Orchestra/DataLoaders'));
-const Tasks = lazy(() => import('./pages/Orchestra/Tasks'));
 const Workflows = lazy(() => import('./pages/Orchestra/Workflows'));
 const Monitoring = lazy(() => import('./pages/Orchestra/Monitoring'));
 const Data = lazy(() => import('./pages/Orchestra/Data/Data'));
@@ -93,7 +93,7 @@ const routeConfig = {
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},
     {path: '/orchestra/data-loaders', component: DataLoaders, title: 'Orchestra'},
-    {path: '/orchestra/tasks', component: Tasks, title: 'Orchestra'},
+    {path: '/orchestra/tasks', component: TaskAccordion, title: 'Orchestra'},
     {path: '/orchestra/workflows', component: Workflows, title: 'Orchestra'},
     {path: '/orchestra/monitoring', component: Monitoring, title: 'Orchestra'},
     {path: '/orchestra/data', component: Data, title: 'Orchestra'},
