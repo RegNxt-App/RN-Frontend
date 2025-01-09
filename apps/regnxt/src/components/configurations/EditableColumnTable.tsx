@@ -1,10 +1,9 @@
 import React, {useCallback, useMemo, useState} from 'react';
-import {useLocation} from 'react-router-dom';
 
+import {useBackend} from '@/contexts/BackendContext';
 import {useToast} from '@/hooks/use-toast';
-import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {cn} from '@/lib/utils';
-import {Column} from '@/types/databaseTypes';
+import {Column, ColumnData, EditableColumnTableProps} from '@/types/databaseTypes';
 import {Edit, History, Plus, Trash2} from 'lucide-react';
 import useSWR from 'swr';
 
@@ -35,36 +34,13 @@ const HISTORIZATION_TYPES = {
   },
 } as const;
 
-interface EditableColumnTableProps {
-  initialColumns: Column[];
-  datasetId: string | number;
-  versionId: string | number;
-  onColumnChange?: () => void;
-  isLoading?: boolean;
-}
-
-interface ColumnData {
-  data: Column[];
-}
-
 export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
   datasetId,
   versionId,
   isLoading,
 }) => {
   const {toast} = useToast();
-  const location = useLocation();
-  const getBackendInstance = () => {
-    if (location.pathname.includes('/bird/')) {
-      return birdBackendInstance;
-    }
-    if (location.pathname.includes('/orchestra/')) {
-      return orchestraBackendInstance;
-    }
-    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
-  };
-
-  const backendInstance = getBackendInstance();
+  const backendInstance = useBackend();
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState<Column | null>(null);

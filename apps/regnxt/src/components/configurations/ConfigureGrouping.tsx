@@ -5,9 +5,10 @@ import {SharedDataTable} from '@/components/SharedDataTable';
 import {SharedColumnFilters} from '@/components/SharedFilters';
 import {GroupFormModal} from '@/components/configurations/GroupFormModal';
 import {GroupItemsModal} from '@/components/configurations/GroupItemsModal';
+import {useBackend} from '@/contexts/BackendContext';
 import {useToast} from '@/hooks/use-toast';
 import {useResetState} from '@/hooks/useResetState';
-import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
+import {Group, Grouping} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
 import {Edit, Eye, Plus, Trash} from 'lucide-react';
 import useSWR from 'swr';
@@ -16,39 +17,11 @@ import {Button} from '@rn/ui/components/ui/button';
 import {Skeleton} from '@rn/ui/components/ui/skeleton';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/ui/components/ui/tooltip';
 
-interface Group {
-  code: string;
-  label: string;
-  description: string;
-  is_system_generated: boolean;
-  items: string;
-}
-
-interface GroupsResponse {
-  count: number;
-  num_pages: number;
-  results: Group[];
-}
-
-interface Grouping {
-  data: GroupsResponse;
-}
-
 const ConfigureGrouping = () => {
   const {toast} = useToast();
   const location = useLocation();
+  const {backendInstance} = useBackend();
 
-  const getBackendInstance = () => {
-    if (location.pathname.includes('/bird/')) {
-      return birdBackendInstance;
-    }
-    if (location.pathname.includes('/orchestra/')) {
-      return orchestraBackendInstance;
-    }
-    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
-  };
-
-  const backendInstance = getBackendInstance();
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);

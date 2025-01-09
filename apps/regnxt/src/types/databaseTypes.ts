@@ -65,7 +65,12 @@ export interface Datasets {
   results: Dataset[];
 }
 export interface DatasetResponse {
-  data: Datasets;
+  data: {
+    results: Dataset[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+  };
 }
 
 export interface DatasetVersion {
@@ -216,4 +221,88 @@ export interface ValidationResult {
   severity_level: string;
   validation_msg: string;
   column_name: string;
+}
+export interface ApiTask {
+  task_type_id: number;
+  task_type_code: string;
+  task_type_label: string;
+  task_id: number;
+  code: string;
+  label: string;
+  description: string;
+  context: string;
+  is_predefined: boolean;
+  task_language: string | null;
+  task_code: string | null;
+}
+export interface TasksApiResponse {
+  data: ApiTask[];
+}
+export interface TaskType {
+  task_id: number;
+  code: string;
+  label: string;
+  description?: string;
+  task_type_label?: string;
+  is_predefined: boolean;
+  task_language?: string | null;
+  task_code?: string | null;
+  context?: string;
+  task_type_id: number;
+  task_type_code: string;
+}
+export interface Group {
+  code: string;
+  label: string;
+  description: string;
+  is_system_generated: boolean;
+  items: string;
+}
+export interface GroupsResponse {
+  count: number;
+  num_pages: number;
+  results: Group[];
+}
+export interface Grouping {
+  data: GroupsResponse;
+}
+export interface EditableColumnTableProps {
+  initialColumns: Column[];
+  datasetId: string | number;
+  versionId: string | number;
+  onColumnChange?: () => void;
+  isLoading?: boolean;
+}
+
+export interface ColumnData {
+  data: Column[];
+}
+export interface TaskDetails {
+  id: string | number;
+  code: string;
+  label: string;
+  description?: string;
+  task_type_label?: string;
+  is_predefined: boolean;
+  task_language?: string | null;
+  task_code?: string | null;
+  context?: string;
+  task_type_id: number;
+  task_type_code: string;
+  task_id: number;
+}
+
+export interface TaskDetailTabsProps {
+  selectedTask: TaskDetails;
+  isEditing: boolean;
+  onEdit: () => void;
+  onSave: () => void;
+  onDelete?: () => void;
+}
+export interface StatItem {
+  title: string;
+  count: string;
+  description: string;
+  titleIcon: JSX.Element;
+  descriptionIcon: JSX.Element;
 }
