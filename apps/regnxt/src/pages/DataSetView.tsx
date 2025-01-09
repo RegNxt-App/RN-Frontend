@@ -11,9 +11,9 @@ import {TableInfoHeader} from '@/components/TableInfoHeader';
 import DatasetFormModal from '@/components/configurations/DatasetFormModal';
 import {MetadataTable} from '@/components/metadatatable/MetadataTable';
 import DataSkeleton from '@/components/skeletons/DataSkeleton';
+import {useBackend} from '@/contexts/BackendContext';
 import {useToast} from '@/hooks/use-toast';
 import {useResetState} from '@/hooks/useResetState';
-import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {
   Dataset,
   DatasetItem,
@@ -34,17 +34,7 @@ const NO_FILTER = 'NO_FILTER';
 const DataSetView: React.FC = () => {
   const location = useLocation();
 
-  const getBackendInstance = () => {
-    if (location.pathname.includes('/bird/')) {
-      return birdBackendInstance;
-    }
-    if (location.pathname.includes('/orchestra/')) {
-      return orchestraBackendInstance;
-    }
-    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
-  };
-
-  const backendInstance = getBackendInstance();
+  const {backendInstance} = useBackend();
   const [selectedFramework, setSelectedFramework] = useState<string>(NO_FILTER);
   const [selectedLayer, setSelectedLayer] = useState<string>(NO_FILTER);
   const [selectedTable, setSelectedTable] = useState<any | null>(null);

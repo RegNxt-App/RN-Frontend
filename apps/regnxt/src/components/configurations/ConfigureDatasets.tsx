@@ -1,10 +1,9 @@
 import {useCallback, useMemo, useState} from 'react';
-import {useLocation} from 'react-router-dom';
 
 import {SharedColumnFilters} from '@/components/SharedFilters';
+import {useBackend} from '@/contexts/BackendContext';
 import {useToast} from '@/hooks/use-toast';
 import {useResetState} from '@/hooks/useResetState';
-import {birdBackendInstance, orchestraBackendInstance} from '@/lib/axios';
 import {
   Column,
   Dataset,
@@ -15,7 +14,6 @@ import {
   Frameworks,
   Layers,
 } from '@/types/databaseTypes';
-import {updateCache} from '@/utils/swrCache';
 import {Plus} from 'lucide-react';
 import useSWR, {mutate} from 'swr';
 
@@ -38,19 +36,8 @@ interface VersionColumnsData {
 
 const ConfigureDatasets = () => {
   const {toast} = useToast();
-  const location = useLocation();
+  const {backendInstance} = useBackend();
 
-  const getBackendInstance = () => {
-    if (location.pathname.includes('/bird/')) {
-      return birdBackendInstance;
-    }
-    if (location.pathname.includes('/orchestra/')) {
-      return orchestraBackendInstance;
-    }
-    throw new Error('Invalid URL path: Neither bird nor orchestra found in path');
-  };
-
-  const backendInstance = getBackendInstance();
   const [selectedFramework, setSelectedFramework] = useState<string>(NO_FILTER);
   const [selectedLayer, setSelectedLayer] = useState<string>(NO_FILTER);
   const [currentPage, setCurrentPage] = useState(1);
@@ -249,18 +236,50 @@ const ConfigureDatasets = () => {
 
   const handleCreateDataset = async (newDataset: Partial<Dataset>) => {
     try {
+      const optimisticData: Dataset = {
+        dataset_id: Date.now(),
+        code: newDataset.code || '',
+        label: newDataset.label || '',
+        description: newDataset.description || '',
+        framework: newDataset.framework || '',
+        type: newDataset.type || '',
+        is_system_generated: false,
+        version_nr: newDataset.version_nr,
+        version_code: newDataset.version_code,
+        valid_to: newDataset.valid_to,
+        valid_from: newDataset.valid_from,
+        is_visible: newDataset.is_visible,
+        latest_version_id: newDataset.latest_version_id,
+        groups: newDataset.groups || [],
+      };
+
+      mutateDatasets(
+        async (currentData?: DatasetResponse) => {
+          if (!currentData) return currentData;
+          return {
+            ...currentData,
+            data: {
+              ...currentData.data,
+              results: [optimisticData, ...currentData.data.results],
+              count: currentData.data.count + 1,
+            },
+          };
+        },
+        {
+          revalidate: false,
+          populateCache: true,
+          rollbackOnError: true,
+        }
+      );
+
+      // Make the actual API call
       const response = await backendInstance.post('/api/v1/datasets/', {
         ...newDataset,
         is_system_generated: false,
       });
 
-      updateCache(`${swrKey}?page=${currentPage}&page_size=${pageSize}`, response.data, mutate);
-      if (datasetsResponse) {
-        updateCache(`${swrKey}?page=${currentPage}`, response.data, mutateDatasets);
-      }
-
-      await mutateDatasets();
-      await mutate(`${swrKey}?page=${currentPage}&page_size=${pageSize}`);
+      // Revalidate both queries to ensure consistency
+      await Promise.all([mutateDatasets(), mutate(`${swrKey}?page=${currentPage}&page_size=${pageSize}`)]);
 
       setIsDatasetModalOpen(false);
 
@@ -280,9 +299,57 @@ const ConfigureDatasets = () => {
 
   const handleUpdateDataset = async (updatedDataset: Dataset) => {
     if (updatedDataset.is_system_generated) return;
+
     try {
+      // Optimistic update for both caches
+      mutateDatasets(
+        async (currentData?: DatasetResponse) => {
+          if (!currentData) return currentData;
+          return {
+            ...currentData,
+            data: {
+              ...currentData.data,
+              results: currentData.data.results.map((dataset) =>
+                dataset.dataset_id === updatedDataset.dataset_id ? updatedDataset : dataset
+              ),
+            },
+          };
+        },
+        {
+          revalidate: false,
+          populateCache: true,
+          rollbackOnError: true,
+        }
+      );
+
+      // Also update the full dataset view
+      mutate(
+        `${swrKey}?page=${currentPage}&page_size=${pageSize}`,
+        async (currentData?: DatasetResponse) => {
+          if (!currentData) return currentData;
+          return {
+            ...currentData,
+            data: {
+              ...currentData.data,
+              results: currentData.data.results.map((dataset) =>
+                dataset.dataset_id === updatedDataset.dataset_id ? updatedDataset : dataset
+              ),
+            },
+          };
+        },
+        {
+          revalidate: false,
+          populateCache: true,
+          rollbackOnError: true,
+        }
+      );
+
+      // Make the actual API call
       await backendInstance.put(`/api/v1/datasets/${updatedDataset.dataset_id}/`, updatedDataset);
-      await mutateDatasets();
+
+      // Revalidate to ensure consistency
+      await Promise.all([mutateDatasets(), mutate(`${swrKey}?page=${currentPage}&page_size=${pageSize}`)]);
+
       toast({
         title: 'Success',
         description: 'Dataset updated successfully.',
@@ -301,9 +368,55 @@ const ConfigureDatasets = () => {
 
   const handleDeleteDataset = async () => {
     if (!deletingDatasetId) return;
+
     try {
+      // Optimistic update for both caches
+      mutateDatasets(
+        async (currentData?: DatasetResponse) => {
+          if (!currentData) return currentData;
+          return {
+            ...currentData,
+            data: {
+              ...currentData.data,
+              results: currentData.data.results.filter((dataset) => dataset.dataset_id !== deletingDatasetId),
+              count: currentData.data.count - 1,
+            },
+          };
+        },
+        {
+          revalidate: false,
+          populateCache: true,
+          rollbackOnError: true,
+        }
+      );
+
+      // Also update the full dataset view
+      mutate(
+        `${swrKey}?page=${currentPage}&page_size=${pageSize}`,
+        async (currentData?: DatasetResponse) => {
+          if (!currentData) return currentData;
+          return {
+            ...currentData,
+            data: {
+              ...currentData.data,
+              results: currentData.data.results.filter((dataset) => dataset.dataset_id !== deletingDatasetId),
+              count: currentData.data.count - 1,
+            },
+          };
+        },
+        {
+          revalidate: false,
+          populateCache: true,
+          rollbackOnError: true,
+        }
+      );
+
+      // Make the actual API call
       await backendInstance.delete(`/api/v1/datasets/${deletingDatasetId}/`);
-      await mutateDatasets();
+
+      // Revalidate to ensure consistency
+      await Promise.all([mutateDatasets(), mutate(`${swrKey}?page=${currentPage}&page_size=${pageSize}`)]);
+
       toast({
         title: 'Success',
         description: 'Dataset deleted successfully.',

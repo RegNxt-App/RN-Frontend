@@ -10,8 +10,9 @@ import ErrorBoundary from './components/ErrorBoundary';
 import PageTitle from './components/PageTitle';
 import PrivateRoute from './components/PrivateRoute';
 import {useAuth} from './contexts/AuthContext';
+import {BackendProvider} from './contexts/BackendContext';
 import DefaultLayout from './layout/DefaultLayout';
-import {TaskAccordion} from './pages/Orchestra/Tasks';
+import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
 
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
 const SignUp = lazy(() => import('./pages/Authentication/SignUp'));
@@ -164,41 +165,43 @@ function App() {
 
   return (
     <Provider store={store}>
-      <Toaster />
-      <Routes>
-        {routeConfig.auth.map(({path, component: Component}) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              <Suspense fallback={<Loader />}>
-                <ErrorBoundary>
-                  <Component />
-                </ErrorBoundary>
-              </Suspense>
-            }
-          />
-        ))}
-
-        {[...routeConfig.reporting, ...routeConfig.orchestra, ...routeConfig.bird].map(
-          ({path, component: Component, title}) => (
+      <BackendProvider>
+        <Toaster />
+        <Routes>
+          {routeConfig.auth.map(({path, component: Component}) => (
             <Route
               key={path}
               path={path}
               element={
                 <Suspense fallback={<Loader />}>
                   <ErrorBoundary>
-                    <ProtectedRoute
-                      component={Component}
-                      title={title}
-                    />
+                    <Component />
                   </ErrorBoundary>
                 </Suspense>
               }
             />
-          )
-        )}
-      </Routes>
+          ))}
+
+          {[...routeConfig.reporting, ...routeConfig.orchestra, ...routeConfig.bird].map(
+            ({path, component: Component, title}) => (
+              <Route
+                key={path}
+                path={path}
+                element={
+                  <Suspense fallback={<Loader />}>
+                    <ErrorBoundary>
+                      <ProtectedRoute
+                        component={Component}
+                        title={title}
+                      />
+                    </ErrorBoundary>
+                  </Suspense>
+                }
+              />
+            )
+          )}
+        </Routes>
+      </BackendProvider>
     </Provider>
   );
 }
