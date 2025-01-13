@@ -14,6 +14,9 @@ import {Label} from '@rn/ui/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@rn/ui/components/ui/tabs';
 import {Textarea} from '@rn/ui/components/ui/textarea';
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/ui/components/ui/tooltip';
+
+import DisabledTooltip from './DisabledTooltip';
 
 export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onSave, onDelete}) => {
   const [currentTab, setCurrentTab] = useState('properties');
@@ -116,23 +119,48 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-2">
         <h2 className="text-xl font-semibold">{localTask.label}</h2>
         <div className="flex gap-2 w-full sm:w-auto">
-          {!localTask.is_predefined && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDeleteClick}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleSaveChanges}
-            disabled={localTask.is_predefined || isSaving}
-          >
-            Save Changes
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleDeleteClick}
+                    disabled={localTask.is_predefined || isSaving}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {localTask.is_predefined && (
+                <TooltipContent>
+                  <p>You cannot delete a task that is system generated</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleSaveChanges}
+                    disabled={localTask.is_predefined || isSaving}
+                  >
+                    Save Changes
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {localTask.is_predefined && (
+                <TooltipContent>
+                  <p>You cannot edit a task that is system generated</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 
@@ -180,31 +208,37 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
           <div className="grid gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Code</Label>
-              <Input
-                value={localTask.code}
-                onChange={(e) => handleInputChange('code', e.target.value)}
-                disabled={selectedTask.is_predefined}
-                placeholder="Enter code"
-              />
+              <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                <Input
+                  value={localTask.code}
+                  onChange={(e) => handleInputChange('code', e.target.value)}
+                  disabled={selectedTask.is_predefined}
+                  placeholder="Enter code"
+                />
+              </DisabledTooltip>
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium">Label</Label>
-              <Input
-                value={localTask.label}
-                onChange={(e) => handleInputChange('label', e.target.value)}
-                disabled={selectedTask.is_predefined}
-                placeholder="Enter label"
-              />
+              <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                <Input
+                  value={localTask.label}
+                  onChange={(e) => handleInputChange('label', e.target.value)}
+                  disabled={selectedTask.is_predefined}
+                  placeholder="Enter label"
+                />
+              </DisabledTooltip>
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium">Description</Label>
-              <Textarea
-                value={localTask.description || ''}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                disabled={selectedTask.is_predefined}
-                className="min-h-[100px]"
-                placeholder="Enter description"
-              />
+              <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                <Textarea
+                  value={localTask.description || ''}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  disabled={selectedTask.is_predefined}
+                  className="min-h-[100px]"
+                  placeholder="Enter description"
+                />
+              </DisabledTooltip>
             </div>
           </div>
         </TabsContent>
@@ -216,30 +250,22 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
           <div className="grid gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Task Language</Label>
-              <Select
-                value={localTask.task_language || 'python'}
-                onValueChange={(value) => handleInputChange('task_language', value)}
-                disabled={localTask.is_predefined}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="python">Python</SelectItem>
-                  <SelectItem value="javascript">JavaScript</SelectItem>
-                  <SelectItem value="sql">SQL</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Task Code</Label>
-              <Textarea
-                value={localTask.task_code || ''}
-                onChange={(e) => handleInputChange('task_code', e.target.value)}
-                className="font-mono min-h-[200px]"
-                disabled={localTask.is_predefined}
-                placeholder="Enter task code"
-              />
+              <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                <Select
+                  value={localTask.task_language || 'python'}
+                  onValueChange={(value) => handleInputChange('task_language', value)}
+                  disabled={localTask.is_predefined}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="javascript">JavaScript</SelectItem>
+                    <SelectItem value="sql">SQL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </DisabledTooltip>
             </div>
           </div>
         </TabsContent>
@@ -274,10 +300,12 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
                       </Button>
                     </div>
                   </div>
-                  <Input
-                    value={param === 1 ? 'default_1' : 'False'}
-                    disabled={selectedTask.is_predefined}
-                  />
+                  <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                    <Input
+                      value={param === 1 ? 'default_1' : 'False'}
+                      disabled={selectedTask.is_predefined}
+                    />
+                  </DisabledTooltip>
                   <p className="text-sm text-gray-500">Configuration parameter {param} for task 1</p>
                 </div>
               </div>
