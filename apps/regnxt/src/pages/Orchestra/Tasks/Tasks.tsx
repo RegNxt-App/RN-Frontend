@@ -302,7 +302,6 @@ export const TaskAccordion: React.FC = () => {
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
           <Button onClick={handleAddClick}>Create a Task</Button>
-          <Button variant="outline">Browse Tasks</Button>
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 lg:mb-8">
@@ -465,14 +464,6 @@ export const TaskAccordion: React.FC = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="task-label">Label</Label>
-                  <Input
-                    id="task-label"
-                    value={currentTask.label || ''}
-                    onChange={(e) => setCurrentTask({...currentTask, label: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="task-code">Code</Label>
                   <Input
                     id="task-code"
@@ -480,12 +471,12 @@ export const TaskAccordion: React.FC = () => {
                     onChange={(e) => setCurrentTask({...currentTask, code: e.target.value})}
                   />
                 </div>
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="task-description">Description</Label>
-                  <Textarea
-                    id="task-description"
-                    value={currentTask.description || ''}
-                    onChange={(e) => setCurrentTask({...currentTask, description: e.target.value})}
+                <div className="space-y-2">
+                  <Label htmlFor="task-label">Label</Label>
+                  <Input
+                    id="task-label"
+                    value={currentTask.label || ''}
+                    onChange={(e) => setCurrentTask({...currentTask, label: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
@@ -535,12 +526,11 @@ export const TaskAccordion: React.FC = () => {
                   </Select>
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="task-code">Task Code</Label>
+                  <Label htmlFor="task-description">Description</Label>
                   <Textarea
-                    id="task-code"
-                    value={currentTask.task_code || ''}
-                    onChange={(e) => setCurrentTask({...currentTask, task_code: e.target.value})}
-                    className="font-mono"
+                    id="task-description"
+                    value={currentTask.description || ''}
+                    onChange={(e) => setCurrentTask({...currentTask, description: e.target.value})}
                   />
                 </div>
               </div>
