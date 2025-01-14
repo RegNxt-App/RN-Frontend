@@ -306,3 +306,10 @@ export interface StatItem {
   titleIcon: JSX.Element;
   descriptionIcon: JSX.Element;
 }
+export interface SystemVariable {
+  system_variable_id: number;
+  category: string;
+  variable_name: string;
+  value: string;
+  description: string;
+}
