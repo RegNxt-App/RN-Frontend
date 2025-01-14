@@ -17,6 +17,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@rn/ui/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@rn/ui/components/ui/dropdown-menu';
 import {Separator} from '@rn/ui/components/ui/separator';
 import {
   Sidebar,
@@ -326,19 +336,33 @@ const SidebarComponent: React.FC<SidebarProps> = ({
 
           <SidebarFooter className="border-t border-border p-4">
             <div className={cn('flex flex-col gap-4', sidebarCollapsed ? 'items-center' : '')}>
-              <Button
-                variant="ghost"
-                className={cn('justify-start', sidebarCollapsed ? 'w-10 justify-center p-0' : '')}
-                asChild
-              >
-                <NavLink
-                  to="/settings"
-                  className="flex items-center"
-                >
-                  <Settings className="h-4 w-4" />
-                  {!sidebarCollapsed && <span className="ml-2 truncate">Settings</span>}
-                </NavLink>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn('justify-start', sidebarCollapsed ? 'w-10 justify-center p-0' : '')}
+                  >
+                    <div className="flex items-center">
+                      <Settings className="h-4 w-4" />
+                      {!sidebarCollapsed && <span className="ml-2 truncate">Settings</span>}
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>Settings</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onSelect={() => navigate('/orchestra/settings/general')}>
+                      General
+                      <DropdownMenuShortcut>⌘G</DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => navigate('/orchestra/settings/system-variables')}>
+                      System Variables
+                      <DropdownMenuShortcut>⌘V</DropdownMenuShortcut>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Separator />
               <div className={cn('flex items-center gap-4', sidebarCollapsed ? 'flex-col' : '')}>
                 <Avatar>

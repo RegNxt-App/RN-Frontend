@@ -12,6 +12,7 @@ import PrivateRoute from './components/PrivateRoute';
 import {useAuth} from './contexts/AuthContext';
 import {BackendProvider} from './contexts/BackendContext';
 import DefaultLayout from './layout/DefaultLayout';
+import SystemVariables from './pages/Orchestra/SystemVariables';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
 
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
@@ -100,6 +101,7 @@ const routeConfig = {
     {path: '/orchestra/data', component: Data, title: 'Orchestra'},
     {path: '/orchestra/business-rules', component: BusinessRules, title: 'Orchestra'},
     {path: '/orchestra/processing', component: Processing, title: 'Orchestra'},
+    {path: '/orchestra/settings/system-variables', component: SystemVariables, title: 'Orchestra'},
   ],
   bird: [
     {path: '/bird/configuration', component: () => <ConfigureDataSetView />, title: 'Bird'},
