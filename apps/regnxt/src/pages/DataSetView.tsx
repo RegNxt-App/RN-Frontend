@@ -23,7 +23,6 @@ import {
   ValidationResult,
 } from '@/types/databaseTypes';
 import {format} from 'date-fns';
-import {Plus} from 'lucide-react';
 import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
