@@ -14,6 +14,7 @@ import {BackendProvider} from './contexts/BackendContext';
 import DefaultLayout from './layout/DefaultLayout';
 import SystemVariables from './pages/Orchestra/SystemVariables';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
+import WorkflowManager from './pages/Orchestra/Workflows';
 
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
 const SignUp = lazy(() => import('./pages/Authentication/SignUp'));
@@ -96,7 +97,7 @@ const routeConfig = {
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},
     {path: '/orchestra/data-loaders', component: DataLoaders, title: 'Orchestra'},
     {path: '/orchestra/tasks', component: TaskAccordion, title: 'Orchestra'},
-    {path: '/orchestra/workflows', component: Workflows, title: 'Orchestra'},
+    {path: '/orchestra/workflows', component: WorkflowManager, title: 'Orchestra'},
     {path: '/orchestra/monitoring', component: Monitoring, title: 'Orchestra'},
     {path: '/orchestra/data', component: Data, title: 'Orchestra'},
     {path: '/orchestra/business-rules', component: BusinessRules, title: 'Orchestra'},

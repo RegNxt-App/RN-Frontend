@@ -352,14 +352,10 @@ const SidebarComponent: React.FC<SidebarProps> = ({
                   <DropdownMenuLabel>Settings</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem onSelect={() => navigate('/orchestra/settings/general')}>
-                      General
-                      <DropdownMenuShortcut>⌘G</DropdownMenuShortcut>
-                    </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => navigate('/orchestra/settings/system-variables')}>
-                      System Variables
-                      <DropdownMenuShortcut>⌘V</DropdownMenuShortcut>
+                      Application Settings
                     </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => navigate('#')}>User Settings</DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>

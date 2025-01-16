@@ -1,9 +1,9 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import Loader from '@/common/Loader';
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {ApiTask, StatItem, TaskDetails, TaskType, TasksApiResponse} from '@/types/databaseTypes';
+import {ApiTask, StatItem, TaskDetails, TaskSubType, TaskType, TasksApiResponse} from '@/types/databaseTypes';
 import {
   ArrowLeftRight,
   ChevronDown,
@@ -12,6 +12,7 @@ import {
   CodeXml,
   FileText,
   Folder,
+  FolderOpen,
   Loader2,
   Plus,
   Save,
@@ -57,6 +58,10 @@ export const TaskAccordion: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [taskSubTypes, setTaskSubTypes] = useState<TaskSubType[]>([]);
+  const [selectedTaskSubType, setSelectedTaskSubType] = useState<string | null>(null);
+  const [isLoadingSubTypes, setIsLoadingSubTypes] = useState(false);
+  const [expandedSubtypes, setExpandedSubtypes] = useState<string[]>([]);
 
   const TASKS_ENDPOINT = '/api/v1/tasks/';
   const TASK_TYPES_ENDPOINT = '/api/v1/tasks/task_type_list/';
@@ -77,6 +82,28 @@ export const TaskAccordion: React.FC = () => {
       }
     },
   });
+  const fetchAllSubtypes = async () => {
+    setIsLoadingSubTypes(true);
+    try {
+      if (!taskTypes.length) return;
+
+      const promises = taskTypes.map((type) =>
+        orchestraBackendInstance.get(`/api/v1/tasks/${type.task_type_id}/subtasks/`)
+      );
+      const responses = await Promise.all(promises);
+      const allSubtypes = responses.flatMap((response) => response.data);
+      setTaskSubTypes(allSubtypes);
+    } catch (error) {
+      console.error('Error fetching subtypes:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch subtypes',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingSubTypes(false);
+    }
+  };
 
   const {data: taskTypesResponse, error: taskTypesError} = useSWR<TaskType[]>(
     TASK_TYPES_ENDPOINT,
@@ -85,6 +112,11 @@ export const TaskAccordion: React.FC = () => {
       return response.data;
     }
   );
+
+  const handleTaskTypeChange = (value: string) => {
+    setSelectedTaskType(value);
+    setSelectedTaskSubType(null);
+  };
 
   const tasks = response?.data ?? [];
   const taskTypes = taskTypesResponse || [];
@@ -154,6 +186,13 @@ export const TaskAccordion: React.FC = () => {
       },
     ];
   }, [tasks]);
+  const getSubtypesByTaskType = useCallback(
+    (taskTypeId: number | null) => {
+      if (!taskTypeId) return [];
+      return taskSubTypes.filter((subtype) => subtype.task_type_id === taskTypeId);
+    },
+    [taskSubTypes]
+  );
 
   const handleEditTask = () => {
     setIsEditing(true);
@@ -176,22 +215,60 @@ export const TaskAccordion: React.FC = () => {
   const taskCategories = useMemo(() => {
     if (!Array.isArray(tasks) || tasks.length === 0) return [];
 
-    return Object.entries(
-      tasks.reduce((acc: Record<string, any[]>, task) => {
-        const typeLabel = task.task_type_label || 'Uncategorized';
-        if (!acc[typeLabel]) acc[typeLabel] = [];
-        acc[typeLabel].push({
-          ...task,
-          isPredefined: task.is_predefined,
-        });
-        return acc;
-      }, {})
-    ).map(([name, tasks]) => ({
+    const groupedByType = tasks.reduce((acc: Record<string, any>, task) => {
+      const typeKey = task.task_type_label;
+      const subtypeKey = task.task_subtype_id;
+
+      if (!acc[typeKey]) {
+        acc[typeKey] = {
+          type_id: task.task_type_id,
+          type_code: task.task_type_code,
+          label: task.task_type_label,
+          subtypes: {},
+        };
+      }
+
+      const subtypeInfo = taskSubTypes.find(
+        (st) => st.task_subtype_id === task.task_subtype_id && st.task_type_id === task.task_type_id
+      );
+
+      if (!acc[typeKey].subtypes[subtypeKey]) {
+        acc[typeKey].subtypes[subtypeKey] = {
+          subtype_id: subtypeKey,
+          label: subtypeInfo?.label || 'Unknown Subtype',
+          tasks: [],
+        };
+      }
+
+      acc[typeKey].subtypes[subtypeKey].tasks.push({
+        ...task,
+        isPredefined: task.is_predefined,
+      });
+
+      return acc;
+    }, {});
+
+    return Object.entries(groupedByType).map(([name, typeData]: [string, any]) => ({
       name,
-      count: tasks.length,
-      tasks,
+      type_id: typeData.type_id,
+      type_code: typeData.type_code,
+      subtypes: Object.values(typeData.subtypes).map((subtype: any) => ({
+        subtype_id: subtype.subtype_id,
+        label: subtype.label,
+        tasks: subtype.tasks,
+        count: subtype.tasks.length,
+      })),
+      count: Object.values(typeData.subtypes).reduce(
+        (acc: number, subtype: any) => acc + subtype.tasks.length,
+        0
+      ),
     }));
-  }, [tasks]);
+  }, [tasks, taskSubTypes]);
+  useEffect(() => {
+    if (taskTypes.length > 0) {
+      fetchAllSubtypes();
+    }
+  }, [taskTypes]);
   const handleAddClick = () => {
     setIsAddDialogOpen(true);
     setCurrentTask({
@@ -225,19 +302,24 @@ export const TaskAccordion: React.FC = () => {
     };
   };
   const handleSave = async () => {
-    if (!currentTask || !selectedTaskType || isSubmitting) return;
+    if (!currentTask || !selectedTaskType || !selectedTaskSubType || isSubmitting) return;
 
     try {
       setIsSubmitting(true);
       const selectedTaskTypeObj = taskTypes.find((type) => type.label === selectedTaskType);
+      const selectedSubTypeObj = taskSubTypes.find(
+        (subtype) =>
+          subtype.label === selectedTaskSubType && subtype.task_type_id === selectedTaskTypeObj?.task_type_id
+      );
 
-      if (!selectedTaskTypeObj) {
-        console.error('Invalid task type selected');
+      if (!selectedTaskTypeObj || !selectedSubTypeObj) {
+        console.error('Invalid task type or subtype selected');
         return;
       }
 
       const payload = {
         task_type_id: selectedTaskTypeObj.task_type_id,
+        task_subtype_id: selectedSubTypeObj.task_subtype_id,
         code: currentTask.code,
         label: currentTask.label,
         description: currentTask.description,
@@ -245,10 +327,13 @@ export const TaskAccordion: React.FC = () => {
         is_predefined: false,
         task_language: currentTask.task_language,
         task_code: currentTask.task_code,
+        component: selectedSubTypeObj.component,
+        parameters: selectedSubTypeObj.parameters,
       };
 
       await orchestraBackendInstance.post('/api/v1/tasks/', payload);
       await mutate(TASKS_ENDPOINT);
+      await fetchAllSubtypes();
 
       toast({
         title: 'Success',
@@ -258,6 +343,7 @@ export const TaskAccordion: React.FC = () => {
       setIsAddDialogOpen(false);
       setCurrentTask(null);
       setSelectedTaskType(null);
+      setSelectedTaskSubType(null);
     } catch (error) {
       console.error('Error saving task:', error);
       toast({
@@ -276,16 +362,27 @@ export const TaskAccordion: React.FC = () => {
     return taskCategories
       .map((category) => ({
         ...category,
-        tasks: category.tasks.filter(
-          (task) =>
-            task.label?.toLowerCase().includes(query) ||
-            task.code?.toLowerCase().includes(query) ||
-            task.description?.toLowerCase().includes(query) ||
-            task.task_type_label?.toLowerCase().includes(query)
-        ),
+        subtypes: category.subtypes
+          .map((subtype) => ({
+            ...subtype,
+            tasks: subtype.tasks.filter(
+              (task) =>
+                task.label?.toLowerCase().includes(query) ||
+                task.code?.toLowerCase().includes(query) ||
+                task.description?.toLowerCase().includes(query) ||
+                task.task_type_label?.toLowerCase().includes(query)
+            ),
+          }))
+          .filter((subtype) => subtype.tasks.length > 0),
+        count: category.subtypes.reduce((acc, subtype) => acc + subtype.tasks.length, 0),
       }))
-      .filter((category) => category.tasks.length > 0);
+      .filter((category) => category.subtypes.length > 0);
   }, [taskCategories, searchQuery]);
+  const toggleSubtype = useCallback((subtypeKey: string) => {
+    setExpandedSubtypes((prev) =>
+      prev.includes(subtypeKey) ? prev.filter((key) => key !== subtypeKey) : [...prev, subtypeKey]
+    );
+  }, []);
 
   if (isLoading) {
     return <Loader />;
@@ -382,32 +479,60 @@ export const TaskAccordion: React.FC = () => {
                               <ChevronRight className="w-4 h-4 mr-2" />
                             )}
                             <Folder className="w-4 h-4 mr-2" />
-                            <span className="text-sm">{category.name}</span>
+                            <span className="text-sm font-medium">{category.name}</span>
                           </div>
                           <span className="text-sm text-gray-500">{category.count}</span>
                         </div>
+
                         {expandedCategories.includes(category.name) && (
-                          <div className="space-y-1">
-                            {category.tasks.map((task) => (
+                          <div className="ml-4 space-y-1">
+                            {category.subtypes.map((subtype) => (
                               <div
-                                key={task.id}
-                                className="flex items-center justify-between ml-8 p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-                                onClick={() => setSelectedTask(task)}
+                                key={subtype.subtype_id}
+                                className="space-y-1"
                               >
-                                <div className="flex items-start min-w-0">
-                                  <FileText className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                                  <div className="min-w-0 flex-1">
-                                    <div className="text-sm">{task.label}</div>
-                                    <div className="text-xs text-gray-500">{task.code}</div>
+                                <div
+                                  className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+                                  onClick={() => toggleSubtype(`${category.name}-${subtype.subtype_id}`)}
+                                >
+                                  <div className="flex items-center">
+                                    {expandedSubtypes.includes(`${category.name}-${subtype.subtype_id}`) ? (
+                                      <ChevronDown className="w-4 h-4 mr-2" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4 mr-2" />
+                                    )}
+                                    <FolderOpen className="w-4 h-4 mr-2" />
+                                    <span className="text-sm">{subtype.label}</span>
                                   </div>
+                                  <span className="text-sm text-gray-500">{subtype.count}</span>
                                 </div>
-                                {task.isPredefined && (
-                                  <Badge
-                                    variant="outline"
-                                    className="text-xs flex-shrink-0 ml-2"
-                                  >
-                                    Predefined
-                                  </Badge>
+
+                                {expandedSubtypes.includes(`${category.name}-${subtype.subtype_id}`) && (
+                                  <div className="ml-4 space-y-1">
+                                    {subtype.tasks.map((task) => (
+                                      <div
+                                        key={task.task_id}
+                                        className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+                                        onClick={() => setSelectedTask(task)}
+                                      >
+                                        <div className="flex items-start min-w-0">
+                                          <FileText className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+                                          <div className="min-w-0 flex-1">
+                                            <div className="text-sm truncate">{task.label}</div>
+                                            <div className="text-xs text-gray-500 truncate">{task.code}</div>
+                                          </div>
+                                        </div>
+                                        {task.isPredefined && (
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs flex-shrink-0 ml-2"
+                                          >
+                                            Predefined
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
                                 )}
                               </div>
                             ))}
@@ -507,7 +632,7 @@ export const TaskAccordion: React.FC = () => {
                 <div className="space-y-2 col-span-2">
                   <Label htmlFor="task-type">Task Type</Label>
                   <Select
-                    onValueChange={(value) => setSelectedTaskType(value)}
+                    onValueChange={handleTaskTypeChange}
                     value={selectedTaskType || ''}
                   >
                     <SelectTrigger id="task-type">
@@ -522,6 +647,45 @@ export const TaskAccordion: React.FC = () => {
                           {taskType.label}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2 col-span-2">
+                  <Label htmlFor="task-subtype">Task Subtype</Label>
+                  <Select
+                    onValueChange={setSelectedTaskSubType}
+                    value={selectedTaskSubType || ''}
+                    disabled={!selectedTaskType || isLoadingSubTypes}
+                  >
+                    <SelectTrigger
+                      id="task-subtype"
+                      className="relative"
+                    >
+                      <SelectValue
+                        placeholder={!selectedTaskType ? 'Select a task type first' : 'Select a task subtype'}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedTaskType ? (
+                        getSubtypesByTaskType(
+                          taskTypes.find((t) => t.label === selectedTaskType)?.task_type_id || null
+                        ).map((subType) => (
+                          <SelectItem
+                            key={subType.task_subtype_id}
+                            value={subType.label}
+                          >
+                            {subType.label}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem
+                          value="no-type"
+                          disabled
+                        >
+                          Select a task type first
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

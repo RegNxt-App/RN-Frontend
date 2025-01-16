@@ -224,6 +224,7 @@ export interface ValidationResult {
 }
 export interface ApiTask {
   task_type_id: number;
+  task_subtype_id: number;
   task_type_code: string;
   task_type_label: string;
   task_id: number;
@@ -312,4 +313,39 @@ export interface SystemVariable {
   variable_name: string;
   value: string;
   description: string;
+}
+export interface TaskSubType {
+  task_subtype_id: number;
+  task_type_id: number;
+  code: string;
+  label: string;
+  description: string;
+  component: string;
+  parameters: any | null;
+}
+
+export interface Workflow {
+  workflow_id: number;
+  code: string;
+  label: string;
+  description: string;
+  engine: string;
+}
+
+export interface WorkflowParameter {
+  task_id: number;
+  name: string;
+  label: string;
+  description: string;
+  default_value: string;
+  is_enum: boolean;
+  statement: string;
+}
+export interface WorkflowRun {
+  'Run ID': string;
+  'Pipeline Name': string;
+  Status: string;
+  'Started At': string;
+  'Completed At': string;
+  'Total Runtime (seconds)': number | string;
 }
