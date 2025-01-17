@@ -83,7 +83,6 @@ export const TaskAccordion: React.FC = () => {
     },
   });
   const fetchAllSubtypes = async () => {
-    setIsLoadingSubTypes(true);
     try {
       if (!taskTypes.length) return;
 
@@ -100,8 +99,6 @@ export const TaskAccordion: React.FC = () => {
         description: 'Failed to fetch subtypes',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoadingSubTypes(false);
     }
   };
 
@@ -117,7 +114,13 @@ export const TaskAccordion: React.FC = () => {
     setSelectedTaskType(value);
     setSelectedTaskSubType(null);
   };
-
+  const getSubtypesByTaskType = useCallback(
+    (taskTypeId: number | null) => {
+      if (!taskTypeId) return [];
+      return taskSubTypes.filter((subtype) => subtype.task_type_id === taskTypeId);
+    },
+    [taskSubTypes]
+  );
   const tasks = response?.data ?? [];
   const taskTypes = taskTypesResponse || [];
 
@@ -186,13 +189,6 @@ export const TaskAccordion: React.FC = () => {
       },
     ];
   }, [tasks]);
-  const getSubtypesByTaskType = useCallback(
-    (taskTypeId: number | null) => {
-      if (!taskTypeId) return [];
-      return taskSubTypes.filter((subtype) => subtype.task_type_id === taskTypeId);
-    },
-    [taskSubTypes]
-  );
 
   const handleEditTask = () => {
     setIsEditing(true);

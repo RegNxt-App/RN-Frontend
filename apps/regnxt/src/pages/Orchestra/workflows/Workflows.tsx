@@ -1,9 +1,11 @@
 import {useState} from 'react';
 
+import {SharedDataTable} from '@/components/SharedDataTable';
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {Workflow, WorkflowParameter, WorkflowRun} from '@/types/databaseTypes';
-import {Clock, Loader2, Play} from 'lucide-react';
+import {Workflow, WorkflowParameter, WorkflowRun, WorkflowTask} from '@/types/databaseTypes';
+import {ColumnDef} from '@tanstack/react-table';
+import {Clock, Edit, Loader2, Play, Plus} from 'lucide-react';
 import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
@@ -11,6 +13,8 @@ import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/car
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
+
+import {WorkflowDialog} from './WorkflowDialog';
 
 const WORKFLOWS_ENDPOINT = '/api/v1/workflows/';
 
@@ -20,7 +24,52 @@ const WorkflowManager = () => {
   const [isRunsDialogOpen, setIsRunsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
-
+  const [isWorkflowDialogOpen, setIsWorkflowDialogOpen] = useState(false);
+  const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
+  const [workflowTasks, setWorkflowTasks] = useState<WorkflowTask[]>([]);
+  const columns: ColumnDef<Workflow>[] = [
+    {
+      accessorKey: 'code',
+      header: 'Context',
+      cell: ({row}) => <div className="font-medium">{row.getValue('code')}</div>,
+    },
+    {
+      accessorKey: 'label',
+      header: 'Workflow',
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({row}) => (
+        <div className="flex space-x-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handlePlayClick(row.original)}
+            title="Start Workflow"
+          >
+            <Play className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleClockClick(row.original)}
+            title="View History"
+          >
+            <Clock className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleEditWorkflow(row.original)}
+            title="Edit Workflow"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
   const {
     data: workflows = [],
     error,
@@ -90,6 +139,15 @@ const WorkflowManager = () => {
   if (error) {
     return <div className="text-red-500 p-4 text-center">Error loading workflows: {error.message}</div>;
   }
+  const handleEditWorkflow = async (workflow: Workflow) => {
+    setEditingWorkflow(workflow);
+    setIsWorkflowDialogOpen(true);
+  };
+
+  const handleCreateWorkflow = () => {
+    setEditingWorkflow(null);
+    setIsWorkflowDialogOpen(true);
+  };
 
   return (
     <div className="p-4 lg:p-6 max-w-screen-2xl mx-auto">
@@ -98,6 +156,11 @@ const WorkflowManager = () => {
           <h1 className="text-2xl lg:text-3xl font-bold mb-1">Workflow Management</h1>
           <p className="text-sm">Configure and manage your workflow execution</p>
         </div>
+        <Button
+        // onClick={handleCreateWorkflow}
+        >
+          Create Workflow
+        </Button>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -106,39 +169,11 @@ const WorkflowManager = () => {
             <CardTitle>Workflows</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Context</TableHead>
-                  <TableHead>Workflow</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {workflows.map((workflow) => (
-                  <TableRow key={workflow.workflow_id}>
-                    <TableCell className="font-medium">{workflow.code}</TableCell>
-                    <TableCell>{workflow.label}</TableCell>
-                    <TableCell className="flex space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handlePlayClick(workflow)}
-                      >
-                        <Play className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleClockClick(workflow)}
-                      >
-                        <Clock className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <SharedDataTable
+              data={workflows}
+              columns={columns}
+              showPagination={true}
+            />
           </CardContent>
         </Card>
 
@@ -251,6 +286,11 @@ const WorkflowManager = () => {
           </Table>
         </DialogContent>
       </Dialog>
+      <WorkflowDialog
+        open={isWorkflowDialogOpen}
+        onOpenChange={setIsWorkflowDialogOpen}
+        workflow={editingWorkflow}
+      />
     </div>
   );
 };
