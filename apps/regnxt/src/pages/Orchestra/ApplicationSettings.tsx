@@ -23,7 +23,7 @@ import {ScrollArea} from '@rn/ui/components/ui/scroll-area';
 
 const SYSTEM_VARIABLES_ENDPOINT = '/api/v1/system-variables/';
 
-const SystemVariables = () => {
+const ApplicationSettings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVariable, setSelectedVariable] = useState<SystemVariable | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
@@ -46,7 +46,7 @@ const SystemVariables = () => {
 
     return [
       {
-        title: 'Total Variables',
+        title: 'Total',
         count: variables.length.toString(),
         description: `Active across ${categories} categories`,
         titleIcon: <FileText className="w-4 h-4" />,
@@ -137,8 +137,8 @@ const SystemVariables = () => {
     <div className="p-4 lg:p-6 max-w-screen-2xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 lg:mb-8 space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold mb-1">System Variables</h1>
-          <p className="text-sm">Configure and manage system variables</p>
+          <h1 className="text-2xl lg:text-3xl font-bold mb-1">Application Settings</h1>
+          <p className="text-sm">Configure and manage application settings</p>
         </div>
       </div>
 
@@ -166,7 +166,7 @@ const SystemVariables = () => {
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         <Card className="w-full lg:w-80">
           <div className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Variable Categories</h2>
+            <h2 className="text-lg font-semibold mb-4">Setting Details</h2>
 
             <div className="mb-4">
               <div className="relative">
@@ -295,8 +295,8 @@ const SystemVariables = () => {
             <div className="h-[calc(100vh-16rem)] flex items-center justify-center">
               <div className="text-center">
                 <FileText className="w-12 h-12 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold mb-2">No Variable Selected</h3>
-                <p>Select a variable from the browser to view and edit its details</p>
+                <h3 className="text-3xl font-bold mb-2">No Setting Selected</h3>
+                <p>Select a setting from the browser to view and edit its details</p>
               </div>
             </div>
           )}
@@ -306,4 +306,4 @@ const SystemVariables = () => {
   );
 };
 
-export default SystemVariables;
+export default ApplicationSettings;

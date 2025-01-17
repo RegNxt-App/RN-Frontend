@@ -12,9 +12,10 @@ import PrivateRoute from './components/PrivateRoute';
 import {useAuth} from './contexts/AuthContext';
 import {BackendProvider} from './contexts/BackendContext';
 import DefaultLayout from './layout/DefaultLayout';
-import SystemVariables from './pages/Orchestra/SystemVariables';
+import ApplicationSettings from './pages/Orchestra/ApplicationSettings';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
-import WorkflowManager from './pages/Orchestra/Workflows';
+import UserSettings from './pages/Orchestra/UserSettings';
+import WorkflowManager from './pages/Orchestra/workflows/Workflows';
 
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
 const SignUp = lazy(() => import('./pages/Authentication/SignUp'));
@@ -43,7 +44,7 @@ const Variables = lazy(() => import('./pages/Orchestra/Variables'));
 const Datasets = lazy(() => import('./pages/Orchestra/Datasets'));
 const Dataviews = lazy(() => import('./pages/Orchestra/Dataviews'));
 const DataLoaders = lazy(() => import('./pages/Orchestra/DataLoaders'));
-const Workflows = lazy(() => import('./pages/Orchestra/Workflows'));
+const Workflows = lazy(() => import('./pages/Orchestra/workflows/Workflows'));
 const Monitoring = lazy(() => import('./pages/Orchestra/Monitoring'));
 const Data = lazy(() => import('./pages/Orchestra/Data/Data'));
 const BusinessRules = lazy(() => import('./pages/Orchestra/BusinessRules/BusinessRules'));
@@ -102,7 +103,8 @@ const routeConfig = {
     {path: '/orchestra/data', component: Data, title: 'Orchestra'},
     {path: '/orchestra/business-rules', component: BusinessRules, title: 'Orchestra'},
     {path: '/orchestra/processing', component: Processing, title: 'Orchestra'},
-    {path: '/orchestra/settings/system-variables', component: SystemVariables, title: 'Orchestra'},
+    {path: '/orchestra/settings/application-settings', component: ApplicationSettings, title: 'Orchestra'},
+    {path: '/orchestra/settings/user-settings', component: UserSettings, title: 'Orchestra'},
   ],
   bird: [
     {path: '/bird/configuration', component: () => <ConfigureDataSetView />, title: 'Bird'},

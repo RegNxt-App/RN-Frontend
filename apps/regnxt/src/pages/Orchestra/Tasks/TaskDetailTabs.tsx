@@ -2,12 +2,18 @@ import React, {useEffect, useState} from 'react';
 
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {TaskDetailTabsProps, TaskDetails} from '@/types/databaseTypes';
+import {
+  DesignTimeParameters,
+  RuntimeParameter,
+  TaskDetailTabsProps,
+  TaskDetails,
+} from '@/types/databaseTypes';
 import {Calendar, Code, Plus, Tag, Trash2} from 'lucide-react';
 import {mutate} from 'swr';
 
 import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
+import {Card} from '@rn/ui/components/ui/card';
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
 import {Input} from '@rn/ui/components/ui/input';
 import {Label} from '@rn/ui/components/ui/label';
@@ -17,14 +23,71 @@ import {Textarea} from '@rn/ui/components/ui/textarea';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/ui/components/ui/tooltip';
 
 import DisabledTooltip from './DisabledTooltip';
+import {TransformationTab} from './TransformationTab';
+import {dummyDatasets} from './dummyData';
 
 export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onSave, onDelete}) => {
   const [currentTab, setCurrentTab] = useState('properties');
   const [localTask, setLocalTask] = useState<TaskDetails>(selectedTask);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [designTimeParams, setDesignTimeParams] = useState<DesignTimeParameters>({
+    sourceId: '',
+    sourceType: 'dataset',
+    destinationId: '',
+  });
+
+  const [runtimeParams, setRuntimeParams] = useState<RuntimeParameter[]>([]);
+  const [sourceFields, setSourceFields] = useState([]);
+  const [destinationFields, setDestinationFields] = useState([]);
+  const [fieldMappings, setFieldMappings] = useState([]);
 
   const TASKS_ENDPOINT = '/api/v1/tasks/';
+
+  const handleAddDesignParameter = () => {
+    const newParam = {
+      id: `design-${Date.now()}`,
+      name: 'New Parameter',
+      type: 'string',
+      value: '',
+      description: 'Design time parameter',
+    };
+    setDesignTimeParams([...designTimeParams]);
+  };
+
+  const handleRemoveDesignParameter = (id: string) => {
+    setDesignTimeParams((prevParams) => {
+      const updatedParams = {...prevParams};
+      return updatedParams;
+    });
+  };
+
+  const handleDesignParameterChange = (id: string, value: string) => {
+    setDesignTimeParams((prevParams) => ({
+      ...prevParams,
+    }));
+  };
+
+  const handleAddRuntimeParameter = () => {
+    const newParam: RuntimeParameter = {
+      id: `runtime-${Date.now()}`,
+      name: 'New Parameter',
+      type: 'string',
+      defaultValue: '',
+      description: 'Runtime parameter',
+    };
+    setRuntimeParams([...runtimeParams, newParam]);
+  };
+
+  const handleRemoveRuntimeParameter = (id: string) => {
+    setRuntimeParams((prevParams) => prevParams.filter((param) => param.id !== id));
+  };
+
+  const handleRuntimeParameterChange = (id: string, value: string) => {
+    setRuntimeParams((prevParams) =>
+      prevParams.map((param) => (param.id === id ? {...param, value} : param))
+    );
+  };
 
   useEffect(() => {
     if (selectedTask.task_id !== localTask.task_id) {
@@ -193,12 +256,14 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
           >
             Configurations
           </TabsTrigger>
-          <TabsTrigger
-            value="parameters"
-            className="flex-1"
-          >
-            Parameters
-          </TabsTrigger>
+          {selectedTask.task_type_code === 'transform' && (
+            <TabsTrigger
+              value="transformation"
+              className="flex-1"
+            >
+              Transformation
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent
@@ -247,7 +312,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
           value="configurations"
           className="space-y-4"
         >
-          <div className="grid gap-4">
+          <div className="space-y-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Task Language</Label>
               <DisabledTooltip isDisabled={selectedTask.is_predefined}>
@@ -267,10 +332,174 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
                 </Select>
               </DisabledTooltip>
             </div>
+
+            <Card className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium">Design Time Parameters</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddDesignParameter}
+                  disabled={selectedTask.is_predefined}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Parameter
+                </Button>
+              </div>
+
+              {Object.keys(designTimeParams).length > 0 ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {selectedTask.task_type_code === 'transform' ? (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Source Type</Label>
+                        <Select
+                          value={designTimeParams.sourceType}
+                          onValueChange={(value: 'dataset' | 'dataview') =>
+                            setDesignTimeParams((prev) => ({...prev, sourceType: value}))
+                          }
+                          disabled={selectedTask.is_predefined}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select source type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="dataset">Dataset</SelectItem>
+                            <SelectItem value="dataview">Dataview</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Destination Dataset</Label>
+                        <Select
+                          value={designTimeParams.destinationId || 'default'}
+                          onValueChange={(value) =>
+                            setDesignTimeParams((prev) => ({...prev, destinationId: value}))
+                          }
+                          disabled={selectedTask.is_predefined}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select destination" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem
+                              value="default"
+                              disabled
+                            >
+                              Select a destination
+                            </SelectItem>
+                            {dummyDatasets.map((dataset) => (
+                              <SelectItem
+                                key={dataset.id}
+                                value={dataset.id}
+                              >
+                                {dataset.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="col-span-2 space-y-4">
+                      {Object.entries(designTimeParams).map(([key, value]) => (
+                        <div
+                          key={key}
+                          className="space-y-2"
+                        >
+                          <Label>{key}</Label>
+                          <Input
+                            value={value}
+                            onChange={(e) =>
+                              setDesignTimeParams((prev) => ({...prev, [key]: e.target.value}))
+                            }
+                            disabled={selectedTask.is_predefined}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No design time parameters configured</p>
+              )}
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium">Runtime Parameters</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddRuntimeParameter}
+                  disabled={selectedTask.is_predefined}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Parameter
+                </Button>
+              </div>
+
+              {runtimeParams.length > 0 ? (
+                <div className="space-y-4">
+                  {runtimeParams.map((param) => (
+                    <div
+                      key={param.id}
+                      className="grid grid-cols-2 gap-4 p-4 border rounded-lg"
+                    >
+                      <div className="space-y-2">
+                        <Label>Name</Label>
+                        <Input
+                          value={param.name}
+                          // onChange={(e) => handleRuntimeParamChange(param.id, 'name', e.target.value)}
+                          disabled={selectedTask.is_predefined}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Type</Label>
+                        <Select
+                          value={param.type}
+                          // onValueChange={(value) => handleRuntimeParamChange(param.id, 'type', value)}
+                          disabled={selectedTask.is_predefined}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="string">String</SelectItem>
+                            <SelectItem value="number">Number</SelectItem>
+                            <SelectItem value="date">Date</SelectItem>
+                            <SelectItem value="boolean">Boolean</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Default Value</Label>
+                        <Input
+                          value={param.defaultValue || ''}
+                          // onChange={(e) => handleRuntimeParamChange(param.id, 'defaultValue', e.target.value)}
+                          disabled={selectedTask.is_predefined}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Description</Label>
+                        <Input
+                          value={param.description}
+                          // onChange={(e) => handleRuntimeParamChange(param.id, 'description', e.target.value)}
+                          disabled={selectedTask.is_predefined}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No runtime parameters configured</p>
+              )}
+            </Card>
           </div>
         </TabsContent>
 
-        <TabsContent
+        {/* <TabsContent
           value="parameters"
           className="space-y-4"
         >
@@ -320,7 +549,16 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
             <Plus className="w-4 h-4 mr-2" />
             Add a new Parameter
           </Button>
-        </TabsContent>
+        </TabsContent> */}
+        {selectedTask.task_type_code === 'transform' && (
+          <TabsContent value="transformation">
+            <TransformationTab
+              disabled={selectedTask.is_predefined}
+              onSave={handleSaveChanges}
+              selectedTask={selectedTask}
+            />
+          </TabsContent>
+        )}
       </Tabs>
       <Dialog
         open={isDeleteDialogOpen}

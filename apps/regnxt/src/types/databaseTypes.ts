@@ -1,4 +1,5 @@
 import {Edge, Node, Position} from '@xyflow/react';
+import {LucideIcon} from 'lucide-react';
 
 export interface TableColumn {
   id?: string;
@@ -348,4 +349,104 @@ export interface WorkflowRun {
   'Started At': string;
   'Completed At': string;
   'Total Runtime (seconds)': number | string;
+}
+
+export interface UserSetting {
+  setting_id: number;
+  category: string;
+  setting_name: string;
+  value: string;
+  description: string;
+}
+
+export interface GroupedSettings {
+  [key: string]: UserSetting[];
+}
+
+export interface EditingStates {
+  [key: number]: boolean;
+}
+
+export interface CategoryIcons {
+  [key: string]: LucideIcon;
+}
+
+export interface WorkflowTask {
+  task_id: number;
+  task_code: string;
+  task_type_id: number;
+  label: string;
+  task_language: string;
+  upstream_tasks: number[];
+}
+export interface NodeData {
+  label: string;
+  type: number;
+  language?: string;
+}
+export interface WorkflowDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  workflow?: Workflow | null;
+}
+export interface Task {
+  task_id: number;
+  task_code: string;
+  task_type_id: number;
+  label: string;
+  task_language: string | null;
+  upstream_tasks: number | null;
+}
+export interface CustomNodeProps {
+  data: {
+    label: string;
+    type: number;
+    language?: string;
+  };
+}
+export interface TransformationTabProps {
+  disabled?: boolean;
+  onSave?: () => void;
+}
+export interface DesignTimeParameters {
+  sourceId: string;
+  sourceType: 'dataset' | 'dataview';
+  destinationId: string;
+}
+
+export interface RuntimeParameter {
+  id: string;
+  name: string;
+  type: string;
+  defaultValue?: string;
+  description: string;
+}
+
+export interface Field {
+  name: string;
+  type: string;
+  label: string;
+}
+
+export interface RuntimeParam {
+  id: string;
+  name: string;
+  type: string;
+  defaultValue?: string;
+  description: string;
+}
+
+export interface FieldMapping {
+  destinationField: string;
+  sourceField: string;
+  runtimeParam?: string;
+}
+
+export interface FieldMappingGridProps {
+  sourceFields: Field[];
+  destinationFields: Field[];
+  runtimeParams: RuntimeParam[];
+  mappings: FieldMapping[];
+  onMappingChange: (newMappings: FieldMapping[]) => void;
+  disabled?: boolean;
 }
