@@ -11,6 +11,7 @@ import {
 import {Calendar, Code, Plus, Tag, Trash2} from 'lucide-react';
 import {mutate} from 'swr';
 
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@rn/ui/components/ui/accordion';
 import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
 import {Card} from '@rn/ui/components/ui/card';
@@ -38,9 +39,6 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
   });
 
   const [runtimeParams, setRuntimeParams] = useState<RuntimeParameter[]>([]);
-  const [sourceFields, setSourceFields] = useState([]);
-  const [destinationFields, setDestinationFields] = useState([]);
-  const [fieldMappings, setFieldMappings] = useState([]);
 
   const TASKS_ENDPOINT = '/api/v1/tasks/';
 
@@ -313,25 +311,178 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
           className="space-y-4"
         >
           <div className="space-y-6">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Task Language</Label>
-              <DisabledTooltip isDisabled={selectedTask.is_predefined}>
-                <Select
-                  value={localTask.task_language || 'python'}
-                  onValueChange={(value) => handleInputChange('task_language', value)}
-                  disabled={localTask.is_predefined}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="python">Python</SelectItem>
-                    <SelectItem value="javascript">JavaScript</SelectItem>
-                    <SelectItem value="sql">SQL</SelectItem>
-                  </SelectContent>
-                </Select>
-              </DisabledTooltip>
-            </div>
+            {selectedTask.task_type_id === 4 && selectedTask.task_subtype_id === 20 ? (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Task Language</Label>
+                  <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                    <Select
+                      value={localTask.task_language || 'python'}
+                      onValueChange={(value) => handleInputChange('task_language', value)}
+                      disabled={selectedTask.is_predefined}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="python">Python</SelectItem>
+                        <SelectItem value="javascript">JavaScript</SelectItem>
+                        <SelectItem value="sql">SQL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </DisabledTooltip>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Task Code</Label>
+                  <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                    <Textarea
+                      value={localTask.task_code || ''}
+                      onChange={(e) => handleInputChange('task_code', e.target.value)}
+                      disabled={selectedTask.is_predefined}
+                      className="min-h-[200px] font-mono"
+                      placeholder="Enter your code here..."
+                    />
+                  </DisabledTooltip>
+                </div>
+              </>
+            ) : selectedTask.task_type_id === 2 && selectedTask.task_subtype_id === 17 ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Input Location</Label>
+                    <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                      <Select
+                        value={designTimeParams.inputLocation || ''}
+                        onValueChange={(value) =>
+                          setDesignTimeParams((prev) => ({...prev, inputLocation: value}))
+                        }
+                        disabled={selectedTask.is_predefined}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select input location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="location1">Location 1</SelectItem>
+                          <SelectItem value="location2">Location 2</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </DisabledTooltip>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Output Location</Label>
+                    <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                      <Select
+                        value={designTimeParams.outputLocation || ''}
+                        onValueChange={(value) =>
+                          setDesignTimeParams((prev) => ({...prev, outputLocation: value}))
+                        }
+                        disabled={selectedTask.is_predefined}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select output location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="location1">Location 1</SelectItem>
+                          <SelectItem value="location2">Location 2</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </DisabledTooltip>
+                  </div>
+                </div>
+
+                {designTimeParams.inputLocation && designTimeParams.outputLocation && (
+                  <Card className="mt-6">
+                    <div className="p-4">
+                      <div className="flex gap-4">
+                        <div className="w-[30%] border-r pr-4">
+                          <Accordion
+                            type="single"
+                            collapsible
+                          >
+                            <AccordionItem value="input-fields">
+                              <AccordionTrigger>Input Fields</AccordionTrigger>
+                              <AccordionContent className="space-y-2">
+                                <div className="p-2 hover:bg-gray-100 cursor-pointer">Field 1</div>
+                                <div className="p-2 hover:bg-gray-100 cursor-pointer">Field 2</div>
+                              </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="runtime-params">
+                              <AccordionTrigger>Runtime Parameters</AccordionTrigger>
+                              <AccordionContent className="space-y-2">
+                                {runtimeParams.map((param) => (
+                                  <div
+                                    key={param.id}
+                                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                                  >
+                                    {param.name}
+                                  </div>
+                                ))}
+                              </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="operators">
+                              <AccordionTrigger>SQL Operators</AccordionTrigger>
+                              <AccordionContent className="space-y-2">
+                                {['=', '>', '<', 'LIKE', 'IN', 'BETWEEN'].map((op) => (
+                                  <div
+                                    key={op}
+                                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                                  >
+                                    {op}
+                                  </div>
+                                ))}
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </div>
+
+                        <div className="flex-1 space-y-4">
+                          <div className="space-y-2">
+                            <Label>Output Field 1</Label>
+                            <Textarea
+                              className="font-mono"
+                              placeholder="Enter mapping expression..."
+                              disabled={selectedTask.is_predefined}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Output Field 2</Label>
+                            <Textarea
+                              className="font-mono"
+                              placeholder="Enter mapping expression..."
+                              disabled={selectedTask.is_predefined}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              </>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Task Language</Label>
+                <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+                  <Select
+                    value={localTask.task_language || 'python'}
+                    onValueChange={(value) => handleInputChange('task_language', value)}
+                    disabled={selectedTask.is_predefined}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="python">Python</SelectItem>
+                      <SelectItem value="javascript">JavaScript</SelectItem>
+                      <SelectItem value="sql">SQL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </DisabledTooltip>
+              </div>
+            )}
 
             <Card className="p-4">
               <div className="flex justify-between items-center mb-4">
