@@ -295,6 +295,7 @@ export const TaskAccordion: React.FC = () => {
       task_type_id: task.task_type_id,
       task_type_code: task.task_type_code,
       task_id: task.task_id,
+      task_subtype_id: task.task_subtype_id,
     };
   };
   const handleSave = async () => {

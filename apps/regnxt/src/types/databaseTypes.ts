@@ -252,6 +252,7 @@ export interface TaskType {
   context?: string;
   task_type_id: number;
   task_type_code: string;
+  task_subtype_id: number;
 }
 export interface Group {
   code: string;
@@ -292,6 +293,7 @@ export interface TaskDetails {
   task_type_id: number;
   task_type_code: string;
   task_id: number;
+  task_subtype_id: number;
 }
 
 export interface TaskDetailTabsProps {
@@ -412,6 +414,8 @@ export interface DesignTimeParameters {
   sourceId: string;
   sourceType: 'dataset' | 'dataview';
   destinationId: string;
+  inputLocation?: string;
+  outputLocation?: string;
 }
 
 export interface RuntimeParameter {
