@@ -148,7 +148,6 @@ const navigationConfig: NavigationConfig = {
             ],
           },
           {path: '/orchestra/dataviews', icon: 'Telescope', label: 'Dataviews'},
-          {path: '/orchestra/data-loaders', icon: 'DatabaseBackup', label: 'Data Loaders'},
           {path: '/orchestra/tasks', icon: 'ListTodo', label: 'Tasks'},
           {path: '/orchestra/workflows', icon: 'Workflow', label: 'Workflows'},
           {path: '/orchestra/monitoring', icon: 'View', label: 'Monitoring'},

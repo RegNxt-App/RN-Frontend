@@ -43,7 +43,6 @@ const Connections = lazy(() => import('./pages/Orchestra/Connections'));
 const Variables = lazy(() => import('./pages/Orchestra/Variables'));
 const Datasets = lazy(() => import('./pages/Orchestra/Datasets'));
 const Dataviews = lazy(() => import('./pages/Orchestra/Dataviews'));
-const DataLoaders = lazy(() => import('./pages/Orchestra/DataLoaders'));
 const Workflows = lazy(() => import('./pages/Orchestra/workflows/Workflows'));
 const Monitoring = lazy(() => import('./pages/Orchestra/Monitoring'));
 const Data = lazy(() => import('./pages/Orchestra/Data/Data'));
@@ -96,7 +95,6 @@ const routeConfig = {
     {path: '/orchestra/variables', component: Variables, title: 'Orchestra'},
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},
-    {path: '/orchestra/data-loaders', component: DataLoaders, title: 'Orchestra'},
     {path: '/orchestra/tasks', component: TaskAccordion, title: 'Orchestra'},
     {path: '/orchestra/workflows', component: WorkflowManager, title: 'Orchestra'},
     {path: '/orchestra/monitoring', component: Monitoring, title: 'Orchestra'},
