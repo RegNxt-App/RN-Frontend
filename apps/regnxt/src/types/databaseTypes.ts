@@ -409,6 +409,7 @@ export interface CustomNodeProps {
 export interface TransformationTabProps {
   disabled?: boolean;
   onSave?: () => void;
+  selectedTask: Task | null;
 }
 export interface DesignTimeParameters {
   sourceId: string;
@@ -453,4 +454,69 @@ export interface FieldMappingGridProps {
   mappings: FieldMapping[];
   onMappingChange: (newMappings: FieldMapping[]) => void;
   disabled?: boolean;
+}
+
+export interface DMSubtask {
+  subtask_id: number;
+  task_id: number;
+  label: string;
+  description: string;
+  order: number;
+  output_fields: any[];
+  filters: any[];
+}
+export interface TaskParameter {
+  id: number;
+  parameter_id: number;
+  default_value: string;
+  source?: 'dataset' | 'dataview';
+}
+export interface DataviewOption {
+  dataview_version_id: number;
+  code: string;
+}
+export interface DatasetOption {
+  dataset_version_id: number;
+  code: string;
+}
+export interface VariableResponse {
+  variable_id: number;
+  name: string;
+  label: string;
+  description: string;
+  data_type: string;
+  is_enum: boolean;
+  statement: string;
+  min_value: null | number;
+  max_value: null | number;
+}
+export interface TaskSubtypeParameter {
+  id: number;
+  name: string;
+}
+
+export interface SubtypeParamsResponse {
+  task_subtype_id: number;
+  parameters: TaskSubtypeParameter[];
+}
+export interface SortableItemProps {
+  id: string;
+  label: string;
+  description: string;
+  selected?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+}
+
+export interface SortableListProps {
+  items: DMSubtask[];
+  currentPage: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  selectedId?: number;
+  disabled?: boolean;
+  onItemClick: (item: DMSubtask) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  total: number;
 }

@@ -601,31 +601,14 @@ export const TaskAccordion: React.FC = () => {
                     onChange={(e) => setCurrentTask({...currentTask, label: e.target.value})}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="task-context">Context</Label>
-                  <Input
-                    id="task-context"
-                    value={currentTask.context || ''}
-                    onChange={(e) => setCurrentTask({...currentTask, context: e.target.value})}
+                <div className="space-y-2 col-span-2">
+                  <Label htmlFor="task-description">Description</Label>
+                  <Textarea
+                    id="task-description"
+                    value={currentTask.description || ''}
+                    onChange={(e) => setCurrentTask({...currentTask, description: e.target.value})}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="task-language">Task Language</Label>
-                  <Select
-                    value={currentTask.task_language || ''}
-                    onValueChange={(value) => setCurrentTask({...currentTask, task_language: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="python">Python</SelectItem>
-                      <SelectItem value="javascript">JavaScript</SelectItem>
-                      <SelectItem value="sql">SQL</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div className="space-y-2 col-span-2">
                   <Label htmlFor="task-type">Task Type</Label>
                   <Select
@@ -687,11 +670,11 @@ export const TaskAccordion: React.FC = () => {
                   </Select>
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="task-description">Description</Label>
-                  <Textarea
-                    id="task-description"
-                    value={currentTask.description || ''}
-                    onChange={(e) => setCurrentTask({...currentTask, description: e.target.value})}
+                  <Label htmlFor="task-context">Context</Label>
+                  <Input
+                    id="task-context"
+                    value={currentTask.context || ''}
+                    onChange={(e) => setCurrentTask({...currentTask, context: e.target.value})}
                   />
                 </div>
               </div>

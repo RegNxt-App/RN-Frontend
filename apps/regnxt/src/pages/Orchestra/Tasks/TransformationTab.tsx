@@ -1,209 +1,302 @@
-import {useState} from 'react';
+import React, {useState} from 'react';
 
-import {DesignTimeParameters, TransformationTabProps} from '@/types/databaseTypes';
-import {Plus} from 'lucide-react';
+import {toast} from '@/hooks/use-toast';
+import {orchestraBackendInstance} from '@/lib/axios';
+import {DMSubtask, TransformationTabProps} from '@/types/databaseTypes';
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {Loader2, Plus} from 'lucide-react';
+import useSWR, {mutate} from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
 import {Card} from '@rn/ui/components/ui/card';
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
 import {Input} from '@rn/ui/components/ui/input';
 import {Label} from '@rn/ui/components/ui/label';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
+import {ScrollArea} from '@rn/ui/components/ui/scroll-area';
+import {Textarea} from '@rn/ui/components/ui/textarea';
 
-import {FieldMappingGrid} from './FieldMappingGrid';
-import {
-  defaultRuntimeParameters,
-  dummyDatasets,
-  dummyDataviews,
-  dummyDestinationFields,
-  dummySourceFields,
-} from './dummyData';
+import {SortableItem} from './SortableItem';
 
-export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, onSave}) => {
-  const [sourceType, setSourceType] = useState<'dataset' | 'dataview'>('dataset');
-  const [sourceId, setSourceId] = useState('');
-  const [destinationId, setDestinationId] = useState('');
-  const [runtimeParams, setRuntimeParams] = useState(defaultRuntimeParameters);
-  const [mappings, setMappings] = useState([]);
-  const [designTimeParams, setDesignTimeParams] = useState<DesignTimeParameters>({
-    sourceId: '',
-    sourceType: 'dataset',
-    destinationId: '',
+export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, selectedTask}) => {
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedSubtask, setSelectedSubtask] = useState<DMSubtask | null>(null);
+  const [newSubtask, setNewSubtask] = useState({
+    label: '',
+    description: '',
   });
-  const handleAddRuntimeParam = () => {
-    const newParam = {
-      id: `param${runtimeParams.length + 1}`,
-      name: '',
-      type: 'string',
-      defaultValue: '',
-      description: '',
-    };
-    setRuntimeParams([...runtimeParams, newParam]);
+  const [isLoadingSubTask, setIsLoadingSubTask] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const subtasksEndpoint = selectedTask?.task_id
+    ? `/api/v1/tasks/${selectedTask.task_id}/list-transformation-subtasks/`
+    : null;
+
+  const {
+    data: response,
+    error,
+    isLoading,
+  } = useSWR<{data: DMSubtask[]}>(
+    subtasksEndpoint,
+    async (url: string) => {
+      setIsLoadingSubTask(true);
+      try {
+        const response = await orchestraBackendInstance.get(url);
+        return response.data;
+      } finally {
+        setIsLoadingSubTask(false);
+      }
+    },
+    {
+      onSuccess: () => {
+        setIsLoadingSubTask(false);
+      },
+      onError: () => {
+        setIsLoadingSubTask(false);
+      },
+    }
+  );
+
+  const sortedSubtasks = response?.data?.sort((a, b) => a.order - b.order) || [];
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const {active, over} = event;
+
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = sortedSubtasks.findIndex((item) => String(item.subtask_id) === active.id);
+    const newIndex = sortedSubtasks.findIndex((item) => String(item.subtask_id) === over.id);
+
+    const newSubtasks = arrayMove(sortedSubtasks, oldIndex, newIndex);
+
+    const orderUpdates = newSubtasks.map((subtask, index) => ({
+      subtask_id: subtask.subtask_id,
+      order: index + 1,
+    }));
+
+    try {
+      const updatedSubtasks = newSubtasks.map((subtask, index) => ({
+        ...subtask,
+        order: index + 1,
+      }));
+      mutate(subtasksEndpoint, {data: updatedSubtasks}, false);
+
+      await orchestraBackendInstance.put(`/api/v1/tasks/${selectedTask?.task_id}/update-subtask-order/`, {
+        subtasks: orderUpdates,
+      });
+
+      mutate(subtasksEndpoint);
+
+      toast({
+        title: 'Success',
+        description: 'Order updated successfully',
+      });
+    } catch (error) {
+      console.error('Error updating order:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update order',
+        variant: 'destructive',
+      });
+      mutate(subtasksEndpoint);
+    }
   };
 
-  const handleRuntimeParamChange = (paramId: string, field: string, value: string) => {
-    setRuntimeParams(
-      runtimeParams.map((param) => (param.id === paramId ? {...param, [field]: value} : param))
-    );
+  const handleCreateSubtask = async () => {
+    if (!selectedTask?.task_id) return;
+
+    try {
+      await orchestraBackendInstance.post(
+        `/api/v1/tasks/${selectedTask.task_id}/create-transformation-subtask/`,
+        newSubtask
+      );
+
+      await mutate(subtasksEndpoint);
+
+      toast({
+        title: 'Success',
+        description: 'Transformation created successfully',
+      });
+
+      setIsCreateDialogOpen(false);
+      setNewSubtask({label: '', description: ''});
+    } catch (error) {
+      console.error('Error creating subtask:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create transformation',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
     <div className="space-y-6">
-      <Card className="p-4">
-        <h3 className="text-lg font-medium mb-4">Design Time Parameters</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Source Type</Label>
-            <Select
-              value={designTimeParams.sourceType}
-              onValueChange={(value: 'dataset' | 'dataview') =>
-                setDesignTimeParams((prev) => ({...prev, sourceType: value}))
-              }
-              disabled={disabled}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select source type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dataset">Dataset</SelectItem>
-                <SelectItem value="dataview">Dataview</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold">Transformations</h2>
+        <Button
+          onClick={() => setIsCreateDialogOpen(true)}
+          disabled={disabled}
+        >
+          Create Transformation
+        </Button>
+      </div>
 
-          <div className="space-y-2">
-            <Label>Source</Label>
-            <Select
-              value={designTimeParams.sourceId}
-              onValueChange={(value) => setDesignTimeParams((prev) => ({...prev, sourceId: value}))}
-              disabled={disabled}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select source" />
-              </SelectTrigger>
-              <SelectContent>
-                {(sourceType === 'dataset' ? dummyDatasets : dummyDataviews).map((source) => (
-                  <SelectItem
-                    key={source.id}
-                    value={source.id}
+      <div className="grid grid-cols-12 gap-6">
+        <Card className="col-span-4">
+          <ScrollArea className="h-[calc(100vh-300px)]">
+            <div className="p-4">
+              {isLoadingSubTask ? (
+                <div className="flex items-center justify-center h-40">
+                  <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+                </div>
+              ) : (
+                <>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
                   >
-                    {source.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                    <SortableContext
+                      items={sortedSubtasks.map((item) => String(item.subtask_id))}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-2">
+                        {sortedSubtasks.map((subtask) => (
+                          <SortableItem
+                            key={subtask.subtask_id}
+                            id={String(subtask.subtask_id)}
+                            disabled={disabled}
+                            selected={selectedSubtask?.subtask_id === subtask.subtask_id}
+                            label={subtask.label}
+                            description={subtask.description}
+                            onClick={() => setSelectedSubtask(subtask)}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
 
-          <div className="space-y-2 col-span-2">
-            <Label>Destination Dataset</Label>
-            <Select
-              value={designTimeParams.destinationId || 'default'}
-              onValueChange={(value) => setDesignTimeParams((prev) => ({...prev, destinationId: value}))}
-              disabled={disabled}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select destination" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  value="default"
-                  disabled
-                >
-                  Select a destination
-                </SelectItem>
-                {dummyDatasets.map((dataset) => (
-                  <SelectItem
-                    key={dataset.id}
-                    value={dataset.id}
-                  >
-                    {dataset.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </Card>
-
-      {sourceId && destinationId && (
-        <Card className="p-4">
-          <h3 className="text-lg font-medium mb-4">Field Mappings</h3>
-          <FieldMappingGrid
-            sourceFields={dummySourceFields}
-            destinationFields={dummyDestinationFields}
-            runtimeParams={runtimeParams}
-            mappings={mappings}
-            onMappingChange={setMappings}
-            disabled={disabled}
-          />
+                  {(!response?.data || response.data.length === 0) && (
+                    <div className="text-center py-8 text-gray-500">No transformations created yet</div>
+                  )}
+                </>
+              )}
+            </div>
+          </ScrollArea>
         </Card>
-      )}
 
-      <Card className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium">Runtime Parameters</h3>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAddRuntimeParam}
-            disabled={disabled}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Parameter
-          </Button>
-        </div>
+        <Card className="col-span-8 p-6">
+          {selectedSubtask ? (
+            <div className="space-y-6">
+              <div className="pb-4 border-b">
+                <Label className="text-sm text-muted-foreground">Name</Label>
+                <h3 className="text-lg font-medium mt-1">{selectedSubtask.label}</h3>
+              </div>
 
-        <div className="space-y-4">
-          {runtimeParams.map((param) => (
-            <div
-              key={param.id}
-              className="grid grid-cols-2 gap-4 p-4 border rounded-lg"
-            >
-              <div className="space-y-2">
-                <Label>Name</Label>
-                <Input
-                  value={param.name}
-                  onChange={(e) => handleRuntimeParamChange(param.id, 'name', e.target.value)}
-                  disabled={disabled}
-                />
+              <div className="pb-4 border-b">
+                <Label className="text-sm text-muted-foreground">Description</Label>
+                <p className="mt-1 text-gray-600">
+                  {selectedSubtask.description || 'No description provided'}
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label>Type</Label>
-                <Select
-                  value={param.type}
-                  onValueChange={(value) => handleRuntimeParamChange(param.id, 'type', value)}
-                  disabled={disabled}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="string">String</SelectItem>
-                    <SelectItem value="number">Number</SelectItem>
-                    <SelectItem value="date">Date</SelectItem>
-                    <SelectItem value="boolean">Boolean</SelectItem>
-                  </SelectContent>
-                </Select>
+
+              <div className="pt-4 border-t">
+                <Label className="text-sm text-muted-foreground">Output Fields</Label>
+                <div className="mt-2 p-3 bg-muted rounded-md">
+                  <pre className="text-sm">
+                    {selectedSubtask.output_fields.length
+                      ? JSON.stringify(selectedSubtask.output_fields, null, 2)
+                      : 'No output fields configured'}
+                  </pre>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Default Value</Label>
-                <Input
-                  value={param.defaultValue || ''}
-                  onChange={(e) => handleRuntimeParamChange(param.id, 'defaultValue', e.target.value)}
-                  disabled={disabled}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Input
-                  value={param.description}
-                  onChange={(e) => handleRuntimeParamChange(param.id, 'description', e.target.value)}
-                  disabled={disabled}
-                />
+
+              <div className="pt-4">
+                <Label className="text-sm text-muted-foreground">Filters</Label>
+                <div className="mt-2 p-3 bg-muted rounded-md">
+                  <pre className="text-sm">
+                    {selectedSubtask.filters.length
+                      ? JSON.stringify(selectedSubtask.filters, null, 2)
+                      : 'No filters configured'}
+                  </pre>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-      </Card>
+          ) : (
+            <div className="text-center py-12 text-gray-500">Select a transformation to view details</div>
+          )}
+        </Card>
+      </div>
+
+      <Dialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Transformation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Label</Label>
+              <Input
+                value={newSubtask.label}
+                onChange={(e) =>
+                  setNewSubtask((prev) => ({
+                    ...prev,
+                    label: e.target.value,
+                  }))
+                }
+                placeholder="Enter transformation name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={newSubtask.description}
+                onChange={(e) =>
+                  setNewSubtask((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                placeholder="Enter transformation description"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreateSubtask}>Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
+export default TransformationTab;

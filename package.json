@@ -1,21 +1,8 @@
 {
   "name": "@rn/root",
   "version": "1.0.0",
+  "private": true,
   "description": "Monorepo for Regnxt frontend",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "dev": "turbo run dev",
-    "start": "turbo run start",
-    "prettier": "turbo run prettier",
-    "prettier-check": "turbo run prettier-check",
-    "clean": "turbo run clean && rm -rf node_modules && rm pnpm-lock.yaml"
-  },
   "keywords": [
     "monorepo",
     "regnxt",
@@ -26,18 +13,32 @@
     "js",
     "javascript"
   ],
-  "author": "abdullahmujahidali",
   "license": "ISC",
-  "private": true,
-  "packageManager": "pnpm@7.11.0",
+  "author": "abdullahmujahidali",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "turbo run clean && rm -rf node_modules && rm pnpm-lock.yaml",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "prettier": "turbo run prettier",
+    "prettier-check": "turbo run prettier-check",
+    "start": "turbo run start",
+    "test": "turbo run test"
+  },
   "devDependencies": {
     "husky": "^8.0.3",
     "lint-staged": "^13.3.0",
     "turbo": "^1.11.3"
   },
+  "packageManager": "pnpm@7.11.0",
   "pnpm": {
     "overrides": {
       "@radix-ui/react-dismissable-layer": "1.0.2"
     }
   }
 }
+
