@@ -5,7 +5,7 @@ import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
 import {Workflow, WorkflowParameter, WorkflowRun, WorkflowTask} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
-import {Clock, Edit, Loader2, Play, Plus} from 'lucide-react';
+import {Clock, Edit, Loader2, Play} from 'lucide-react';
 import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
@@ -172,6 +172,7 @@ const WorkflowManager = () => {
             <SharedDataTable
               data={workflows}
               columns={columns}
+              onRowClick={(item) => console.log()}
               showPagination={true}
             />
           </CardContent>
@@ -211,8 +212,23 @@ const WorkflowManager = () => {
                               <SelectValue placeholder="Select value" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="option1">Option 1</SelectItem>
-                              <SelectItem value="option2">Option 2</SelectItem>
+                              {param.options?.length > 0 ? (
+                                param.options.map((option) => (
+                                  <SelectItem
+                                    key={option.value}
+                                    value={String(option.value)}
+                                  >
+                                    {option.label}
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <SelectItem
+                                  disabled
+                                  value="none"
+                                >
+                                  No options available
+                                </SelectItem>
+                              )}
                             </SelectContent>
                           </Select>
                         ) : (

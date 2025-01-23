@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {GripVertical} from 'lucide-react';
@@ -25,7 +23,7 @@ export function SortableItem({id, label, selected, disabled, onClick}: SortableI
     <div
       ref={setNodeRef}
       style={style}
-      className={`p-3 rounded-lg hover:bg-gray-100 transition-colors 
+      className={`p-3 rounded-lg hover:bg-gray-100 transition-colors border-b
         ${selected ? 'bg-gray-100' : ''} 
         ${isDragging ? 'shadow-lg opacity-50' : ''}`}
     >
