@@ -313,6 +313,10 @@ export const TaskAccordion: React.FC = () => {
         console.error('Invalid task type or subtype selected');
         return;
       }
+      const defaultTaskLanguage =
+        selectedTaskTypeObj.task_type_id === 4
+          ? currentTask.task_language
+          : currentTask.task_language || 'python';
 
       const payload = {
         task_type_id: selectedTaskTypeObj.task_type_id,
@@ -322,7 +326,7 @@ export const TaskAccordion: React.FC = () => {
         description: currentTask.description,
         context: currentTask.context,
         is_predefined: false,
-        task_language: currentTask.task_language,
+        task_language: defaultTaskLanguage,
         task_code: currentTask.task_code,
         component: selectedSubTypeObj.component,
         parameters: selectedSubTypeObj.parameters,

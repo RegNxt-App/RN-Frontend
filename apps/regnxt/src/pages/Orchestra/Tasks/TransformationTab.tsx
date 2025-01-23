@@ -18,7 +18,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {Loader2, Plus} from 'lucide-react';
+import {Loader2} from 'lucide-react';
 import useSWR, {mutate} from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';

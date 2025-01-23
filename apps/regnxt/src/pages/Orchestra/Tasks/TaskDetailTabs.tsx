@@ -12,20 +12,16 @@ import {
   TaskParameter,
   VariableResponse,
 } from '@/types/databaseTypes';
-import {Calendar, Code, Plus, Tag, Trash2} from 'lucide-react';
+import {Calendar, Code, Tag, Trash2} from 'lucide-react';
 import useSWR, {mutate} from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
-import {Card} from '@rn/ui/components/ui/card';
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
-import {Input} from '@rn/ui/components/ui/input';
-import {Label} from '@rn/ui/components/ui/label';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@rn/ui/components/ui/tabs';
-import {Textarea} from '@rn/ui/components/ui/textarea';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/ui/components/ui/tooltip';
 
-import DisabledTooltip from './DisabledTooltip';
+import {ConfigurationsTabContent} from './ConfigurationsTabContent';
+import {PropertiesTabContent} from './PropertiesTabContent';
 import {TransformationTab} from './TransformationTab';
 
 export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onSave, onDelete}) => {
@@ -103,8 +99,8 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
   useEffect(() => {
     console.log('Task Parameters Changed:', {
       taskParameters: taskParametersResponse,
-      inputOptions: inputOptionsResponse?.data,
-      outputOptions: outputOptionsResponse?.data,
+      inputOptions: inputOptionsResponse,
+      outputOptions: outputOptionsResponse,
       currentDesignTimeParams: designTimeParams,
       inputVariableId,
       outputVariableId,
@@ -184,7 +180,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
     try {
       const payload = parameters.map((param) => ({
         parameter_id: param.id,
-        default_value: param.value,
+        default_value: param.default_value,
       }));
 
       await orchestraBackendInstance.post(TASK_PARAMETERS_ENDPOINT, payload);
@@ -208,6 +204,18 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
+    const parameters: TaskParameter[] = [
+      {
+        id: 1,
+        parameter_id: 1,
+        default_value: designTimeParams.sourceId,
+      },
+      {
+        id: 2,
+        parameter_id: 2,
+        default_value: designTimeParams.destinationId,
+      },
+    ];
     try {
       const payload = {
         task_type_id: localTask.task_type_id,
@@ -217,20 +225,10 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
         context: localTask.context,
         task_language: localTask.task_language,
         task_code: localTask.task_code,
+        parameters: parameters,
       };
 
       const {data} = await orchestraBackendInstance.put(`/api/v1/tasks/${localTask.task_id}/`, payload);
-
-      const parameters: TaskParameter[] = [
-        {
-          id: 3,
-          value: designTimeParams.sourceId,
-        },
-        {
-          id: 4,
-          value: designTimeParams.destinationId,
-        },
-      ];
 
       await saveTaskParameters(parameters);
 
@@ -350,285 +348,22 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
           )}
         </TabsList>
 
-        <TabsContent
-          value="properties"
-          className="space-y-4"
-        >
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Code</Label>
-              <DisabledTooltip isDisabled={selectedTask.is_predefined}>
-                <Input
-                  value={localTask.code}
-                  onChange={(e) => handleInputChange('code', e.target.value)}
-                  disabled={selectedTask.is_predefined}
-                  placeholder="Enter code"
-                />
-              </DisabledTooltip>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Label</Label>
-              <DisabledTooltip isDisabled={selectedTask.is_predefined}>
-                <Input
-                  value={localTask.label}
-                  onChange={(e) => handleInputChange('label', e.target.value)}
-                  disabled={selectedTask.is_predefined}
-                  placeholder="Enter label"
-                />
-              </DisabledTooltip>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Description</Label>
-              <DisabledTooltip isDisabled={selectedTask.is_predefined}>
-                <Textarea
-                  value={localTask.description || ''}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  disabled={selectedTask.is_predefined}
-                  className="min-h-[100px]"
-                  placeholder="Enter description"
-                />
-              </DisabledTooltip>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent
-          value="configurations"
-          className="space-y-4"
-        >
-          <div className="space-y-6">
-            {selectedTask.task_type_id === 4 && selectedTask.task_subtype_id === 20 ? (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Task Language</Label>
-                  <DisabledTooltip isDisabled={selectedTask.is_predefined}>
-                    <Select
-                      value={localTask.task_language || 'python'}
-                      onValueChange={(value) => handleInputChange('task_language', value)}
-                      disabled={selectedTask.is_predefined}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="python">Python</SelectItem>
-                        <SelectItem value="javascript">JavaScript</SelectItem>
-                        <SelectItem value="sql">SQL</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </DisabledTooltip>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Task Code</Label>
-                  <DisabledTooltip isDisabled={selectedTask.is_predefined}>
-                    <Textarea
-                      value={localTask.task_code || ''}
-                      onChange={(e) => handleInputChange('task_code', e.target.value)}
-                      disabled={selectedTask.is_predefined}
-                      className="min-h-[200px] font-mono"
-                      placeholder="Enter your code here..."
-                    />
-                  </DisabledTooltip>
-                </div>
-              </>
-            ) : selectedTask.task_type_id === 2 &&
-              selectedTask.task_subtype_id === 17 &&
-              variablesResponse ? (
-              <div className="grid grid-cols-2 gap-4">
-                {variablesResponse?.map((variable) => {
-                  const isInput = variable.name === 'input_dataset';
-                  return (
-                    <div
-                      key={variable.variable_id}
-                      className="space-y-2"
-                    >
-                      <Label className="text-sm font-medium">{variable.label}</Label>
-                      <DisabledTooltip isDisabled={selectedTask.is_predefined}>
-                        <Select
-                          value={
-                            isInput
-                              ? `${designTimeParams.sourceId}:${designTimeParams.sourceType}`
-                              : designTimeParams.destinationId
-                          }
-                          onValueChange={(value) => {
-                            if (isInput) {
-                              const [id, type] = value.split(':');
-                              setDesignTimeParams((prev) => ({
-                                ...prev,
-                                sourceId: id,
-                                sourceType: type === 'dataview' ? 'dataview' : 'dataset',
-                              }));
-                            } else {
-                              setDesignTimeParams((prev) => ({
-                                ...prev,
-                                destinationId: value,
-                              }));
-                            }
-                          }}
-                          disabled={selectedTask.is_predefined}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={`Select ${isInput ? 'input' : 'output'} location`} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {isInput
-                              ? inputOptionsResponse?.data?.map((option: any) => {
-                                  const id = option.dataset_version_id || option.dataview_version_id;
-                                  const type = option.dataset_version_id ? 'dataset' : 'dataview';
-                                  return (
-                                    <SelectItem
-                                      key={`${id}:${type}`}
-                                      value={`${id}:${type}`}
-                                    >
-                                      {option['?column?']}
-                                    </SelectItem>
-                                  );
-                                })
-                              : outputOptionsResponse?.data?.map((option: any) => (
-                                  <SelectItem
-                                    key={option.dataset_version_id}
-                                    value={String(option.dataset_version_id)}
-                                  >
-                                    {option['?column?']}
-                                  </SelectItem>
-                                ))}
-                          </SelectContent>
-                        </Select>
-                      </DisabledTooltip>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Task Language</Label>
-                <DisabledTooltip isDisabled={selectedTask.is_predefined}>
-                  <Select
-                    value={localTask.task_language || 'python'}
-                    onValueChange={(value) => handleInputChange('task_language', value)}
-                    disabled={selectedTask.is_predefined}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="python">Python</SelectItem>
-                      <SelectItem value="javascript">JavaScript</SelectItem>
-                      <SelectItem value="sql">SQL</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </DisabledTooltip>
-              </div>
-            )}
-
-            <Card className="p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium">Design Time Parameters</h3>
-                {/* {!selectedTask.task_type_code === 'transform' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={selectedTask.is_predefined}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Parameter
-                  </Button>
-                )} */}
-              </div>
-
-              {selectedTask.task_type_code === 'transform' ? (
-                <p className="text-sm text-gray-500">
-                  Parameters configured in source and destination fields above
-                </p>
-              ) : Object.keys(designTimeParams).length > 0 ? (
-                <div className="col-span-2 space-y-4">
-                  {Object.entries(designTimeParams).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="space-y-2"
-                    >
-                      <Label>{key}</Label>
-                      <Input
-                        value={value}
-                        onChange={(e) => setDesignTimeParams((prev) => ({...prev, [key]: e.target.value}))}
-                        disabled={selectedTask.is_predefined}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">No design time parameters configured</p>
-              )}
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium">Runtime Parameters</h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={selectedTask.is_predefined}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Parameter
-                </Button>
-              </div>
-
-              {runtimeParams.length > 0 ? (
-                <div className="space-y-4">
-                  {runtimeParams.map((param) => (
-                    <div
-                      key={param.id}
-                      className="grid grid-cols-2 gap-4 p-4 border rounded-lg"
-                    >
-                      <div className="space-y-2">
-                        <Label>Name</Label>
-                        <Input
-                          value={param.name}
-                          disabled={selectedTask.is_predefined}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Type</Label>
-                        <Select
-                          value={param.type}
-                          disabled={selectedTask.is_predefined}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="string">String</SelectItem>
-                            <SelectItem value="number">Number</SelectItem>
-                            <SelectItem value="date">Date</SelectItem>
-                            <SelectItem value="boolean">Boolean</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Default Value</Label>
-                        <Input
-                          value={param.defaultValue || ''}
-                          disabled={selectedTask.is_predefined}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Description</Label>
-                        <Input
-                          value={param.description}
-                          disabled={selectedTask.is_predefined}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">No runtime parameters configured</p>
-              )}
-            </Card>
-          </div>
-        </TabsContent>
+        <PropertiesTabContent
+          selectedTask={selectedTask}
+          localTask={localTask}
+          handleInputChange={handleInputChange}
+        />
+        <ConfigurationsTabContent
+          selectedTask={selectedTask}
+          localTask={localTask}
+          handleInputChange={handleInputChange}
+          designTimeParams={designTimeParams}
+          setDesignTimeParams={setDesignTimeParams}
+          variablesResponse={variablesResponse}
+          inputOptionsResponse={inputOptionsResponse}
+          outputOptionsResponse={outputOptionsResponse}
+          runtimeParams={runtimeParams}
+        />
 
         {selectedTask.task_type_code === 'transform' && (
           <TabsContent value="transformation">
