@@ -55,7 +55,11 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
     data: response,
     error,
     isLoading,
-  } = useSWR<{data: DMSubtask[]}>(
+  } = useSWR<{
+    count: number;
+    num_pages: number;
+    results: DMSubtask[];
+  }>(
     subtasksEndpoint,
     async (url: string) => {
       setIsLoadingSubTask(true);
@@ -76,7 +80,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
     }
   );
 
-  const sortedSubtasks = response?.data?.sort((a, b) => a.order - b.order) || [];
+  const sortedSubtasks = response?.results?.sort((a, b) => a.order - b.order) || [];
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const {active, over} = event;
@@ -196,7 +200,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
                     </SortableContext>
                   </DndContext>
 
-                  {(!response?.data || response.data.length === 0) && (
+                  {(!response?.results || response.results.length === 0) && (
                     <div className="text-center py-8 text-gray-500">No transformations created yet</div>
                   )}
                 </>

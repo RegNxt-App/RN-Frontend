@@ -102,13 +102,14 @@ export const TaskAccordion: React.FC = () => {
     }
   };
 
-  const {data: taskTypesResponse, error: taskTypesError} = useSWR<TaskType[]>(
-    TASK_TYPES_ENDPOINT,
-    async (url: string) => {
-      const response = await orchestraBackendInstance.get(url);
-      return response.data;
-    }
-  );
+  const {data: taskTypesResponse, error: taskTypesError} = useSWR<{
+    count: number;
+    num_pages: number;
+    results: TaskType[];
+  }>(TASK_TYPES_ENDPOINT, async (url: string) => {
+    const response = await orchestraBackendInstance.get(url);
+    return response.data;
+  });
 
   const handleTaskTypeChange = (value: string) => {
     setSelectedTaskType(value);
@@ -121,8 +122,8 @@ export const TaskAccordion: React.FC = () => {
     },
     [taskSubTypes]
   );
-  const tasks = response?.data ?? [];
-  const taskTypes = taskTypesResponse || [];
+  const tasks = response?.data?.results ?? [];
+  const taskTypes = taskTypesResponse?.results || [];
 
   if (taskTypesError) {
     return <div className="text-red-500">Error loading task types: {taskTypesError.message}</div>;
@@ -332,7 +333,7 @@ export const TaskAccordion: React.FC = () => {
         parameters: selectedSubTypeObj.parameters,
       };
 
-      await orchestraBackendInstance.post('/api/v1/tasks/', payload);
+      await orchestraBackendInstance.post(TASKS_ENDPOINT, payload);
       await mutate(TASKS_ENDPOINT);
       await fetchAllSubtypes();
 

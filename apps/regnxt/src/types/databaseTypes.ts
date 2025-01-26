@@ -237,8 +237,10 @@ export interface ApiTask {
   task_language: string | null;
   task_code: string | null;
 }
-export interface TasksApiResponse {
-  data: ApiTask[];
+interface TasksApiResponse {
+  count: number;
+  num_pages: number;
+  results: ApiTask[];
 }
 export interface TaskType {
   task_id: number;
