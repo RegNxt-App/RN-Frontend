@@ -19,6 +19,9 @@ import {Textarea} from '@rn/ui/components/ui/textarea';
 
 import DisabledTooltip from './DisabledTooltip';
 
+interface ApiResponse<T> {
+  data: T;
+}
 interface ConfigurationsTabContentProps {
   selectedTask: TaskDetails;
   localTask: TaskDetails;
@@ -36,9 +39,12 @@ interface ConfigurationsTabContentProps {
     }>
   >;
   variablesResponse?: VariableResponse[];
-  inputOptionsResponse?: {data: (DatasetOption | DataviewOption)[]};
-  outputOptionsResponse?: {data: DatasetOption[]};
+  inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
+  outputOptionsResponse?: ApiResponse<DatasetOption[]>;
   runtimeParams: RuntimeParameter[];
+}
+interface Task extends TaskDetails {
+  upstream_tasks: any[];
 }
 
 export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> = ({

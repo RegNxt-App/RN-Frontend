@@ -24,6 +24,9 @@ import {ConfigurationsTabContent} from './ConfigurationsTabContent';
 import {PropertiesTabContent} from './PropertiesTabContent';
 import {TransformationTab} from './TransformationTab';
 
+interface ApiResponse<T> {
+  data: T;
+}
 export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onSave, onDelete}) => {
   const [currentTab, setCurrentTab] = useState('properties');
   const [localTask, setLocalTask] = useState<TaskDetails>(selectedTask);
@@ -78,24 +81,29 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
   const outputVariableId = variablesResponse?.find(
     (v) => v.name.toLowerCase().includes('output') && v.name.toLowerCase().includes('dataset')
   )?.variable_id;
-  const {data: inputOptionsResponse} = useSWR<(DatasetOption | DataviewOption)[]>(
+  const {data: inputOptionsResponse} = useSWR<ApiResponse<(DatasetOption | DataviewOption)[]>>(
     inputVariableId && variablesResponse?.find((v) => v.variable_id === inputVariableId)?.statement
       ? `/api/v1/tasks/execute-sql/?statement=${encodeURIComponent(
           variablesResponse?.find((v) => v.variable_id === inputVariableId)?.statement || ''
         )}`
       : null,
-    orchestraBackendInstance
+    async (url: any) => {
+      const response = await orchestraBackendInstance.get(url);
+      return {data: response.data};
+    }
   );
 
-  const {data: outputOptionsResponse} = useSWR<DatasetOption[]>(
+  const {data: outputOptionsResponse} = useSWR<ApiResponse<DatasetOption[]>>(
     outputVariableId && variablesResponse?.find((v) => v.variable_id === outputVariableId)?.statement
       ? `/api/v1/tasks/execute-sql/?statement=${encodeURIComponent(
           variablesResponse?.find((v) => v.variable_id === outputVariableId)?.statement || ''
         )}`
       : null,
-    orchestraBackendInstance
+    async (url: any) => {
+      const response = await orchestraBackendInstance.get(url);
+      return {data: response.data};
+    }
   );
-
   useEffect(() => {
     console.log('Task Parameters Changed:', {
       taskParameters: taskParametersResponse,

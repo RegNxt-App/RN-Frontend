@@ -3,7 +3,15 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import Loader from '@/common/Loader';
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {ApiTask, StatItem, TaskDetails, TaskSubType, TaskType, TasksApiResponse} from '@/types/databaseTypes';
+import {
+  ApiTask,
+  GroupedTask,
+  StatItem,
+  TaskDetails,
+  TaskSubType,
+  TaskType,
+  TasksApiResponse,
+} from '@/types/databaseTypes';
 import {
   ArrowLeftRight,
   ChevronDown,
@@ -219,15 +227,18 @@ export const TaskAccordion: React.FC = () => {
   const taskCategories = useMemo(() => {
     if (!Array.isArray(tasks) || tasks.length === 0) return [];
 
-    const groupedByType = tasks.reduce((acc: Record<string, any>, task) => {
+    const groupedByType = tasks.reduce((acc: Record<string, GroupedTask>, task: TaskType) => {
       const typeKey = task.task_type_label;
+
+      if (!typeKey) return acc;
+
       const subtypeKey = task.task_subtype_id;
 
       if (!acc[typeKey]) {
         acc[typeKey] = {
           type_id: task.task_type_id,
           type_code: task.task_type_code,
-          label: task.task_type_label,
+          label: task.task_type_label || '',
           subtypes: {},
         };
       }
@@ -246,26 +257,23 @@ export const TaskAccordion: React.FC = () => {
 
       acc[typeKey].subtypes[subtypeKey].tasks.push({
         ...task,
-        isPredefined: task.is_predefined,
+        isPredefined: task.is_predefined || false,
       });
 
       return acc;
     }, {});
 
-    return Object.entries(groupedByType).map(([name, typeData]: [string, any]) => ({
+    return Object.entries(groupedByType).map(([name, typeData]: [string, GroupedTask]) => ({
       name,
       type_id: typeData.type_id,
       type_code: typeData.type_code,
-      subtypes: Object.values(typeData.subtypes).map((subtype: any) => ({
+      subtypes: Object.values(typeData.subtypes).map((subtype) => ({
         subtype_id: subtype.subtype_id,
         label: subtype.label,
         tasks: subtype.tasks,
         count: subtype.tasks.length,
       })),
-      count: Object.values(typeData.subtypes).reduce(
-        (acc: number, subtype: any) => acc + subtype.tasks.length,
-        0
-      ),
+      count: Object.values(typeData.subtypes).reduce((acc: number, subtype) => acc + subtype.tasks.length, 0),
     }));
   }, [tasks, taskSubTypes]);
   useEffect(() => {

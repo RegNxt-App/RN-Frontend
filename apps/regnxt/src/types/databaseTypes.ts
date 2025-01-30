@@ -393,11 +393,12 @@ export interface WorkflowTask {
   task_language: string;
   upstream_tasks: number[];
 }
-export interface NodeData {
+export interface NodeData extends Record<string, unknown> {
   label: string;
   type: number;
-  language?: string;
+  language: string | null;
 }
+
 export interface WorkflowDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -405,11 +406,18 @@ export interface WorkflowDialogProps {
 }
 export interface Task {
   task_id: number;
-  task_code: string;
-  task_type_id: number;
+  code?: string;
   label: string;
+  description?: string;
+  task_type_label?: string;
+  is_predefined?: boolean;
   task_language: string | null;
-  upstream_tasks: number | null;
+  task_code: string;
+  context?: string;
+  task_type_id: number;
+  task_type_code?: string;
+  task_subtype_id: number;
+  upstream_tasks: number[] | null;
 }
 export interface CustomNodeProps {
   data: {
@@ -531,4 +539,17 @@ export interface SortableListProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   total: number;
+}
+export interface GroupedTask {
+  type_id: number;
+  type_code: string;
+  label: string;
+  subtypes: Record<
+    number,
+    {
+      subtype_id: number;
+      label: string;
+      tasks: Array<TaskType & {isPredefined: boolean}>;
+    }
+  >;
 }

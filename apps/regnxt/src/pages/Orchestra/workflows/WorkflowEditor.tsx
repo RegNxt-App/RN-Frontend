@@ -4,6 +4,9 @@ import {
   Background,
   Connection,
   Controls,
+  Edge,
+  Node,
+  NodeProps,
   ReactFlow,
   addEdge,
   useEdgesState,
@@ -12,12 +15,16 @@ import {
 
 import '@xyflow/react/dist/style.css';
 
+import {NodeData} from '@/types/databaseTypes';
+
 import {CustomNode} from './CustomNode';
 import {TasksList} from './TasksList';
 
+type CustomNodeType = Node<NodeData>;
+
 export const WorkflowEditor: React.FC<{className?: string}> = ({className}) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -41,7 +48,7 @@ export const WorkflowEditor: React.FC<{className?: string}> = ({className}) => {
         y: event.clientY - event.currentTarget.getBoundingClientRect().top,
       };
 
-      const newNode = {
+      const newNode: Node<NodeData> = {
         id: Date.now().toString(),
         type: 'custom',
         position,
@@ -52,7 +59,7 @@ export const WorkflowEditor: React.FC<{className?: string}> = ({className}) => {
         },
       };
 
-      setNodes((nds) => [...nds, newNode]);
+      setNodes((nds: Node<NodeData>[]) => [...nds, newNode]);
     },
     [setNodes]
   );

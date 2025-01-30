@@ -11,6 +11,7 @@ import useSWR from 'swr';
 import {Button} from '@rn/ui/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
+import {Input} from '@rn/ui/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
 
@@ -250,7 +251,7 @@ const WorkflowManager = () => {
                         </label>
                         {param.is_enum ? (
                           <Select
-                            value={parameters[param.name] || param.default_value}
+                            value={parameters[param.name] || param.default_value || ''}
                             onValueChange={(value) =>
                               setParameters((prev) => ({...prev, [param.name]: value}))
                             }
@@ -279,10 +280,9 @@ const WorkflowManager = () => {
                             </SelectContent>
                           </Select>
                         ) : (
-                          <input
-                            type="text"
+                          <Input
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                            value={parameters[param.name] || param.default_value}
+                            value={parameters[param.name] || param.default_value || ''}
                             onChange={(e) =>
                               setParameters((prev) => ({
                                 ...prev,
