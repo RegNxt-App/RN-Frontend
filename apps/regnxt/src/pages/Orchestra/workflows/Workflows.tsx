@@ -71,10 +71,14 @@ const WorkflowManager = () => {
     },
   ];
   const {
-    data: workflows = [],
+    data: workflowsResponse,
     error,
     isLoading,
-  } = useSWR<Workflow[]>(WORKFLOWS_ENDPOINT, async (url: string) => {
+  } = useSWR<{
+    count: number;
+    num_pages: number;
+    results: Workflow[];
+  }>(WORKFLOWS_ENDPOINT, async (url: string) => {
     const response = await orchestraBackendInstance.get(url);
     return response.data;
   });
@@ -86,18 +90,31 @@ const WorkflowManager = () => {
       return response.data;
     }
   );
-
+  const workflows = workflowsResponse?.results || [];
   const handlePlayClick = async (workflow: Workflow) => {
     setSelectedWorkflow(workflow);
-    setParameters({});
+    const initialParameters = workflowParameters.reduce((acc, param) => {
+      acc[param.name] = param.default_value || '';
+      return acc;
+    }, {} as Record<string, string>);
+    setParameters(initialParameters);
   };
 
   const handleClockClick = async (workflow: Workflow) => {
     try {
       const response = await orchestraBackendInstance.get(
-        `${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`
+        `${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`,
+        {
+          params: {
+            page: 1,
+            page_size: 50,
+            search: '',
+          },
+        }
       );
-      setWorkflowRuns(response.data);
+
+      const runs: WorkflowRun[] = response.data;
+      setWorkflowRuns(runs);
       setIsRunsDialogOpen(true);
     } catch (error) {
       toast({
@@ -105,6 +122,36 @@ const WorkflowManager = () => {
         description: 'Failed to fetch workflow runs',
         variant: 'destructive',
       });
+    }
+  };
+  const formatDateTime = (dateTimeString: string | null) => {
+    if (!dateTimeString) return 'N/A';
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleString();
+    } catch {
+      return dateTimeString;
+    }
+  };
+  const formatRuntime = (runtime: string | number) => {
+    if (runtime === 'N/A') return runtime;
+    if (typeof runtime === 'number') {
+      return runtime.toFixed(2);
+    }
+    return runtime;
+  };
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'text-green-600';
+      case 'failed':
+        return 'text-red-600';
+      case 'running':
+        return 'text-blue-600';
+      case 'cancelled':
+        return 'text-orange-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
@@ -289,15 +336,26 @@ const WorkflowManager = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {workflowRuns.map((run) => (
-                <TableRow key={run['Run ID']}>
-                  <TableCell>{run['Run ID']}</TableCell>
-                  <TableCell>{run.Status}</TableCell>
-                  <TableCell>{run['Started At']}</TableCell>
-                  <TableCell>{run['Completed At']}</TableCell>
-                  <TableCell>{run['Total Runtime (seconds)']}</TableCell>
+              {workflowRuns.length > 0 ? (
+                workflowRuns.map((run) => (
+                  <TableRow key={run['Run ID']}>
+                    <TableCell className="font-medium">{run['Run ID']}</TableCell>
+                    <TableCell className={getStatusColor(run.Status)}>{run.Status}</TableCell>
+                    <TableCell>{formatDateTime(run['Started At'])}</TableCell>
+                    <TableCell>{formatDateTime(run['Completed At'])}</TableCell>
+                    <TableCell>{formatRuntime(run['Total Runtime (seconds)'])}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-4 text-gray-500"
+                  >
+                    No run history available
+                  </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </DialogContent>

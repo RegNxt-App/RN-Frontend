@@ -51,36 +51,37 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
     ? `/api/v1/tasks/${selectedTask.task_id}/list-transformation-subtasks/`
     : null;
 
+  const fetcher = async (url: string) => {
+    setIsLoadingSubTask(true);
+    try {
+      const response = await orchestraBackendInstance.get(url);
+      return Array.isArray(response.data) ? response.data : [];
+    } finally {
+      setIsLoadingSubTask(false);
+    }
+  };
+
   const {
-    data: response,
+    data: subtasks = [],
     error,
     isLoading,
-  } = useSWR<{
-    count: number;
-    num_pages: number;
-    results: DMSubtask[];
-  }>(
-    subtasksEndpoint,
-    async (url: string) => {
-      setIsLoadingSubTask(true);
-      try {
-        const response = await orchestraBackendInstance.get(url);
-        return response.data;
-      } finally {
-        setIsLoadingSubTask(false);
-      }
+  } = useSWR<DMSubtask[]>(subtasksEndpoint, fetcher, {
+    onSuccess: () => {
+      setIsLoadingSubTask(false);
     },
-    {
-      onSuccess: () => {
-        setIsLoadingSubTask(false);
-      },
-      onError: () => {
-        setIsLoadingSubTask(false);
-      },
-    }
-  );
+    onError: () => {
+      setIsLoadingSubTask(false);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch transformations',
+        variant: 'destructive',
+      });
+    },
+  });
 
-  const sortedSubtasks = response?.results?.sort((a, b) => a.order - b.order) || [];
+  const sortedSubtasks = React.useMemo(() => {
+    return [...subtasks].sort((a, b) => a.order - b.order);
+  }, [subtasks]);
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const {active, over} = event;
@@ -102,10 +103,10 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
         ...subtask,
         order: index + 1,
       }));
-      mutate(subtasksEndpoint, {data: updatedSubtasks}, false);
+      mutate(subtasksEndpoint, updatedSubtasks, false);
 
       await orchestraBackendInstance.put(`/api/v1/tasks/${selectedTask?.task_id}/update-subtask-order/`, {
-        subtasks: orderUpdates,
+        data: orderUpdates,
       });
 
       mutate(subtasksEndpoint);
@@ -127,6 +128,15 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
 
   const handleCreateSubtask = async () => {
     if (!selectedTask?.task_id) return;
+
+    if (!newSubtask.label.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Label is required',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     try {
       await orchestraBackendInstance.post(
@@ -200,7 +210,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
                     </SortableContext>
                   </DndContext>
 
-                  {(!response?.results || response.results.length === 0) && (
+                  {!sortedSubtasks.length && (
                     <div className="text-center py-8 text-gray-500">No transformations created yet</div>
                   )}
                 </>
@@ -228,7 +238,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
                 <Label className="text-sm text-muted-foreground">Output Fields</Label>
                 <div className="mt-2 p-3 bg-muted rounded-md">
                   <pre className="text-sm">
-                    {selectedSubtask.output_fields.length
+                    {selectedSubtask.output_fields?.length
                       ? JSON.stringify(selectedSubtask.output_fields, null, 2)
                       : 'No output fields configured'}
                   </pre>
@@ -239,7 +249,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
                 <Label className="text-sm text-muted-foreground">Filters</Label>
                 <div className="mt-2 p-3 bg-muted rounded-md">
                   <pre className="text-sm">
-                    {selectedSubtask.filters.length
+                    {selectedSubtask.filters?.length
                       ? JSON.stringify(selectedSubtask.filters, null, 2)
                       : 'No filters configured'}
                   </pre>

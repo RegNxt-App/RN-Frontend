@@ -70,18 +70,25 @@ export const TaskAccordion: React.FC = () => {
     data: response,
     error,
     isLoading,
-  } = useSWR<TasksApiResponse>(TASKS_ENDPOINT, orchestraBackendInstance, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    onSuccess: (data) => {
-      if (selectedTask) {
-        const refreshedTask = data.data.find((task) => task.task_id === selectedTask.task_id);
-        if (refreshedTask) {
-          setSelectedTask(refreshedTask);
-        }
-      }
+  } = useSWR<TasksApiResponse>(
+    TASKS_ENDPOINT,
+    async (url) => {
+      const response = await orchestraBackendInstance.get(url);
+      return response.data;
     },
-  });
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      onSuccess: (data) => {
+        if (selectedTask && data?.results) {
+          const refreshedTask = data.results.find((task) => task.task_id === selectedTask.task_id);
+          if (refreshedTask) {
+            setSelectedTask(refreshedTask);
+          }
+        }
+      },
+    }
+  );
   const fetchAllSubtypes = async () => {
     try {
       if (!taskTypes.length) return;
@@ -122,7 +129,7 @@ export const TaskAccordion: React.FC = () => {
     },
     [taskSubTypes]
   );
-  const tasks = response?.data?.results ?? [];
+  const tasks = response?.results ?? [];
   const taskTypes = taskTypesResponse?.results || [];
 
   if (taskTypesError) {

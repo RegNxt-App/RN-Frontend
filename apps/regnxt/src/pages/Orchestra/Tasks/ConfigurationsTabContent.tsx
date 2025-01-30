@@ -114,23 +114,23 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
                 <SelectContent>
                   {isInput
                     ? inputOptionsResponse?.data?.map((option: any) => {
-                        const id = option.dataset_version_id || option.dataview_version_id;
-                        const type = option.dataset_version_id ? 'dataset' : 'dataview';
+                        const id = option.id;
+                        const type = option.source.includes('dataset') ? 'dataset' : 'dataview';
                         return (
                           <SelectItem
                             key={`${id}:${type}`}
                             value={`${id}:${type}`}
                           >
-                            {option['?column?']}
+                            {option.label}
                           </SelectItem>
                         );
                       })
                     : outputOptionsResponse?.data?.map((option: any) => (
                         <SelectItem
-                          key={option.dataset_version_id}
-                          value={String(option.dataset_version_id)}
+                          key={option.id}
+                          value={String(option.id)}
                         >
-                          {option['?column?']}
+                          {option.label}
                         </SelectItem>
                       ))}
                 </SelectContent>

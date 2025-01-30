@@ -108,24 +108,16 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
   }, [taskParametersResponse, inputOptionsResponse, outputOptionsResponse, designTimeParams]);
 
   useEffect(() => {
-    if (taskParametersResponse && taskParametersResponse.length > 0) {
-      console.log('Loading saved parameters:', taskParametersResponse);
-
-      const inputParam = inputVariableId
-        ? taskParametersResponse.find((param) => param.parameter_id === inputVariableId)
-        : undefined;
-
-      const outputParam = outputVariableId
-        ? taskParametersResponse.find((param) => param.parameter_id === outputVariableId)
-        : undefined;
+    if (taskParametersResponse?.length) {
+      const inputParam = taskParametersResponse.find((param) => param.parameter_id === inputVariableId);
+      const outputParam = taskParametersResponse.find((param) => param.parameter_id === outputVariableId);
 
       if (inputParam || outputParam) {
-        setDesignTimeParams((prev) => ({
-          ...prev,
+        setDesignTimeParams({
           sourceId: inputParam?.default_value || '',
-          sourceType: inputParam?.source || 'dataset',
+          sourceType: 'dataset',
           destinationId: outputParam?.default_value || '',
-        }));
+        });
       }
     }
   }, [taskParametersResponse, inputVariableId, outputVariableId]);
@@ -204,18 +196,20 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
-    const parameters: TaskParameter[] = [
-      {
-        id: 1,
-        parameter_id: 1,
+    const parameters = [];
+    if (inputVariableId) {
+      parameters.push({
+        parameter_id: inputVariableId,
         default_value: designTimeParams.sourceId,
-      },
-      {
-        id: 2,
-        parameter_id: 2,
+      });
+    }
+    if (outputVariableId) {
+      parameters.push({
+        parameter_id: outputVariableId,
         default_value: designTimeParams.destinationId,
-      },
-    ];
+      });
+    }
+
     try {
       const payload = {
         task_type_id: localTask.task_type_id,
@@ -225,12 +219,13 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
         context: localTask.context,
         task_language: localTask.task_language,
         task_code: localTask.task_code,
-        parameters: parameters,
       };
 
       const {data} = await orchestraBackendInstance.put(`/api/v1/tasks/${localTask.task_id}/`, payload);
 
-      await saveTaskParameters(parameters);
+      if (parameters.length > 0) {
+        await orchestraBackendInstance.post(`/api/v1/tasks/${localTask.task_id}/add_parameter/`, parameters);
+      }
 
       setLocalTask((prev) => ({
         ...prev,

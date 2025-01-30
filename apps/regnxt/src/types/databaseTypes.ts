@@ -237,10 +237,10 @@ export interface ApiTask {
   task_language: string | null;
   task_code: string | null;
 }
-interface TasksApiResponse {
+export interface TasksApiResponse {
   count: number;
   num_pages: number;
-  results: ApiTask[];
+  results: TaskType[];
 }
 export interface TaskType {
   task_id: number;
@@ -339,20 +339,30 @@ export interface Workflow {
 
 export interface WorkflowParameter {
   task_id: number;
+  default_value: string | null;
   name: string;
   label: string;
   description: string;
-  default_value: string;
-  is_enum: boolean;
   statement: string;
+  is_enum: boolean;
+  options: Array<{
+    value: number | string;
+    label: string;
+  }>;
 }
 export interface WorkflowRun {
-  'Run ID': string;
+  'Run ID': number;
   'Pipeline Name': string;
   Status: string;
   'Started At': string;
   'Completed At': string;
-  'Total Runtime (seconds)': number | string;
+  'Total Runtime (seconds)': string | number;
+  'Block Details': Array<{
+    'Block UUID': string;
+    Status: string;
+    'Started At': string | null;
+    'Completed At': string | null;
+  }>;
 }
 
 export interface UserSetting {
