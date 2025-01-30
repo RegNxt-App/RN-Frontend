@@ -445,6 +445,17 @@ export interface RuntimeParameter {
   type: string;
   defaultValue?: string;
   description: string;
+  parameter_id: number;
+  default_value: string | null;
+  label: string;
+  data_type: string;
+}
+export interface AvailableParameter {
+  variable_id: number;
+  name: string;
+  label: string;
+  description: string;
+  data_type: string;
 }
 
 export interface Field {
@@ -552,4 +563,10 @@ export interface GroupedTask {
       tasks: Array<TaskType & {isPredefined: boolean}>;
     }
   >;
+}
+export interface AddRuntimeParameterDialogProps {
+  taskId: number;
+  availableParameters: AvailableParameter[];
+  onParameterAdd: () => void;
+  isDisabled: boolean;
 }

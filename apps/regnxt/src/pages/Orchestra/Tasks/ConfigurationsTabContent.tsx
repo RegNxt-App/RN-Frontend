@@ -1,6 +1,9 @@
 import React from 'react';
 
+import {AddRuntimeParameterDialog} from '@/components/AddRuntimeParameterDialog';
+import {orchestraBackendInstance} from '@/lib/axios';
 import {
+  AvailableParameter,
   DatasetOption,
   DataviewOption,
   RuntimeParameter,
@@ -8,6 +11,7 @@ import {
   VariableResponse,
 } from '@/types/databaseTypes';
 import {Plus} from 'lucide-react';
+import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
 import {Card} from '@rn/ui/components/ui/card';
@@ -43,9 +47,6 @@ interface ConfigurationsTabContentProps {
   outputOptionsResponse?: ApiResponse<DatasetOption[]>;
   runtimeParams: RuntimeParameter[];
 }
-interface Task extends TaskDetails {
-  upstream_tasks: any[];
-}
 
 export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> = ({
   selectedTask,
@@ -58,6 +59,22 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   outputOptionsResponse,
   runtimeParams,
 }) => {
+  const fetcher = (url: string) => orchestraBackendInstance.get(url).then((res) => res.data);
+
+  const {data: availableParameters, mutate: mutateAvailable} = useSWR<AvailableParameter[]>(
+    `/api/v1/tasks/${selectedTask.task_id}/get_available_runtime_parameters/`,
+    fetcher
+  );
+
+  const {data: taskParameters, mutate: mutateTaskParams} = useSWR<RuntimeParameter[]>(
+    `/api/v1/tasks/${selectedTask.task_id}/get_task_runtime_parameters/`,
+    fetcher
+  );
+  const handleParameterAdd = () => {
+    mutateAvailable();
+    mutateTaskParams();
+  };
+
   const renderTaskLanguageField = () => (
     <div className="space-y-2">
       <Label className="text-sm font-medium">Task Language</Label>
@@ -203,51 +220,39 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
         <Card className="p-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Runtime Parameters</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={selectedTask.is_predefined}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Parameter
-            </Button>
+            <AddRuntimeParameterDialog
+              taskId={selectedTask.task_id}
+              availableParameters={availableParameters || []}
+              onParameterAdd={handleParameterAdd}
+              isDisabled={selectedTask.is_predefined}
+            />
           </div>
 
-          {runtimeParams.length > 0 ? (
+          {taskParameters && taskParameters.length > 0 ? (
             <div className="space-y-4">
-              {runtimeParams.map((param) => (
+              {taskParameters.map((param) => (
                 <div
-                  key={param.id}
+                  key={param.parameter_id}
                   className="grid grid-cols-2 gap-4 p-4 border rounded-lg"
                 >
                   <div className="space-y-2">
                     <Label>Name</Label>
                     <Input
                       value={param.name}
-                      disabled={selectedTask.is_predefined}
+                      disabled
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Type</Label>
-                    <Select
-                      value={param.type}
-                      disabled={selectedTask.is_predefined}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="string">String</SelectItem>
-                        <SelectItem value="number">Number</SelectItem>
-                        <SelectItem value="date">Date</SelectItem>
-                        <SelectItem value="boolean">Boolean</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      value={param.data_type}
+                      disabled
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Default Value</Label>
                     <Input
-                      value={param.defaultValue || ''}
+                      value={param.default_value || ''}
                       disabled={selectedTask.is_predefined}
                     />
                   </div>
@@ -255,7 +260,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
                     <Label>Description</Label>
                     <Input
                       value={param.description}
-                      disabled={selectedTask.is_predefined}
+                      disabled
                     />
                   </div>
                 </div>
