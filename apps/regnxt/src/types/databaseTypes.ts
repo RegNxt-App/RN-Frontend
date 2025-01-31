@@ -298,13 +298,6 @@ export interface TaskDetails {
   task_subtype_id: number;
 }
 
-export interface TaskDetailTabsProps {
-  selectedTask: TaskDetails;
-  isEditing: boolean;
-  onEdit: () => void;
-  onSave: () => void;
-  onDelete?: () => void;
-}
 export interface StatItem {
   title: string;
   count: string;
@@ -608,4 +601,61 @@ export interface SortableItemProps {
   selected?: boolean;
   disabled?: boolean;
   onClick?: () => void;
+}
+export interface ApiResponse<T> {
+  data: T;
+}
+
+export interface TaskDetailTabsProps {
+  selectedTask: TaskDetails;
+  currentTab: string;
+  setCurrentTab: (tab: string) => void;
+  localTask: TaskDetails;
+  setLocalTask: (task: TaskDetails | null) => void;
+  isSaving: boolean;
+  setIsSaving: (saving: boolean) => void;
+  designTimeParams: {
+    sourceId: string;
+    sourceType: 'dataset' | 'dataview';
+    destinationId: string;
+  };
+  setDesignTimeParams: (params: any) => void;
+  runtimeParams: RuntimeParameter[];
+  onSave: () => Promise<void>;
+  onDeleteClick: () => void;
+  inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
+  outputOptionsResponse?: ApiResponse<DatasetOption[]>;
+  variablesResponse?: VariableResponse[];
+}
+export interface ConfigurationsTabContentProps {
+  selectedTask: TaskDetails;
+  localTask: TaskDetails;
+  handleInputChange: (field: keyof TaskDetails, value: string) => void;
+  designTimeParams: {
+    sourceId: string;
+    sourceType: 'dataset' | 'dataview';
+    destinationId: string;
+  };
+  setDesignTimeParams: React.Dispatch<
+    React.SetStateAction<{
+      sourceId: string;
+      sourceType: 'dataset' | 'dataview';
+      destinationId: string;
+    }>
+  >;
+  variablesResponse?: VariableResponse[];
+  inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
+  outputOptionsResponse?: ApiResponse<DatasetOption[]>;
+  runtimeParams: RuntimeParameter[];
+}
+export interface PropertiesTabContentProps {
+  selectedTask: TaskDetails;
+  localTask: TaskDetails;
+  handleInputChange: (field: keyof TaskDetails, value: string) => void;
+}
+export interface TooltipWrapperProps {
+  children: React.ReactNode;
+  disabled?: boolean;
+  disabledMessage?: string;
+  enabled?: boolean;
 }

@@ -1,19 +1,13 @@
 import React from 'react';
 
-import {TaskDetails} from '@/types/databaseTypes';
+import {PropertiesTabContentProps, TaskDetails} from '@/types/databaseTypes';
 
 import {Input} from '@rn/ui/components/ui/input';
 import {Label} from '@rn/ui/components/ui/label';
 import {TabsContent} from '@rn/ui/components/ui/tabs';
 import {Textarea} from '@rn/ui/components/ui/textarea';
 
-import DisabledTooltip from './DisabledTooltip';
-
-interface PropertiesTabContentProps {
-  selectedTask: TaskDetails;
-  localTask: TaskDetails;
-  handleInputChange: (field: keyof TaskDetails, value: string) => void;
-}
+import {TooltipWrapper} from './TooltipWrapper';
 
 export const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({
   selectedTask,
@@ -28,29 +22,38 @@ export const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({
       <div className="grid gap-4">
         <div className="space-y-2">
           <Label className="text-sm font-medium">Code</Label>
-          <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+          <TooltipWrapper
+            disabled={selectedTask.is_predefined}
+            disabledMessage="You cannot modify a system-generated task"
+          >
             <Input
               value={localTask.code}
               onChange={(e) => handleInputChange('code', e.target.value)}
               disabled={selectedTask.is_predefined}
               placeholder="Enter code"
             />
-          </DisabledTooltip>
+          </TooltipWrapper>
         </div>
         <div className="space-y-2">
           <Label className="text-sm font-medium">Label</Label>
-          <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+          <TooltipWrapper
+            disabled={selectedTask.is_predefined}
+            disabledMessage="You cannot modify a system-generated task"
+          >
             <Input
               value={localTask.label}
               onChange={(e) => handleInputChange('label', e.target.value)}
               disabled={selectedTask.is_predefined}
               placeholder="Enter label"
             />
-          </DisabledTooltip>
+          </TooltipWrapper>
         </div>
         <div className="space-y-2">
           <Label className="text-sm font-medium">Description</Label>
-          <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+          <TooltipWrapper
+            disabled={selectedTask.is_predefined}
+            disabledMessage="You cannot modify a system-generated task"
+          >
             <Textarea
               value={localTask.description || ''}
               onChange={(e) => handleInputChange('description', e.target.value)}
@@ -58,7 +61,7 @@ export const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({
               className="min-h-[100px]"
               placeholder="Enter description"
             />
-          </DisabledTooltip>
+          </TooltipWrapper>
         </div>
       </div>
     </TabsContent>
