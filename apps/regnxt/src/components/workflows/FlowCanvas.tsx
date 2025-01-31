@@ -1,28 +1,24 @@
 import React, {useCallback} from 'react';
 
+import {CustomNode} from '@/components/workflows/CustomNode';
+import {NodeData} from '@/types/databaseTypes';
 import {
   Background,
   Connection,
   Controls,
   Edge,
   Node,
-  NodeProps,
   ReactFlow,
   addEdge,
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
 
-import '@xyflow/react/dist/style.css';
+interface FlowCanvasProps {
+  className?: string;
+}
 
-import {NodeData} from '@/types/databaseTypes';
-
-import {CustomNode} from './CustomNode';
-import {TasksList} from './TasksList';
-
-type CustomNodeType = Node<NodeData>;
-
-export const WorkflowEditor: React.FC<{className?: string}> = ({className}) => {
+export const FlowCanvas: React.FC<FlowCanvasProps> = ({className}) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
@@ -64,35 +60,22 @@ export const WorkflowEditor: React.FC<{className?: string}> = ({className}) => {
     [setNodes]
   );
 
-  const handleDragStart = (event: React.DragEvent, nodeData: any) => {
-    event.dataTransfer.setData('application/json', JSON.stringify(nodeData));
-    event.dataTransfer.effectAllowed = 'move';
-  };
-
   return (
-    <div className={className}>
-      <div className="flex h-[600px] gap-4">
-        <div className="w-64 overflow-y-auto">
-          <h3 className="font-semibold mb-4">Available Tasks</h3>
-          <TasksList onDragStart={handleDragStart} />
-        </div>
-        <div className="flex-1 border rounded-lg">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
-            nodeTypes={{custom: CustomNode}}
-            fitView
-          >
-            <Background />
-            <Controls />
-          </ReactFlow>
-        </div>
-      </div>
+    <div className={`flex-1 border rounded-lg ${className}`}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        nodeTypes={{custom: CustomNode}}
+        fitView
+      >
+        <Background />
+        <Controls />
+      </ReactFlow>
     </div>
   );
 };

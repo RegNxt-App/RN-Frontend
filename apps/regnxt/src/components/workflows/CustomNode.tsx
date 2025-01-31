@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 
 import {CustomNodeProps} from '@/types/databaseTypes';
 import {Handle, Position} from '@xyflow/react';
@@ -14,7 +14,9 @@ const getTypeLabel = (typeId: number) => {
   }
 };
 
-export const CustomNode = ({data}: CustomNodeProps) => {
+export const CustomNode = React.memo(({data}: CustomNodeProps) => {
+  const typeLabel = useMemo(() => getTypeLabel(data.type), [data.type]);
+
   return (
     <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400">
       <Handle
@@ -24,7 +26,7 @@ export const CustomNode = ({data}: CustomNodeProps) => {
       />
       <div className="flex flex-col">
         <div className="text-sm font-bold text-green-600">{data.label}</div>
-        <div className="text-xs text-gray-500">{getTypeLabel(data.type)}</div>
+        <div className="text-xs text-gray-500">{typeLabel}</div>
         {data.language && <div className="mt-2 text-xs bg-gray-100 px-2 py-1 rounded">{data.language}</div>}
       </div>
       <Handle
@@ -34,4 +36,4 @@ export const CustomNode = ({data}: CustomNodeProps) => {
       />
     </div>
   );
-};
+});

@@ -1,9 +1,10 @@
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
+import {useWorkflow} from '@/contexts/WorkflowContext';
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {Workflow, WorkflowParameter, WorkflowRun, WorkflowTask} from '@/types/databaseTypes';
+import {Workflow, WorkflowParameter, WorkflowRun} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
 import {Clock, Edit, Loader2, Play} from 'lucide-react';
 import useSWR from 'swr';
@@ -15,11 +16,12 @@ import {Input} from '@rn/ui/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
 
-import {WorkflowDialog} from './WorkflowDialog';
+import {WorkflowDialog} from '../../../components/workflows/WorkflowDialog';
 
 const WORKFLOWS_ENDPOINT = '/api/v1/workflows/';
 
 const WorkflowManager = () => {
+  const {workflow, isEditing, setWorkflow, setIsEditing} = useWorkflow();
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [parameters, setParameters] = useState<Record<string, string>>({});
   const [isRunsDialogOpen, setIsRunsDialogOpen] = useState(false);
@@ -27,50 +29,54 @@ const WorkflowManager = () => {
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
   const [isWorkflowDialogOpen, setIsWorkflowDialogOpen] = useState(false);
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
-  const [workflowTasks, setWorkflowTasks] = useState<WorkflowTask[]>([]);
-  const columns: ColumnDef<Workflow>[] = [
-    {
-      accessorKey: 'code',
-      header: 'Context',
-      cell: ({row}) => <div className="font-medium">{row.getValue('code')}</div>,
-    },
-    {
-      accessorKey: 'label',
-      header: 'Workflow',
-    },
-    {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({row}) => (
-        <div className="flex space-x-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handlePlayClick(row.original)}
-            title="Start Workflow"
-          >
-            <Play className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleClockClick(row.original)}
-            title="View History"
-          >
-            <Clock className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleEditWorkflow(row.original)}
-            title="Edit Workflow"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
+
+  const columns = useMemo<ColumnDef<Workflow>[]>(
+    () => [
+      {
+        accessorKey: 'code',
+        header: 'Context',
+        cell: ({row}) => <div className="font-medium">{row.getValue('code')}</div>,
+      },
+      {
+        accessorKey: 'label',
+        header: 'Workflow',
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({row}) => (
+          <div className="flex space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handlePlayClick(row.original)}
+              title="Start Workflow"
+            >
+              <Play className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleClockClick(row.original)}
+              title="View History"
+            >
+              <Clock className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleEditWorkflow(row.original)}
+              title="Edit Workflow"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
   const {
     data: workflowsResponse,
     error,
@@ -105,17 +111,9 @@ const WorkflowManager = () => {
     try {
       const response = await orchestraBackendInstance.get(
         `${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`,
-        {
-          params: {
-            page: 1,
-            page_size: 50,
-            search: '',
-          },
-        }
+        {params: {page: 1, page_size: 50, search: ''}}
       );
-
-      const runs: WorkflowRun[] = response.data;
-      setWorkflowRuns(runs);
+      setWorkflowRuns(response.data);
       setIsRunsDialogOpen(true);
     } catch (error) {
       toast({
@@ -123,36 +121,6 @@ const WorkflowManager = () => {
         description: 'Failed to fetch workflow runs',
         variant: 'destructive',
       });
-    }
-  };
-  const formatDateTime = (dateTimeString: string | null) => {
-    if (!dateTimeString) return 'N/A';
-    try {
-      const date = new Date(dateTimeString);
-      return date.toLocaleString();
-    } catch {
-      return dateTimeString;
-    }
-  };
-  const formatRuntime = (runtime: string | number) => {
-    if (runtime === 'N/A') return runtime;
-    if (typeof runtime === 'number') {
-      return runtime.toFixed(2);
-    }
-    return runtime;
-  };
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'text-green-600';
-      case 'failed':
-        return 'text-red-600';
-      case 'running':
-        return 'text-blue-600';
-      case 'cancelled':
-        return 'text-orange-600';
-      default:
-        return 'text-gray-600';
     }
   };
 
@@ -184,18 +152,56 @@ const WorkflowManager = () => {
     }
   };
 
-  if (error) {
-    return <div className="text-red-500 p-4 text-center">Error loading workflows: {error.message}</div>;
-  }
-  const handleEditWorkflow = async (workflow: Workflow) => {
-    setEditingWorkflow(workflow);
+  const handleEditWorkflow = (workflow: Workflow) => {
+    setWorkflow(workflow);
+    setIsEditing(true);
+    setIsWorkflowDialogOpen(true);
+  };
+  const handleCreateWorkflow = () => {
+    setWorkflow(null);
+    setIsEditing(false);
     setIsWorkflowDialogOpen(true);
   };
 
-  const handleCreateWorkflow = () => {
-    setEditingWorkflow(null);
-    setIsWorkflowDialogOpen(true);
+  const formatDateTime = (dateTimeString: string | null) => {
+    if (!dateTimeString) return 'N/A';
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleString();
+    } catch {
+      return dateTimeString;
+    }
   };
+
+  const formatRuntime = (runtime: string | number) => {
+    if (runtime === 'N/A') return runtime;
+    if (typeof runtime === 'number') {
+      return runtime.toFixed(2);
+    }
+    return runtime;
+  };
+
+  const getStatusColor = useMemo(
+    () => (status: string) => {
+      switch (status.toLowerCase()) {
+        case 'completed':
+          return 'text-green-600';
+        case 'failed':
+          return 'text-red-600';
+        case 'running':
+          return 'text-blue-600';
+        case 'cancelled':
+          return 'text-orange-600';
+        default:
+          return 'text-gray-600';
+      }
+    },
+    []
+  );
+
+  if (error) {
+    return <div className="text-red-500 p-4 text-center">Error loading workflows: {error.message}</div>;
+  }
 
   return (
     <div className="p-4 lg:p-6 max-w-screen-2xl mx-auto">
@@ -204,11 +210,7 @@ const WorkflowManager = () => {
           <h1 className="text-2xl lg:text-3xl font-bold mb-1">Workflow Management</h1>
           <p className="text-sm">Configure and manage your workflow execution</p>
         </div>
-        <Button
-        // onClick={handleCreateWorkflow}
-        >
-          Create Workflow
-        </Button>
+        <Button onClick={handleCreateWorkflow}>Create Workflow</Button>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
@@ -220,7 +222,7 @@ const WorkflowManager = () => {
             <SharedDataTable
               data={workflows}
               columns={columns}
-              onRowClick={(item) => console.log()}
+              onRowClick={(item) => console.log(item)}
               showPagination={true}
             />
           </CardContent>
@@ -281,7 +283,6 @@ const WorkflowManager = () => {
                           </Select>
                         ) : (
                           <Input
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                             value={parameters[param.name] || param.default_value || ''}
                             onChange={(e) =>
                               setParameters((prev) => ({
@@ -289,6 +290,7 @@ const WorkflowManager = () => {
                                 [param.name]: e.target.value,
                               }))
                             }
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                           />
                         )}
                       </div>
@@ -363,7 +365,7 @@ const WorkflowManager = () => {
       <WorkflowDialog
         open={isWorkflowDialogOpen}
         onOpenChange={setIsWorkflowDialogOpen}
-        workflow={editingWorkflow}
+        workflow={workflow}
       />
     </div>
   );

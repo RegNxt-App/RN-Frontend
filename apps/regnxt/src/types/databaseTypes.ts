@@ -1,4 +1,4 @@
-import {Edge, Node, Position} from '@xyflow/react';
+import {Connection, Edge, Node, Position} from '@xyflow/react';
 import {LucideIcon} from 'lucide-react';
 
 export interface TableColumn {
@@ -319,6 +319,11 @@ export interface SystemVariable {
   value: string;
   description: string;
 }
+export interface SystemVariablesResponse {
+  count: number;
+  num_pages: number;
+  results: SystemVariable[];
+}
 export interface TaskSubType {
   task_subtype_id: number;
   task_type_id: number;
@@ -569,4 +574,38 @@ export interface AddRuntimeParameterDialogProps {
   availableParameters: AvailableParameter[];
   onParameterAdd: () => void;
   isDisabled: boolean;
+}
+
+export interface VariableCardProps {
+  selectedVariable: SystemVariable;
+  isEditing: boolean;
+  onEdit: () => void;
+  onSave: (variable: SystemVariable) => void;
+  onChange: (variable: SystemVariable) => void;
+}
+export interface VariableListItemProps {
+  variable: SystemVariable;
+  isSelected: boolean;
+  onSelect: (variable: SystemVariable) => void;
+}
+export interface WorkflowContextType {
+  currentWorkflow: Workflow | null;
+  nodes: Node<NodeData>[];
+  edges: Edge[];
+  tasks: WorkflowTask[];
+  isEditing: boolean;
+  setCurrentWorkflow: (workflow: Workflow | null) => void;
+  setNodes: React.Dispatch<React.SetStateAction<Node<NodeData>[]>>;
+  setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
+  setTasks: React.Dispatch<React.SetStateAction<WorkflowTask[]>>;
+  setIsEditing: (isEditing: boolean) => void;
+  onConnect: (connection: Connection) => void;
+}
+export interface SortableItemProps {
+  id: string;
+  label: string;
+  description: string;
+  selected?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
 }

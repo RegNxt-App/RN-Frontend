@@ -11,6 +11,7 @@ import PageTitle from './components/PageTitle';
 import PrivateRoute from './components/PrivateRoute';
 import {useAuth} from './contexts/AuthContext';
 import {BackendProvider} from './contexts/BackendContext';
+import {WorkflowProvider} from './contexts/WorkflowContext';
 import DefaultLayout from './layout/DefaultLayout';
 import ApplicationSettings from './pages/Orchestra/ApplicationSettings';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
@@ -55,6 +56,12 @@ const Relationship = lazy(() => import('./pages/Relationship'));
 const ConfigureDatasets = lazy(() => import('./components/configurations/ConfigureDatasets'));
 const ConfigureGrouping = lazy(() => import('./components/configurations/ConfigureGrouping'));
 
+const WorkflowsWithProvider = () => (
+  <WorkflowProvider>
+    <WorkflowManager />
+  </WorkflowProvider>
+);
+
 const routeConfig = {
   auth: [
     {path: '/auth/signin', component: SignIn, layout: null},
@@ -96,7 +103,7 @@ const routeConfig = {
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},
     {path: '/orchestra/tasks', component: TaskAccordion, title: 'Orchestra'},
-    {path: '/orchestra/workflows', component: WorkflowManager, title: 'Orchestra'},
+    {path: '/orchestra/workflows', component: WorkflowsWithProvider, title: 'Orchestra'},
     {path: '/orchestra/monitoring', component: Monitoring, title: 'Orchestra'},
     {path: '/orchestra/data', component: Data, title: 'Orchestra'},
     {path: '/orchestra/business-rules', component: BusinessRules, title: 'Orchestra'},

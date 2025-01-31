@@ -1,10 +1,15 @@
-import {Workflow, WorkflowDialogProps} from '@/types/databaseTypes';
+import React from 'react';
+
+import {useWorkflow} from '@/contexts/WorkflowContext';
+import {WorkflowDialogProps} from '@/types/databaseTypes';
 
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
 
 import {WorkflowEditor} from './WorkflowEditor';
 
-export const WorkflowDialog: React.FC<WorkflowDialogProps> = ({open, onOpenChange, workflow}) => {
+export const WorkflowDialog: React.FC<WorkflowDialogProps> = ({open, onOpenChange}) => {
+  const {workflow, isEditing} = useWorkflow();
+
   return (
     <Dialog
       open={open}
@@ -12,7 +17,7 @@ export const WorkflowDialog: React.FC<WorkflowDialogProps> = ({open, onOpenChang
     >
       <DialogContent className="max-w-7xl">
         <DialogHeader>
-          <DialogTitle>{workflow ? `Edit Workflow: ${workflow.label}` : 'Create New Workflow'}</DialogTitle>
+          <DialogTitle>{isEditing ? `Edit Workflow: ${workflow?.label}` : 'Create New Workflow'}</DialogTitle>
         </DialogHeader>
         <WorkflowEditor className="mt-4" />
       </DialogContent>

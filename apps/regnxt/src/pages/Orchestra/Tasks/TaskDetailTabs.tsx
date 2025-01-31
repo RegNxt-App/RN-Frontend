@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
@@ -104,18 +104,8 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
       return {data: response.data};
     }
   );
-  useEffect(() => {
-    console.log('Task Parameters Changed:', {
-      taskParameters: taskParametersResponse,
-      inputOptions: inputOptionsResponse,
-      outputOptions: outputOptionsResponse,
-      currentDesignTimeParams: designTimeParams,
-      inputVariableId,
-      outputVariableId,
-    });
-  }, [taskParametersResponse, inputOptionsResponse, outputOptionsResponse, designTimeParams]);
 
-  useEffect(() => {
+  const updateDesignTimeParams = useCallback(() => {
     if (taskParametersResponse?.length) {
       const inputParam = taskParametersResponse.find((param) => param.parameter_id === inputVariableId);
       const outputParam = taskParametersResponse.find((param) => param.parameter_id === outputVariableId);
@@ -129,6 +119,10 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
       }
     }
   }, [taskParametersResponse, inputVariableId, outputVariableId]);
+
+  useEffect(() => {
+    updateDesignTimeParams();
+  }, [updateDesignTimeParams]);
 
   useEffect(() => {
     if (selectedTask.task_id !== localTask.task_id) {
@@ -176,31 +170,6 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
       [field]: value,
     }));
   };
-  const saveTaskParameters = async (parameters: TaskParameter[]) => {
-    try {
-      const payload = parameters.map((param) => ({
-        parameter_id: param.id,
-        default_value: param.default_value,
-      }));
-
-      await orchestraBackendInstance.post(TASK_PARAMETERS_ENDPOINT, payload);
-
-      toast({
-        title: 'Success',
-        description: 'Task parameters saved successfully',
-      });
-
-      mutate(GET_TASK_PARAMETERS_ENDPOINT);
-    } catch (error) {
-      console.error('Error saving task parameters:', error);
-
-      toast({
-        title: 'Error',
-        description: 'Failed to save task parameters',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
@@ -221,7 +190,6 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({selectedTask, onS
     try {
       const payload = {
         task_type_id: localTask.task_type_id,
-        code: localTask.code,
         label: localTask.label,
         description: localTask.description,
         context: localTask.context,
