@@ -1,0 +1,60 @@
+name: Deploy to Firebase Hosting on staging
+on:
+  push:
+    branches:
+      - staging
+    paths:
+      - "apps/regnxt/**"
+
+jobs:
+  build_and_preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build Regnxt App
+        run: |
+          cd apps/regnxt
+          pnpm run build
+          cp web.config dist/
+        env:
+          CI: false
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_FAST_API_BACKEND: ${{ secrets.VITE_FAST_API_BACKEND }}
+          VITE_ORCHESTRA_API_BACKED: ${{ secrets.VITE_ORCHESTRA_API_BACKED }}
+
+      - name: Setup Distribution
+        run: |
+          mkdir -p dist
+          cp -r apps/regnxt/dist/* dist/
+          cp apps/regnxt/dist/web.config dist/ || cp apps/regnxt/web.config dist/
+          chmod -R 755 dist
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_REGNXT_ORCHESTRA }}
+          projectId: regnxt-orchestra
+          channelId: staging

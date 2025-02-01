@@ -123,7 +123,7 @@ const routeConfig = {
 const ProtectedRoute = ({component: Component, title}: {component: React.ComponentType; title: string}) => {
   const {user, loading, refreshUserSession} = useAuth();
   const location = useLocation();
-
+  console.log('test commit');
   useEffect(() => {
     if (!user) {
       refreshUserSession();
