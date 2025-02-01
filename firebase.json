@@ -1,15 +1,11 @@
 {
   "hosting": {
     "public": "apps/regnxt/dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "**",
-        "destination": "apps/regnxt/index.html"
+        "destination": "/index.html"
       }
     ]
   }
