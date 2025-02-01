@@ -2,11 +2,11 @@ name: Deploy to Firebase Hosting on Merge to Main
 on:
   push:
     branches:
-      - main # Runs only when staging merges into main
+      - main
 
 jobs:
   build_and_deploy_main:
-    if: ${{ github.event.before == 'refs/heads/staging' }} # Only triggers if staging is merged into main
+    if: ${{ github.event.before == 'refs/heads/staging' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build Regnxt App
         run: |
