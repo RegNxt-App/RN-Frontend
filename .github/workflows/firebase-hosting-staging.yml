@@ -1,16 +1,36 @@
 name: Deploy to Firebase Hosting on staging
-on:
+"on":
   push:
     branches:
       - staging
     paths:
       - "apps/regnxt/**"
+  pull_request:
+    branches:
+      - staging
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
   build_and_preview:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Debug Information
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Base ref: ${{ github.base_ref }}"
+          echo "Head ref: ${{ github.head_ref }}"
+          echo "PR merged: ${{ github.event.pull_request.merged }}"
+          echo "Source branch: ${{ github.event.pull_request.head.ref }}"
+          echo "Target branch: ${{ github.event.pull_request.base.ref }}"
 
       - name: Cache pnpm modules
         uses: actions/cache@v3
