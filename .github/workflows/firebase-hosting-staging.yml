@@ -1,44 +1,14 @@
-name: Deploy to Firebase Hosting on staging
-"on":
+name: Deploy to Firebase Hosting on Staging
+on:
   push:
     branches:
-      - staging
-    paths:
-      - "apps/regnxt/**"
-  pull_request:
-    branches:
-      - staging
-    types:
-      - opened
-      - synchronize
-      - reopened
+      - staging # Runs for each commit on staging
 
 jobs:
-  build_and_preview:
+  build_and_deploy_staging:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Debug Information
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Base ref: ${{ github.base_ref }}"
-          echo "Head ref: ${{ github.head_ref }}"
-          echo "PR merged: ${{ github.event.pull_request.merged }}"
-          echo "Source branch: ${{ github.event.pull_request.head.ref }}"
-          echo "Target branch: ${{ github.event.pull_request.base.ref }}"
-
-      - name: Cache pnpm modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -52,7 +22,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: Build Regnxt App
         run: |
@@ -72,9 +42,10 @@ jobs:
           cp apps/regnxt/dist/web.config dist/ || cp apps/regnxt/web.config dist/
           chmod -R 755 dist
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Deploy to Firebase Hosting (Staging)
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_REGNXT_ORCHESTRA }}
-          projectId: regnxt-orchestra
           channelId: staging
+          projectId: regnxt-orchestra
