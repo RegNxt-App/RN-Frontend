@@ -1,14 +1,13 @@
 name: Deploy to Firebase Hosting on merge
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
       - main
-      - staging
-    paths:
-      - "apps/regnxt/**"
 
 jobs:
   build_and_deploy:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'staging'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +32,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build Regnxt App
         run: |
@@ -57,5 +56,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_REGNXT_ORCHESTRA }}
-          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || format('staging-{0}', github.sha) }}
+          channelId: live
           projectId: regnxt-orchestra
