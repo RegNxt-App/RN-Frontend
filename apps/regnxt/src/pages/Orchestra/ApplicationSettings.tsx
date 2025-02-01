@@ -1,8 +1,8 @@
-import {useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {SystemVariable} from '@/types/databaseTypes';
+import {SystemVariable, SystemVariablesResponse} from '@/types/databaseTypes';
 import {
   ArrowLeftRight,
   ChevronDown,
@@ -16,10 +16,12 @@ import {
 } from 'lucide-react';
 import useSWR, {mutate} from 'swr';
 
-import {Button} from '@rn/ui/components/ui/button';
 import {Card} from '@rn/ui/components/ui/card';
 import {Input} from '@rn/ui/components/ui/input';
 import {ScrollArea} from '@rn/ui/components/ui/scroll-area';
+
+import {EmptyVariableCard, VariableCard} from './VariableCard';
+import {VariableListItem} from './VariableListItem';
 
 const SYSTEM_VARIABLES_ENDPOINT = '/api/v1/system-variables/';
 
@@ -33,12 +35,12 @@ const ApplicationSettings = () => {
     data: response,
     error,
     isLoading,
-  } = useSWR<SystemVariable[]>(SYSTEM_VARIABLES_ENDPOINT, async (url: string) => {
+  } = useSWR<SystemVariablesResponse>(SYSTEM_VARIABLES_ENDPOINT, async (url: string) => {
     const response = await orchestraBackendInstance.get(url);
     return response.data;
   });
 
-  const variables = response || [];
+  const variables = response?.results || [];
 
   const stats = useMemo(() => {
     const categories = new Set(variables.map((v) => v.category)).size;
@@ -79,7 +81,7 @@ const ApplicationSettings = () => {
     }));
   }, [variables]);
 
-  const handleSave = async (variable: SystemVariable) => {
+  const handleSave = useCallback(async (variable: SystemVariable) => {
     try {
       await orchestraBackendInstance.put(`${SYSTEM_VARIABLES_ENDPOINT}${variable.system_variable_id}/`, {
         value: variable.value,
@@ -101,13 +103,13 @@ const ApplicationSettings = () => {
         variant: 'destructive',
       });
     }
-  };
+  }, []);
 
-  const toggleCategory = (categoryName: string) => {
+  const toggleCategory = useCallback((categoryName: string) => {
     setExpandedCategories((prev) =>
       prev.includes(categoryName) ? prev.filter((name) => name !== categoryName) : [...prev, categoryName]
     );
-  };
+  }, []);
 
   const filteredCategories = useMemo(() => {
     const query = searchTerm.toLowerCase().trim();
@@ -210,25 +212,14 @@ const ApplicationSettings = () => {
                       {expandedCategories.includes(category.name) && (
                         <div className="space-y-1">
                           {category.variables.map((variable) => (
-                            <div
+                            <VariableListItem
                               key={variable.system_variable_id}
-                              className={`flex items-center justify-between ml-8 p-2 hover:bg-gray-100 rounded-lg cursor-pointer ${
+                              variable={variable}
+                              isSelected={
                                 selectedVariable?.system_variable_id === variable.system_variable_id
-                                  ? 'bg-gray-100'
-                                  : ''
-                              }`}
-                              onClick={() => setSelectedVariable(variable)}
-                            >
-                              <div className="flex items-start min-w-0">
-                                <FileText className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-sm">{variable.variable_name}</div>
-                                  <div className="text-xs text-gray-500">
-                                    {variable.value || 'No value set'}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                              }
+                              onSelect={setSelectedVariable}
+                            />
                           ))}
                         </div>
                       )}
@@ -248,57 +239,15 @@ const ApplicationSettings = () => {
 
         <Card className="flex-1 p-4 lg:p-6">
           {selectedVariable ? (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">{selectedVariable.variable_name}</h2>
-                <Button
-                  onClick={() => {
-                    if (isEditing) {
-                      handleSave(selectedVariable);
-                    } else {
-                      setIsEditing(true);
-                    }
-                  }}
-                >
-                  {isEditing ? 'Save Changes' : 'Edit'}
-                </Button>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-500">
-                <span className="flex items-center">
-                  <Tag className="w-4 h-4 mr-1" /> {selectedVariable.category}
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Value</label>
-                  <Input
-                    value={selectedVariable.value || ''}
-                    onChange={(e) => {
-                      setSelectedVariable({
-                        ...selectedVariable,
-                        value: e.target.value,
-                      });
-                    }}
-                    disabled={!isEditing}
-                    className="font-mono"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Description</label>
-                  <p className="text-sm text-gray-600">{selectedVariable.description}</p>
-                </div>
-              </div>
-            </div>
+            <VariableCard
+              selectedVariable={selectedVariable}
+              isEditing={isEditing}
+              onEdit={() => setIsEditing(true)}
+              onSave={handleSave}
+              onChange={setSelectedVariable}
+            />
           ) : (
-            <div className="h-[calc(100vh-16rem)] flex items-center justify-center">
-              <div className="text-center">
-                <FileText className="w-12 h-12 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold mb-2">No Setting Selected</h3>
-                <p>Select a setting from the browser to view and edit its details</p>
-              </div>
-            </div>
+            <EmptyVariableCard />
           )}
         </Card>
       </div>

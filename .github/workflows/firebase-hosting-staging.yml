@@ -1,12 +1,11 @@
-name: Deploy to Firebase Hosting on Merge to Main
+name: Deploy to Firebase Hosting on Staging
 on:
   push:
     branches:
-      - main
+      - staging # Runs for each commit on staging
 
 jobs:
-  build_and_deploy_main:
-    if: ${{ github.event.before == 'refs/heads/staging' }}
+  build_and_deploy_staging:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,10 +42,10 @@ jobs:
           cp apps/regnxt/dist/web.config dist/ || cp apps/regnxt/web.config dist/
           chmod -R 755 dist
 
-      - name: Deploy to Firebase Hosting (Main)
+      - name: Deploy to Firebase Hosting (Staging)
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_REGNXT_ORCHESTRA }}
-          channelId: live
+          channelId: staging
           projectId: regnxt-orchestra

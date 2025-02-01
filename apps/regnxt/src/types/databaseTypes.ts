@@ -1,4 +1,4 @@
-import {Edge, Node, Position} from '@xyflow/react';
+import {Connection, Edge, Node, Position} from '@xyflow/react';
 import {LucideIcon} from 'lucide-react';
 
 export interface TableColumn {
@@ -238,7 +238,9 @@ export interface ApiTask {
   task_code: string | null;
 }
 export interface TasksApiResponse {
-  data: ApiTask[];
+  count: number;
+  num_pages: number;
+  results: TaskType[];
 }
 export interface TaskType {
   task_id: number;
@@ -296,13 +298,6 @@ export interface TaskDetails {
   task_subtype_id: number;
 }
 
-export interface TaskDetailTabsProps {
-  selectedTask: TaskDetails;
-  isEditing: boolean;
-  onEdit: () => void;
-  onSave: () => void;
-  onDelete?: () => void;
-}
 export interface StatItem {
   title: string;
   count: string;
@@ -316,6 +311,11 @@ export interface SystemVariable {
   variable_name: string;
   value: string;
   description: string;
+}
+export interface SystemVariablesResponse {
+  count: number;
+  num_pages: number;
+  results: SystemVariable[];
 }
 export interface TaskSubType {
   task_subtype_id: number;
@@ -337,20 +337,30 @@ export interface Workflow {
 
 export interface WorkflowParameter {
   task_id: number;
+  default_value: string | null;
   name: string;
   label: string;
   description: string;
-  default_value: string;
-  is_enum: boolean;
   statement: string;
+  is_enum: boolean;
+  options: Array<{
+    value: number | string;
+    label: string;
+  }>;
 }
 export interface WorkflowRun {
-  'Run ID': string;
+  'Run ID': number;
   'Pipeline Name': string;
   Status: string;
   'Started At': string;
   'Completed At': string;
-  'Total Runtime (seconds)': number | string;
+  'Total Runtime (seconds)': string | number;
+  'Block Details': Array<{
+    'Block UUID': string;
+    Status: string;
+    'Started At': string | null;
+    'Completed At': string | null;
+  }>;
 }
 
 export interface UserSetting {
@@ -381,11 +391,12 @@ export interface WorkflowTask {
   task_language: string;
   upstream_tasks: number[];
 }
-export interface NodeData {
+export interface NodeData extends Record<string, unknown> {
   label: string;
   type: number;
-  language?: string;
+  language: string | null;
 }
+
 export interface WorkflowDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -393,11 +404,18 @@ export interface WorkflowDialogProps {
 }
 export interface Task {
   task_id: number;
-  task_code: string;
-  task_type_id: number;
+  code?: string;
   label: string;
+  description?: string;
+  task_type_label?: string;
+  is_predefined?: boolean;
   task_language: string | null;
-  upstream_tasks: number | null;
+  task_code: string;
+  context?: string;
+  task_type_id: number;
+  task_type_code?: string;
+  task_subtype_id: number;
+  upstream_tasks: number[] | null;
 }
 export interface CustomNodeProps {
   data: {
@@ -425,6 +443,17 @@ export interface RuntimeParameter {
   type: string;
   defaultValue?: string;
   description: string;
+  parameter_id: number;
+  default_value: string | null;
+  label: string;
+  data_type: string;
+}
+export interface AvailableParameter {
+  variable_id: number;
+  name: string;
+  label: string;
+  description: string;
+  data_type: string;
 }
 
 export interface Field {
@@ -519,4 +548,114 @@ export interface SortableListProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   total: number;
+}
+export interface GroupedTask {
+  type_id: number;
+  type_code: string;
+  label: string;
+  subtypes: Record<
+    number,
+    {
+      subtype_id: number;
+      label: string;
+      tasks: Array<TaskType & {isPredefined: boolean}>;
+    }
+  >;
+}
+export interface AddRuntimeParameterDialogProps {
+  taskId: number;
+  availableParameters: AvailableParameter[];
+  onParameterAdd: () => void;
+  isDisabled: boolean;
+}
+
+export interface VariableCardProps {
+  selectedVariable: SystemVariable;
+  isEditing: boolean;
+  onEdit: () => void;
+  onSave: (variable: SystemVariable) => void;
+  onChange: (variable: SystemVariable) => void;
+}
+export interface VariableListItemProps {
+  variable: SystemVariable;
+  isSelected: boolean;
+  onSelect: (variable: SystemVariable) => void;
+}
+export interface WorkflowContextType {
+  currentWorkflow: Workflow | null;
+  nodes: Node<NodeData>[];
+  edges: Edge[];
+  tasks: WorkflowTask[];
+  isEditing: boolean;
+  setCurrentWorkflow: (workflow: Workflow | null) => void;
+  setNodes: React.Dispatch<React.SetStateAction<Node<NodeData>[]>>;
+  setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
+  setTasks: React.Dispatch<React.SetStateAction<WorkflowTask[]>>;
+  setIsEditing: (isEditing: boolean) => void;
+  onConnect: (connection: Connection) => void;
+}
+export interface SortableItemProps {
+  id: string;
+  label: string;
+  description: string;
+  selected?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+}
+export interface ApiResponse<T> {
+  data: T;
+}
+
+export interface TaskDetailTabsProps {
+  selectedTask: TaskDetails;
+  currentTab: string;
+  setCurrentTab: (tab: string) => void;
+  localTask: TaskDetails;
+  setLocalTask: (task: TaskDetails | null) => void;
+  isSaving: boolean;
+  setIsSaving: (saving: boolean) => void;
+  designTimeParams: {
+    sourceId: string;
+    sourceType: 'dataset' | 'dataview';
+    destinationId: string;
+  };
+  setDesignTimeParams: (params: any) => void;
+  runtimeParams: RuntimeParameter[];
+  onSave: () => Promise<void>;
+  onDeleteClick: () => void;
+  inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
+  outputOptionsResponse?: ApiResponse<DatasetOption[]>;
+  variablesResponse?: VariableResponse[];
+}
+export interface ConfigurationsTabContentProps {
+  selectedTask: TaskDetails;
+  localTask: TaskDetails;
+  handleInputChange: (field: keyof TaskDetails, value: string) => void;
+  designTimeParams: {
+    sourceId: string;
+    sourceType: 'dataset' | 'dataview';
+    destinationId: string;
+  };
+  setDesignTimeParams: React.Dispatch<
+    React.SetStateAction<{
+      sourceId: string;
+      sourceType: 'dataset' | 'dataview';
+      destinationId: string;
+    }>
+  >;
+  variablesResponse?: VariableResponse[];
+  inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
+  outputOptionsResponse?: ApiResponse<DatasetOption[]>;
+  runtimeParams: RuntimeParameter[];
+}
+export interface PropertiesTabContentProps {
+  selectedTask: TaskDetails;
+  localTask: TaskDetails;
+  handleInputChange: (field: keyof TaskDetails, value: string) => void;
+}
+export interface TooltipWrapperProps {
+  children: React.ReactNode;
+  disabled?: boolean;
+  disabledMessage?: string;
+  enabled?: boolean;
 }

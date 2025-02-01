@@ -3,7 +3,21 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import Loader from '@/common/Loader';
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {ApiTask, StatItem, TaskDetails, TaskSubType, TaskType, TasksApiResponse} from '@/types/databaseTypes';
+import {
+  ApiResponse,
+  ApiTask,
+  DatasetOption,
+  DataviewOption,
+  GroupedTask,
+  RuntimeParameter,
+  StatItem,
+  SubtypeParamsResponse,
+  TaskDetails,
+  TaskSubType,
+  TaskType,
+  TasksApiResponse,
+  VariableResponse,
+} from '@/types/databaseTypes';
 import {
   ArrowLeftRight,
   ChevronDown,
@@ -33,7 +47,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn
 import {Tabs, TabsList, TabsTrigger} from '@rn/ui/components/ui/tabs';
 import {Textarea} from '@rn/ui/components/ui/textarea';
 
-import {TaskDetailTabs} from './TaskDetailTabs';
+import {TaskDetailTabs} from '../../../components/Tasks/TaskDetailTabs';
 
 const formSchema = z.object({
   task_type_id: z.number().min(1, 'Task type is required'),
@@ -62,26 +76,242 @@ export const TaskAccordion: React.FC = () => {
   const [selectedTaskSubType, setSelectedTaskSubType] = useState<string | null>(null);
   const [isLoadingSubTypes, setIsLoadingSubTypes] = useState(false);
   const [expandedSubtypes, setExpandedSubtypes] = useState<string[]>([]);
+  const [currentTab, setCurrentTab] = useState('properties');
+  const [localTask, setLocalTask] = useState<TaskDetails | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [runtimeParams, setRuntimeParams] = useState<RuntimeParameter[]>([]);
+  const [variablesResponse, setVariablesResponse] = useState<VariableResponse[]>([]);
+  const [taskToDelete, setTaskToDelete] = useState<TaskType | null>(null);
+  const [inputOptionsResponse, setInputOptionsResponse] =
+    useState<ApiResponse<(DatasetOption | DataviewOption)[]>>();
+  const [outputOptionsResponse, setOutputOptionsResponse] = useState<ApiResponse<DatasetOption[]>>();
+
+  const [designTimeParams, setDesignTimeParams] = useState<{
+    sourceId: string;
+    sourceType: 'dataset' | 'dataview';
+    destinationId: string;
+  }>({
+    sourceId: '',
+    sourceType: 'dataset',
+    destinationId: '',
+  });
 
   const TASKS_ENDPOINT = '/api/v1/tasks/';
   const TASK_TYPES_ENDPOINT = '/api/v1/tasks/task_type_list/';
+  const {data: subtypeParamsResponse} = useSWR<SubtypeParamsResponse[]>(
+    selectedTask?.task_subtype_id
+      ? `/api/v1/tasks/${selectedTask.task_subtype_id}/subtype-parameters/`
+      : null,
+    async (url: string) => {
+      const response = await orchestraBackendInstance.get(url);
+      return response.data;
+    }
+  );
+  const fetchVariables = useCallback(async () => {
+    if (subtypeParamsResponse?.[0]?.parameters) {
+      try {
+        const variablesUrl = `/api/v1/tasks/variables/?ids=${subtypeParamsResponse[0].parameters
+          .map((p) => p.id)
+          .join(',')}`;
+        const variablesResponse = await orchestraBackendInstance.get(variablesUrl);
+        setVariablesResponse(variablesResponse.data);
+
+        // Find input and output variable IDs
+        const inputVariableId = variablesResponse.data.find(
+          (v: VariableResponse) =>
+            v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
+        )?.variable_id;
+
+        const outputVariableId = variablesResponse.data.find(
+          (v: VariableResponse) =>
+            v.name.toLowerCase().includes('output') && v.name.toLowerCase().includes('dataset')
+        )?.variable_id;
+
+        // Fetch input options
+        if (inputVariableId) {
+          const inputStatement = variablesResponse.data.find(
+            (v: VariableResponse) => v.variable_id === inputVariableId
+          )?.statement;
+          if (inputStatement) {
+            const inputOptionsUrl = `/api/v1/tasks/execute-sql/?statement=${encodeURIComponent(
+              inputStatement
+            )}`;
+            const inputOptionsResponse = await orchestraBackendInstance.get(inputOptionsUrl);
+            setInputOptionsResponse({data: inputOptionsResponse.data});
+          }
+        }
+
+        // Fetch output options
+        if (outputVariableId) {
+          const outputStatement = variablesResponse.data.find(
+            (v: VariableResponse) => v.variable_id === outputVariableId
+          )?.statement;
+          if (outputStatement) {
+            const outputOptionsUrl = `/api/v1/tasks/execute-sql/?statement=${encodeURIComponent(
+              outputStatement
+            )}`;
+            const outputOptionsResponse = await orchestraBackendInstance.get(outputOptionsUrl);
+            setOutputOptionsResponse({data: outputOptionsResponse.data});
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching variables:', error);
+      }
+    }
+  }, [subtypeParamsResponse]);
+
+  // Trigger variable fetching when a task is selected
+  useEffect(() => {
+    if (selectedTask) {
+      fetchVariables();
+    }
+  }, [selectedTask, fetchVariables]);
 
   const {
     data: response,
     error,
     isLoading,
-  } = useSWR<TasksApiResponse>(TASKS_ENDPOINT, orchestraBackendInstance, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    onSuccess: (data) => {
-      if (selectedTask) {
-        const refreshedTask = data.data.find((task) => task.task_id === selectedTask.task_id);
-        if (refreshedTask) {
-          setSelectedTask(refreshedTask);
-        }
-      }
+  } = useSWR<TasksApiResponse>(
+    TASKS_ENDPOINT,
+    async (url) => {
+      const response = await orchestraBackendInstance.get(url);
+      return response.data;
     },
-  });
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      onSuccess: (data) => {
+        if (selectedTask && data?.results) {
+          const refreshedTask = data.results.find((task) => task.task_id === selectedTask.task_id);
+          if (refreshedTask) {
+            setSelectedTask(refreshedTask);
+          }
+        }
+      },
+    }
+  );
+  const handleDeleteClick = (task: TaskType) => {
+    setTaskToDelete(task);
+    setIsDeleteDialogOpen(true);
+  };
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete?.task_id) {
+      console.error('No task id found');
+      return;
+    }
+
+    try {
+      await orchestraBackendInstance.delete(`/api/v1/tasks/${taskToDelete.task_id}/`);
+      setIsDeleteDialogOpen(false);
+      setTaskToDelete(null);
+      setSelectedTask(null); // Clear selected task
+
+      toast({
+        title: 'Success',
+        description: 'Task deleted successfully',
+      });
+
+      await mutate(TASKS_ENDPOINT); // Refresh task list
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete task',
+        variant: 'destructive',
+      });
+    }
+  };
+  const handleCancelDelete = () => {
+    setIsDeleteDialogOpen(false);
+    setTaskToDelete(null);
+  };
+
+  const handleInputChange = (field: keyof TaskDetails, value: string) => {
+    if (localTask) {
+      setLocalTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              [field]: value,
+            }
+          : null
+      );
+    }
+  };
+  const handleSaveChanges = async () => {
+    if (!localTask) return;
+
+    setIsSaving(true);
+    const parameters = [];
+    const TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${localTask.task_id}/add_parameter/`;
+
+    // Fetch input and output variable IDs (you might need to pass these as props or derive them)
+    const inputVariableId = variablesResponse?.find(
+      (v) => v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
+    )?.variable_id;
+
+    const outputVariableId = variablesResponse?.find(
+      (v) => v.name.toLowerCase().includes('output') && v.name.toLowerCase().includes('dataset')
+    )?.variable_id;
+
+    if (inputVariableId) {
+      parameters.push({
+        parameter_id: inputVariableId,
+        default_value: designTimeParams.sourceId,
+      });
+    }
+    if (outputVariableId) {
+      parameters.push({
+        parameter_id: outputVariableId,
+        default_value: designTimeParams.destinationId,
+      });
+    }
+
+    try {
+      const payload = {
+        task_type_id: localTask.task_type_id,
+        label: localTask.label,
+        description: localTask.description,
+        context: localTask.context,
+        task_language: localTask.task_language,
+        task_code: localTask.task_code,
+      };
+
+      const {data} = await orchestraBackendInstance.put(`/api/v1/tasks/${localTask.task_id}/`, payload);
+
+      if (parameters.length > 0) {
+        await orchestraBackendInstance.post(TASK_PARAMETERS_ENDPOINT, parameters);
+      }
+
+      setLocalTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...data,
+            }
+          : null
+      );
+
+      await mutate(TASKS_ENDPOINT);
+      await mutate(TASK_PARAMETERS_ENDPOINT);
+
+      toast({
+        title: 'Success',
+        description: 'Task updated successfully',
+      });
+
+      setIsSaving(false);
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update task',
+        variant: 'destructive',
+      });
+      setIsSaving(false);
+    }
+  };
   const fetchAllSubtypes = async () => {
     try {
       if (!taskTypes.length) return;
@@ -102,13 +332,14 @@ export const TaskAccordion: React.FC = () => {
     }
   };
 
-  const {data: taskTypesResponse, error: taskTypesError} = useSWR<TaskType[]>(
-    TASK_TYPES_ENDPOINT,
-    async (url: string) => {
-      const response = await orchestraBackendInstance.get(url);
-      return response.data;
-    }
-  );
+  const {data: taskTypesResponse, error: taskTypesError} = useSWR<{
+    count: number;
+    num_pages: number;
+    results: TaskType[];
+  }>(TASK_TYPES_ENDPOINT, async (url: string) => {
+    const response = await orchestraBackendInstance.get(url);
+    return response.data;
+  });
 
   const handleTaskTypeChange = (value: string) => {
     setSelectedTaskType(value);
@@ -121,8 +352,8 @@ export const TaskAccordion: React.FC = () => {
     },
     [taskSubTypes]
   );
-  const tasks = response?.data ?? [];
-  const taskTypes = taskTypesResponse || [];
+  const tasks = response?.results ?? [];
+  const taskTypes = taskTypesResponse?.results || [];
 
   if (taskTypesError) {
     return <div className="text-red-500">Error loading task types: {taskTypesError.message}</div>;
@@ -211,15 +442,18 @@ export const TaskAccordion: React.FC = () => {
   const taskCategories = useMemo(() => {
     if (!Array.isArray(tasks) || tasks.length === 0) return [];
 
-    const groupedByType = tasks.reduce((acc: Record<string, any>, task) => {
+    const groupedByType = tasks.reduce((acc: Record<string, GroupedTask>, task: TaskType) => {
       const typeKey = task.task_type_label;
+
+      if (!typeKey) return acc;
+
       const subtypeKey = task.task_subtype_id;
 
       if (!acc[typeKey]) {
         acc[typeKey] = {
           type_id: task.task_type_id,
           type_code: task.task_type_code,
-          label: task.task_type_label,
+          label: task.task_type_label || '',
           subtypes: {},
         };
       }
@@ -238,26 +472,23 @@ export const TaskAccordion: React.FC = () => {
 
       acc[typeKey].subtypes[subtypeKey].tasks.push({
         ...task,
-        isPredefined: task.is_predefined,
+        isPredefined: task.is_predefined || false,
       });
 
       return acc;
     }, {});
 
-    return Object.entries(groupedByType).map(([name, typeData]: [string, any]) => ({
+    return Object.entries(groupedByType).map(([name, typeData]: [string, GroupedTask]) => ({
       name,
       type_id: typeData.type_id,
       type_code: typeData.type_code,
-      subtypes: Object.values(typeData.subtypes).map((subtype: any) => ({
+      subtypes: Object.values(typeData.subtypes).map((subtype) => ({
         subtype_id: subtype.subtype_id,
         label: subtype.label,
         tasks: subtype.tasks,
         count: subtype.tasks.length,
       })),
-      count: Object.values(typeData.subtypes).reduce(
-        (acc: number, subtype: any) => acc + subtype.tasks.length,
-        0
-      ),
+      count: Object.values(typeData.subtypes).reduce((acc: number, subtype) => acc + subtype.tasks.length, 0),
     }));
   }, [tasks, taskSubTypes]);
   useEffect(() => {
@@ -332,7 +563,7 @@ export const TaskAccordion: React.FC = () => {
         parameters: selectedSubTypeObj.parameters,
       };
 
-      await orchestraBackendInstance.post('/api/v1/tasks/', payload);
+      await orchestraBackendInstance.post(TASKS_ENDPOINT, payload);
       await mutate(TASKS_ENDPOINT);
       await fetchAllSubtypes();
 
@@ -558,12 +789,20 @@ export const TaskAccordion: React.FC = () => {
           {selectedTask ? (
             <TaskDetailTabs
               selectedTask={mapTaskToDetails(selectedTask)}
-              isEditing={isEditing}
-              onEdit={handleEditTask}
-              onSave={handleSaveTask}
-              onDelete={() => {
-                setSelectedTask(null);
-              }}
+              currentTab={currentTab}
+              setCurrentTab={setCurrentTab}
+              localTask={localTask || mapTaskToDetails(selectedTask)}
+              setLocalTask={setLocalTask}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+              designTimeParams={designTimeParams}
+              setDesignTimeParams={setDesignTimeParams}
+              runtimeParams={runtimeParams}
+              onSave={handleSaveChanges}
+              onDeleteClick={() => handleDeleteClick(selectedTask)}
+              inputOptionsResponse={inputOptionsResponse}
+              outputOptionsResponse={outputOptionsResponse}
+              variablesResponse={variablesResponse}
             />
           ) : (
             <div className="h-[calc(100vh-16rem)] flex items-center justify-center">
@@ -704,6 +943,31 @@ export const TaskAccordion: React.FC = () => {
               ) : (
                 'Create Task'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(open) => !open && handleCancelDelete()}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Delete Task</DialogTitle>
+          </DialogHeader>
+          <p>Are you sure you want to delete task "{taskToDelete?.label}"? This action cannot be undone.</p>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={handleCancelDelete}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+            >
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

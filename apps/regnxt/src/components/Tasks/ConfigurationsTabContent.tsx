@@ -1,15 +1,10 @@
 import React from 'react';
 
-import {
-  DatasetOption,
-  DataviewOption,
-  RuntimeParameter,
-  TaskDetails,
-  VariableResponse,
-} from '@/types/databaseTypes';
-import {Plus} from 'lucide-react';
+import {AddRuntimeParameterDialog} from '@/components/AddRuntimeParameterDialog';
+import {orchestraBackendInstance} from '@/lib/axios';
+import {AvailableParameter, ConfigurationsTabContentProps, RuntimeParameter} from '@/types/databaseTypes';
+import useSWR from 'swr';
 
-import {Button} from '@rn/ui/components/ui/button';
 import {Card} from '@rn/ui/components/ui/card';
 import {Input} from '@rn/ui/components/ui/input';
 import {Label} from '@rn/ui/components/ui/label';
@@ -17,29 +12,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn
 import {TabsContent} from '@rn/ui/components/ui/tabs';
 import {Textarea} from '@rn/ui/components/ui/textarea';
 
-import DisabledTooltip from './DisabledTooltip';
-
-interface ConfigurationsTabContentProps {
-  selectedTask: TaskDetails;
-  localTask: TaskDetails;
-  handleInputChange: (field: keyof TaskDetails, value: string) => void;
-  designTimeParams: {
-    sourceId: string;
-    sourceType: 'dataset' | 'dataview';
-    destinationId: string;
-  };
-  setDesignTimeParams: React.Dispatch<
-    React.SetStateAction<{
-      sourceId: string;
-      sourceType: 'dataset' | 'dataview';
-      destinationId: string;
-    }>
-  >;
-  variablesResponse?: VariableResponse[];
-  inputOptionsResponse?: {data: (DatasetOption | DataviewOption)[]};
-  outputOptionsResponse?: {data: DatasetOption[]};
-  runtimeParams: RuntimeParameter[];
-}
+import {TooltipWrapper} from './TooltipWrapper';
 
 export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> = ({
   selectedTask,
@@ -50,12 +23,30 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   variablesResponse,
   inputOptionsResponse,
   outputOptionsResponse,
-  runtimeParams,
 }) => {
+  const fetcher = (url: string) => orchestraBackendInstance.get(url).then((res) => res.data);
+
+  const {data: availableParameters, mutate: mutateAvailable} = useSWR<AvailableParameter[]>(
+    `/api/v1/tasks/${selectedTask.task_id}/get_available_runtime_parameters/`,
+    fetcher
+  );
+
+  const {data: taskParameters, mutate: mutateTaskParams} = useSWR<RuntimeParameter[]>(
+    `/api/v1/tasks/${selectedTask.task_id}/get_task_runtime_parameters/`,
+    fetcher
+  );
+  const handleParameterAdd = () => {
+    mutateAvailable();
+    mutateTaskParams();
+  };
+
   const renderTaskLanguageField = () => (
     <div className="space-y-2">
       <Label className="text-sm font-medium">Task Language</Label>
-      <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+      <TooltipWrapper
+        disabled={selectedTask.is_predefined}
+        disabledMessage="You cannot modify a system-generated task"
+      >
         <Select
           value={localTask.task_language || 'python'}
           onValueChange={(value) => handleInputChange('task_language', value)}
@@ -70,7 +61,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
             <SelectItem value="sql">SQL</SelectItem>
           </SelectContent>
         </Select>
-      </DisabledTooltip>
+      </TooltipWrapper>
     </div>
   );
 
@@ -84,7 +75,10 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
             className="space-y-2"
           >
             <Label className="text-sm font-medium">{variable.label}</Label>
-            <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+            <TooltipWrapper
+              disabled={selectedTask.is_predefined}
+              disabledMessage="You cannot modify a system-generated task"
+            >
               <Select
                 value={
                   isInput
@@ -114,28 +108,28 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
                 <SelectContent>
                   {isInput
                     ? inputOptionsResponse?.data?.map((option: any) => {
-                        const id = option.dataset_version_id || option.dataview_version_id;
-                        const type = option.dataset_version_id ? 'dataset' : 'dataview';
+                        const id = option.id;
+                        const type = option.source.includes('dataset') ? 'dataset' : 'dataview';
                         return (
                           <SelectItem
                             key={`${id}:${type}`}
                             value={`${id}:${type}`}
                           >
-                            {option['?column?']}
+                            {option.label}
                           </SelectItem>
                         );
                       })
                     : outputOptionsResponse?.data?.map((option: any) => (
                         <SelectItem
-                          key={option.dataset_version_id}
-                          value={String(option.dataset_version_id)}
+                          key={option.id}
+                          value={String(option.id)}
                         >
-                          {option['?column?']}
+                          {option.label}
                         </SelectItem>
                       ))}
                 </SelectContent>
               </Select>
-            </DisabledTooltip>
+            </TooltipWrapper>
           </div>
         );
       })}
@@ -174,7 +168,10 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
             {renderTaskLanguageField()}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Task Code</Label>
-              <DisabledTooltip isDisabled={selectedTask.is_predefined}>
+              <TooltipWrapper
+                disabled={selectedTask.is_predefined}
+                disabledMessage="You cannot modify a system-generated task"
+              >
                 <Textarea
                   value={localTask.task_code || ''}
                   onChange={(e) => handleInputChange('task_code', e.target.value)}
@@ -182,7 +179,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
                   className="min-h-[200px] font-mono"
                   placeholder="Enter your code here..."
                 />
-              </DisabledTooltip>
+              </TooltipWrapper>
             </div>
           </>
         ) : isTaskType2AndSubtype17 && variablesResponse ? (
@@ -197,51 +194,39 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
         <Card className="p-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Runtime Parameters</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={selectedTask.is_predefined}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Parameter
-            </Button>
+            <AddRuntimeParameterDialog
+              taskId={selectedTask.task_id}
+              availableParameters={availableParameters || []}
+              onParameterAdd={handleParameterAdd}
+              isDisabled={selectedTask.is_predefined}
+            />
           </div>
 
-          {runtimeParams.length > 0 ? (
+          {taskParameters && taskParameters.length > 0 ? (
             <div className="space-y-4">
-              {runtimeParams.map((param) => (
+              {taskParameters.map((param) => (
                 <div
-                  key={param.id}
+                  key={param.parameter_id}
                   className="grid grid-cols-2 gap-4 p-4 border rounded-lg"
                 >
                   <div className="space-y-2">
                     <Label>Name</Label>
                     <Input
                       value={param.name}
-                      disabled={selectedTask.is_predefined}
+                      disabled
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Type</Label>
-                    <Select
-                      value={param.type}
-                      disabled={selectedTask.is_predefined}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="string">String</SelectItem>
-                        <SelectItem value="number">Number</SelectItem>
-                        <SelectItem value="date">Date</SelectItem>
-                        <SelectItem value="boolean">Boolean</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      value={param.data_type}
+                      disabled
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Default Value</Label>
                     <Input
-                      value={param.defaultValue || ''}
+                      value={param.default_value || ''}
                       disabled={selectedTask.is_predefined}
                     />
                   </div>
@@ -249,7 +234,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
                     <Label>Description</Label>
                     <Input
                       value={param.description}
-                      disabled={selectedTask.is_predefined}
+                      disabled
                     />
                   </div>
                 </div>
