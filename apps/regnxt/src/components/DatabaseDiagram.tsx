@@ -18,11 +18,14 @@ import {
 
 import '@xyflow/react/dist/style.css';
 
+import {NodeData} from '@/types/databaseTypes';
+
 import ColumnSelectionModal from './ColumnSelectionModal';
 import CustomEdge from './CustomEdge';
 import DatabaseTableNode from './DatabaseTableNode';
 
-type CustomNode = ReactFlowNode<Record<string, unknown>>;
+type CustomNode = Node<NodeData>;
+
 type CustomEdge = ReactFlowEdge<any>;
 
 interface DatabaseDiagramProps {
