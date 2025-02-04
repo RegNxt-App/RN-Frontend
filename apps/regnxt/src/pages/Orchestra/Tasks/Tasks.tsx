@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import Loader from '@/common/Loader';
+import {TaskConfigurationProvider} from '@/contexts/TaskConfigurationContext';
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
 import {
@@ -12,12 +13,14 @@ import {
   RuntimeParameter,
   StatItem,
   SubtypeParamsResponse,
+  TaskConfigurationResponse,
   TaskDetails,
   TaskSubType,
   TaskType,
   TasksApiResponse,
   VariableResponse,
 } from '@/types/databaseTypes';
+import {getDefaultLanguage} from '@/utils/taskUtils';
 import {
   ArrowLeftRight,
   ChevronDown,
@@ -98,11 +101,18 @@ export const TaskAccordion: React.FC = () => {
   });
 
   const TASKS_ENDPOINT = '/api/v1/tasks/';
-  const TASK_TYPES_ENDPOINT = '/api/v1/tasks/task_type_list/';
+  const TASK_TYPES_ENDPOINT = '/api/v1/tasks/task-type-list/';
   const {data: subtypeParamsResponse} = useSWR<SubtypeParamsResponse[]>(
     selectedTask?.task_subtype_id
       ? `/api/v1/tasks/${selectedTask.task_subtype_id}/subtype-parameters/`
       : null,
+    async (url: string) => {
+      const response = await orchestraBackendInstance.get(url);
+      return response.data;
+    }
+  );
+  const {data: taskConfigurations, isLoading: isConfigLoading} = useSWR<TaskConfigurationResponse>(
+    '/api/v1/tasks/tasks-configurations/',
     async (url: string) => {
       const response = await orchestraBackendInstance.get(url);
       return response.data;
@@ -541,11 +551,12 @@ export const TaskAccordion: React.FC = () => {
         console.error('Invalid task type or subtype selected');
         return;
       }
-      const defaultTaskLanguage =
-        selectedTaskTypeObj.task_type_id === 4
-          ? currentTask.task_language
-          : currentTask.task_language || 'python';
 
+      const defaultTaskLanguage = getDefaultLanguage(
+        selectedTaskTypeObj?.code || '',
+        currentTask?.task_language || null,
+        taskConfigurations
+      );
       const payload = {
         task_type_id: selectedTaskTypeObj.task_type_id,
         task_subtype_id: selectedSubTypeObj.task_subtype_id,
@@ -620,363 +631,370 @@ export const TaskAccordion: React.FC = () => {
     return <div className="text-red-500 p-4 text-center">Error loading tasks: {error.message}</div>;
   }
   return (
-    <div className="p-4 lg:p-6 max-w-screen-2xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 lg:mb-8 space-y-4 md:space-y-0">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold mb-1">Task Management</h1>
-          <p className="text-sm">Configure and manage your data processing tasks</p>
+    <TaskConfigurationProvider
+      taskConfigurations={taskConfigurations}
+      isLoading={isConfigLoading}
+    >
+      <div className="p-4 lg:p-6 max-w-screen-2xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 lg:mb-8 space-y-4 md:space-y-0">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold mb-1">Task Management</h1>
+            <p className="text-sm">Configure and manage your data processing tasks</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+            <Button onClick={handleAddClick}>Create a Task</Button>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-          <Button onClick={handleAddClick}>Create a Task</Button>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 lg:mb-8">
-        {stats.map((stat, index) => (
-          <Card
-            key={index}
-            className="p-4 lg:p-6"
-          >
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <p className="text-base font-semibold">{stat.title}</p>
-                {stat.titleIcon}
-              </div>
-              <p className="text-2xl font-bold">{stat.count}</p>
-              <div className="flex items-center gap-1.5">
-                {stat.descriptionIcon}
-                <p className="text-xs text-gray-500">{stat.description}</p>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        <Card className="w-full lg:w-96 xl:w-[33%]">
-          <div className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Task Categories</h2>
-            <Tabs
-              defaultValue="all"
-              className="w-full"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 lg:mb-8">
+          {stats.map((stat, index) => (
+            <Card
+              key={index}
+              className="p-4 lg:p-6"
             >
-              <TabsList className="w-full mb-4">
-                <TabsTrigger
-                  value="all"
-                  className="flex-1"
-                >
-                  All Tasks
-                </TabsTrigger>
-                <TabsTrigger
-                  value="recent"
-                  className="flex-1"
-                >
-                  Recent Tasks
-                </TabsTrigger>
-              </TabsList>
-
-              <div className="mb-4">
-                <div className="relative">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                  <Input
-                    placeholder="Search a Task"
-                    className="pl-8"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-base font-semibold">{stat.title}</p>
+                  {stat.titleIcon}
+                </div>
+                <p className="text-2xl font-bold">{stat.count}</p>
+                <div className="flex items-center gap-1.5">
+                  {stat.descriptionIcon}
+                  <p className="text-xs text-gray-500">{stat.description}</p>
                 </div>
               </div>
+            </Card>
+          ))}
+        </div>
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+          <Card className="w-full lg:w-96 xl:w-[33%]">
+            <div className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Task Categories</h2>
+              <Tabs
+                defaultValue="all"
+                className="w-full"
+              >
+                <TabsList className="w-full mb-4">
+                  <TabsTrigger
+                    value="all"
+                    className="flex-1"
+                  >
+                    All Tasks
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="recent"
+                    className="flex-1"
+                  >
+                    Recent Tasks
+                  </TabsTrigger>
+                </TabsList>
 
-              <ScrollArea className="h-[calc(100vh-24rem)]">
-                {isLoading ? (
-                  <div className="flex justify-center items-center h-40">
-                    <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                    <Input
+                      placeholder="Search a Task"
+                      className="pl-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                   </div>
-                ) : (
-                  <div className="space-y-1">
-                    {filteredTaskCategories.map((category) => (
-                      <div
-                        key={category.name}
-                        className="space-y-1"
-                      >
+                </div>
+
+                <ScrollArea className="h-[calc(100vh-24rem)]">
+                  {isLoading ? (
+                    <div className="flex justify-center items-center h-40">
+                      <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {filteredTaskCategories.map((category) => (
                         <div
-                          className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-                          onClick={() => toggleCategory(category.name)}
+                          key={category.name}
+                          className="space-y-1"
                         >
-                          <div className="flex items-center">
-                            {expandedCategories.includes(category.name) ? (
-                              <ChevronDown className="w-4 h-4 mr-2" />
-                            ) : (
-                              <ChevronRight className="w-4 h-4 mr-2" />
-                            )}
-                            <Folder className="w-4 h-4 mr-2" />
-                            <span className="text-sm font-medium">{category.name}</span>
+                          <div
+                            className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+                            onClick={() => toggleCategory(category.name)}
+                          >
+                            <div className="flex items-center">
+                              {expandedCategories.includes(category.name) ? (
+                                <ChevronDown className="w-4 h-4 mr-2" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4 mr-2" />
+                              )}
+                              <Folder className="w-4 h-4 mr-2" />
+                              <span className="text-sm font-medium">{category.name}</span>
+                            </div>
+                            <span className="text-sm text-gray-500">{category.count}</span>
                           </div>
-                          <span className="text-sm text-gray-500">{category.count}</span>
-                        </div>
 
-                        {expandedCategories.includes(category.name) && (
-                          <div className="ml-4 space-y-1">
-                            {category.subtypes.map((subtype) => (
-                              <div
-                                key={subtype.subtype_id}
-                                className="space-y-1"
-                              >
+                          {expandedCategories.includes(category.name) && (
+                            <div className="ml-4 space-y-1">
+                              {category.subtypes.map((subtype) => (
                                 <div
-                                  className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-                                  onClick={() => toggleSubtype(`${category.name}-${subtype.subtype_id}`)}
+                                  key={subtype.subtype_id}
+                                  className="space-y-1"
                                 >
-                                  <div className="flex items-center">
-                                    {expandedSubtypes.includes(`${category.name}-${subtype.subtype_id}`) ? (
-                                      <ChevronDown className="w-4 h-4 mr-2" />
-                                    ) : (
-                                      <ChevronRight className="w-4 h-4 mr-2" />
-                                    )}
-                                    <FolderOpen className="w-4 h-4 mr-2" />
-                                    <span className="text-sm">{subtype.label}</span>
+                                  <div
+                                    className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+                                    onClick={() => toggleSubtype(`${category.name}-${subtype.subtype_id}`)}
+                                  >
+                                    <div className="flex items-center">
+                                      {expandedSubtypes.includes(`${category.name}-${subtype.subtype_id}`) ? (
+                                        <ChevronDown className="w-4 h-4 mr-2" />
+                                      ) : (
+                                        <ChevronRight className="w-4 h-4 mr-2" />
+                                      )}
+                                      <FolderOpen className="w-4 h-4 mr-2" />
+                                      <span className="text-sm">{subtype.label}</span>
+                                    </div>
+                                    <span className="text-sm text-gray-500">{subtype.count}</span>
                                   </div>
-                                  <span className="text-sm text-gray-500">{subtype.count}</span>
-                                </div>
 
-                                {expandedSubtypes.includes(`${category.name}-${subtype.subtype_id}`) && (
-                                  <div className="ml-4 space-y-1">
-                                    {subtype.tasks.map((task) => (
-                                      <div
-                                        key={task.task_id}
-                                        className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-                                        onClick={() => setSelectedTask(task)}
-                                      >
-                                        <div className="flex items-center justify-between w-full">
-                                          <div className="flex items-start min-w-0 flex-1 mr-2">
-                                            <FileText className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                                            <div className="min-w-0 flex-1 max-w-[calc(100%-70px)]">
-                                              <div className="text-sm truncate lg:max-w-[150px] xl:max-w-[180px] 2xl:max-w-none">
-                                                {task.label.split(' ').slice(0, 2).join(' ')}
-                                                {task.label.split(' ').length > 2 && '...'}
-                                              </div>
-                                              <div className="text-xs text-gray-500 truncate">
-                                                {task.code}
+                                  {expandedSubtypes.includes(`${category.name}-${subtype.subtype_id}`) && (
+                                    <div className="ml-4 space-y-1">
+                                      {subtype.tasks.map((task) => (
+                                        <div
+                                          key={task.task_id}
+                                          className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+                                          onClick={() => setSelectedTask(task)}
+                                        >
+                                          <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-start min-w-0 flex-1 mr-2">
+                                              <FileText className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+                                              <div className="min-w-0 flex-1 max-w-[calc(100%-70px)]">
+                                                <div className="text-sm truncate lg:max-w-[150px] xl:max-w-[180px] 2xl:max-w-none">
+                                                  {task.label.split(' ').slice(0, 2).join(' ')}
+                                                  {task.label.split(' ').length > 2 && '...'}
+                                                </div>
+                                                <div className="text-xs text-gray-500 truncate">
+                                                  {task.code}
+                                                </div>
                                               </div>
                                             </div>
+                                            {task.isPredefined && (
+                                              <Badge
+                                                variant="outline"
+                                                className="text-xs flex-shrink-0 ml-2 whitespace-nowrap min-w-[80px] text-center"
+                                              >
+                                                Predefined
+                                              </Badge>
+                                            )}
                                           </div>
-                                          {task.isPredefined && (
-                                            <Badge
-                                              variant="outline"
-                                              className="text-xs flex-shrink-0 ml-2 whitespace-nowrap min-w-[80px] text-center"
-                                            >
-                                              Predefined
-                                            </Badge>
-                                          )}
                                         </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    {searchQuery && filteredTaskCategories.length === 0 && (
-                      <div className="text-center py-8">
-                        <FileText className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-                        <p className="text-gray-500">No tasks found matching "{searchQuery}"</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </ScrollArea>
-            </Tabs>
-          </div>
-        </Card>
-
-        <Card className="flex-1 p-4 lg:p-6">
-          {selectedTask ? (
-            <TaskDetailTabs
-              selectedTask={mapTaskToDetails(selectedTask)}
-              currentTab={currentTab}
-              setCurrentTab={setCurrentTab}
-              localTask={localTask || mapTaskToDetails(selectedTask)}
-              setLocalTask={setLocalTask}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              designTimeParams={designTimeParams}
-              setDesignTimeParams={setDesignTimeParams}
-              runtimeParams={runtimeParams}
-              onSave={handleSaveChanges}
-              onDeleteClick={() => handleDeleteClick(selectedTask)}
-              inputOptionsResponse={inputOptionsResponse}
-              outputOptionsResponse={outputOptionsResponse}
-              variablesResponse={variablesResponse}
-              onInputChange={handleInputChange}
-            />
-          ) : (
-            <div className="h-[calc(100vh-16rem)] flex items-center justify-center">
-              <div className="text-center">
-                <FileText className="w-12 h-12 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold mb-2">No Task Selected</h3>
-                <p>Select a task from the task browser to view and edit its details</p>
-              </div>
-            </div>
-          )}
-        </Card>
-      </div>
-      <Dialog
-        open={isAddDialogOpen}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) handleCancel();
-        }}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Add New Task</DialogTitle>
-          </DialogHeader>
-          {currentTask && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="task-code">Code</Label>
-                  <Input
-                    id="task-code"
-                    value={currentTask.code || ''}
-                    onChange={(e) => setCurrentTask({...currentTask, code: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="task-label">Label</Label>
-                  <Input
-                    id="task-label"
-                    value={currentTask.label || ''}
-                    onChange={(e) => setCurrentTask({...currentTask, label: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="task-description">Description</Label>
-                  <Textarea
-                    id="task-description"
-                    value={currentTask.description || ''}
-                    onChange={(e) => setCurrentTask({...currentTask, description: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="task-type">Task Type</Label>
-                  <Select
-                    onValueChange={handleTaskTypeChange}
-                    value={selectedTaskType || ''}
-                  >
-                    <SelectTrigger id="task-type">
-                      <SelectValue placeholder="Select a task type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taskTypes.map((taskType) => (
-                        <SelectItem
-                          key={taskType.task_type_id}
-                          value={taskType.label}
-                        >
-                          {taskType.label}
-                        </SelectItem>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="task-subtype">Task Subtype</Label>
-                  <Select
-                    onValueChange={setSelectedTaskSubType}
-                    value={selectedTaskSubType || ''}
-                    disabled={!selectedTaskType || isLoadingSubTypes}
-                  >
-                    <SelectTrigger
-                      id="task-subtype"
-                      className="relative"
-                    >
-                      <SelectValue
-                        placeholder={!selectedTaskType ? 'Select a task type first' : 'Select a task subtype'}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedTaskType ? (
-                        getSubtypesByTaskType(
-                          taskTypes.find((t) => t.label === selectedTaskType)?.task_type_id || null
-                        ).map((subType) => (
-                          <SelectItem
-                            key={subType.task_subtype_id}
-                            value={subType.label}
-                          >
-                            {subType.label}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem
-                          value="no-type"
-                          disabled
-                        >
-                          Select a task type first
-                        </SelectItem>
+                      {searchQuery && filteredTaskCategories.length === 0 && (
+                        <div className="text-center py-8">
+                          <FileText className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                          <p className="text-gray-500">No tasks found matching "{searchQuery}"</p>
+                        </div>
                       )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="task-context">Context</Label>
-                  <Input
-                    id="task-context"
-                    value={currentTask.context || ''}
-                    onChange={(e) => setCurrentTask({...currentTask, context: e.target.value})}
-                  />
+                    </div>
+                  )}
+                </ScrollArea>
+              </Tabs>
+            </div>
+          </Card>
+
+          <Card className="flex-1 p-4 lg:p-6">
+            {selectedTask ? (
+              <TaskDetailTabs
+                selectedTask={mapTaskToDetails(selectedTask)}
+                currentTab={currentTab}
+                setCurrentTab={setCurrentTab}
+                localTask={localTask || mapTaskToDetails(selectedTask)}
+                setLocalTask={setLocalTask}
+                isSaving={isSaving}
+                setIsSaving={setIsSaving}
+                designTimeParams={designTimeParams}
+                setDesignTimeParams={setDesignTimeParams}
+                runtimeParams={runtimeParams}
+                onSave={handleSaveChanges}
+                onDeleteClick={() => handleDeleteClick(selectedTask)}
+                inputOptionsResponse={inputOptionsResponse}
+                outputOptionsResponse={outputOptionsResponse}
+                variablesResponse={variablesResponse}
+                onInputChange={handleInputChange}
+              />
+            ) : (
+              <div className="h-[calc(100vh-16rem)] flex items-center justify-center">
+                <div className="text-center">
+                  <FileText className="w-12 h-12 mx-auto mb-4" />
+                  <h3 className="text-3xl font-bold mb-2">No Task Selected</h3>
+                  <p>Select a task from the task browser to view and edit its details</p>
                 </div>
               </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={isSubmitting}
-              className="w-full sm:w-auto"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                'Create Task'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      <Dialog
-        open={isDeleteDialogOpen}
-        onOpenChange={(open) => !open && handleCancelDelete()}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Delete Task</DialogTitle>
-          </DialogHeader>
-          <p>Are you sure you want to delete task "{taskToDelete?.label}"? This action cannot be undone.</p>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={handleCancelDelete}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDelete}
-            >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+            )}
+          </Card>
+        </div>
+        <Dialog
+          open={isAddDialogOpen}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) handleCancel();
+          }}
+        >
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add New Task</DialogTitle>
+            </DialogHeader>
+            {currentTask && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="task-code">Code</Label>
+                    <Input
+                      id="task-code"
+                      value={currentTask.code || ''}
+                      onChange={(e) => setCurrentTask({...currentTask, code: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="task-label">Label</Label>
+                    <Input
+                      id="task-label"
+                      value={currentTask.label || ''}
+                      onChange={(e) => setCurrentTask({...currentTask, label: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="task-description">Description</Label>
+                    <Textarea
+                      id="task-description"
+                      value={currentTask.description || ''}
+                      onChange={(e) => setCurrentTask({...currentTask, description: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="task-type">Task Type</Label>
+                    <Select
+                      onValueChange={handleTaskTypeChange}
+                      value={selectedTaskType || ''}
+                    >
+                      <SelectTrigger id="task-type">
+                        <SelectValue placeholder="Select a task type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {taskTypes.map((taskType) => (
+                          <SelectItem
+                            key={taskType.task_type_id}
+                            value={taskType.label}
+                          >
+                            {taskType.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="task-subtype">Task Subtype</Label>
+                    <Select
+                      onValueChange={setSelectedTaskSubType}
+                      value={selectedTaskSubType || ''}
+                      disabled={!selectedTaskType || isLoadingSubTypes}
+                    >
+                      <SelectTrigger
+                        id="task-subtype"
+                        className="relative"
+                      >
+                        <SelectValue
+                          placeholder={
+                            !selectedTaskType ? 'Select a task type first' : 'Select a task subtype'
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedTaskType ? (
+                          getSubtypesByTaskType(
+                            taskTypes.find((t) => t.label === selectedTaskType)?.task_type_id || null
+                          ).map((subType) => (
+                            <SelectItem
+                              key={subType.task_subtype_id}
+                              value={subType.label}
+                            >
+                              {subType.label}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem
+                            value="no-type"
+                            disabled
+                          >
+                            Select a task type first
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="task-context">Context</Label>
+                    <Input
+                      id="task-context"
+                      value={currentTask.context || ''}
+                      onChange={(e) => setCurrentTask({...currentTask, context: e.target.value})}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Task'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Dialog
+          open={isDeleteDialogOpen}
+          onOpenChange={(open) => !open && handleCancelDelete()}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Delete Task</DialogTitle>
+            </DialogHeader>
+            <p>Are you sure you want to delete task "{taskToDelete?.label}"? This action cannot be undone.</p>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={handleCancelDelete}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmDelete}
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </TaskConfigurationProvider>
   );
 };

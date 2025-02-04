@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {AddRuntimeParameterDialog} from '@/components/AddRuntimeParameterDialog';
+import {useTaskConfiguration} from '@/contexts/TaskConfigurationContext';
 import {orchestraBackendInstance} from '@/lib/axios';
 import {AvailableParameter, ConfigurationsTabContentProps, RuntimeParameter} from '@/types/databaseTypes';
 import useSWR from 'swr';
@@ -12,6 +13,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn
 import {TabsContent} from '@rn/ui/components/ui/tabs';
 import {Textarea} from '@rn/ui/components/ui/textarea';
 
+import Loader from '../loader';
 import {TooltipWrapper} from './TooltipWrapper';
 
 export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> = ({
@@ -24,6 +26,8 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   inputOptionsResponse,
   outputOptionsResponse,
 }) => {
+  const {taskConfigurations, isLoading} = useTaskConfiguration();
+
   const fetcher = (url: string) => orchestraBackendInstance.get(url).then((res) => res.data);
 
   const {data: availableParameters, mutate: mutateAvailable} = useSWR<AvailableParameter[]>(
@@ -39,6 +43,17 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
     mutateAvailable();
     mutateTaskParams();
   };
+  if (isLoading || !taskConfigurations) {
+    return <Loader />;
+  }
+
+  const isCustomCodeTask = taskConfigurations.taskTypes[selectedTask.task_type_code]?.subtypes.find(
+    (subtype) => subtype.id === selectedTask.task_subtype_id && subtype.features.allowsCustomCode
+  );
+
+  const isTransformationTask = taskConfigurations.taskTypes[selectedTask.task_type_code]?.subtypes.find(
+    (subtype) => subtype.id === selectedTask.task_subtype_id && subtype.features.requiresTransformation
+  );
 
   const renderTaskLanguageField = () => (
     <div className="space-y-2">
@@ -154,16 +169,13 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
     </div>
   );
 
-  const isTaskType4AndSubtype20 = selectedTask.task_type_id === 4 && selectedTask.task_subtype_id === 20;
-  const isTaskType2AndSubtype17 = selectedTask.task_type_id === 2 && selectedTask.task_subtype_id === 17;
-
   return (
     <TabsContent
       value="configurations"
       className="space-y-4"
     >
       <div className="space-y-6">
-        {isTaskType4AndSubtype20 ? (
+        {isCustomCodeTask ? (
           <>
             {renderTaskLanguageField()}
             <div className="space-y-2">
@@ -182,7 +194,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
               </TooltipWrapper>
             </div>
           </>
-        ) : isTaskType2AndSubtype17 && variablesResponse ? (
+        ) : isTransformationTask && variablesResponse ? (
           renderTransformFields()
         ) : (
           <>
