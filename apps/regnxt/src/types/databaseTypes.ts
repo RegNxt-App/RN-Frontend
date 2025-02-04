@@ -645,3 +645,39 @@ export interface TooltipWrapperProps {
   disabledMessage?: string;
   enabled?: boolean;
 }
+export interface TaskFeatures {
+  allowsCustomCode: boolean;
+  requiresTransformation: boolean;
+}
+
+export interface TaskSubTypeConfig {
+  id: number;
+  code: string;
+  label: string;
+  description: string;
+  features: TaskFeatures;
+}
+
+export interface TaskTypeConfig {
+  id: number;
+  code: string;
+  label: string;
+  description: string;
+  subtypes: TaskSubTypeConfig[];
+}
+
+export interface TaskConfigurationResponse {
+  taskTypes: {
+    [key: string]: TaskTypeConfig;
+  };
+  defaultLanguages: {
+    [key: string]: string | null;
+  };
+  features: {
+    [key: string]: string;
+  };
+}
+export interface TaskConfigurationContextType {
+  taskConfigurations: TaskConfigurationResponse | undefined;
+  isLoading: boolean;
+}
