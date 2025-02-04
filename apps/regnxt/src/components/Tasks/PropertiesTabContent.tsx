@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {PropertiesTabContentProps, TaskDetails} from '@/types/databaseTypes';
+import {PropertiesTabContentProps} from '@/types/databaseTypes';
 
 import {Input} from '@rn/ui/components/ui/input';
 import {Label} from '@rn/ui/components/ui/label';
