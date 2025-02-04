@@ -4,22 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-catalogs:
-  default:
-    '@types/node':
-      specifier: ^20
-      version: 20.17.17
-    lucide-react:
-      specifier: ^0.451.0
-      version: 0.451.0
-    tailwindcss:
-      specifier: ^3.4.13
-      version: 3.4.17
-  react18:
-    '@types/react':
-      specifier: ^18.3.11
-      version: 18.3.18
-
 overrides:
   '@radix-ui/react-dismissable-layer': 1.0.2
 
@@ -469,8 +453,8 @@ importers:
         specifier: ^0.474.0
         version: 0.474.0
       lucide-react:
-        specifier: 'catalog:'
-        version: 0.451.0(react@18.3.1)
+        specifier: ^0.441.0
+        version: 0.441.0(react@18.3.1)
       react:
         specifier: ^18
         version: 18.3.1
@@ -503,10 +487,10 @@ importers:
         specifier: workspace:*
         version: link:../tsconfig
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^20.11.0
         version: 20.17.17
       '@types/react':
-        specifier: catalog:react18
+        specifier: ^18.2.47
         version: 18.3.18
       autoprefixer:
         specifier: ^10
@@ -518,7 +502,7 @@ importers:
         specifier: ^6
         version: 6.0.1(jiti@1.21.7)(postcss@8.5.1)(yaml@2.7.0)
       tailwindcss:
-        specifier: 'catalog:'
+        specifier: ^3.4.17
         version: 3.4.17
       typescript:
         specifier: ^5.3.3
@@ -4034,11 +4018,6 @@ packages:
 
   lucide-react@0.441.0:
     resolution: {integrity: sha512-0vfExYtvSDhkC2lqg0zYVW1Uu9GsI4knuV9GP9by5z0Xhc4Zi5RejTxfz9LsjRmCyWVzHCJvxGKZWcRyvQCWVg==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
-
-  lucide-react@0.451.0:
-    resolution: {integrity: sha512-OwQ3uljZLp2cerj8sboy5rnhtGTCl9UCJIhT1J85/yOuGVlEH+xaUPR7tvNdddPvmV5M5VLdr7cQuWE3hzA4jw==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
 
@@ -9251,10 +9230,6 @@ snapshots:
       yallist: 3.1.1
 
   lucide-react@0.441.0(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-
-  lucide-react@0.451.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
