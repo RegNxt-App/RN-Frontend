@@ -15,9 +15,6 @@ catalogs:
     tailwindcss:
       specifier: ^3.4.13
       version: 3.4.17
-    typescript:
-      specifier: ^5.6.3
-      version: 5.7.3
   react18:
     '@types/react':
       specifier: ^18.3.11
@@ -350,7 +347,7 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.3.3
         version: 5.7.3
 
   packages/lib:
@@ -527,7 +524,7 @@ importers:
         specifier: ^3.4.1
         version: 3.4.17
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.3.3
         version: 5.7.3
 
 packages:
