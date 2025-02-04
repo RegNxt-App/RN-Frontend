@@ -340,12 +340,12 @@ const WorkflowManager = () => {
             <TableBody>
               {workflowRuns.length > 0 ? (
                 workflowRuns.map((run) => (
-                  <TableRow key={run['Run ID']}>
-                    <TableCell className="font-medium">{run['Run ID']}</TableCell>
-                    <TableCell className={getStatusColor(run.Status)}>{run.Status}</TableCell>
-                    <TableCell>{formatDateTime(run['Started At'])}</TableCell>
-                    <TableCell>{formatDateTime(run['Completed At'])}</TableCell>
-                    <TableCell>{formatRuntime(run['Total Runtime (seconds)'])}</TableCell>
+                  <TableRow key={run['run_id']}>
+                    <TableCell className="font-medium">{run['run_id']}</TableCell>
+                    <TableCell className={getStatusColor(run.status)}>{run.status}</TableCell>
+                    <TableCell>{formatDateTime(run['started_at'])}</TableCell>
+                    <TableCell>{formatDateTime(run['completed_at'])}</TableCell>
+                    <TableCell>{formatRuntime(run['total_runtime_seconds'])}</TableCell>
                   </TableRow>
                 ))
               ) : (

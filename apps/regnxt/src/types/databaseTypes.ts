@@ -349,17 +349,17 @@ export interface WorkflowParameter {
   }>;
 }
 export interface WorkflowRun {
-  'Run ID': number;
-  'Pipeline Name': string;
-  Status: string;
-  'Started At': string;
-  'Completed At': string;
-  'Total Runtime (seconds)': string | number;
-  'Block Details': Array<{
-    'Block UUID': string;
+  run_id: number;
+  pipeline_name: string;
+  status: string;
+  started_at: string;
+  completed_at: string;
+  total_runtime_seconds: string | number;
+  block_details: Array<{
+    block_uuid: string;
     Status: string;
-    'Started At': string | null;
-    'Completed At': string | null;
+    started_at: string | null;
+    completed_at: string | null;
   }>;
 }
 
@@ -626,6 +626,7 @@ export interface TaskDetailTabsProps {
   inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
   outputOptionsResponse?: ApiResponse<DatasetOption[]>;
   variablesResponse?: VariableResponse[];
+  onInputChange: (field: keyof TaskDetails, value: string) => void;
 }
 export interface ConfigurationsTabContentProps {
   selectedTask: TaskDetails;

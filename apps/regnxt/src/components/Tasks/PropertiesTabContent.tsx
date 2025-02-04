@@ -14,6 +14,7 @@ export const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({
   localTask,
   handleInputChange,
 }) => {
+  if (!localTask) return null;
   return (
     <TabsContent
       value="properties"
@@ -23,13 +24,13 @@ export const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({
         <div className="space-y-2">
           <Label className="text-sm font-medium">Code</Label>
           <TooltipWrapper
-            disabled={selectedTask.is_predefined}
-            disabledMessage="You cannot modify a system-generated task"
+            disabled={true}
+            disabledMessage="You cannot modify code for any task"
           >
             <Input
-              value={localTask.code}
+              value={localTask.code || ''}
               onChange={(e) => handleInputChange('code', e.target.value)}
-              disabled={selectedTask.is_predefined}
+              disabled={true}
               placeholder="Enter code"
             />
           </TooltipWrapper>
@@ -41,7 +42,7 @@ export const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({
             disabledMessage="You cannot modify a system-generated task"
           >
             <Input
-              value={localTask.label}
+              value={localTask.label || ''}
               onChange={(e) => handleInputChange('label', e.target.value)}
               disabled={selectedTask.is_predefined}
               placeholder="Enter label"

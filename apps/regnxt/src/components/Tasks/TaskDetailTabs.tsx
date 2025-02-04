@@ -30,8 +30,9 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
   outputOptionsResponse,
   variablesResponse,
   onDeleteClick,
+  onInputChange,
 }) => {
-  const TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${selectedTask.task_id}/add_parameter/`;
+  const TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${selectedTask.task_id}/add-parameter/`;
   const GET_TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${selectedTask.task_id}/parameters/`;
 
   const {data: taskParametersResponse} = useSWR<TaskParameter[]>(
@@ -69,78 +70,6 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
     updateDesignTimeParams();
   }, [updateDesignTimeParams]);
 
-  useEffect(() => {
-    if (selectedTask.task_id !== localTask.task_id) {
-      setLocalTask(selectedTask);
-    }
-  }, [selectedTask.task_id, localTask.task_id, setLocalTask]);
-
-  const handleInputChange = (field: keyof TaskDetails, value: string) => {
-    setLocalTask((prev) =>
-      prev
-        ? {
-            ...prev,
-            [field]: value,
-          }
-        : null
-    );
-  };
-
-  const handleSaveChanges = async () => {
-    if (!localTask) return;
-
-    setIsSaving(true);
-    const parameters = [];
-
-    if (inputVariableId) {
-      parameters.push({
-        parameter_id: inputVariableId,
-        default_value: designTimeParams.sourceId,
-      });
-    }
-    if (outputVariableId) {
-      parameters.push({
-        parameter_id: outputVariableId,
-        default_value: designTimeParams.destinationId,
-      });
-    }
-
-    try {
-      const payload = {
-        task_type_id: localTask.task_type_id,
-        label: localTask.label,
-        description: localTask.description,
-        context: localTask.context,
-        task_language: localTask.task_language,
-        task_code: localTask.task_code,
-      };
-
-      const {data} = await orchestraBackendInstance.put(`/api/v1/tasks/${localTask.task_id}/`, payload);
-
-      if (parameters.length > 0) {
-        await orchestraBackendInstance.post(TASK_PARAMETERS_ENDPOINT, parameters);
-      }
-
-      toast({
-        title: 'Success',
-        description: 'Task updated successfully',
-      });
-
-      if (onSave) {
-        onSave();
-      }
-    } catch (error) {
-      console.error('Error updating task:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update task',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   return (
     <div className="space-y-4 lg:space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-2">
@@ -174,7 +103,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={handleSaveChanges}
+                    onClick={onSave}
                     disabled={localTask?.is_predefined || isSaving}
                   >
                     Save Changes
@@ -233,12 +162,12 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
         <PropertiesTabContent
           selectedTask={selectedTask}
           localTask={localTask}
-          handleInputChange={handleInputChange}
+          handleInputChange={onInputChange}
         />
         <ConfigurationsTabContent
           selectedTask={selectedTask}
           localTask={localTask}
-          handleInputChange={handleInputChange}
+          handleInputChange={onInputChange}
           designTimeParams={designTimeParams}
           setDesignTimeParams={setDesignTimeParams}
           variablesResponse={variablesResponse}
@@ -251,7 +180,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
           <TabsContent value="transformation">
             <TransformationTab
               disabled={selectedTask.is_predefined}
-              onSave={handleSaveChanges}
+              onSave={onSave}
               selectedTask={selectedTask}
             />
           </TabsContent>
