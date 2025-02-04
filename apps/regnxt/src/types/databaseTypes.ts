@@ -470,21 +470,6 @@ export interface RuntimeParam {
   description: string;
 }
 
-export interface FieldMapping {
-  destinationField: string;
-  sourceField: string;
-  runtimeParam?: string;
-}
-
-export interface FieldMappingGridProps {
-  sourceFields: Field[];
-  destinationFields: Field[];
-  runtimeParams: RuntimeParam[];
-  mappings: FieldMapping[];
-  onMappingChange: (newMappings: FieldMapping[]) => void;
-  disabled?: boolean;
-}
-
 export interface DMSubtask {
   subtask_id: number;
   task_id: number;
@@ -659,4 +644,40 @@ export interface TooltipWrapperProps {
   disabled?: boolean;
   disabledMessage?: string;
   enabled?: boolean;
+}
+export interface TaskFeatures {
+  allowsCustomCode: boolean;
+  requiresTransformation: boolean;
+}
+
+export interface TaskSubTypeConfig {
+  id: number;
+  code: string;
+  label: string;
+  description: string;
+  features: TaskFeatures;
+}
+
+export interface TaskTypeConfig {
+  id: number;
+  code: string;
+  label: string;
+  description: string;
+  subtypes: TaskSubTypeConfig[];
+}
+
+export interface TaskConfigurationResponse {
+  taskTypes: {
+    [key: string]: TaskTypeConfig;
+  };
+  defaultLanguages: {
+    [key: string]: string | null;
+  };
+  features: {
+    [key: string]: string;
+  };
+}
+export interface TaskConfigurationContextType {
+  taskConfigurations: TaskConfigurationResponse | undefined;
+  isLoading: boolean;
 }
