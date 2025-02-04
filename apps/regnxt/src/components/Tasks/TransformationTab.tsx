@@ -106,7 +106,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
       mutate(subtasksEndpoint, updatedSubtasks, false);
 
       await orchestraBackendInstance.put(`/api/v1/tasks/${selectedTask?.task_id}/update-subtask-order/`, {
-        data: orderUpdates,
+        subtasks: orderUpdates,
       });
 
       mutate(subtasksEndpoint);

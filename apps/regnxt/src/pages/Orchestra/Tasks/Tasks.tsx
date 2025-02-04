@@ -117,7 +117,6 @@ export const TaskAccordion: React.FC = () => {
         const variablesResponse = await orchestraBackendInstance.get(variablesUrl);
         setVariablesResponse(variablesResponse.data);
 
-        // Find input and output variable IDs
         const inputVariableId = variablesResponse.data.find(
           (v: VariableResponse) =>
             v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
@@ -128,7 +127,6 @@ export const TaskAccordion: React.FC = () => {
             v.name.toLowerCase().includes('output') && v.name.toLowerCase().includes('dataset')
         )?.variable_id;
 
-        // Fetch input options
         if (inputVariableId) {
           const inputStatement = variablesResponse.data.find(
             (v: VariableResponse) => v.variable_id === inputVariableId
@@ -142,7 +140,6 @@ export const TaskAccordion: React.FC = () => {
           }
         }
 
-        // Fetch output options
         if (outputVariableId) {
           const outputStatement = variablesResponse.data.find(
             (v: VariableResponse) => v.variable_id === outputVariableId
@@ -161,12 +158,16 @@ export const TaskAccordion: React.FC = () => {
     }
   }, [subtypeParamsResponse]);
 
-  // Trigger variable fetching when a task is selected
   useEffect(() => {
     if (selectedTask) {
       fetchVariables();
     }
   }, [selectedTask, fetchVariables]);
+  useEffect(() => {
+    if (selectedTask) {
+      setLocalTask(mapTaskToDetails(selectedTask));
+    }
+  }, [selectedTask]);
 
   const {
     data: response,
@@ -205,14 +206,14 @@ export const TaskAccordion: React.FC = () => {
       await orchestraBackendInstance.delete(`/api/v1/tasks/${taskToDelete.task_id}/`);
       setIsDeleteDialogOpen(false);
       setTaskToDelete(null);
-      setSelectedTask(null); // Clear selected task
+      setSelectedTask(null);
 
       toast({
         title: 'Success',
         description: 'Task deleted successfully',
       });
 
-      await mutate(TASKS_ENDPOINT); // Refresh task list
+      await mutate(TASKS_ENDPOINT);
     } catch (error) {
       console.error('Error deleting task:', error);
       toast({
@@ -228,25 +229,21 @@ export const TaskAccordion: React.FC = () => {
   };
 
   const handleInputChange = (field: keyof TaskDetails, value: string) => {
-    if (localTask) {
-      setLocalTask((prev) =>
-        prev
-          ? {
-              ...prev,
-              [field]: value,
-            }
-          : null
-      );
-    }
+    setLocalTask((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        [field]: value,
+      };
+    });
   };
   const handleSaveChanges = async () => {
     if (!localTask) return;
 
     setIsSaving(true);
     const parameters = [];
-    const TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${localTask.task_id}/add_parameter/`;
+    const TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${localTask.task_id}/add-parameter/`;
 
-    // Fetch input and output variable IDs (you might need to pass these as props or derive them)
     const inputVariableId = variablesResponse?.find(
       (v) => v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
     )?.variable_id;
@@ -654,7 +651,7 @@ export const TaskAccordion: React.FC = () => {
         ))}
       </div>
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        <Card className="w-full lg:w-80">
+        <Card className="w-full lg:w-96 xl:w-[33%]">
           <div className="p-4">
             <h2 className="text-lg font-semibold mb-4">Task Categories</h2>
             <Tabs
@@ -747,21 +744,28 @@ export const TaskAccordion: React.FC = () => {
                                         className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
                                         onClick={() => setSelectedTask(task)}
                                       >
-                                        <div className="flex items-start min-w-0">
-                                          <FileText className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                                          <div className="min-w-0 flex-1">
-                                            <div className="text-sm truncate">{task.label}</div>
-                                            <div className="text-xs text-gray-500 truncate">{task.code}</div>
+                                        <div className="flex items-center justify-between w-full">
+                                          <div className="flex items-start min-w-0 flex-1 mr-2">
+                                            <FileText className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+                                            <div className="min-w-0 flex-1 max-w-[calc(100%-70px)]">
+                                              <div className="text-sm truncate lg:max-w-[150px] xl:max-w-[180px] 2xl:max-w-none">
+                                                {task.label.split(' ').slice(0, 2).join(' ')}
+                                                {task.label.split(' ').length > 2 && '...'}
+                                              </div>
+                                              <div className="text-xs text-gray-500 truncate">
+                                                {task.code}
+                                              </div>
+                                            </div>
                                           </div>
+                                          {task.isPredefined && (
+                                            <Badge
+                                              variant="outline"
+                                              className="text-xs flex-shrink-0 ml-2 whitespace-nowrap min-w-[80px] text-center"
+                                            >
+                                              Predefined
+                                            </Badge>
+                                          )}
                                         </div>
-                                        {task.isPredefined && (
-                                          <Badge
-                                            variant="outline"
-                                            className="text-xs flex-shrink-0 ml-2"
-                                          >
-                                            Predefined
-                                          </Badge>
-                                        )}
                                       </div>
                                     ))}
                                   </div>
@@ -803,6 +807,7 @@ export const TaskAccordion: React.FC = () => {
               inputOptionsResponse={inputOptionsResponse}
               outputOptionsResponse={outputOptionsResponse}
               variablesResponse={variablesResponse}
+              onInputChange={handleInputChange}
             />
           ) : (
             <div className="h-[calc(100vh-16rem)] flex items-center justify-center">

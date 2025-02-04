@@ -27,12 +27,12 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   const fetcher = (url: string) => orchestraBackendInstance.get(url).then((res) => res.data);
 
   const {data: availableParameters, mutate: mutateAvailable} = useSWR<AvailableParameter[]>(
-    `/api/v1/tasks/${selectedTask.task_id}/get_available_runtime_parameters/`,
+    `/api/v1/tasks/get-available-runtime-parameters/`,
     fetcher
   );
 
   const {data: taskParameters, mutate: mutateTaskParams} = useSWR<RuntimeParameter[]>(
-    `/api/v1/tasks/${selectedTask.task_id}/get_task_runtime_parameters/`,
+    `/api/v1/tasks/${selectedTask.task_id}/get-task-runtime-parameters/`,
     fetcher
   );
   const handleParameterAdd = () => {

@@ -22,7 +22,7 @@ export const AddRuntimeParameterDialog = ({
 
   const handleAdd = async () => {
     try {
-      await orchestraBackendInstance.post(`/api/v1/tasks/${taskId}/add_runtime_parameter/`, [
+      await orchestraBackendInstance.post(`/api/v1/tasks/${taskId}/add-runtime-parameter/`, [
         {
           parameter_id: parseInt(selectedParam),
           default_value: defaultValue,
