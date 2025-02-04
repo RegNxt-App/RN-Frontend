@@ -44,7 +44,7 @@
     "cmdk": "1.0.0",
     "date-fns": "^4.1.0",
     "lucide": "^0.474.0",
-    "lucide-react": "^0.441.0",
+    "lucide-react": "^0.474.0",
     "react-day-picker": "8.10.1",
     "react-hook-form": "^7.54.1",
     "recharts": "^2.15.0",
