@@ -6,22 +6,9 @@ settings:
 
 catalogs:
   default:
-    '@types/node':
-      specifier: ^20
-      version: 20.17.17
     lucide-react:
       specifier: ^0.451.0
       version: 0.451.0
-    tailwindcss:
-      specifier: ^3.4.13
-      version: 3.4.17
-    typescript:
-      specifier: ^5.6.3
-      version: 5.7.3
-  react18:
-    '@types/react':
-      specifier: ^18.3.11
-      version: 18.3.18
 
 overrides:
   '@radix-ui/react-dismissable-layer': 1.0.2
@@ -400,7 +387,7 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.3.3
         version: 5.7.3
 
   packages/lib:
@@ -586,10 +573,10 @@ importers:
         specifier: workspace:*
         version: link:../tsconfig
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^20.0.0
         version: 20.17.17
       '@types/react':
-        specifier: catalog:react18
+        specifier: ^18.2.0
         version: 18.3.18
       autoprefixer:
         specifier: ^10
@@ -604,10 +591,10 @@ importers:
         version: 6.0.1(jiti@1.21.7)(postcss@8.5.1)(yaml@2.7.0)
         version: 6.0.1(jiti@1.21.7)(postcss@8.5.1)(yaml@2.7.0)
       tailwindcss:
-        specifier: ^3.4.17
+        specifier: ^3.4.1
         version: 3.4.17
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.3.3
         version: 5.7.3
 
 packages:

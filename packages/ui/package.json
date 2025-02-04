@@ -56,16 +56,17 @@
     "@rn/eslint-config": "workspace:*",
     "@rn/lib": "workspace:*",
     "@rn/tsconfig": "workspace:*",
-    "@types/node": "^20.11.0",
-    "@types/react": "^18.2.47",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
     "autoprefixer": "^10",
     "postcss": "^8",
     "postcss-load-config": "^6",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"
   },
   "peerDependencies": {
     "react": "^18"
   }
 }
+
 

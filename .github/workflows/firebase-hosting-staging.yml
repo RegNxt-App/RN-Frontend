@@ -29,8 +29,11 @@ jobs:
           node-version: "18.x"
           cache: "pnpm"
 
+      - name: Clear pnpm Cache
+        run: pnpm store prune
+
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --force
 
       - name: Build Regnxt App
         run: |
