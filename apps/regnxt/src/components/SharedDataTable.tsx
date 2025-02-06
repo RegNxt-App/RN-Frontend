@@ -17,7 +17,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn
 interface SharedDataTableProps<T> {
   data: T[];
   columns: ColumnDef<T>[];
-  onRowClick?: (item: T) => void;
+  onRowClick: (item: T) => void;
   showPagination?: boolean;
 }
 

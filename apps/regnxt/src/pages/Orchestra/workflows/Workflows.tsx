@@ -14,6 +14,7 @@ import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/car
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
 import {Input} from '@rn/ui/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
 
 import {WorkflowDialog} from '../../../components/workflows/WorkflowDialog';
 
@@ -109,7 +110,8 @@ const WorkflowManager = () => {
   const handleClockClick = async (workflow: Workflow) => {
     try {
       const response = await orchestraBackendInstance.get(
-        `${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`
+        `${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`,
+        {params: {page: 1, page_size: 50, search: ''}}
       );
       setWorkflowRuns(response.data);
       setIsRunsDialogOpen(true);
@@ -196,38 +198,6 @@ const WorkflowManager = () => {
     },
     []
   );
-  const runColumns = useMemo<ColumnDef<WorkflowRun>[]>(
-    () => [
-      {
-        accessorKey: 'run_id',
-        header: 'Run ID',
-        cell: ({row}) => <div className="font-medium">{row.getValue('run_id')}</div>,
-      },
-      {
-        accessorKey: 'status',
-        header: 'Status',
-        cell: ({row}) => (
-          <div className={getStatusColor(row.getValue('status'))}>{row.getValue('status')}</div>
-        ),
-      },
-      {
-        accessorKey: 'started_at',
-        header: 'Started At',
-        cell: ({row}) => formatDateTime(row.getValue('started_at')),
-      },
-      {
-        accessorKey: 'completed_at',
-        header: 'Completed At',
-        cell: ({row}) => formatDateTime(row.getValue('completed_at')),
-      },
-      {
-        accessorKey: 'total_runtime_seconds',
-        header: 'Runtime (s)',
-        cell: ({row}) => formatRuntime(row.getValue('total_runtime_seconds')),
-      },
-    ],
-    [getStatusColor]
-  );
 
   if (error) {
     return <div className="text-red-500 p-4 text-center">Error loading workflows: {error.message}</div>;
@@ -252,6 +222,7 @@ const WorkflowManager = () => {
             <SharedDataTable
               data={workflows}
               columns={columns}
+              onRowClick={(item) => console.log(item)}
               showPagination={true}
             />
           </CardContent>
@@ -356,11 +327,39 @@ const WorkflowManager = () => {
           <DialogHeader>
             <DialogTitle>Workflow Run History</DialogTitle>
           </DialogHeader>
-          <SharedDataTable
-            data={workflowRuns}
-            columns={runColumns}
-            showPagination={true}
-          />
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Run ID</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Started At</TableHead>
+                <TableHead>Completed At</TableHead>
+                <TableHead>Runtime (s)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {workflowRuns.length > 0 ? (
+                workflowRuns.map((run) => (
+                  <TableRow key={run['run_id']}>
+                    <TableCell className="font-medium">{run['run_id']}</TableCell>
+                    <TableCell className={getStatusColor(run.status)}>{run.status}</TableCell>
+                    <TableCell>{formatDateTime(run['started_at'])}</TableCell>
+                    <TableCell>{formatDateTime(run['completed_at'])}</TableCell>
+                    <TableCell>{formatRuntime(run['total_runtime_seconds'])}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-4 text-gray-500"
+                  >
+                    No run history available
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </DialogContent>
       </Dialog>
       <WorkflowDialog

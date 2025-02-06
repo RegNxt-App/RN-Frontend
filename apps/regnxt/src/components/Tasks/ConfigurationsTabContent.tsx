@@ -3,13 +3,7 @@ import React from 'react';
 import {AddRuntimeParameterDialog} from '@/components/AddRuntimeParameterDialog';
 import {useTaskConfiguration} from '@/contexts/TaskConfigurationContext';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {
-  AvailableParameter,
-  ConfigurationsTabContentProps,
-  DatasetOption,
-  DataviewOption,
-  RuntimeParameter,
-} from '@/types/databaseTypes';
+import {AvailableParameter, ConfigurationsTabContentProps, RuntimeParameter} from '@/types/databaseTypes';
 import useSWR from 'swr';
 
 import {Card} from '@rn/ui/components/ui/card';
@@ -31,7 +25,6 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   variablesResponse,
   inputOptionsResponse,
   outputOptionsResponse,
-  subtypeParamsResponse,
 }) => {
   const {taskConfigurations, isLoading} = useTaskConfiguration();
 
@@ -87,95 +80,76 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
     </div>
   );
 
-  const renderTransformFields = () => {
-    const sortedVariables = [...(variablesResponse || [])].sort((a, b) => {
-      if (a.name === 'input_dataset') return -1;
-      if (b.name === 'input_dataset') return 1;
-      return 0;
-    });
-
-    const getSelectedLabel = (isInput: boolean, options: (DatasetOption | DataviewOption)[]) => {
-      if (!options.length) return isInput ? 'Select Input Location' : 'Select Output Location';
-      return isInput
-        ? options.find(
-            (opt) =>
-              `${opt.id}:${opt.source.trim().toLowerCase()}` ===
-              `${designTimeParams.sourceId}:${designTimeParams.sourceType}`
-          )?.label
-        : options.find((opt) => String(opt.id) === designTimeParams.destinationId)?.label;
-    };
-
-    const handleChange = (isInput: boolean, value: string) => {
-      if (isInput) {
-        const [id, type] = value.split(':');
-        setDesignTimeParams((prev) => ({
-          ...prev,
-          sourceId: id,
-          sourceType: type.includes('dataview') ? 'dataview' : 'dataset',
-        }));
-      } else {
-        setDesignTimeParams((prev) => ({
-          ...prev,
-          destinationId: value,
-        }));
-      }
-    };
-
-    return (
-      <div className="grid grid-cols-2 gap-4">
-        {sortedVariables.map((variable) => {
-          const isInput = variable.name === 'input_dataset';
-          const parameterLabel = subtypeParamsResponse?.[0]?.parameters
-            ? subtypeParamsResponse[0].parameters.find((p) => p.id === variable.variable_id)?.name
-            : variable.label;
-
-          const options = isInput ? inputOptionsResponse?.data : outputOptionsResponse?.data;
-
-          return (
-            <div
-              key={variable.variable_id}
-              className="space-y-2"
+  const renderTransformFields = () => (
+    <div className="grid grid-cols-2 gap-4">
+      {variablesResponse?.map((variable) => {
+        const isInput = variable.name === 'input_dataset';
+        return (
+          <div
+            key={variable.variable_id}
+            className="space-y-2"
+          >
+            <Label className="text-sm font-medium">{variable.label}</Label>
+            <TooltipWrapper
+              disabled={selectedTask.is_predefined}
+              disabledMessage="You cannot modify a system-generated task"
             >
-              <Label className="text-sm font-medium">{parameterLabel}</Label>
-              <TooltipWrapper
-                disabled={selectedTask.is_predefined}
-                disabledMessage="You cannot modify a system-generated task"
-              >
-                <Select
-                  value={
-                    isInput
-                      ? `${designTimeParams.sourceId}:${designTimeParams.sourceType}`
-                      : designTimeParams.destinationId || ''
+              <Select
+                value={
+                  isInput
+                    ? `${designTimeParams.sourceId}:${designTimeParams.sourceType}`
+                    : designTimeParams.destinationId
+                }
+                onValueChange={(value) => {
+                  if (isInput) {
+                    const [id, type] = value.split(':');
+                    setDesignTimeParams((prev) => ({
+                      ...prev,
+                      sourceId: id,
+                      sourceType: type === 'dataview' ? 'dataview' : 'dataset',
+                    }));
+                  } else {
+                    setDesignTimeParams((prev) => ({
+                      ...prev,
+                      destinationId: value,
+                    }));
                   }
-                  onValueChange={(value) => handleChange(isInput, value)}
-                  disabled={selectedTask.is_predefined}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={isInput ? 'Select Input Location' : 'Select Output Location'}>
-                      {getSelectedLabel(isInput, options ?? []) ||
-                        (isInput ? 'Select Input Location' : 'Select Output Location')}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(options ?? []).map((option) => (
-                      <SelectItem
-                        key={option.id}
-                        value={
-                          isInput ? `${option.id}:${option.source.trim().toLowerCase()}` : String(option.id)
-                        }
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </TooltipWrapper>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
+                }}
+                disabled={selectedTask.is_predefined}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={`Select ${isInput ? 'input' : 'output'} location`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {isInput
+                    ? inputOptionsResponse?.data?.map((option: any) => {
+                        const id = option.id;
+                        const type = option.source.includes('dataset') ? 'dataset' : 'dataview';
+                        return (
+                          <SelectItem
+                            key={`${id}:${type}`}
+                            value={`${id}:${type}`}
+                          >
+                            {option.label}
+                          </SelectItem>
+                        );
+                      })
+                    : outputOptionsResponse?.data?.map((option: any) => (
+                        <SelectItem
+                          key={option.id}
+                          value={String(option.id)}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                </SelectContent>
+              </Select>
+            </TooltipWrapper>
+          </div>
+        );
+      })}
+    </div>
+  );
 
   const renderDesignTimeParamsFields = () => (
     <div className="col-span-2 space-y-4">
