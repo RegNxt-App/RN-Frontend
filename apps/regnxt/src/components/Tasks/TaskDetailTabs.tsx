@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect} from 'react';
 
 import {orchestraBackendInstance} from '@/lib/axios';
-import {TaskDetailTabsProps, TaskDetails, TaskParameter} from '@/types/databaseTypes';
+import {TaskDetailTabsProps, TaskParameter} from '@/types/databaseTypes';
 import {Calendar, Code, Tag, Trash2} from 'lucide-react';
 import useSWR from 'swr';
 
@@ -30,8 +30,8 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
   variablesResponse,
   onDeleteClick,
   onInputChange,
+  subtypeParamsResponse,
 }) => {
-  const TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${selectedTask.task_id}/add-parameter/`;
   const GET_TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${selectedTask.task_id}/parameters/`;
 
   const {data: taskParametersResponse} = useSWR<TaskParameter[]>(
@@ -56,14 +56,18 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
       const outputParam = taskParametersResponse.find((param) => param.parameter_id === outputVariableId);
 
       if (inputParam || outputParam) {
+        const inputOption = inputOptionsResponse?.data?.find(
+          (opt) => String(opt.id) === inputParam?.default_value
+        );
+
         setDesignTimeParams({
-          sourceId: inputParam?.default_value || '',
-          sourceType: 'dataset',
-          destinationId: outputParam?.default_value || '',
+          sourceId: inputParam?.default_value || null,
+          sourceType: inputOption?.source || null,
+          destinationId: outputParam?.default_value || null,
         });
       }
     }
-  }, [taskParametersResponse, inputVariableId, outputVariableId, setDesignTimeParams]);
+  }, [taskParametersResponse, inputVariableId, outputVariableId, inputOptionsResponse?.data]);
 
   useEffect(() => {
     updateDesignTimeParams();
@@ -173,6 +177,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
           inputOptionsResponse={inputOptionsResponse}
           outputOptionsResponse={outputOptionsResponse}
           runtimeParams={runtimeParams}
+          subtypeParamsResponse={subtypeParamsResponse}
         />
 
         {selectedTask.task_type_code === 'transform' && (

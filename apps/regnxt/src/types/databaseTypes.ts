@@ -357,6 +357,14 @@ export interface WorkflowRun {
   total_runtime_seconds: string | number;
   block_details: Array<{
     block_uuid: string;
+  run_id: number;
+  pipeline_name: string;
+  status: string;
+  started_at: string;
+  completed_at: string;
+  total_runtime_seconds: string | number;
+  block_details: Array<{
+    block_uuid: string;
     Status: string;
     started_at: string | null;
     completed_at: string | null;
@@ -486,12 +494,18 @@ export interface TaskParameter {
   source?: 'dataset' | 'dataview';
 }
 export interface DataviewOption {
+  id: string | number;
+  source: string;
   dataview_version_id: number;
   code: string;
+  label: string;
 }
 export interface DatasetOption {
+  id: string | number;
   dataset_version_id: number;
   code: string;
+  source: string;
+  label: string;
 }
 export interface VariableResponse {
   variable_id: number;
@@ -612,6 +626,7 @@ export interface TaskDetailTabsProps {
   outputOptionsResponse?: ApiResponse<DatasetOption[]>;
   variablesResponse?: VariableResponse[];
   onInputChange: (field: keyof TaskDetails, value: string) => void;
+  subtypeParamsResponse?: SubtypeParamsResponse[];
 }
 export interface ConfigurationsTabContentProps {
   selectedTask: TaskDetails;
@@ -633,6 +648,7 @@ export interface ConfigurationsTabContentProps {
   inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
   outputOptionsResponse?: ApiResponse<DatasetOption[]>;
   runtimeParams: RuntimeParameter[];
+  subtypeParamsResponse?: SubtypeParamsResponse[];
 }
 export interface PropertiesTabContentProps {
   selectedTask: TaskDetails;
@@ -680,4 +696,17 @@ export interface TaskConfigurationResponse {
 export interface TaskConfigurationContextType {
   taskConfigurations: TaskConfigurationResponse | undefined;
   isLoading: boolean;
+}
+export interface WorkflowRunColumn {
+  run_id: number;
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+  total_runtime_seconds: string | number;
+  block_details: Array<{
+    block_uuid: string;
+    status: string;
+    started_at: string | null;
+    completed_at: string | null;
+  }>;
 }
