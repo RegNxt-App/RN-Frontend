@@ -4,25 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-catalogs:
-  default:
-    '@types/node':
-      specifier: ^20
-      version: 20.17.10
-    lucide-react:
-      specifier: ^0.451.0
-      version: 0.451.0
-    tailwindcss:
-      specifier: ^3.4.13
-      version: 3.4.17
-    typescript:
-      specifier: ^5.6.3
-      version: 5.6.3
-  react18:
-    '@types/react':
-      specifier: ^18.3.11
-      version: 18.3.17
-
 overrides:
   '@radix-ui/react-dismissable-layer': 1.0.2
 
@@ -347,7 +328,7 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.3.3
         version: 5.6.3
 
   packages/lib:
@@ -472,8 +453,8 @@ importers:
         specifier: ^0.474.0
         version: 0.474.0
       lucide-react:
-        specifier: 'catalog:'
-        version: 0.451.0(react@18.3.1)
+        specifier: ^0.474.0
+        version: 0.474.0(react@18.3.1)
       react:
         specifier: ^18
         version: 18.3.1
@@ -506,10 +487,10 @@ importers:
         specifier: workspace:*
         version: link:../tsconfig
       '@types/node':
-        specifier: 'catalog:'
+        specifier: ^20.0.0
         version: 20.17.10
       '@types/react':
-        specifier: catalog:react18
+        specifier: ^18.2.0
         version: 18.3.17
       autoprefixer:
         specifier: ^10
@@ -521,10 +502,10 @@ importers:
         specifier: ^6
         version: 6.0.1(jiti@1.21.7)(postcss@8.4.49)(yaml@2.6.1)
       tailwindcss:
-        specifier: 'catalog:'
+        specifier: ^3.4.1
         version: 3.4.17
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.3.3
         version: 5.6.3
 
 packages:
@@ -4042,10 +4023,10 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
 
-  lucide-react@0.451.0:
-    resolution: {integrity: sha512-OwQ3uljZLp2cerj8sboy5rnhtGTCl9UCJIhT1J85/yOuGVlEH+xaUPR7tvNdddPvmV5M5VLdr7cQuWE3hzA4jw==}
+  lucide-react@0.474.0:
+    resolution: {integrity: sha512-CmghgHkh0OJNmxGKWc0qfPJCYHASPMVSyGY8fj3xgk4v84ItqDg64JNKFZn5hC6E0vHi6gxnbCgwhyVB09wQtA==}
     peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   lucide@0.474.0:
     resolution: {integrity: sha512-2rfORNh9fzhCUKu0ciE48ogR1Zg7hleABLO5MBF06vOb4esTtE8FbfQJiC+wveiNFoeojWKz6zXheUToRR5uIg==}
@@ -9285,7 +9266,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  lucide-react@0.451.0(react@18.3.1):
+  lucide-react@0.474.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
