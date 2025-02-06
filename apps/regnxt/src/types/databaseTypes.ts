@@ -357,6 +357,14 @@ export interface WorkflowRun {
   total_runtime_seconds: string | number;
   block_details: Array<{
     block_uuid: string;
+  run_id: number;
+  pipeline_name: string;
+  status: string;
+  started_at: string;
+  completed_at: string;
+  total_runtime_seconds: string | number;
+  block_details: Array<{
+    block_uuid: string;
     Status: string;
     started_at: string | null;
     completed_at: string | null;

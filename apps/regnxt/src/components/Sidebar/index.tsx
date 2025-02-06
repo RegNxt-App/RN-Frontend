@@ -24,7 +24,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@rn/ui/components/ui/dropdown-menu';
 import {Separator} from '@rn/ui/components/ui/separator';
@@ -43,7 +42,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarProvider,
-  SidebarRail,
 } from '@rn/ui/components/ui/sidebar';
 
 interface DropdownItem {
@@ -394,8 +392,6 @@ const SidebarComponent: React.FC<SidebarProps> = ({
           >
             {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
-
-          <SidebarRail />
         </Sidebar>
       </SidebarProvider>
 
