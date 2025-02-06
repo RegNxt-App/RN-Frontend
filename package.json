@@ -39,6 +39,8 @@
     "overrides": {
       "@radix-ui/react-dismissable-layer": "1.0.2"
     }
+  },
+  "dependencies": {
+    "@sentry/vite-plugin": "^3.1.2"
   }
 }
-

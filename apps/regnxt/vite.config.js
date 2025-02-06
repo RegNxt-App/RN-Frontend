@@ -1,13 +1,18 @@
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), sentryVitePlugin({
+    org: "regnxt",
+    project: "rn-frontend"
+  })],
   base: '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+
     rollupOptions: {
       output: {
         manualChunks: {
@@ -18,6 +23,8 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
+
+    sourcemap: true
   },
   resolve: {
     alias: {

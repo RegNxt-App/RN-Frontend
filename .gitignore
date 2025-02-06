@@ -7,3 +7,5 @@ dist/**
 .env*.local
 bun.lockb
 .idea/
+# Sentry Config File
+.env.sentry-build-plugin

@@ -44,7 +44,7 @@
     "cmdk": "1.0.0",
     "date-fns": "^4.1.0",
     "lucide": "^0.474.0",
-    "lucide-react": "catalog:",
+    "lucide-react": "^0.474.0",
     "react-day-picker": "8.10.1",
     "react-hook-form": "^7.54.1",
     "recharts": "^2.15.0",
@@ -56,15 +56,16 @@
     "@rn/eslint-config": "workspace:*",
     "@rn/lib": "workspace:*",
     "@rn/tsconfig": "workspace:*",
-    "@types/node": "catalog:",
-    "@types/react": "catalog:react18",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
     "autoprefixer": "^10",
     "postcss": "^8",
     "postcss-load-config": "^6",
-    "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
   },
   "peerDependencies": {
     "react": "^18"
   }
 }
+
