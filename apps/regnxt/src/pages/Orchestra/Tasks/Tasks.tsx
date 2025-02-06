@@ -144,8 +144,8 @@ export const TaskAccordion: React.FC = () => {
             const inputOptionsUrl = `/api/v1/tasks/execute-sql/?statement=${encodeURIComponent(
               inputStatement
             )}`;
-            const inputOptionsResponse = await orchestraBackendInstance.get(inputOptionsUrl);
-            setInputOptionsResponse({data: inputOptionsResponse.data});
+            const {data} = await orchestraBackendInstance.get(inputOptionsUrl);
+            setInputOptionsResponse({data});
           }
         }
 
@@ -157,8 +157,8 @@ export const TaskAccordion: React.FC = () => {
             const outputOptionsUrl = `/api/v1/tasks/execute-sql/?statement=${encodeURIComponent(
               outputStatement
             )}`;
-            const outputOptionsResponse = await orchestraBackendInstance.get(outputOptionsUrl);
-            setOutputOptionsResponse({data: outputOptionsResponse.data});
+            const {data} = await orchestraBackendInstance.get(outputOptionsUrl);
+            setOutputOptionsResponse({data});
           }
         }
       } catch (error) {
@@ -261,15 +261,20 @@ export const TaskAccordion: React.FC = () => {
       (v) => v.name.toLowerCase().includes('output') && v.name.toLowerCase().includes('dataset')
     )?.variable_id;
 
+    let parameterCount = 1;
     if (inputVariableId) {
       parameters.push({
+        id: parameterCount++,
         parameter_id: inputVariableId,
+        source: designTimeParams.sourceType || 'dataset',
         default_value: designTimeParams.sourceId,
       });
     }
     if (outputVariableId) {
       parameters.push({
+        id: parameterCount++,
         parameter_id: outputVariableId,
+        source: 'dataset',
         default_value: designTimeParams.destinationId,
       });
     }
@@ -282,6 +287,7 @@ export const TaskAccordion: React.FC = () => {
         context: localTask.context,
         task_language: localTask.task_language,
         task_code: localTask.task_code,
+        parameters: parameters,
       };
 
       const {data} = await orchestraBackendInstance.put(`/api/v1/tasks/${localTask.task_id}/`, payload);
@@ -298,9 +304,6 @@ export const TaskAccordion: React.FC = () => {
             }
           : null
       );
-
-      await mutate(TASKS_ENDPOINT);
-      await mutate(TASK_PARAMETERS_ENDPOINT);
 
       toast({
         title: 'Success',
