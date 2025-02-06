@@ -91,15 +91,14 @@ export const TaskAccordion: React.FC = () => {
   const [outputOptionsResponse, setOutputOptionsResponse] = useState<ApiResponse<DatasetOption[]>>();
 
   const [designTimeParams, setDesignTimeParams] = useState<{
-    sourceId: string;
-    sourceType: 'dataset' | 'dataview';
-    destinationId: string;
+    sourceId: string | null;
+    sourceType: string | null;
+    destinationId: string | null;
   }>({
-    sourceId: '',
-    sourceType: 'dataset',
-    destinationId: '',
+    sourceId: null,
+    sourceType: null,
+    destinationId: null,
   });
-
   const TASKS_ENDPOINT = '/api/v1/tasks/';
   const TASK_TYPES_ENDPOINT = '/api/v1/tasks/task-type-list/';
   const {data: subtypeParamsResponse} = useSWR<SubtypeParamsResponse[]>(
@@ -823,6 +822,7 @@ export const TaskAccordion: React.FC = () => {
                 outputOptionsResponse={outputOptionsResponse}
                 variablesResponse={variablesResponse}
                 onInputChange={handleInputChange}
+                subtypeParamsResponse={subtypeParamsResponse}
               />
             ) : (
               <div className="h-[calc(100vh-16rem)] flex items-center justify-center">
