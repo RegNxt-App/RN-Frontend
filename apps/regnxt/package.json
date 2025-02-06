@@ -32,6 +32,7 @@
     "@rn/tokens": "workspace:*",
     "@rn/tsconfig": "workspace:*",
     "@rn/ui": "workspace:*",
+    "@sentry/react": "^8.54.0",
     "@silevis/reactgrid": "^4.1.10",
     "@tanstack/react-table": "^8.20.5",
     "@vitejs/plugin-react-swc": "^3.7.2",
@@ -82,4 +83,3 @@
     "vite": "^5.4.1"
   }
 }
-
