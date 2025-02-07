@@ -255,6 +255,7 @@ export interface TaskType {
   task_type_id: number;
   task_type_code: string;
   task_subtype_id: number;
+  parameters: any | null;
 }
 export interface Group {
   code: string;
@@ -296,6 +297,7 @@ export interface TaskDetails {
   task_type_code: string;
   task_id: number;
   task_subtype_id: number;
+  parameters: any | null;
 }
 
 export interface StatItem {
@@ -357,17 +359,18 @@ export interface WorkflowRun {
   total_runtime_seconds: string | number;
   block_details: Array<{
     block_uuid: string;
-  run_id: number;
-  pipeline_name: string;
-  status: string;
-  started_at: string;
-  completed_at: string;
-  total_runtime_seconds: string | number;
-  block_details: Array<{
-    block_uuid: string;
-    Status: string;
-    started_at: string | null;
-    completed_at: string | null;
+    run_id: number;
+    pipeline_name: string;
+    status: string;
+    started_at: string;
+    completed_at: string;
+    total_runtime_seconds: string | number;
+    block_details: Array<{
+      block_uuid: string;
+      status: string;
+      started_at: string | null;
+      completed_at: string | null;
+    }>;
   }>;
 }
 
@@ -488,9 +491,9 @@ export interface DMSubtask {
   filters: any[];
 }
 export interface TaskParameter {
-  id: number;
-  parameter_id: number;
-  default_value: string;
+  id?: number;
+  parameter_id?: number;
+  default_value?: string;
   source?: 'dataset' | 'dataview';
 }
 export interface DataviewOption {
@@ -604,6 +607,11 @@ export interface SortableItemProps {
 export interface ApiResponse<T> {
   data: T;
 }
+export interface DesignTimeParams {
+  sourceId: string | null;
+  sourceType: 'dataset' | 'dataview' | null;
+  destinationId: string | null;
+}
 
 export interface TaskDetailTabsProps {
   selectedTask: TaskDetails;
@@ -613,12 +621,8 @@ export interface TaskDetailTabsProps {
   setLocalTask: (task: TaskDetails | null) => void;
   isSaving: boolean;
   setIsSaving: (saving: boolean) => void;
-  designTimeParams: {
-    sourceId: string;
-    sourceType: 'dataset' | 'dataview';
-    destinationId: string;
-  };
-  setDesignTimeParams: (params: any) => void;
+  designTimeParams: DesignTimeParams;
+  setDesignTimeParams: React.Dispatch<React.SetStateAction<DesignTimeParams>>;
   runtimeParams: RuntimeParameter[];
   onSave: () => Promise<void>;
   onDeleteClick: () => void;
@@ -632,18 +636,8 @@ export interface ConfigurationsTabContentProps {
   selectedTask: TaskDetails;
   localTask: TaskDetails;
   handleInputChange: (field: keyof TaskDetails, value: string) => void;
-  designTimeParams: {
-    sourceId: string;
-    sourceType: 'dataset' | 'dataview';
-    destinationId: string;
-  };
-  setDesignTimeParams: React.Dispatch<
-    React.SetStateAction<{
-      sourceId: string;
-      sourceType: 'dataset' | 'dataview';
-      destinationId: string;
-    }>
-  >;
+  designTimeParams: DesignTimeParams;
+  setDesignTimeParams: React.Dispatch<React.SetStateAction<DesignTimeParams>>;
   variablesResponse?: VariableResponse[];
   inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
   outputOptionsResponse?: ApiResponse<DatasetOption[]>;

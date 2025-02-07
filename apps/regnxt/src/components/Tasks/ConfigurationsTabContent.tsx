@@ -130,6 +130,9 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
             : variable.label;
 
           const options = isInput ? inputOptionsResponse?.data : outputOptionsResponse?.data;
+          const currentValue = isInput
+            ? `${designTimeParams.sourceId}:${designTimeParams.sourceType}`
+            : designTimeParams.destinationId;
 
           return (
             <div
@@ -142,11 +145,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
                 disabledMessage="You cannot modify a system-generated task"
               >
                 <Select
-                  value={
-                    isInput
-                      ? `${designTimeParams.sourceId}:${designTimeParams.sourceType}`
-                      : designTimeParams.destinationId || ''
-                  }
+                  value={currentValue || ''}
                   onValueChange={(value) => handleChange(isInput, value)}
                   disabled={selectedTask.is_predefined}
                 >
@@ -157,16 +156,23 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {(options ?? []).map((option) => (
-                      <SelectItem
-                        key={option.id}
-                        value={
-                          isInput ? `${option.id}:${option.source.trim().toLowerCase()}` : String(option.id)
-                        }
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                    {isInput
+                      ? inputOptionsResponse?.data?.map((option: any) => (
+                          <SelectItem
+                            key={`input-${option.id}-${option.source}`}
+                            value={`${option.id}:${option.source.trim().toLowerCase()}`}
+                          >
+                            {option.label}
+                          </SelectItem>
+                        ))
+                      : outputOptionsResponse?.data?.map((option: any) => (
+                          <SelectItem
+                            key={`output-${option.id}`}
+                            value={String(option.id)}
+                          >
+                            {option.label}
+                          </SelectItem>
+                        ))}
                   </SelectContent>
                 </Select>
               </TooltipWrapper>

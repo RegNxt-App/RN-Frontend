@@ -9,6 +9,7 @@ import {
   ApiTask,
   DatasetOption,
   DataviewOption,
+  DesignTimeParams,
   GroupedTask,
   RuntimeParameter,
   StatItem,
@@ -90,11 +91,7 @@ export const TaskAccordion: React.FC = () => {
     useState<ApiResponse<(DatasetOption | DataviewOption)[]>>();
   const [outputOptionsResponse, setOutputOptionsResponse] = useState<ApiResponse<DatasetOption[]>>();
 
-  const [designTimeParams, setDesignTimeParams] = useState<{
-    sourceId: string | null;
-    sourceType: string | null;
-    destinationId: string | null;
-  }>({
+  const [designTimeParams, setDesignTimeParams] = useState<DesignTimeParams>({
     sourceId: null,
     sourceType: null,
     destinationId: null,
@@ -251,7 +248,7 @@ export const TaskAccordion: React.FC = () => {
 
     setIsSaving(true);
     const parameters = [];
-    const TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${localTask.task_id}/add-parameter/`;
+    // const TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${localTask.task_id}/add-parameter/`;
 
     const inputVariableId = variablesResponse?.find(
       (v) => v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
@@ -291,10 +288,6 @@ export const TaskAccordion: React.FC = () => {
       };
 
       const {data} = await orchestraBackendInstance.put(`/api/v1/tasks/${localTask.task_id}/`, payload);
-
-      if (parameters.length > 0) {
-        await orchestraBackendInstance.post(TASK_PARAMETERS_ENDPOINT, parameters);
-      }
 
       setLocalTask((prev) =>
         prev
@@ -430,18 +423,6 @@ export const TaskAccordion: React.FC = () => {
     ];
   }, [tasks]);
 
-  const handleEditTask = () => {
-    setIsEditing(true);
-  };
-
-  const handleSaveTask = async () => {
-    const updatedTask = tasks.find((task) => task.task_id === selectedTask?.task_id);
-    if (updatedTask) {
-      setSelectedTask(updatedTask);
-    }
-    setIsEditing(false);
-  };
-
   const toggleCategory = useCallback((categoryName: string) => {
     setExpandedCategories((prev) =>
       prev.includes(categoryName) ? prev.filter((name) => name !== categoryName) : [...prev, categoryName]
@@ -536,6 +517,7 @@ export const TaskAccordion: React.FC = () => {
       task_type_code: task.task_type_code,
       task_id: task.task_id,
       task_subtype_id: task.task_subtype_id,
+      parameters: task.parameters || [],
     };
   };
   const handleSave = async () => {
