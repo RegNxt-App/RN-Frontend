@@ -1,13 +1,92 @@
+import {useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {DataViewsTable} from '@/components/dataviews/DataViewsTable';
+import {useBackend} from '@/contexts/BackendContext';
 import {ArrowUpRight, BarChart3, Database, FileText, PlusCircle} from 'lucide-react';
+import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
 
+interface DataView {
+  dataview_id: number;
+  code: string;
+  label: string;
+  description: string;
+  framework: string;
+  type: string;
+  is_system_generated: boolean;
+  is_visible: boolean;
+  data_objects: any[];
+  data_joins: any[];
+  data_fields: any[];
+  data_filters: any[];
+  data_aggregations: any[];
+  version_nr: number;
+  version_code: string;
+}
+
+interface DataViewsResponse {
+  data: {
+    count: number;
+    current_page: number;
+    num_pages: number;
+    page_size: number;
+    results: DataView[];
+    filters_applied: {
+      search: string | null;
+      framework?: string;
+      type?: string;
+    };
+  };
+}
+
 export default function Dataviews() {
   const navigate = useNavigate();
+  const {backendInstance} = useBackend();
+  const [searchParams, setSearchParams] = useState({
+    page: 1,
+    page_size: 10,
+    search: '',
+    framework: '',
+    type: '',
+  });
+
+  const {
+    data: viewsData,
+    error,
+    isLoading,
+  } = useSWR<DataViewsResponse>(
+    `/api/v1/dataviews/?page=${searchParams.page}&page_size=${searchParams.page_size}${
+      searchParams.search ? `&search=${searchParams.search}` : ''
+    }${searchParams.framework ? `&framework=${searchParams.framework}` : ''}${
+      searchParams.type ? `&type=${searchParams.type}` : ''
+    }`,
+    backendInstance
+  );
+
+  const stats = useMemo(() => {
+    if (!viewsData?.data)
+      return {
+        total: 0,
+        active: 0,
+        linkedDatasets: 0,
+      };
+
+    return {
+      total: viewsData.data.count,
+      active: viewsData.data.results?.filter((view) => view.is_visible).length,
+      linkedDatasets: viewsData.data.results?.reduce((acc, view) => acc + view.data_objects.length, 0),
+    };
+  }, [viewsData]);
+
+  console.log("console.log('Table Data:', data);: ", viewsData);
+
+  if (error) {
+    return <div>Error loading data views: {error.message}</div>;
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -31,10 +110,10 @@ export default function Dataviews() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">156</div>
+            <div className="text-2xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground">
               <ArrowUpRight className="mr-1 inline h-4 w-4 text-green-500" />
-              +12% from last month
+              Total data views
             </p>
           </CardContent>
         </Card>
@@ -44,10 +123,10 @@ export default function Dataviews() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">89</div>
+            <div className="text-2xl font-bold">{stats.active}</div>
             <p className="text-xs text-muted-foreground">
               <ArrowUpRight className="mr-1 inline h-4 w-4 text-green-500" />
-              +5% from last month
+              Currently visible views
             </p>
           </CardContent>
         </Card>
@@ -57,8 +136,8 @@ export default function Dataviews() {
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">32</div>
-            <p className="text-xs text-muted-foreground">Across all data views</p>
+            <div className="text-2xl font-bold">{stats.linkedDatasets}</div>
+            <p className="text-xs text-muted-foreground">Total linked data objects</p>
           </CardContent>
         </Card>
       </div>
@@ -73,7 +152,25 @@ export default function Dataviews() {
           </div>
         </CardHeader>
         <CardContent>
-          <DataViewsTable />
+          <DataViewsTable
+            data={viewsData?.data?.results ?? []}
+            pagination={{
+              pageCount: viewsData?.data?.num_pages ?? 0,
+              pageSize: viewsData?.data?.page_size ?? 10,
+              currentPage: viewsData?.data?.current_page ?? 1,
+              totalCount: viewsData?.data?.count ?? 0,
+            }}
+            isLoading={isLoading}
+            onPageChange={(page) => setSearchParams((prev) => ({...prev, page}))}
+            onSearch={(search) => setSearchParams((prev) => ({...prev, search, page: 1}))}
+            onFilterChange={(filters) =>
+              setSearchParams((prev) => ({
+                ...prev,
+                ...filters,
+                page: 1,
+              }))
+            }
+          />
         </CardContent>
       </Card>
     </div>
