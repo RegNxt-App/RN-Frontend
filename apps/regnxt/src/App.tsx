@@ -17,6 +17,7 @@ import ApplicationSettings from './pages/Orchestra/ApplicationSettings';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
 import UserSettings from './pages/Orchestra/UserSettings';
 import WorkflowManager from './pages/Orchestra/workflows/Workflows';
+import CreateDataViewPage from './pages/Orchestra/DataViews/CreateDataview';
 
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
 const SignUp = lazy(() => import('./pages/Authentication/SignUp'));
@@ -43,7 +44,7 @@ const Validation = lazy(() => import('./pages/Configuration/Validation'));
 const Connections = lazy(() => import('./pages/Orchestra/Connections'));
 const Variables = lazy(() => import('./pages/Orchestra/Variables'));
 const Datasets = lazy(() => import('./pages/Orchestra/Datasets'));
-const Dataviews = lazy(() => import('./pages/Orchestra/Dataviews'));
+const Dataviews = lazy(() => import('./pages/Orchestra/DataViews/Dataviews'));
 const Workflows = lazy(() => import('./pages/Orchestra/workflows/Workflows'));
 const Monitoring = lazy(() => import('./pages/Orchestra/Monitoring'));
 const Data = lazy(() => import('./pages/Orchestra/Data/Data'));
@@ -102,6 +103,7 @@ const routeConfig = {
     {path: '/orchestra/variables', component: Variables, title: 'Orchestra'},
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},
+    {path: '/orchestra/dataviews/create', component: CreateDataViewPage, title: 'Orchestra'},
     {path: '/orchestra/tasks', component: TaskAccordion, title: 'Orchestra'},
     {path: '/orchestra/workflows', component: WorkflowsWithProvider, title: 'Orchestra'},
     {path: '/orchestra/monitoring', component: Monitoring, title: 'Orchestra'},
