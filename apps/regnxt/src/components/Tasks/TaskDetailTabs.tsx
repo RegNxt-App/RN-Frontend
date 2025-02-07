@@ -32,16 +32,6 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
   onInputChange,
   subtypeParamsResponse,
 }) => {
-  const GET_TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${selectedTask.task_id}/parameters/`;
-
-  const {data: taskParametersResponse} = useSWR<TaskParameter[]>(
-    GET_TASK_PARAMETERS_ENDPOINT,
-    async (url: string) => {
-      const response = await orchestraBackendInstance.get(url);
-      return response.data;
-    }
-  );
-
   const inputVariableId = variablesResponse?.find(
     (v) => v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
   )?.variable_id;
@@ -51,23 +41,43 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
   )?.variable_id;
 
   const updateDesignTimeParams = useCallback(() => {
-    if (taskParametersResponse?.length) {
-      const inputParam = taskParametersResponse.find((param) => param.parameter_id === inputVariableId);
-      const outputParam = taskParametersResponse.find((param) => param.parameter_id === outputVariableId);
+    if (!selectedTask?.parameters || selectedTask.parameters.length === 0) {
+      setDesignTimeParams({
+        sourceId: null,
+        sourceType: null,
+        destinationId: null,
+      });
+      return;
+    }
+    if (selectedTask?.parameters) {
+      const inputParam = selectedTask.parameters.find(
+        (param: TaskParameter) => param.parameter_id === inputVariableId || param.id === inputVariableId
+      );
+      const outputParam = selectedTask.parameters.find(
+        (param: TaskParameter) => param.parameter_id === outputVariableId || param.id === outputVariableId
+      );
 
       if (inputParam || outputParam) {
         const inputOption = inputOptionsResponse?.data?.find(
-          (opt) => String(opt.id) === inputParam?.default_value
+          (opt) => String(opt.id) === (inputParam?.default_value || inputParam?.value)
         );
 
+        const newDesignTimeParams = {
+          sourceId: inputParam?.default_value || inputParam?.value || null,
+          sourceType: inputParam?.source || inputOption?.source || null,
+          destinationId: outputParam?.default_value || outputParam?.value || null,
+        };
+
+        setDesignTimeParams(newDesignTimeParams);
+      } else {
         setDesignTimeParams({
-          sourceId: inputParam?.default_value || null,
-          sourceType: inputOption?.source || null,
-          destinationId: outputParam?.default_value || null,
+          sourceId: null,
+          sourceType: null,
+          destinationId: null,
         });
       }
     }
-  }, [taskParametersResponse, inputVariableId, outputVariableId, inputOptionsResponse?.data]);
+  }, [selectedTask?.parameters, inputVariableId, outputVariableId, inputOptionsResponse?.data]);
 
   useEffect(() => {
     updateDesignTimeParams();
