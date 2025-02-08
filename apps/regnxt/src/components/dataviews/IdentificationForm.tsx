@@ -9,25 +9,24 @@ import {Textarea} from '@rn/ui/components/ui/textarea';
 interface IdentificationFormProps {
   config: any;
   updateConfig: (data: any) => void;
+  isEdit?: boolean;
 }
 
-export function IdentificationForm({config, updateConfig}: IdentificationFormProps) {
-  const [formData, setFormData] = useState({
-    code: config.code || '',
-    label: config.label || '',
-    description: config.description || '',
-    framework: config.framework || '',
-    visible: config.visible || false,
-  });
+export function IdentificationForm({config, updateConfig, isEdit}: IdentificationFormProps) {
+  const [formData, setFormData] = useState(config);
 
   useEffect(() => {
-    if (JSON.stringify(formData) !== JSON.stringify(config)) {
-      updateConfig(formData);
-    }
-  }, [formData, updateConfig, config]);
+    setFormData({
+      code: config.code || '',
+      label: config.label || '',
+      description: config.description || '',
+      framework: config.framework || '',
+      visible: config.visible || false,
+    });
+  }, [config]);
 
   const handleChange = (field: string, value: string | boolean) => {
-    setFormData((prev) => ({
+    setFormData((prev: Record<string, string>) => ({
       ...prev,
       [field]: value,
     }));
@@ -40,8 +39,9 @@ export function IdentificationForm({config, updateConfig}: IdentificationFormPro
         <Input
           id="code"
           placeholder="Enter unique code"
-          value={formData.code}
+          value={formData?.code || ''}
           onChange={(e) => handleChange('code', e.target.value)}
+          disabled={isEdit}
         />
       </div>
       <div className="grid gap-2">
@@ -49,7 +49,7 @@ export function IdentificationForm({config, updateConfig}: IdentificationFormPro
         <Input
           id="label"
           placeholder="Enter label"
-          value={formData.label}
+          value={formData.label || ''}
           onChange={(e) => handleChange('label', e.target.value)}
         />
       </div>
@@ -58,7 +58,7 @@ export function IdentificationForm({config, updateConfig}: IdentificationFormPro
         <Textarea
           id="description"
           placeholder="Enter description"
-          value={formData.description}
+          value={formData.description || ''}
           onChange={(e) => handleChange('description', e.target.value)}
         />
       </div>

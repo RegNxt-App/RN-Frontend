@@ -14,10 +14,10 @@ import {BackendProvider} from './contexts/BackendContext';
 import {WorkflowProvider} from './contexts/WorkflowContext';
 import DefaultLayout from './layout/DefaultLayout';
 import ApplicationSettings from './pages/Orchestra/ApplicationSettings';
+import {CreateEditDataview} from './pages/Orchestra/DataViews/CreateEditDataview';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
 import UserSettings from './pages/Orchestra/UserSettings';
 import WorkflowManager from './pages/Orchestra/workflows/Workflows';
-import CreateDataViewPage from './pages/Orchestra/DataViews/CreateDataview';
 
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
 const SignUp = lazy(() => import('./pages/Authentication/SignUp'));
@@ -103,7 +103,8 @@ const routeConfig = {
     {path: '/orchestra/variables', component: Variables, title: 'Orchestra'},
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},
-    {path: '/orchestra/dataviews/create', component: CreateDataViewPage, title: 'Orchestra'},
+    {path: '/orchestra/dataviews/create', component: CreateEditDataview, title: 'Orchestra'},
+    {path: '/orchestra/dataviews/:id/edit', component: CreateEditDataview, title: 'Orchestra'},
     {path: '/orchestra/tasks', component: TaskAccordion, title: 'Orchestra'},
     {path: '/orchestra/workflows', component: WorkflowsWithProvider, title: 'Orchestra'},
     {path: '/orchestra/monitoring', component: Monitoring, title: 'Orchestra'},
@@ -125,7 +126,6 @@ const routeConfig = {
 const ProtectedRoute = ({component: Component, title}: {component: React.ComponentType; title: string}) => {
   const {user, loading, refreshUserSession} = useAuth();
   const location = useLocation();
-  console.log('test commit');
   useEffect(() => {
     if (!user) {
       refreshUserSession();
