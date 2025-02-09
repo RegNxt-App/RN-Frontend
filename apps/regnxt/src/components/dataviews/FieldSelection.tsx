@@ -51,7 +51,7 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
 
   const filteredFields = fields.filter(
     (field) =>
-      field.name.toLowerCase().includes(searchTerm.toLowerCase()) && (!showSelected || field.selected)
+      field?.name?.toLowerCase().includes(searchTerm?.toLowerCase()) && (!showSelected || field.selected)
   );
 
   return (
