@@ -3,39 +3,15 @@ import React, {memo} from 'react';
 import {Card} from '@/components/ui/card';
 import {Task} from '@/types/databaseTypes';
 
-interface TasksListProps {
-  onDragStart: (event: React.DragEvent, nodeData: any) => void;
-}
+import {Badge} from '@rn/ui/components/ui/badge';
 
-const DUMMY_TASKS: Task[] = [
-  {
-    task_id: 1,
-    task_code: 'file/load_json',
-    task_type_id: 1,
-    task_subtype_id: 1,
-    label: 'Load interest rates from external source',
-    task_language: null,
-    upstream_tasks: null,
-  },
-  {
-    task_id: 2,
-    task_code: 'hello_1',
-    task_type_id: 2,
-    task_subtype_id: 1,
-    label: 'hello_1',
-    task_language: 'python',
-    upstream_tasks: [1],
-  },
-  {
-    task_id: 3,
-    task_code: 'file/load_csv',
-    task_type_id: 1,
-    task_subtype_id: 1,
-    label: 'Load accounting movements from a file',
-    task_language: null,
-    upstream_tasks: [10],
-  },
-];
+interface TasksListProps {
+  tasks: Task[];
+  onDragStart: (event: React.DragEvent, nodeData: any) => void;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
 
 const TaskItem = memo(({task, onDragStart}: {task: Task; onDragStart: TasksListProps['onDragStart']}) => (
   <Card
@@ -45,24 +21,51 @@ const TaskItem = memo(({task, onDragStart}: {task: Task; onDragStart: TasksListP
   >
     <div className="flex items-center space-x-2">
       <div className="flex-1">
-        <div className="text-sm font-medium">{task.label}</div>
-        <div className="text-xs text-gray-500">Type: {task.task_type_id}</div>
-        {task.task_language && <div className="text-xs text-gray-500">Language: {task.task_language}</div>}
+        <div className="text-sm font-medium mb-2">{task.label}</div>
+        <div className="text-xs text-gray-500 flex space-x-2">
+          <Badge variant="secondary">{task.task_type_label}</Badge>
+          {task.task_language && <Badge>{task.task_language}</Badge>}
+        </div>
       </div>
     </div>
   </Card>
 ));
 
-export const TasksList: React.FC<TasksListProps> = memo(({onDragStart}) => {
-  return (
-    <div className="space-y-2">
-      {DUMMY_TASKS.map((task) => (
-        <TaskItem
-          key={task.task_id}
-          task={task}
-          onDragStart={onDragStart}
-        />
-      ))}
-    </div>
-  );
-});
+export const TasksList: React.FC<TasksListProps> = memo(
+  ({tasks, onDragStart, currentPage, totalPages, onPageChange}) => {
+    return (
+      <div className="space-y-4">
+        <div className="space-y-2">
+          {tasks.map((task) => (
+            <TaskItem
+              key={task.task_id}
+              task={task}
+              onDragStart={onDragStart}
+            />
+          ))}
+        </div>
+        {totalPages > 1 && (
+          <div className="flex justify-between items-center mt-4 text-sm">
+            <button
+              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="text-blue-600 disabled:text-gray-400"
+            >
+              Previous
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="text-blue-600 disabled:text-gray-400"
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+);

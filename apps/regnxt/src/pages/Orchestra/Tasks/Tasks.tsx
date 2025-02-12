@@ -6,7 +6,6 @@ import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
 import {
   ApiResponse,
-  ApiTask,
   DatasetOption,
   DataviewOption,
   DesignTimeParams,
@@ -14,8 +13,8 @@ import {
   RuntimeParameter,
   StatItem,
   SubtypeParamsResponse,
+  Task,
   TaskConfigurationResponse,
-  TaskDetails,
   TaskSubType,
   TaskType,
   TasksApiResponse,
@@ -70,8 +69,7 @@ type FormValues = z.infer<typeof formSchema>;
 export const TaskAccordion: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<TaskType | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentTask, setCurrentTask] = useState<ApiTask | Partial<ApiTask> | null>(null);
+  const [currentTask, setCurrentTask] = useState<Task | Partial<Task> | null>(null);
   const [selectedTaskType, setSelectedTaskType] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -81,7 +79,7 @@ export const TaskAccordion: React.FC = () => {
   const [isLoadingSubTypes, setIsLoadingSubTypes] = useState(false);
   const [expandedSubtypes, setExpandedSubtypes] = useState<string[]>([]);
   const [currentTab, setCurrentTab] = useState('properties');
-  const [localTask, setLocalTask] = useState<TaskDetails | null>(null);
+  const [localTask, setLocalTask] = useState<Task | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [runtimeParams, setRuntimeParams] = useState<RuntimeParameter[]>([]);
@@ -234,7 +232,7 @@ export const TaskAccordion: React.FC = () => {
     setTaskToDelete(null);
   };
 
-  const handleInputChange = (field: keyof TaskDetails, value: string) => {
+  const handleInputChange = (field: keyof Task, value: string) => {
     setLocalTask((prev) => {
       if (!prev) return prev;
       return {
@@ -248,7 +246,6 @@ export const TaskAccordion: React.FC = () => {
 
     setIsSaving(true);
     const parameters = [];
-    // const TASK_PARAMETERS_ENDPOINT = `/api/v1/tasks/${localTask.task_id}/add-parameter/`;
 
     const inputVariableId = variablesResponse?.find(
       (v) => v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
@@ -494,7 +491,7 @@ export const TaskAccordion: React.FC = () => {
       description: '',
       context: '',
       task_language: null,
-      task_code: null,
+      task_code: 'null',
     });
     setSelectedTaskType(null);
   };
@@ -502,9 +499,9 @@ export const TaskAccordion: React.FC = () => {
     setIsAddDialogOpen(false);
     setCurrentTask(null);
   };
-  const mapTaskToDetails = (task: TaskType): TaskDetails => {
+  const mapTaskToDetails = (task: TaskType): Task => {
     return {
-      id: task.task_id,
+      task_id: task.task_id,
       code: task.code,
       label: task.label,
       description: task.description,
@@ -515,9 +512,9 @@ export const TaskAccordion: React.FC = () => {
       context: task.context,
       task_type_id: task.task_type_id,
       task_type_code: task.task_type_code,
-      task_id: task.task_id,
       task_subtype_id: task.task_subtype_id,
       parameters: task.parameters || [],
+      upstream_tasks: null,
     };
   };
   const handleSave = async () => {

@@ -1,6 +1,11 @@
 import React, {createContext, useContext} from 'react';
 
-import {TaskConfigurationContextType, TaskConfigurationResponse} from '@/types/databaseTypes';
+import {TaskConfigurationResponse} from '@/types/databaseTypes';
+
+interface TaskConfigurationContextType {
+  taskConfigurations: TaskConfigurationResponse | undefined;
+  isLoading: boolean;
+}
 
 const TaskConfigurationContext = createContext<TaskConfigurationContextType | undefined>(undefined);
 

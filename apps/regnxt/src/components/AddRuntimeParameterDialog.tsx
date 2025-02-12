@@ -2,13 +2,20 @@ import React from 'react';
 
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {AddRuntimeParameterDialogProps, AvailableParameter} from '@/types/databaseTypes';
+import {AvailableParameter} from '@/types/databaseTypes';
 
 import {Button} from '@rn/ui/components/ui/button';
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from '@rn/ui/components/ui/dialog';
 import {Input} from '@rn/ui/components/ui/input';
 import {Label} from '@rn/ui/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
+
+interface AddRuntimeParameterDialogProps {
+  taskId: number;
+  availableParameters: AvailableParameter[];
+  onParameterAdd: () => void;
+  isDisabled: boolean;
+}
 
 export const AddRuntimeParameterDialog = ({
   taskId,

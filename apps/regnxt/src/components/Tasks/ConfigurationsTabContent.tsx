@@ -4,11 +4,15 @@ import {AddRuntimeParameterDialog} from '@/components/AddRuntimeParameterDialog'
 import {useTaskConfiguration} from '@/contexts/TaskConfigurationContext';
 import {orchestraBackendInstance} from '@/lib/axios';
 import {
+  ApiResponse,
   AvailableParameter,
-  ConfigurationsTabContentProps,
   DatasetOption,
   DataviewOption,
+  DesignTimeParams,
   RuntimeParameter,
+  SubtypeParamsResponse,
+  Task,
+  VariableResponse,
 } from '@/types/databaseTypes';
 import useSWR from 'swr';
 
@@ -21,6 +25,19 @@ import {Textarea} from '@rn/ui/components/ui/textarea';
 
 import Loader from '../loader';
 import {TooltipWrapper} from './TooltipWrapper';
+
+interface ConfigurationsTabContentProps {
+  selectedTask: Task;
+  localTask: Task;
+  handleInputChange: (field: keyof Task, value: string) => void;
+  designTimeParams: DesignTimeParams;
+  setDesignTimeParams: React.Dispatch<React.SetStateAction<DesignTimeParams>>;
+  variablesResponse?: VariableResponse[];
+  inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
+  outputOptionsResponse?: ApiResponse<DatasetOption[]>;
+  runtimeParams: RuntimeParameter[];
+  subtypeParamsResponse?: SubtypeParamsResponse[];
+}
 
 export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> = ({
   selectedTask,

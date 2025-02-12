@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
-import {DMSubtask, TransformationTabProps} from '@/types/databaseTypes';
+import {DMSubtask, Task} from '@/types/databaseTypes';
 import {
   DndContext,
   DragEndEvent,
@@ -30,6 +30,12 @@ import {ScrollArea} from '@rn/ui/components/ui/scroll-area';
 import {Textarea} from '@rn/ui/components/ui/textarea';
 
 import {SortableItem} from './SortableItem';
+
+interface TransformationTabProps {
+  disabled?: boolean;
+  onSave?: () => void;
+  selectedTask: Task | null;
+}
 
 export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, selectedTask}) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);

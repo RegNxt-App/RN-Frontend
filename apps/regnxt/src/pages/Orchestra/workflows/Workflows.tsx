@@ -7,7 +7,7 @@ import {orchestraBackendInstance} from '@/lib/axios';
 import {Workflow, WorkflowParameter, WorkflowRun} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
 import {Clock, Edit, Loader2, Play} from 'lucide-react';
-import useSWR from 'swr';
+import useSWR, {mutate} from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
@@ -229,6 +229,10 @@ const WorkflowManager = () => {
     [getStatusColor]
   );
 
+  const handleRefreshWorkflows = () => {
+    mutate(WORKFLOWS_ENDPOINT);
+  };
+
   if (error) {
     return <div className="text-red-500 p-4 text-center">Error loading workflows: {error.message}</div>;
   }
@@ -367,6 +371,7 @@ const WorkflowManager = () => {
         open={isWorkflowDialogOpen}
         onOpenChange={setIsWorkflowDialogOpen}
         workflow={workflow}
+        onRefresh={handleRefreshWorkflows}
       />
     </div>
   );
