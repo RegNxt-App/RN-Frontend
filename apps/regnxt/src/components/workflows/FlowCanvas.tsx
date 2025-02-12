@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import {useWorkflow} from '@/contexts/WorkflowContext';
 import {toast} from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
+import dagre from 'dagre';
 import {Loader2, Save} from 'lucide-react';
 import useSWR from 'swr';
 
@@ -72,13 +73,44 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
     workflowContext?.workflow_id ? WORKFLOW_COMPONENTS_ENDPOINT(workflowContext.workflow_id) : null,
     (url: string) => backendInstance.get(url).then((r) => r.data)
   );
+
+  const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
+    const dagreGraph = new dagre.graphlib.Graph();
+    dagreGraph.setDefaultEdgeLabel(() => ({}));
+    dagreGraph.setGraph({rankdir: direction, ranksep: 100, nodesep: 100});
+
+    const nodeWidth = 200;
+    const nodeHeight = 100;
+
+    nodes.forEach((node) => {
+      dagreGraph.setNode(node.id, {width: nodeWidth, height: nodeHeight});
+    });
+
+    edges.forEach((edge) => {
+      dagreGraph.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(dagreGraph);
+
+    return nodes.map((node) => {
+      const dagreNode = dagreGraph.node(node.id);
+      return {
+        ...node,
+        position: {
+          x: dagreNode.x - nodeWidth / 2,
+          y: dagreNode.y - nodeHeight / 2,
+        },
+        data: node.data as NodeData,
+      };
+    });
+  };
   useMemo(() => {
     if (!components) return;
 
-    const newNodes: Node<NodeData>[] = components.map((comp, index) => ({
+    const newNodes: Node<NodeData>[] = components.map((comp) => ({
       id: comp.task_id.toString(),
       type: 'custom',
-      position: calculateNodePosition(index, nodes),
+      position: {x: 0, y: 0},
       data: {
         label: comp.label,
         type: comp.task_type_id,
@@ -88,18 +120,18 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
         upstreamTasks: comp.upstream_tasks ? [comp.upstream_tasks] : null,
       },
     }));
-    const newEdges: Edge[] = [];
-    components.forEach((comp) => {
-      if (comp.upstream_tasks !== null) {
-        newEdges.push({
-          id: `edge-${comp.upstream_tasks}-${comp.task_id}`,
-          source: comp.upstream_tasks.toString(),
-          target: comp.task_id.toString(),
-        });
-      }
-    });
 
-    setNodes(newNodes);
+    const newEdges: Edge[] = components
+      .filter((comp): comp is WorkflowComponent & {upstream_tasks: number} => comp.upstream_tasks !== null)
+      .map((comp) => ({
+        id: `edge-${comp.upstream_tasks}-${comp.task_id}`,
+        source: comp.upstream_tasks.toString(),
+        target: comp.task_id.toString(),
+      }));
+
+    const layoutedNodes = getLayoutedElements(newNodes, newEdges);
+
+    setNodes(layoutedNodes);
     setEdges(newEdges);
   }, [components]);
 
@@ -126,51 +158,30 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
 
   const handleSave = async () => {
     if (!onSave && !currentWorkflow?.workflow_id) return;
-
     setIsSaving(true);
+
     try {
-      const uniqueTasks = Array.from(new Map(nodes.map((node) => [node.data.task_id, node])).values());
-
-      const tasks = uniqueTasks.map((node) => {
-        const upstreamTasks = edges
+      const tasks = nodes.map((node) => ({
+        task_id: node.data.task_id,
+        upstream_tasks: edges
           .filter((edge) => edge.target === node.id)
-          .map((edge) => {
-            const sourceNode = nodes.find((n) => n.id === edge.source);
-            return sourceNode ? sourceNode.data.task_id : null;
-          })
-          .filter((id): id is number => id !== null);
-
-        return {
-          task_id: node.data.task_id,
-          upstream_tasks: upstreamTasks.length > 0 ? upstreamTasks : [],
-        };
-      });
+          .map((edge) => nodes.find((n) => n.id === edge.source)?.data.task_id || null)
+          .filter(Boolean),
+      }));
 
       if (onSave) {
         await onSave(tasks);
       } else {
         await backendInstance.put(`/api/v1/workflows/${currentWorkflow.workflow_id}/dag/`, {tasks});
         await mutateComponents();
-        toast({
-          title: 'Success',
-          description: 'Workflow saved successfully',
-        });
+        toast({title: 'Success', description: 'Workflow saved successfully'});
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
-        const errorMessage = error.response?.data?.error || 'Failed to save workflow';
-        toast({
-          title: 'Error',
-          description: errorMessage,
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'Error',
-          description: 'An unknown error occurred',
-          variant: 'destructive',
-        });
-      }
+      const errorMessage =
+        error instanceof AxiosError
+          ? error.response?.data?.error || 'Failed to save workflow'
+          : 'An unknown error occurred';
+      toast({title: 'Error', description: errorMessage, variant: 'destructive'});
     } finally {
       setIsSaving(false);
     }
@@ -248,7 +259,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
         <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="gap-2"
+          className="gap-2 mx-6"
         >
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Save Changes
@@ -291,18 +302,4 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
       </div>
     </div>
   );
-};
-
-const calculateNodePosition = (index: number, existingNodes: Node[]) => {
-  const gridSize = 200;
-  let x = 150 + (index % 4) * gridSize;
-  let y = 100 + Math.floor(index / 3) * gridSize;
-
-  const occupiedPositions = new Set(existingNodes.map((node) => `${node.position.x},${node.position.y}`));
-
-  while (occupiedPositions.has(`${x},${y}`)) {
-    y += gridSize;
-  }
-
-  return {x, y};
 };
