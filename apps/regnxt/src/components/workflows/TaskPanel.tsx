@@ -1,6 +1,6 @@
 import React, {useCallback, useState} from 'react';
 
-import {orchestraBackendInstance} from '@/lib/axios';
+import {useBackend} from '@/contexts/BackendContext';
 import {Task} from '@/types/databaseTypes';
 import {Loader2} from 'lucide-react';
 import useSWR from 'swr';
@@ -20,6 +20,7 @@ interface TasksResponse {
 }
 
 export const TaskPanel: React.FC<TaskPanelProps> = ({className}) => {
+  const {backendInstance} = useBackend();
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
 
@@ -27,10 +28,9 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({className}) => {
     data: tasksResponse,
     error,
     isLoading,
-  } = useSWR<TasksResponse>(`/api/v1/tasks/?search=${searchTerm}&page=${page}`, async (url: string) => {
-    const response = await orchestraBackendInstance.get(url);
-    return response.data;
-  });
+  } = useSWR<TasksResponse>(`/api/v1/tasks/?search=${searchTerm}&page=${page}`, (url: string) =>
+    backendInstance.get(url).then((r) => r.data)
+  );
 
   const handleDragStart = useCallback((event: React.DragEvent, nodeData: any) => {
     event.dataTransfer.setData('application/json', JSON.stringify(nodeData));

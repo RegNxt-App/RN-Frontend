@@ -1,9 +1,9 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import Loader from '@/common/Loader';
+import {useBackend} from '@/contexts/BackendContext';
 import {TaskConfigurationProvider} from '@/contexts/TaskConfigurationContext';
 import {toast} from '@/hooks/use-toast';
-import {orchestraBackendInstance} from '@/lib/axios';
 import {
   ApiResponse,
   DatasetOption,
@@ -37,7 +37,6 @@ import {
   Settings2,
 } from 'lucide-react';
 import useSWR, {mutate} from 'swr';
-import * as z from 'zod';
 
 import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
@@ -52,21 +51,9 @@ import {Textarea} from '@rn/ui/components/ui/textarea';
 
 import {TaskDetailTabs} from '../../../components/Tasks/TaskDetailTabs';
 
-const formSchema = z.object({
-  task_type_id: z.number().min(1, 'Task type is required'),
-  code: z
-    .string()
-    .min(1, 'Code is required')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Invalid code format'),
-  label: z.string().min(1, 'Label is required'),
-  description: z.string().optional(),
-  context: z.string().min(1, 'Context is required'),
-  task_language: z.string().min(1, 'Task language is required'),
-  task_code: z.string().min(1, 'Task code is required'),
-});
-type FormValues = z.infer<typeof formSchema>;
-
 export const TaskAccordion: React.FC = () => {
+  const {backendInstance} = useBackend();
+
   const [selectedTask, setSelectedTask] = useState<TaskType | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [currentTask, setCurrentTask] = useState<Task | Partial<Task> | null>(null);
@@ -101,16 +88,13 @@ export const TaskAccordion: React.FC = () => {
       ? `/api/v1/tasks/${selectedTask.task_subtype_id}/subtype-parameters/`
       : null,
     async (url: string) => {
-      const response = await orchestraBackendInstance.get(url);
+      const response = await backendInstance.get(url);
       return response.data;
     }
   );
   const {data: taskConfigurations, isLoading: isConfigLoading} = useSWR<TaskConfigurationResponse>(
     '/api/v1/tasks/tasks-configurations/',
-    async (url: string) => {
-      const response = await orchestraBackendInstance.get(url);
-      return response.data;
-    }
+    (url: string) => backendInstance.get(url).then((r) => r.data)
   );
   const fetchVariables = useCallback(async () => {
     if (subtypeParamsResponse?.[0]?.parameters) {
@@ -118,7 +102,7 @@ export const TaskAccordion: React.FC = () => {
         const variablesUrl = `/api/v1/tasks/variables/?ids=${subtypeParamsResponse[0].parameters
           .map((p) => p.id)
           .join(',')}`;
-        const variablesResponse = await orchestraBackendInstance.get(variablesUrl);
+        const variablesResponse = await backendInstance.get(variablesUrl);
         setVariablesResponse(variablesResponse.data);
 
         const inputVariableId = variablesResponse.data.find(
@@ -139,7 +123,7 @@ export const TaskAccordion: React.FC = () => {
             const inputOptionsUrl = `/api/v1/tasks/execute-sql/?statement=${encodeURIComponent(
               inputStatement
             )}`;
-            const {data} = await orchestraBackendInstance.get(inputOptionsUrl);
+            const {data} = await backendInstance.get(inputOptionsUrl);
             setInputOptionsResponse({data});
           }
         }
@@ -152,7 +136,7 @@ export const TaskAccordion: React.FC = () => {
             const outputOptionsUrl = `/api/v1/tasks/execute-sql/?statement=${encodeURIComponent(
               outputStatement
             )}`;
-            const {data} = await orchestraBackendInstance.get(outputOptionsUrl);
+            const {data} = await backendInstance.get(outputOptionsUrl);
             setOutputOptionsResponse({data});
           }
         }
@@ -180,7 +164,7 @@ export const TaskAccordion: React.FC = () => {
   } = useSWR<TasksApiResponse>(
     TASKS_ENDPOINT,
     async (url) => {
-      const response = await orchestraBackendInstance.get(url);
+      const response = await backendInstance.get(url);
       return response.data;
     },
     {
@@ -207,7 +191,7 @@ export const TaskAccordion: React.FC = () => {
     }
 
     try {
-      await orchestraBackendInstance.delete(`/api/v1/tasks/${taskToDelete.task_id}/`);
+      await backendInstance.delete(`/api/v1/tasks/${taskToDelete.task_id}/`);
       setIsDeleteDialogOpen(false);
       setTaskToDelete(null);
       setSelectedTask(null);
@@ -284,7 +268,7 @@ export const TaskAccordion: React.FC = () => {
         parameters: parameters,
       };
 
-      const {data} = await orchestraBackendInstance.put(`/api/v1/tasks/${localTask.task_id}/`, payload);
+      const {data} = await backendInstance.put(`/api/v1/tasks/${localTask.task_id}/`, payload);
 
       setLocalTask((prev) =>
         prev
@@ -316,7 +300,7 @@ export const TaskAccordion: React.FC = () => {
       if (!taskTypes.length) return;
 
       const promises = taskTypes.map((type) =>
-        orchestraBackendInstance.get(`/api/v1/tasks/${type.task_type_id}/subtasks/`)
+        backendInstance.get(`/api/v1/tasks/${type.task_type_id}/subtasks/`)
       );
       const responses = await Promise.all(promises);
       const allSubtypes = responses.flatMap((response) => response.data);
@@ -336,7 +320,7 @@ export const TaskAccordion: React.FC = () => {
     num_pages: number;
     results: TaskType[];
   }>(TASK_TYPES_ENDPOINT, async (url: string) => {
-    const response = await orchestraBackendInstance.get(url);
+    const response = await backendInstance.get(url);
     return response.data;
   });
 
@@ -552,7 +536,7 @@ export const TaskAccordion: React.FC = () => {
         parameters: selectedSubTypeObj.parameters,
       };
 
-      await orchestraBackendInstance.post(TASKS_ENDPOINT, payload);
+      await backendInstance.post(TASKS_ENDPOINT, payload);
       await mutate(TASKS_ENDPOINT);
       await fetchAllSubtypes();
 

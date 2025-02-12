@@ -6,16 +6,14 @@ interface TooltipWrapperProps {
   children: React.ReactNode;
   disabled?: boolean;
   disabledMessage?: string;
-  enabled?: boolean;
 }
 
 export const TooltipWrapper: React.FC<TooltipWrapperProps> = ({
   children,
   disabled = false,
   disabledMessage = 'You cannot edit this field as it is system generated',
-  enabled = true,
 }) => {
-  if (!enabled || !disabled) {
+  if (!disabled) {
     return <>{children}</>;
   }
 

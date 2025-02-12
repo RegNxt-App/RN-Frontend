@@ -1,8 +1,7 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 
 import {AddRuntimeParameterDialog} from '@/components/AddRuntimeParameterDialog';
 import {useTaskConfiguration} from '@/contexts/TaskConfigurationContext';
-import {orchestraBackendInstance} from '@/lib/axios';
 import {
   ApiResponse,
   AvailableParameter,
@@ -52,32 +51,32 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
 }) => {
   const {taskConfigurations, isLoading} = useTaskConfiguration();
 
-  const fetcher = (url: string) => orchestraBackendInstance.get(url).then((res) => res.data);
-
   const {data: availableParameters, mutate: mutateAvailable} = useSWR<AvailableParameter[]>(
-    `/api/v1/tasks/get-available-runtime-parameters/`,
-    fetcher
+    `/api/v1/tasks/get-available-runtime-parameters/`
   );
 
   const {data: taskParameters, mutate: mutateTaskParams} = useSWR<RuntimeParameter[]>(
-    `/api/v1/tasks/${selectedTask.task_id}/get-task-runtime-parameters/`,
-    fetcher
+    `/api/v1/tasks/${selectedTask.task_id}/get-task-runtime-parameters/`
   );
   const handleParameterAdd = () => {
     mutateAvailable();
     mutateTaskParams();
   };
-  if (isLoading || !taskConfigurations) {
+  if (isLoading || !taskConfigurations || !Object.keys(taskConfigurations.taskTypes || {}).length) {
     return <Loader />;
   }
 
-  const isCustomCodeTask = taskConfigurations.taskTypes[selectedTask.task_type_code]?.subtypes.find(
-    (subtype) => subtype.id === selectedTask.task_subtype_id && subtype.features.allowsCustomCode
-  );
+  const {isCustomCodeTask, isTransformationTask} = useMemo(() => {
+    const taskType = taskConfigurations?.taskTypes?.[selectedTask?.task_type_code];
+    const relevantSubtype = taskType?.subtypes?.find(
+      (subtype) => subtype?.id === selectedTask?.task_subtype_id
+    );
 
-  const isTransformationTask = taskConfigurations.taskTypes[selectedTask.task_type_code]?.subtypes.find(
-    (subtype) => subtype.id === selectedTask.task_subtype_id && subtype.features.requiresTransformation
-  );
+    return {
+      isCustomCodeTask: Boolean(relevantSubtype?.features?.allowsCustomCode),
+      isTransformationTask: Boolean(relevantSubtype?.features?.requiresTransformation),
+    };
+  }, [taskConfigurations?.taskTypes, selectedTask?.task_type_code, selectedTask?.task_subtype_id]);
 
   const renderTaskLanguageField = () => (
     <div className="space-y-2">
@@ -105,21 +104,32 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   );
 
   const renderTransformFields = () => {
+    const PRIORITY_ORDER = ['input_dataset', 'output_dataset'];
+
     const sortedVariables = [...(variablesResponse || [])].sort((a, b) => {
-      if (a.name === 'input_dataset') return -1;
-      if (b.name === 'input_dataset') return 1;
-      return 0;
+      const indexA = PRIORITY_ORDER.indexOf(a.name);
+      const indexB = PRIORITY_ORDER.indexOf(b.name);
+
+      return indexA === -1 && indexB === -1
+        ? a.name.localeCompare(b.name)
+        : indexA === -1
+        ? 1
+        : indexB === -1
+        ? -1
+        : indexA - indexB;
     });
 
     const getSelectedLabel = (isInput: boolean, options: (DatasetOption | DataviewOption)[]) => {
-      if (!options.length) return isInput ? 'Select Input Location' : 'Select Output Location';
-      return isInput
-        ? options.find(
-            (opt) =>
-              `${opt.id}:${opt.source.trim().toLowerCase()}` ===
+      const defaultLabel = isInput ? 'Select Input Location' : 'Select Output Location';
+
+      return (
+        options?.find((opt) =>
+          isInput
+            ? `${opt.id}:${opt.source?.trim().toLowerCase()}` ===
               `${designTimeParams.sourceId}:${designTimeParams.sourceType}`
-          )?.label
-        : options.find((opt) => String(opt.id) === designTimeParams.destinationId)?.label;
+            : String(opt.id) === designTimeParams.destinationId
+        )?.label ?? defaultLabel
+      );
     };
 
     const handleChange = (isInput: boolean, value: string) => {

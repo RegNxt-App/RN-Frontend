@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect} from 'react';
 
-import {orchestraBackendInstance} from '@/lib/axios';
 import {
   ApiResponse,
   DatasetOption,
@@ -47,9 +46,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
   currentTab,
   setCurrentTab,
   localTask,
-  setLocalTask,
   isSaving,
-  setIsSaving,
   designTimeParams,
   setDesignTimeParams,
   runtimeParams,

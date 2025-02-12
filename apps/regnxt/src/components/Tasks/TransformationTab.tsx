@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
+import {useBackend} from '@/contexts/BackendContext';
 import {toast} from '@/hooks/use-toast';
-import {orchestraBackendInstance} from '@/lib/axios';
 import {DMSubtask, Task} from '@/types/databaseTypes';
 import {
   DndContext,
@@ -38,13 +38,13 @@ interface TransformationTabProps {
 }
 
 export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, selectedTask}) => {
+  const {backendInstance} = useBackend();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedSubtask, setSelectedSubtask] = useState<DMSubtask | null>(null);
   const [newSubtask, setNewSubtask] = useState({
     label: '',
     description: '',
   });
-  const [isLoadingSubTask, setIsLoadingSubTask] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -57,33 +57,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
     ? `/api/v1/tasks/${selectedTask.task_id}/list-transformation-subtasks/`
     : null;
 
-  const fetcher = async (url: string) => {
-    setIsLoadingSubTask(true);
-    try {
-      const response = await orchestraBackendInstance.get(url);
-      return Array.isArray(response.data) ? response.data : [];
-    } finally {
-      setIsLoadingSubTask(false);
-    }
-  };
-
-  const {
-    data: subtasks = [],
-    error,
-    isLoading,
-  } = useSWR<DMSubtask[]>(subtasksEndpoint, fetcher, {
-    onSuccess: () => {
-      setIsLoadingSubTask(false);
-    },
-    onError: () => {
-      setIsLoadingSubTask(false);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch transformations',
-        variant: 'destructive',
-      });
-    },
-  });
+  const {data: subtasks = [], error, isLoading} = useSWR<DMSubtask[]>(subtasksEndpoint);
 
   const sortedSubtasks = React.useMemo(() => {
     return [...subtasks].sort((a, b) => a.order - b.order);
@@ -111,7 +85,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
       }));
       mutate(subtasksEndpoint, updatedSubtasks, false);
 
-      await orchestraBackendInstance.put(`/api/v1/tasks/${selectedTask?.task_id}/update-subtask-order/`, {
+      await backendInstance.put(`/api/v1/tasks/${selectedTask?.task_id}/update-subtask-order/`, {
         subtasks: orderUpdates,
       });
 
@@ -145,7 +119,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
     }
 
     try {
-      await orchestraBackendInstance.post(
+      await backendInstance.post(
         `/api/v1/tasks/${selectedTask.task_id}/create-transformation-subtask/`,
         newSubtask
       );
@@ -185,7 +159,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
         <Card className="col-span-4">
           <ScrollArea className="h-[calc(100vh-300px)]">
             <div className="p-4">
-              {isLoadingSubTask ? (
+              {isLoading ? (
                 <div className="flex items-center justify-center h-40">
                   <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
                 </div>

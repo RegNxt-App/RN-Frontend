@@ -2,12 +2,12 @@ import React, {useCallback, useMemo, useState} from 'react';
 
 import {useWorkflow} from '@/contexts/WorkflowContext';
 import {toast} from '@/hooks/use-toast';
-import {orchestraBackendInstance} from '@/lib/axios';
 import {
   Background,
   Connection,
   Controls,
   Edge,
+  MarkerType,
   Node,
   ReactFlow,
   addEdge,
@@ -21,10 +21,10 @@ import {Button} from '@rn/ui/components/ui/button';
 
 import CustomEdge from '../CustomEdge';
 import {CustomNode} from './CustomNode';
-import {EdgeMarker} from './EdgeMarker';
 
 import '../../css/workflow.css';
 
+import {useBackend} from '@/contexts/BackendContext';
 import {AxiosError} from 'axios';
 
 interface NodeData extends Record<string, unknown> {
@@ -52,6 +52,8 @@ interface FlowCanvasProps {
 }
 
 export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: workflowProp, onSave}) => {
+  const {backendInstance} = useBackend();
+
   const {workflow: workflowContext} = useWorkflow();
   const currentWorkflow = workflowProp || workflowContext;
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>([]);
@@ -68,19 +70,15 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
     mutate: mutateComponents,
   } = useSWR<WorkflowComponent[]>(
     workflowContext?.workflow_id ? WORKFLOW_COMPONENTS_ENDPOINT(workflowContext.workflow_id) : null,
-    async (url: string) => {
-      const response = await orchestraBackendInstance.get(url);
-      return response.data;
-    }
+    (url: string) => backendInstance.get(url).then((r) => r.data)
   );
-
   useMemo(() => {
     if (!components) return;
 
-    const newNodes: Node<NodeData>[] = components.map((comp) => ({
+    const newNodes: Node<NodeData>[] = components.map((comp, index) => ({
       id: comp.task_id.toString(),
       type: 'custom',
-      position: calculateNodePosition(comp.task_id),
+      position: calculateNodePosition(index, nodes),
       data: {
         label: comp.label,
         type: comp.task_type_id,
@@ -109,22 +107,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
     (params: Connection) => {
       if (!params.source || !params.target) return;
 
-      const sourceNode = nodes.find((n) => n.id === params.source);
-      const targetNode = nodes.find((n) => n.id === params.target);
+      const edgeSet = new Set(edges.map((edge) => `${edge.source}-${edge.target}`));
+      const newEdgeKey = `${params.source}-${params.target}`;
 
-      if (!sourceNode || !targetNode) {
-        toast({
-          title: 'Error',
-          description: 'Invalid connection: One or both nodes do not exist',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const existingEdge = edges.find(
-        (edge) => edge.source === params.source && edge.target === params.target
-      );
-      if (existingEdge) {
+      if (edgeSet.has(newEdgeKey)) {
         toast({
           title: 'Error',
           description: 'Connection already exists',
@@ -135,7 +121,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
 
       setEdges((eds) => addEdge(params, eds));
     },
-    [setEdges, nodes, edges]
+    [setEdges, edges]
   );
 
   const handleSave = async () => {
@@ -163,7 +149,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
       if (onSave) {
         await onSave(tasks);
       } else {
-        await orchestraBackendInstance.put(`/api/v1/workflows/${currentWorkflow.workflow_id}/dag/`, {tasks});
+        await backendInstance.put(`/api/v1/workflows/${currentWorkflow.workflow_id}/dag/`, {tasks});
         await mutateComponents();
         toast({
           title: 'Success',
@@ -202,15 +188,14 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
-
       const taskData = JSON.parse(event.dataTransfer.getData('application/json'));
+
       const position = {
         x: event.clientX - event.currentTarget.getBoundingClientRect().left,
         y: event.clientY - event.currentTarget.getBoundingClientRect().top,
       };
-
       const newNode: Node<NodeData> = {
-        id: taskData.task_code || `task-${nodes.length}`,
+        id: taskData.task_id.toString(),
         type: 'custom',
         position,
         data: {
@@ -225,7 +210,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
 
       setNodes((nds) => [...nds, newNode]);
     },
-    [setNodes, nodes.length]
+    [nodes]
   );
   const edgeTypes = useMemo(
     () => ({
@@ -237,7 +222,13 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
   const defaultEdgeOptions = useMemo(
     () => ({
       type: 'custom',
-      markerEnd: 'arrowclosed',
+      style: {stroke: '#6419e6'},
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 20,
+        height: 20,
+        color: '#6419e6',
+      },
       animated: true,
     }),
     []
@@ -296,14 +287,22 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({className, workflow: work
         >
           <Background />
           <Controls />
-          <EdgeMarker />
         </ReactFlow>
       </div>
     </div>
   );
 };
 
-const calculateNodePosition = (index: number) => ({
-  x: 150 + (index % 3) * 300,
-  y: 100 + Math.floor(index / 3) * 200,
-});
+const calculateNodePosition = (index: number, existingNodes: Node[]) => {
+  const gridSize = 200;
+  let x = 150 + (index % 4) * gridSize;
+  let y = 100 + Math.floor(index / 3) * gridSize;
+
+  const occupiedPositions = new Set(existingNodes.map((node) => `${node.position.x},${node.position.y}`));
+
+  while (occupiedPositions.has(`${x},${y}`)) {
+    y += gridSize;
+  }
+
+  return {x, y};
+};

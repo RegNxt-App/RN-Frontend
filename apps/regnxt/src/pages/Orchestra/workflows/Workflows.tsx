@@ -1,9 +1,9 @@
 import {useMemo, useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
+import {useBackend} from '@/contexts/BackendContext';
 import {useWorkflow} from '@/contexts/WorkflowContext';
 import {toast} from '@/hooks/use-toast';
-import {orchestraBackendInstance} from '@/lib/axios';
 import {Workflow, WorkflowParameter, WorkflowRun} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
 import {Clock, Edit, Loader2, Play} from 'lucide-react';
@@ -20,6 +20,8 @@ import {WorkflowDialog} from '../../../components/workflows/WorkflowDialog';
 const WORKFLOWS_ENDPOINT = '/api/v1/workflows/';
 
 const WorkflowManager = () => {
+  const {backendInstance} = useBackend();
+
   const {workflow, isEditing, setWorkflow, setIsEditing} = useWorkflow();
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [parameters, setParameters] = useState<Record<string, string>>({});
@@ -85,32 +87,43 @@ const WorkflowManager = () => {
     num_pages: number;
     results: Workflow[];
   }>(WORKFLOWS_ENDPOINT, async (url: string) => {
-    const response = await orchestraBackendInstance.get(url);
+    const response = await backendInstance.get(url);
     return response.data;
   });
 
   const {data: workflowParameters = [], isLoading: isLoadingParameters} = useSWR<WorkflowParameter[]>(
     selectedWorkflow ? `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/parameters/` : null,
     async (url: string) => {
-      const response = await orchestraBackendInstance.get(url);
+      const response = await backendInstance.get(url);
       return response.data;
     }
   );
   const workflows = workflowsResponse?.results || [];
+
   const handlePlayClick = async (workflow: Workflow) => {
-    setSelectedWorkflow(workflow);
-    const initialParameters = workflowParameters.reduce((acc, param) => {
-      acc[param.name] = param.default_value || '';
-      return acc;
-    }, {} as Record<string, string>);
-    setParameters(initialParameters);
+    try {
+      const response = await backendInstance.get(`${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/parameters/`);
+      const parameters: WorkflowParameter[] = response.data;
+
+      const initialParameters = parameters.reduce<Record<string, string>>((acc, param: WorkflowParameter) => {
+        acc[param.name] = param.default_value || '';
+        return acc;
+      }, {});
+
+      setSelectedWorkflow(workflow);
+      setParameters(initialParameters);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch workflow parameters',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleClockClick = async (workflow: Workflow) => {
     try {
-      const response = await orchestraBackendInstance.get(
-        `${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`
-      );
+      const response = await backendInstance.get(`${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`);
       setWorkflowRuns(response.data);
       setIsRunsDialogOpen(true);
     } catch (error) {
@@ -127,10 +140,7 @@ const WorkflowManager = () => {
 
     setIsSubmitting(true);
     try {
-      await orchestraBackendInstance.post(
-        `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/start/`,
-        parameters
-      );
+      await backendInstance.post(`${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/start/`, parameters);
 
       toast({
         title: 'Success',
@@ -179,23 +189,20 @@ const WorkflowManager = () => {
     return runtime;
   };
 
-  const getStatusColor = useMemo(
-    () => (status: string) => {
-      switch (status.toLowerCase()) {
-        case 'completed':
-          return 'text-green-600';
-        case 'failed':
-          return 'text-red-600';
-        case 'running':
-          return 'text-blue-600';
-        case 'cancelled':
-          return 'text-orange-600';
-        default:
-          return 'text-gray-600';
-      }
-    },
-    []
-  );
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'text-green-600';
+      case 'failed':
+        return 'text-red-600';
+      case 'running':
+        return 'text-blue-600';
+      case 'cancelled':
+        return 'text-orange-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
   const runColumns = useMemo<ColumnDef<WorkflowRun>[]>(
     () => [
       {
