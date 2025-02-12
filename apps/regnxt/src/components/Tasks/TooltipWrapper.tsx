@@ -1,8 +1,13 @@
 import React from 'react';
 
-import {TooltipWrapperProps} from '@/types/databaseTypes';
-
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/ui/components/ui/tooltip';
+
+interface TooltipWrapperProps {
+  children: React.ReactNode;
+  disabled?: boolean;
+  disabledMessage?: string;
+  enabled?: boolean;
+}
 
 export const TooltipWrapper: React.FC<TooltipWrapperProps> = ({
   children,

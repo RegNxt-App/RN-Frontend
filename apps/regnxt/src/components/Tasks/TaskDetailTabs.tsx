@@ -1,9 +1,18 @@
 import React, {useCallback, useEffect} from 'react';
 
 import {orchestraBackendInstance} from '@/lib/axios';
-import {TaskDetailTabsProps, TaskParameter} from '@/types/databaseTypes';
+import {
+  ApiResponse,
+  DatasetOption,
+  DataviewOption,
+  DesignTimeParams,
+  RuntimeParameter,
+  SubtypeParamsResponse,
+  Task,
+  TaskParameter,
+  VariableResponse,
+} from '@/types/databaseTypes';
 import {Calendar, Code, Tag, Trash2} from 'lucide-react';
-import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@rn/ui/components/ui/tabs';
@@ -12,6 +21,26 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/ui/c
 import {ConfigurationsTabContent} from './ConfigurationsTabContent';
 import {PropertiesTabContent} from './PropertiesTabContent';
 import {TransformationTab} from './TransformationTab';
+
+interface TaskDetailTabsProps {
+  selectedTask: Task;
+  currentTab: string;
+  setCurrentTab: (tab: string) => void;
+  localTask: Task;
+  setLocalTask: (task: Task | null) => void;
+  isSaving: boolean;
+  setIsSaving: (saving: boolean) => void;
+  designTimeParams: DesignTimeParams;
+  setDesignTimeParams: React.Dispatch<React.SetStateAction<DesignTimeParams>>;
+  runtimeParams: RuntimeParameter[];
+  onSave: () => Promise<void>;
+  onDeleteClick: () => void;
+  inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
+  outputOptionsResponse?: ApiResponse<DatasetOption[]>;
+  variablesResponse?: VariableResponse[];
+  onInputChange: (field: keyof Task, value: string) => void;
+  subtypeParamsResponse?: SubtypeParamsResponse[];
+}
 
 export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
   selectedTask,
@@ -62,9 +91,9 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
           (opt) => String(opt.id) === (inputParam?.default_value || inputParam?.value)
         );
 
-        const newDesignTimeParams = {
+        const newDesignTimeParams: DesignTimeParams = {
           sourceId: inputParam?.default_value || inputParam?.value || null,
-          sourceType: inputParam?.source || inputOption?.source || null,
+          sourceType: (inputParam?.source || inputOption?.source || null) as 'dataset' | 'dataview' | null,
           destinationId: outputParam?.default_value || outputParam?.value || null,
         };
 

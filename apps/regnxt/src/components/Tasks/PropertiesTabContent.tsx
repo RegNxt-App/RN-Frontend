@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {PropertiesTabContentProps} from '@/types/databaseTypes';
+import {Task} from '@/types/databaseTypes';
 
 import {Input} from '@rn/ui/components/ui/input';
 import {Label} from '@rn/ui/components/ui/label';
@@ -8,6 +8,12 @@ import {TabsContent} from '@rn/ui/components/ui/tabs';
 import {Textarea} from '@rn/ui/components/ui/textarea';
 
 import {TooltipWrapper} from './TooltipWrapper';
+
+interface PropertiesTabContentProps {
+  selectedTask: Task;
+  localTask: Task;
+  handleInputChange: (field: keyof Task, value: string) => void;
+}
 
 export const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({
   selectedTask,

@@ -223,25 +223,24 @@ export interface ValidationResult {
   validation_msg: string;
   column_name: string;
 }
-export interface ApiTask {
-  task_type_id: number;
-  task_subtype_id: number;
-  task_type_code: string;
-  task_type_label: string;
+
+export interface Task {
   task_id: number;
-  code: string;
+  code?: string;
   label: string;
-  description: string;
-  context: string;
+  description?: string;
+  task_type_label?: string;
   is_predefined: boolean;
-  task_language: string | null;
-  task_code: string | null;
+  task_language?: string | null;
+  task_code: string;
+  context?: string;
+  task_type_id: number;
+  task_type_code: string;
+  task_subtype_id: number;
+  upstream_tasks: number[] | null;
+  parameters: TaskParameter[];
 }
-export interface TasksApiResponse {
-  count: number;
-  num_pages: number;
-  results: TaskType[];
-}
+
 export interface TaskType {
   task_id: number;
   code: string;
@@ -250,62 +249,36 @@ export interface TaskType {
   task_type_label?: string;
   is_predefined: boolean;
   task_language?: string | null;
-  task_code?: string | null;
+  task_code: string;
   context?: string;
   task_type_id: number;
   task_type_code: string;
   task_subtype_id: number;
-  parameters: any | null;
+  parameters: TaskParameter[];
 }
-export interface Group {
+
+export interface TaskSubType {
+  task_subtype_id: number;
+  task_type_id: number;
   code: string;
   label: string;
   description: string;
-  is_system_generated: boolean;
-  items: string;
+  component: string;
+  parameters: TaskParameter[];
 }
-export interface GroupsResponse {
+export interface WorkflowTask {
+  task_id: number;
+  task_code: string;
+  task_type_id: number;
+  label: string;
+  task_language: string;
+  upstream_tasks: number[];
+}
+
+export interface TasksApiResponse {
   count: number;
   num_pages: number;
-  results: Group[];
-}
-export interface Grouping {
-  data: GroupsResponse;
-}
-export interface EditableColumnTableProps {
-  initialColumns: Column[];
-  datasetId: string | number;
-  versionId: string | number;
-  onColumnChange?: () => void;
-  isLoading?: boolean;
-}
-
-export interface ColumnData {
-  data: Column[];
-}
-export interface TaskDetails {
-  id: string | number;
-  code: string;
-  label: string;
-  description?: string;
-  task_type_label?: string;
-  is_predefined: boolean;
-  task_language?: string | null;
-  task_code?: string | null;
-  context?: string;
-  task_type_id: number;
-  task_type_code: string;
-  task_id: number;
-  task_subtype_id: number;
-  parameters: any | null;
-}
-
-export interface StatItem {
-  title: string;
-  count: string;
-  description: string;
-  titleIcon: JSX.Element;
-  descriptionIcon: JSX.Element;
+  results: TaskType[];
 }
 export interface SystemVariable {
   system_variable_id: number;
@@ -314,41 +287,29 @@ export interface SystemVariable {
   value: string;
   description: string;
 }
-export interface SystemVariablesResponse {
-  count: number;
-  num_pages: number;
-  results: SystemVariable[];
+export interface UserSetting {
+  setting_id: number;
+  category: string;
+  setting_name: string;
+  value: string;
+  description: string;
 }
-export interface TaskSubType {
-  task_subtype_id: number;
-  task_type_id: number;
+export interface Group {
   code: string;
   label: string;
   description: string;
-  component: string;
-  parameters: any | null;
+  is_system_generated: boolean;
+  items: string;
 }
 
-export interface Workflow {
-  workflow_id: number;
-  code: string;
-  label: string;
-  description: string;
-  engine: string;
-}
-
-export interface WorkflowParameter {
+export interface DMSubtask {
+  subtask_id: number;
   task_id: number;
-  default_value: string | null;
-  name: string;
   label: string;
   description: string;
-  statement: string;
-  is_enum: boolean;
-  options: Array<{
-    value: number | string;
-    label: string;
-  }>;
+  order: number;
+  output_fields: any[];
+  filters: any[];
 }
 export interface WorkflowRun {
   run_id: number;
@@ -374,72 +335,91 @@ export interface WorkflowRun {
   }>;
 }
 
-export interface UserSetting {
-  setting_id: number;
-  category: string;
-  setting_name: string;
-  value: string;
-  description: string;
+export interface TaskSubtypeParameter {
+  id: number;
+  name: string;
 }
-
-export interface GroupedSettings {
-  [key: string]: UserSetting[];
-}
-
-export interface EditingStates {
-  [key: number]: boolean;
-}
-
-export interface CategoryIcons {
-  [key: string]: LucideIcon;
-}
-
-export interface WorkflowTask {
+export interface WorkflowParameter {
   task_id: number;
-  task_code: string;
-  task_type_id: number;
+  default_value: string | null;
+  name: string;
   label: string;
-  task_language: string;
-  upstream_tasks: number[];
+  description: string;
+  statement: string;
+  is_enum: boolean;
+  options: Array<{
+    value: number | string;
+    label: string;
+  }>;
 }
+
+export interface Field {
+  name: string;
+  type: string;
+  label: string;
+}
+export interface DatasetOption {
+  id: string | number;
+  dataset_version_id: number;
+  code: string;
+  source: string;
+  label: string;
+}
+export interface DataviewOption {
+  id: string | number;
+  source: string;
+  dataview_version_id: number;
+  code: string;
+  label: string;
+}
+export interface GroupsResponse {
+  count: number;
+  num_pages: number;
+  results: Group[];
+}
+export interface Grouping {
+  data: GroupsResponse;
+}
+export interface EditableColumnTableProps {
+  initialColumns: Column[];
+  datasetId: string | number;
+  versionId: string | number;
+  onColumnChange?: () => void;
+  isLoading?: boolean;
+}
+
+export interface ColumnData {
+  data: Column[];
+}
+
+export interface StatItem {
+  title: string;
+  count: string;
+  description: string;
+  titleIcon: JSX.Element;
+  descriptionIcon: JSX.Element;
+}
+
+export interface SystemVariablesResponse {
+  count: number;
+  num_pages: number;
+  results: SystemVariable[];
+}
+
+export interface Workflow {
+  workflow_id: number;
+  code: string;
+  label: string;
+  description: string;
+  engine: string;
+}
+
 export interface NodeData extends Record<string, unknown> {
   label: string;
   type: number;
   language: string | null;
 }
 
-export interface WorkflowDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  workflow?: Workflow | null;
-}
-export interface Task {
-  task_id: number;
-  code?: string;
-  label: string;
-  description?: string;
-  task_type_label?: string;
-  is_predefined?: boolean;
-  task_language: string | null;
-  task_code: string;
-  context?: string;
-  task_type_id: number;
-  task_type_code?: string;
-  task_subtype_id: number;
-  upstream_tasks: number[] | null;
-}
-export interface CustomNodeProps {
-  data: {
-    label: string;
-    type: number;
-    language?: string;
-  };
-}
-export interface TransformationTabProps {
-  disabled?: boolean;
-  onSave?: () => void;
-  selectedTask: Task | null;
-}
 export interface DesignTimeParameters {
   sourceId: string;
   sourceType: 'dataset' | 'dataview';
@@ -467,12 +447,6 @@ export interface AvailableParameter {
   data_type: string;
 }
 
-export interface Field {
-  name: string;
-  type: string;
-  label: string;
-}
-
 export interface RuntimeParam {
   id: string;
   name: string;
@@ -481,35 +455,14 @@ export interface RuntimeParam {
   description: string;
 }
 
-export interface DMSubtask {
-  subtask_id: number;
-  task_id: number;
-  label: string;
-  description: string;
-  order: number;
-  output_fields: any[];
-  filters: any[];
-}
 export interface TaskParameter {
   id?: number;
   parameter_id?: number;
   default_value?: string;
+  value?: string;
   source?: 'dataset' | 'dataview';
 }
-export interface DataviewOption {
-  id: string | number;
-  source: string;
-  dataview_version_id: number;
-  code: string;
-  label: string;
-}
-export interface DatasetOption {
-  id: string | number;
-  dataset_version_id: number;
-  code: string;
-  source: string;
-  label: string;
-}
+
 export interface VariableResponse {
   variable_id: number;
   name: string;
@@ -521,36 +474,12 @@ export interface VariableResponse {
   min_value: null | number;
   max_value: null | number;
 }
-export interface TaskSubtypeParameter {
-  id: number;
-  name: string;
-}
 
 export interface SubtypeParamsResponse {
   task_subtype_id: number;
   parameters: TaskSubtypeParameter[];
 }
-export interface SortableItemProps {
-  id: string;
-  label: string;
-  description: string;
-  selected?: boolean;
-  disabled?: boolean;
-  onClick?: () => void;
-}
 
-export interface SortableListProps {
-  items: DMSubtask[];
-  currentPage: number;
-  itemsPerPage: number;
-  onPageChange: (page: number) => void;
-  selectedId?: number;
-  disabled?: boolean;
-  onItemClick: (item: DMSubtask) => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  total: number;
-}
 export interface GroupedTask {
   type_id: number;
   type_code: string;
@@ -564,46 +493,7 @@ export interface GroupedTask {
     }
   >;
 }
-export interface AddRuntimeParameterDialogProps {
-  taskId: number;
-  availableParameters: AvailableParameter[];
-  onParameterAdd: () => void;
-  isDisabled: boolean;
-}
 
-export interface VariableCardProps {
-  selectedVariable: SystemVariable;
-  isEditing: boolean;
-  onEdit: () => void;
-  onSave: (variable: SystemVariable) => void;
-  onChange: (variable: SystemVariable) => void;
-}
-export interface VariableListItemProps {
-  variable: SystemVariable;
-  isSelected: boolean;
-  onSelect: (variable: SystemVariable) => void;
-}
-export interface WorkflowContextType {
-  currentWorkflow: Workflow | null;
-  nodes: Node<NodeData>[];
-  edges: Edge[];
-  tasks: WorkflowTask[];
-  isEditing: boolean;
-  setCurrentWorkflow: (workflow: Workflow | null) => void;
-  setNodes: React.Dispatch<React.SetStateAction<Node<NodeData>[]>>;
-  setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
-  setTasks: React.Dispatch<React.SetStateAction<WorkflowTask[]>>;
-  setIsEditing: (isEditing: boolean) => void;
-  onConnect: (connection: Connection) => void;
-}
-export interface SortableItemProps {
-  id: string;
-  label: string;
-  description: string;
-  selected?: boolean;
-  disabled?: boolean;
-  onClick?: () => void;
-}
 export interface ApiResponse<T> {
   data: T;
 }
@@ -613,48 +503,6 @@ export interface DesignTimeParams {
   destinationId: string | null;
 }
 
-export interface TaskDetailTabsProps {
-  selectedTask: TaskDetails;
-  currentTab: string;
-  setCurrentTab: (tab: string) => void;
-  localTask: TaskDetails;
-  setLocalTask: (task: TaskDetails | null) => void;
-  isSaving: boolean;
-  setIsSaving: (saving: boolean) => void;
-  designTimeParams: DesignTimeParams;
-  setDesignTimeParams: React.Dispatch<React.SetStateAction<DesignTimeParams>>;
-  runtimeParams: RuntimeParameter[];
-  onSave: () => Promise<void>;
-  onDeleteClick: () => void;
-  inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
-  outputOptionsResponse?: ApiResponse<DatasetOption[]>;
-  variablesResponse?: VariableResponse[];
-  onInputChange: (field: keyof TaskDetails, value: string) => void;
-  subtypeParamsResponse?: SubtypeParamsResponse[];
-}
-export interface ConfigurationsTabContentProps {
-  selectedTask: TaskDetails;
-  localTask: TaskDetails;
-  handleInputChange: (field: keyof TaskDetails, value: string) => void;
-  designTimeParams: DesignTimeParams;
-  setDesignTimeParams: React.Dispatch<React.SetStateAction<DesignTimeParams>>;
-  variablesResponse?: VariableResponse[];
-  inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
-  outputOptionsResponse?: ApiResponse<DatasetOption[]>;
-  runtimeParams: RuntimeParameter[];
-  subtypeParamsResponse?: SubtypeParamsResponse[];
-}
-export interface PropertiesTabContentProps {
-  selectedTask: TaskDetails;
-  localTask: TaskDetails;
-  handleInputChange: (field: keyof TaskDetails, value: string) => void;
-}
-export interface TooltipWrapperProps {
-  children: React.ReactNode;
-  disabled?: boolean;
-  disabledMessage?: string;
-  enabled?: boolean;
-}
 export interface TaskFeatures {
   allowsCustomCode: boolean;
   requiresTransformation: boolean;
@@ -687,10 +535,7 @@ export interface TaskConfigurationResponse {
     [key: string]: string;
   };
 }
-export interface TaskConfigurationContextType {
-  taskConfigurations: TaskConfigurationResponse | undefined;
-  isLoading: boolean;
-}
+
 export interface WorkflowRunColumn {
   run_id: number;
   status: string;

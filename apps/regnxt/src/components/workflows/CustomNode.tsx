@@ -1,7 +1,14 @@
 import React, {useMemo} from 'react';
 
-import {CustomNodeProps} from '@/types/databaseTypes';
 import {Handle, Position} from '@xyflow/react';
+
+interface CustomNodeProps {
+  data: {
+    label: string;
+    type: number;
+    language?: string;
+  };
+}
 
 const getTypeLabel = (typeId: number) => {
   switch (typeId) {
@@ -25,7 +32,7 @@ export const CustomNode = React.memo(({data}: CustomNodeProps) => {
         className="w-2 h-2"
       />
       <div className="flex flex-col">
-        <div className="text-sm font-bold text-green-600">{data.label}</div>
+        <div className="text-sm font-bold text-primary">{data.label}</div>
         <div className="text-xs text-gray-500">{typeLabel}</div>
         {data.language && <div className="mt-2 text-xs bg-gray-100 px-2 py-1 rounded">{data.language}</div>}
       </div>
