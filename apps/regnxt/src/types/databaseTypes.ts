@@ -241,22 +241,6 @@ export interface Task {
   parameters: TaskParameter[];
 }
 
-export interface TaskType {
-  task_id: number;
-  code: string;
-  label: string;
-  description?: string;
-  task_type_label?: string;
-  is_predefined: boolean;
-  task_language?: string | null;
-  task_code: string;
-  context?: string;
-  task_type_id: number;
-  task_type_code: string;
-  task_subtype_id: number;
-  parameters: TaskParameter[];
-}
-
 export interface TaskSubType {
   task_subtype_id: number;
   task_type_id: number;
@@ -278,7 +262,7 @@ export interface WorkflowTask {
 export interface TasksApiResponse {
   count: number;
   num_pages: number;
-  results: TaskType[];
+  results: Task[];
 }
 export interface SystemVariable {
   system_variable_id: number;
@@ -489,7 +473,7 @@ export interface GroupedTask {
     {
       subtype_id: number;
       label: string;
-      tasks: Array<TaskType & {isPredefined: boolean}>;
+      tasks: Array<Task & {isPredefined: boolean}>;
     }
   >;
 }

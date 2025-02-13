@@ -1,7 +1,7 @@
 import React from 'react';
 
+import {useBackend} from '@/contexts/BackendContext';
 import {toast} from '@/hooks/use-toast';
-import {orchestraBackendInstance} from '@/lib/axios';
 import {AvailableParameter} from '@/types/databaseTypes';
 
 import {Button} from '@rn/ui/components/ui/button';
@@ -23,13 +23,15 @@ export const AddRuntimeParameterDialog = ({
   onParameterAdd,
   isDisabled,
 }: AddRuntimeParameterDialogProps) => {
+  const {backendInstance} = useBackend();
+
   const [selectedParam, setSelectedParam] = React.useState<string>('');
   const [defaultValue, setDefaultValue] = React.useState<string>('');
   const [open, setOpen] = React.useState(false);
 
   const handleAdd = async () => {
     try {
-      await orchestraBackendInstance.post(`/api/v1/tasks/${taskId}/add-runtime-parameter/`, [
+      await backendInstance.post(`/api/v1/tasks/${taskId}/add-runtime-parameter/`, [
         {
           parameter_id: parseInt(selectedParam),
           default_value: defaultValue,

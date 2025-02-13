@@ -22,16 +22,13 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: "9.15.1"
+          version: latest
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
           cache: "pnpm"
-
-      - name: Clear pnpm Cache
-        run: pnpm store prune
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
@@ -61,5 +58,3 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_REGNXT_ORCHESTRA }}"
           projectId: regnxt-orchestra
           expires: 7d
-        env:
-          FIREBASE_CLI_PREVIEWS: hostingchannels

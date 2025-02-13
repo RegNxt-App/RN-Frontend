@@ -4,8 +4,8 @@ import '@xyflow/react/dist/style.css';
 
 import {FlowCanvas} from '@/components/workflows/FlowCanvas';
 import {TaskPanel} from '@/components/workflows/TaskPanel';
+import {useBackend} from '@/contexts/BackendContext';
 import {toast} from '@/hooks/use-toast';
-import {orchestraBackendInstance} from '@/lib/axios';
 
 interface WorkflowEditorProps {
   className?: string;
@@ -22,21 +22,21 @@ export const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   onOpenChange,
   onRefresh,
 }) => {
+  const {backendInstance} = useBackend();
   const handleSave = async (tasks: any[]) => {
     try {
       if (isNew) {
-        await orchestraBackendInstance.post('/api/v1/workflows/', {
+        await backendInstance.post('/api/v1/workflows/', {
           ...workflow,
           tasks,
         });
-
-        onOpenChange(false);
-        onRefresh();
       } else {
-        await orchestraBackendInstance.put(`/api/v1/workflows/${workflow.workflow_id}/dag/`, {
+        await backendInstance.put(`/api/v1/workflows/${workflow.workflow_id}/dag/`, {
           tasks,
         });
       }
+      onOpenChange(false);
+      onRefresh();
 
       toast({
         title: 'Success',
