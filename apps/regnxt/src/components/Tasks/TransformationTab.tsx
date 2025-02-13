@@ -34,10 +34,10 @@ import {SortableItem} from './SortableItem';
 interface TransformationTabProps {
   disabled?: boolean;
   onSave?: () => void;
-  selectedTask: Task | null;
+  task: Task | null;
 }
 
-export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, selectedTask}) => {
+export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, task}) => {
   const {backendInstance} = useBackend();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedSubtask, setSelectedSubtask] = useState<DMSubtask | null>(null);
@@ -53,8 +53,8 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
     })
   );
 
-  const subtasksEndpoint = selectedTask?.task_id
-    ? `/api/v1/tasks/${selectedTask.task_id}/list-transformation-subtasks/`
+  const subtasksEndpoint = task?.task_id
+    ? `/api/v1/tasks/${task.task_id}/list-transformation-subtasks/`
     : null;
 
   const {
@@ -89,7 +89,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
       }));
       mutate(subtasksEndpoint, updatedSubtasks, false);
 
-      await backendInstance.put(`/api/v1/tasks/${selectedTask?.task_id}/update-subtask-order/`, {
+      await backendInstance.put(`/api/v1/tasks/${task?.task_id}/update-subtask-order/`, {
         subtasks: orderUpdates,
       });
 
@@ -111,7 +111,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
   };
 
   const handleCreateSubtask = async () => {
-    if (!selectedTask?.task_id) return;
+    if (!task?.task_id) return;
 
     if (!newSubtask.label.trim()) {
       toast({
@@ -123,10 +123,7 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
     }
 
     try {
-      await backendInstance.post(
-        `/api/v1/tasks/${selectedTask.task_id}/create-transformation-subtask/`,
-        newSubtask
-      );
+      await backendInstance.post(`/api/v1/tasks/${task.task_id}/create-transformation-subtask/`, newSubtask);
 
       await mutate(subtasksEndpoint);
 

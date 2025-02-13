@@ -36,7 +36,6 @@ export const TaskAccordion: React.FC = () => {
   const [taskSubTypes, setTaskSubTypes] = useState<TaskSubType[]>([]);
   const [expandedSubtypes, setExpandedSubtypes] = useState<string[]>([]);
   const [currentTab, setCurrentTab] = useState('properties');
-  const [localTask, setLocalTask] = useState<Task | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
@@ -61,11 +60,6 @@ export const TaskAccordion: React.FC = () => {
     '/api/v1/tasks/tasks-configurations/',
     (url: string) => backendInstance.get(url).then((r) => r.data)
   );
-  useEffect(() => {
-    if (selectedTask) {
-      setLocalTask(mapTaskToDetails(selectedTask));
-    }
-  }, [selectedTask]);
 
   const {
     data: response,
@@ -100,8 +94,8 @@ export const TaskAccordion: React.FC = () => {
     setSelectedTask(null);
   };
 
-  const handleInputChange = (field: keyof Task, value: string) => {
-    setLocalTask((prev) => {
+  const handleTaskChange = (field: keyof Task, value: string) => {
+    setSelectedTask((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
@@ -110,7 +104,7 @@ export const TaskAccordion: React.FC = () => {
     });
   };
   const handleSaveChanges = async () => {
-    if (!localTask) return;
+    if (!selectedTask) return;
 
     setIsSaving(true);
     const parameters = [];
@@ -143,18 +137,18 @@ export const TaskAccordion: React.FC = () => {
 
     try {
       const payload = {
-        task_type_id: localTask.task_type_id,
-        label: localTask.label,
-        description: localTask.description,
-        context: localTask.context,
-        task_language: localTask.task_language,
-        task_code: localTask.task_code,
+        task_type_id: selectedTask.task_type_id,
+        label: selectedTask.label,
+        description: selectedTask.description,
+        context: selectedTask.context,
+        task_language: selectedTask.task_language,
+        task_code: selectedTask.task_code,
         parameters: getParametersPayload(designTimeParams),
       };
 
-      const {data} = await backendInstance.put(`/api/v1/tasks/${localTask.task_id}/`, payload);
+      const {data} = await backendInstance.put(`/api/v1/tasks/${selectedTask.task_id}/`, payload);
 
-      setLocalTask((prev) =>
+      setSelectedTask((prev) =>
         prev
           ? {
               ...prev,
@@ -293,21 +287,18 @@ export const TaskAccordion: React.FC = () => {
           <Card className="flex-1 p-4 lg:p-6">
             {selectedTask ? (
               <TaskDetailTabs
-                selectedTask={mapTaskToDetails(selectedTask)}
+                task={selectedTask ? mapTaskToDetails(selectedTask) : null}
                 currentTab={currentTab}
                 setCurrentTab={setCurrentTab}
-                localTask={localTask || mapTaskToDetails(selectedTask)}
-                setLocalTask={setLocalTask}
                 isSaving={isSaving}
-                setIsSaving={setIsSaving}
                 designTimeParams={designTimeParams}
                 setDesignTimeParams={setDesignTimeParams}
                 onSave={handleSaveChanges}
-                onDeleteClick={() => handleDeleteClick(selectedTask)}
+                onDelete={() => handleDeleteClick(selectedTask)}
                 inputOptionsResponse={inputOptionsResponse}
                 outputOptionsResponse={outputOptionsResponse}
                 variablesResponse={variablesResponse}
-                onInputChange={handleInputChange}
+                onTaskChange={handleTaskChange}
                 subtypeParamsResponse={subtypeParamsResponse}
               />
             ) : (

@@ -27,9 +27,8 @@ import Loader from '../loader';
 import {TooltipWrapper} from './TooltipWrapper';
 
 interface ConfigurationsTabContentProps {
-  selectedTask: Task;
-  localTask: Task;
-  handleInputChange: (field: keyof Task, value: string) => void;
+  task: Task;
+  onTaskChange: (field: keyof Task, value: string) => void;
   designTimeParams: DesignTimeParams;
   setDesignTimeParams: React.Dispatch<React.SetStateAction<DesignTimeParams>>;
   variablesResponse?: VariableResponse[];
@@ -39,9 +38,8 @@ interface ConfigurationsTabContentProps {
 }
 
 export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> = ({
-  selectedTask,
-  localTask,
-  handleInputChange,
+  task,
+  onTaskChange,
   designTimeParams,
   setDesignTimeParams,
   variablesResponse,
@@ -59,7 +57,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   );
 
   const {data: taskParameters, mutate: mutateTaskParams} = useSWR<RuntimeParameter[]>(
-    `/api/v1/tasks/${selectedTask.task_id}/get-task-runtime-parameters/`,
+    `/api/v1/tasks/${task.task_id}/get-task-runtime-parameters/`,
     (url: string) => backendInstance.get(url).then((r) => r.data)
   );
   const handleParameterAdd = () => {
@@ -71,28 +69,26 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   }
 
   const {isCustomCodeTask, isTransformationTask} = useMemo(() => {
-    const taskType = taskConfigurations?.taskTypes?.[selectedTask?.task_type_code];
-    const relevantSubtype = taskType?.subtypes?.find(
-      (subtype) => subtype?.id === selectedTask?.task_subtype_id
-    );
+    const taskType = taskConfigurations?.taskTypes?.[task?.task_type_code];
+    const relevantSubtype = taskType?.subtypes?.find((subtype) => subtype?.id === task?.task_subtype_id);
 
     return {
       isCustomCodeTask: Boolean(relevantSubtype?.features?.allowsCustomCode),
       isTransformationTask: Boolean(relevantSubtype?.features?.requiresTransformation),
     };
-  }, [taskConfigurations?.taskTypes, selectedTask?.task_type_code, selectedTask?.task_subtype_id]);
+  }, [taskConfigurations?.taskTypes, task?.task_type_code, task?.task_subtype_id]);
 
   const renderTaskLanguageField = () => (
     <div className="space-y-2">
       <Label className="text-sm font-medium">Task Language</Label>
       <TooltipWrapper
-        disabled={selectedTask.is_predefined}
+        disabled={task.is_predefined}
         disabledMessage="You cannot modify a system-generated task"
       >
         <Select
-          value={localTask.task_language || 'python'}
-          onValueChange={(value) => handleInputChange('task_language', value)}
-          disabled={selectedTask.is_predefined}
+          value={task.task_language || 'python'}
+          onValueChange={(value) => onTaskChange('task_language', value)}
+          disabled={task.is_predefined}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select language" />
@@ -171,13 +167,13 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
             >
               <Label className="text-sm font-medium">{parameterLabel}</Label>
               <TooltipWrapper
-                disabled={selectedTask.is_predefined}
+                disabled={task.is_predefined}
                 disabledMessage="You cannot modify a system-generated task"
               >
                 <Select
                   value={currentValue || ''}
                   onValueChange={(value) => handleChange(isInput, value)}
-                  disabled={selectedTask.is_predefined}
+                  disabled={task.is_predefined}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={isInput ? 'Select Input Location' : 'Select Output Location'}>
@@ -224,7 +220,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
           <Input
             value={value}
             onChange={(e) => setDesignTimeParams((prev) => ({...prev, [key]: e.target.value}))}
-            disabled={selectedTask.is_predefined}
+            disabled={task.is_predefined}
           />
         </div>
       ))}
@@ -243,13 +239,13 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
             <div className="space-y-2">
               <Label className="text-sm font-medium">Task Code</Label>
               <TooltipWrapper
-                disabled={selectedTask.is_predefined}
+                disabled={task.is_predefined}
                 disabledMessage="You cannot modify a system-generated task"
               >
                 <Textarea
-                  value={localTask.task_code || ''}
-                  onChange={(e) => handleInputChange('task_code', e.target.value)}
-                  disabled={selectedTask.is_predefined}
+                  value={task.task_code || ''}
+                  onChange={(e) => onTaskChange('task_code', e.target.value)}
+                  disabled={task.is_predefined}
                   className="min-h-[200px] font-mono"
                   placeholder="Enter your code here..."
                 />
@@ -269,10 +265,10 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Runtime Parameters</h3>
             <AddRuntimeParameterDialog
-              taskId={selectedTask.task_id}
+              taskId={task.task_id}
               availableParameters={availableParameters || []}
               onParameterAdd={handleParameterAdd}
-              isDisabled={selectedTask.is_predefined}
+              isDisabled={task.is_predefined}
             />
           </div>
 
