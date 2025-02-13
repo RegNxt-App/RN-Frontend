@@ -57,7 +57,11 @@ export const TransformationTab: React.FC<TransformationTabProps> = ({disabled, s
     ? `/api/v1/tasks/${selectedTask.task_id}/list-transformation-subtasks/`
     : null;
 
-  const {data: subtasks = [], error, isLoading} = useSWR<DMSubtask[]>(subtasksEndpoint);
+  const {
+    data: subtasks = [],
+    error,
+    isLoading,
+  } = useSWR<DMSubtask[]>(subtasksEndpoint, (url: string) => backendInstance.get(url).then((r) => r.data));
 
   const sortedSubtasks = React.useMemo(() => {
     return [...subtasks].sort((a, b) => a.order - b.order);

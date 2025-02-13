@@ -5,7 +5,6 @@ import {
   DatasetOption,
   DataviewOption,
   DesignTimeParams,
-  RuntimeParameter,
   SubtypeParamsResponse,
   Task,
   TaskParameter,
@@ -31,7 +30,6 @@ interface TaskDetailTabsProps {
   setIsSaving: (saving: boolean) => void;
   designTimeParams: DesignTimeParams;
   setDesignTimeParams: React.Dispatch<React.SetStateAction<DesignTimeParams>>;
-  runtimeParams: RuntimeParameter[];
   onSave: () => Promise<void>;
   onDeleteClick: () => void;
   inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
@@ -49,7 +47,6 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
   isSaving,
   designTimeParams,
   setDesignTimeParams,
-  runtimeParams,
   onSave,
   inputOptionsResponse,
   outputOptionsResponse,
@@ -68,11 +65,6 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
 
   const updateDesignTimeParams = useCallback(() => {
     if (!selectedTask?.parameters || selectedTask.parameters.length === 0) {
-      setDesignTimeParams({
-        sourceId: null,
-        sourceType: null,
-        destinationId: null,
-      });
       return;
     }
     if (selectedTask?.parameters) {
@@ -212,7 +204,6 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
           variablesResponse={variablesResponse}
           inputOptionsResponse={inputOptionsResponse}
           outputOptionsResponse={outputOptionsResponse}
-          runtimeParams={runtimeParams}
           subtypeParamsResponse={subtypeParamsResponse}
         />
 

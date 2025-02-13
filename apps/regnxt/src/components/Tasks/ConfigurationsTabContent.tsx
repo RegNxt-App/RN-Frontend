@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 
 import {AddRuntimeParameterDialog} from '@/components/AddRuntimeParameterDialog';
+import {useBackend} from '@/contexts/BackendContext';
 import {useTaskConfiguration} from '@/contexts/TaskConfigurationContext';
 import {
   ApiResponse,
@@ -34,7 +35,6 @@ interface ConfigurationsTabContentProps {
   variablesResponse?: VariableResponse[];
   inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
   outputOptionsResponse?: ApiResponse<DatasetOption[]>;
-  runtimeParams: RuntimeParameter[];
   subtypeParamsResponse?: SubtypeParamsResponse[];
 }
 
@@ -49,14 +49,18 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   outputOptionsResponse,
   subtypeParamsResponse,
 }) => {
+  const {backendInstance} = useBackend();
+
   const {taskConfigurations, isLoading} = useTaskConfiguration();
 
   const {data: availableParameters, mutate: mutateAvailable} = useSWR<AvailableParameter[]>(
-    `/api/v1/tasks/get-available-runtime-parameters/`
+    `/api/v1/tasks/get-available-runtime-parameters/`,
+    (url: string) => backendInstance.get(url).then((r) => r.data)
   );
 
   const {data: taskParameters, mutate: mutateTaskParams} = useSWR<RuntimeParameter[]>(
-    `/api/v1/tasks/${selectedTask.task_id}/get-task-runtime-parameters/`
+    `/api/v1/tasks/${selectedTask.task_id}/get-task-runtime-parameters/`,
+    (url: string) => backendInstance.get(url).then((r) => r.data)
   );
   const handleParameterAdd = () => {
     mutateAvailable();
@@ -109,7 +113,6 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
     const sortedVariables = [...(variablesResponse || [])].sort((a, b) => {
       const indexA = PRIORITY_ORDER.indexOf(a.name);
       const indexB = PRIORITY_ORDER.indexOf(b.name);
-
       return indexA === -1 && indexB === -1
         ? a.name.localeCompare(b.name)
         : indexA === -1
@@ -298,7 +301,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
                     <Label>Default Value</Label>
                     <Input
                       value={param.default_value || ''}
-                      disabled={selectedTask.is_predefined}
+                      disabled
                     />
                   </div>
                   <div className="space-y-2">
