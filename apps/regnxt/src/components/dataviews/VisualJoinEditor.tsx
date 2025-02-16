@@ -112,7 +112,6 @@ export function VisualJoinEditor({tables, joins, onJoinUpdate}: VisualJoinEditor
     conditions: [{leftColumn: '', operator: '=', rightColumn: ''}],
   });
 
-  // Update nodes and edges when tables or joins change
   useEffect(() => {
     setNodes(
       tables.map((table, index) => ({

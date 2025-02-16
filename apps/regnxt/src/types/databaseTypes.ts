@@ -659,3 +659,36 @@ export interface TooltipWrapperProps {
   disabledMessage?: string;
   enabled?: boolean;
 }
+
+export interface DataViewObject {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  framework?: string;
+  object_type?: string;
+  version?: {
+    id: number;
+    number: number;
+  };
+}
+
+export interface Field {
+  id: string;
+  name: string;
+  table: string;
+  type: string;
+  label: string;
+  description?: string;
+  selected: boolean;
+}
+
+export interface ApiResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+  page: number;
+  page_size: number;
+  total_pages: number;
+}

@@ -10,6 +10,7 @@ import {ObjectSelection} from '@/components/dataviews/ObjectSelection';
 import {PreviewMode} from '@/components/dataviews/PreviewMode';
 import {Button} from '@/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import {DataViewProvider} from '@/contexts/DataViewContext';
 import {useDataView} from '@/hooks/api/use-dataview';
 import {toast} from '@/hooks/use-toast';
 import {orchestraBackendInstance} from '@/lib/axios';
@@ -233,147 +234,149 @@ export function CreateEditDataview() {
   }
 
   return (
-    <div className="container max-w-5xl py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {id ? 'Edit Data View' : 'Create Data View'}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Complete all steps to {id ? 'update' : 'create'} your custom data view.
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          onClick={() => navigate('/orchestra/dataviews')}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to List
-        </Button>
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-sm">Progress</CardTitle>
-            <CardDescription>
-              Step {currentStep + 1} of {steps.length}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-1">
-              {steps.map((step, index) => (
-                <div
-                  key={step.id}
-                  className={`flex items-start space-x-3 rounded-lg p-3 transition-colors ${
-                    index === currentStep
-                      ? 'bg-primary/10 text-primary'
-                      : index < currentStep
-                      ? 'text-muted-foreground'
-                      : 'text-muted-foreground/60'
-                  }`}
-                >
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full border text-xs">
-                    {index < currentStep ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="text-sm font-medium">{step.title}</div>
-                    <div className="text-xs">{step.description}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>{steps[currentStep].title}</CardTitle>
-            <CardDescription>{steps[currentStep].description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {currentStep === 0 && (
-              <IdentificationForm
-                config={dataViewConfig.identification}
-                updateConfig={(data) => updateConfig('identification', data)}
-                isEdit={!!id}
-              />
-            )}
-            {currentStep === 1 && (
-              <ObjectSelection
-                dataCollection={dataCollection}
-                config={dataViewConfig.objects}
-                updateConfig={(data) => updateConfig('objects', data)}
-              />
-            )}
-            {currentStep === 2 && (
-              <JoinConfiguration
-                config={dataViewConfig.joins}
-                updateConfig={(data) => updateConfig('joins', data)}
-                selectedObjects={dataViewConfig.objects}
-              />
-            )}
-            {currentStep === 3 && (
-              <FieldSelection
-                config={dataViewConfig.fields}
-                updateConfig={(data) => updateConfig('fields', data)}
-              />
-            )}
-            {currentStep === 4 && (
-              <FilterConfiguration
-                config={dataViewConfig.filters}
-                updateConfig={(data) => updateConfig('filters', data)}
-              />
-            )}
-            {currentStep === 5 && (
-              <AggregationConfiguration
-                config={dataViewConfig.aggregations}
-                updateConfig={(data) => updateConfig('aggregations', data)}
-              />
-            )}
-            {currentStep === 6 && (
-              <PreviewMode
-                config={dataViewConfig}
-                previewData={previewData}
-                isLoading={isLoadingPreview}
-                onRefresh={loadPreviewData}
-              />
-            )}
-          </CardContent>
-          <div className="flex items-center justify-between border-t p-6">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-              disabled={currentStep === 0 || isSubmitting}
-            >
-              Previous
-            </Button>
-            <Button
-              onClick={handleNext}
-              disabled={isSubmitting}
-              className="gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : currentStep === steps.length - 1 ? (
-                id ? (
-                  'Update'
-                ) : (
-                  'Create'
-                )
-              ) : (
-                <>
-                  Next Step
-                  <ChevronRight className="h-4 w-4" />
-                </>
-              )}
-            </Button>
+    <DataViewProvider>
+      <div className="container max-w-5xl py-10">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {id ? 'Edit Data View' : 'Create Data View'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Complete all steps to {id ? 'update' : 'create'} your custom data view.
+            </p>
           </div>
-        </Card>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/orchestra/dataviews')}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to List
+          </Button>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-3">
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle className="text-sm">Progress</CardTitle>
+              <CardDescription>
+                Step {currentStep + 1} of {steps.length}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {steps.map((step, index) => (
+                  <div
+                    key={step.id}
+                    className={`flex items-start space-x-3 rounded-lg p-3 transition-colors ${
+                      index === currentStep
+                        ? 'bg-primary/10 text-primary'
+                        : index < currentStep
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground/60'
+                    }`}
+                  >
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full border text-xs">
+                      {index < currentStep ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="text-sm font-medium">{step.title}</div>
+                      <div className="text-xs">{step.description}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>{steps[currentStep].title}</CardTitle>
+              <CardDescription>{steps[currentStep].description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {currentStep === 0 && (
+                <IdentificationForm
+                  config={dataViewConfig.identification}
+                  updateConfig={(data) => updateConfig('identification', data)}
+                  isEdit={!!id}
+                />
+              )}
+              {currentStep === 1 && (
+                <ObjectSelection
+                  dataCollection={dataCollection}
+                  config={dataViewConfig.objects}
+                  updateConfig={(data) => updateConfig('objects', data)}
+                />
+              )}
+              {currentStep === 2 && (
+                <JoinConfiguration
+                  config={dataViewConfig.joins}
+                  updateConfig={(data) => updateConfig('joins', data)}
+                  selectedObjects={dataViewConfig.objects}
+                />
+              )}
+              {currentStep === 3 && (
+                <FieldSelection
+                  config={dataViewConfig.fields}
+                  updateConfig={(data) => updateConfig('fields', data)}
+                />
+              )}
+              {currentStep === 4 && (
+                <FilterConfiguration
+                  config={dataViewConfig.filters}
+                  updateConfig={(data) => updateConfig('filters', data)}
+                />
+              )}
+              {currentStep === 5 && (
+                <AggregationConfiguration
+                  config={dataViewConfig.aggregations}
+                  updateConfig={(data) => updateConfig('aggregations', data)}
+                />
+              )}
+              {currentStep === 6 && (
+                <PreviewMode
+                  config={dataViewConfig}
+                  previewData={previewData}
+                  isLoading={isLoadingPreview}
+                  onRefresh={loadPreviewData}
+                />
+              )}
+            </CardContent>
+            <div className="flex items-center justify-between border-t p-6">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+                disabled={currentStep === 0 || isSubmitting}
+              >
+                Previous
+              </Button>
+              <Button
+                onClick={handleNext}
+                disabled={isSubmitting}
+                className="gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : currentStep === steps.length - 1 ? (
+                  id ? (
+                    'Update'
+                  ) : (
+                    'Create'
+                  )
+                ) : (
+                  <>
+                    Next Step
+                    <ChevronRight className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </Card>
+        </div>
       </div>
-    </div>
+    </DataViewProvider>
   );
 }

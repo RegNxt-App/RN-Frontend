@@ -1,9 +1,12 @@
+// components/dataviews/FilterConfiguration.tsx
 import {useEffect, useState} from 'react';
 
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {useDataView} from '@/contexts/DataViewContext';
 import {PlusCircle, X} from 'lucide-react';
+
+import {Button} from '@rn/ui/components/ui/button';
+import {Input} from '@rn/ui/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 
 interface Filter {
   id: string;
@@ -17,7 +20,20 @@ interface FilterConfigurationProps {
   updateConfig: (filters: Filter[]) => void;
 }
 
+const OPERATORS = [
+  {value: 'equals', label: '='},
+  {value: 'not_equals', label: '!='},
+  {value: 'greater_than', label: '>'},
+  {value: 'less_than', label: '<'},
+  {value: 'greater_equals', label: '>='},
+  {value: 'less_equals', label: '<='},
+  {value: 'like', label: 'Contains'},
+  {value: 'in', label: 'In'},
+  {value: 'not_in', label: 'Not In'},
+];
+
 export function FilterConfiguration({config, updateConfig}: FilterConfigurationProps) {
+  const {fields} = useDataView();
   const [filters, setFilters] = useState<Filter[]>(config);
 
   useEffect(() => {
@@ -27,69 +43,103 @@ export function FilterConfiguration({config, updateConfig}: FilterConfigurationP
   }, [filters, config, updateConfig]);
 
   const addFilter = () => {
-    setFilters([...filters, {id: Date.now().toString(), field: '', operator: '', value: ''}]);
+    setFilters([
+      ...filters,
+      {
+        id: `filter_${Date.now()}`,
+        field: '',
+        operator: '',
+        value: '',
+      },
+    ]);
   };
 
   const removeFilter = (id: string) => {
     setFilters(filters.filter((filter) => filter.id !== id));
   };
 
-  const updateFilter = (id: string, field: string, value: string) => {
+  const updateFilter = (id: string, field: keyof Filter, value: string) => {
     setFilters(filters.map((filter) => (filter.id === id ? {...filter, [field]: value} : filter)));
   };
 
+  // Transform fields into options for the select
+  const fieldOptions = fields.map((field) => ({
+    value: `${field.table}.${field.name}`,
+    label: `${field.table} - ${field.label || field.name}`,
+    type: field.type,
+  }));
+
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-medium">Filter Configuration</h3>
-      {filters.map((filter) => (
-        <div
-          key={filter.id}
-          className="flex items-center space-x-4"
-        >
-          <Select onValueChange={(value) => updateFilter(filter.id, 'field', value)}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select field" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="customer_id">Customer ID</SelectItem>
-              <SelectItem value="transaction_amount">Transaction Amount</SelectItem>
-              <SelectItem value="transaction_date">Transaction Date</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select onValueChange={(value) => updateFilter(filter.id, 'operator', value)}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select operator" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="equals">=</SelectItem>
-              <SelectItem value="not_equals">!=</SelectItem>
-              <SelectItem value="greater_than">&gt;</SelectItem>
-              <SelectItem value="less_than">&lt;</SelectItem>
-              <SelectItem value="contains">Contains</SelectItem>
-            </SelectContent>
-          </Select>
-          <Input
-            placeholder="Enter value"
-            className="w-[200px]"
-            value={filter.value}
-            onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => removeFilter(filter.id)}
+      <div className="space-y-4">
+        {filters.map((filter) => (
+          <div
+            key={filter.id}
+            className="flex items-center space-x-4"
           >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      ))}
+            <Select
+              value={filter.field}
+              onValueChange={(value) => updateFilter(filter.id, 'field', value)}
+            >
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="Select field" />
+              </SelectTrigger>
+              <SelectContent>
+                {fieldOptions.map((option) => (
+                  <SelectItem
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filter.operator}
+              onValueChange={(value) => updateFilter(filter.id, 'operator', value)}
+            >
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Operator" />
+              </SelectTrigger>
+              <SelectContent>
+                {OPERATORS.map((op) => (
+                  <SelectItem
+                    key={op.value}
+                    value={op.value}
+                  >
+                    {op.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Input
+              placeholder="Enter value"
+              className="w-[200px]"
+              value={filter.value}
+              onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
+            />
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => removeFilter(filter.id)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
       <Button
         variant="outline"
-        className="w-full"
         onClick={addFilter}
+        className="w-full"
       >
         <PlusCircle className="mr-2 h-4 w-4" />
-        Add Filter Condition
+        Add Filter
       </Button>
     </div>
   );

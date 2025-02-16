@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
 
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
-import {useDataView} from '@/hooks/api/use-dataview';
+import {useDataView} from '@/contexts/DataViewContext';
+import {DataViewObject} from '@/types/databaseTypes';
 import {DragHandleDots2Icon} from '@radix-ui/react-icons';
 import {Loader2} from 'lucide-react';
 
@@ -10,35 +11,36 @@ import {Input} from '@rn/ui/components/ui/input';
 import {ScrollArea} from '@rn/ui/components/ui/scroll-area';
 
 interface ObjectSelectionProps {
-  config: any[];
-  updateConfig: (objects: any[]) => void;
+  config: DataViewObject[];
+  updateConfig: (objects: DataViewObject[]) => void;
   framework?: string;
 }
 
 export function ObjectSelection({config, updateConfig, framework}: ObjectSelectionProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
-  const [selectedObjects, setSelectedObjects] = useState<Record<string, any>>(
-    Object.fromEntries(config.map((obj) => [obj.id, obj]))
-  );
-
-  const {data, error, isLoading, mutate} = useDataView().useAvailableObjects(page, searchTerm, framework);
+  const {selectedObjects, setSelectedObjects, fetchFieldsForObjects, useAvailableObjects} = useDataView();
+  const {data, error, isLoading} = useAvailableObjects(page, searchTerm, framework);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setPage(1);
-    }, 300);
+    if (config?.length > 0) {
+      const initialSelected = config.reduce((acc, obj) => {
+        acc[obj.id] = obj;
+        return acc;
+      }, {} as Record<string, DataViewObject>);
+      setSelectedObjects(initialSelected);
+    }
+  }, [config, setSelectedObjects]);
 
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
-
-  const handleAdd = (obj: any) => {
+  const handleAdd = async (obj: DataViewObject) => {
     const newSelected = {
       ...selectedObjects,
       [obj.id]: obj,
     };
     setSelectedObjects(newSelected);
-    updateConfig(Object.values(newSelected));
+    const selectedArray = Object.values(newSelected);
+    updateConfig(selectedArray);
+    await fetchFieldsForObjects(selectedArray);
   };
 
   const handleRemove = (objId: string) => {
@@ -68,7 +70,7 @@ export function ObjectSelection({config, updateConfig, framework}: ObjectSelecti
               </div>
             ) : error ? (
               <div className="text-center p-4 text-destructive">Error loading objects</div>
-            ) : data?.results.length === 0 ? (
+            ) : data?.results?.length === 0 ? (
               <div className="text-center p-4 text-muted-foreground">No objects found</div>
             ) : (
               <Table>
@@ -81,7 +83,7 @@ export function ObjectSelection({config, updateConfig, framework}: ObjectSelecti
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.results.map((obj: Record<string, string>) => (
+                  {data?.results?.map((obj: Record<string, string>) => (
                     <TableRow key={obj.id}>
                       <TableCell>{obj.name}</TableCell>
                       <TableCell className="capitalize">{obj.type}</TableCell>
