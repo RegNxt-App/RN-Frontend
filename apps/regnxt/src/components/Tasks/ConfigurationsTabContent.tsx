@@ -5,7 +5,6 @@ import {useBackend} from '@/contexts/BackendContext';
 import {useTaskConfiguration} from '@/contexts/TaskConfigurationContext';
 import {
   ApiResponse,
-  AvailableParameter,
   DatasetOption,
   DataviewOption,
   DesignTimeParams,
@@ -51,22 +50,29 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
 
   const {taskConfigurations, isLoading} = useTaskConfiguration();
 
-  const {data: availableParameters, mutate: mutateAvailable} = useSWR<AvailableParameter[]>(
-    `/api/v1/tasks/get-available-runtime-parameters/`,
-    (url: string) => backendInstance.get(url).then((r) => r.data)
+  const {
+    data,
+    isLoading: paramsLoading,
+    mutate: mutateParams,
+  } = useSWR(
+    [
+      '/api/v1/tasks/get-available-runtime-parameters/',
+      `/api/v1/tasks/${task.task_id}/get-task-runtime-parameters/`,
+    ],
+    async ([availableUrl, taskParamsUrl]) => {
+      const [availableParams, taskParams] = await Promise.all([
+        backendInstance.get(availableUrl).then((r) => r.data),
+        backendInstance.get(taskParamsUrl).then((r) => r.data),
+      ]);
+      return {
+        availableParameters: availableParams,
+        taskParameters: taskParams,
+      };
+    }
   );
 
-  const {data: taskParameters, mutate: mutateTaskParams} = useSWR<RuntimeParameter[]>(
-    `/api/v1/tasks/${task.task_id}/get-task-runtime-parameters/`,
-    (url: string) => backendInstance.get(url).then((r) => r.data)
-  );
-  const handleParameterAdd = () => {
-    mutateAvailable();
-    mutateTaskParams();
-  };
-  if (isLoading || !taskConfigurations || !Object.keys(taskConfigurations.taskTypes || {}).length) {
-    return <Loader />;
-  }
+  const availableParameters = data?.availableParameters;
+  const taskParameters = data?.taskParameters;
 
   const {isCustomCodeTask, isTransformationTask} = useMemo(() => {
     const taskType = taskConfigurations?.taskTypes?.[task?.task_type_code];
@@ -77,6 +83,40 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
       isTransformationTask: Boolean(relevantSubtype?.features?.requiresTransformation),
     };
   }, [taskConfigurations?.taskTypes, task?.task_type_code, task?.task_subtype_id]);
+
+  const handleParameterAdd = () => {
+    mutateParams();
+  };
+
+  const renderDesignTimeParamsFields = useMemo(
+    () => (
+      <div className="col-span-2 space-y-4">
+        {Object.entries(designTimeParams).map(([key, value]) => (
+          <div
+            key={key}
+            className="space-y-2"
+          >
+            <Label>{key}</Label>
+            <Input
+              value={value}
+              onChange={(e) => setDesignTimeParams((prev) => ({...prev, [key]: e.target.value}))}
+              disabled={task.is_predefined}
+            />
+          </div>
+        ))}
+      </div>
+    ),
+    [designTimeParams, setDesignTimeParams, task.is_predefined]
+  );
+
+  if (
+    isLoading ||
+    paramsLoading ||
+    !taskConfigurations ||
+    !Object.keys(taskConfigurations.taskTypes || {}).length
+  ) {
+    return <Loader />;
+  }
 
   const renderTaskLanguageField = () => (
     <div className="space-y-2">
@@ -209,24 +249,6 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
     );
   };
 
-  const renderDesignTimeParamsFields = () => (
-    <div className="col-span-2 space-y-4">
-      {Object.entries(designTimeParams).map(([key, value]) => (
-        <div
-          key={key}
-          className="space-y-2"
-        >
-          <Label>{key}</Label>
-          <Input
-            value={value}
-            onChange={(e) => setDesignTimeParams((prev) => ({...prev, [key]: e.target.value}))}
-            disabled={task.is_predefined}
-          />
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <TabsContent
       value="configurations"
@@ -257,7 +279,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
         ) : (
           <>
             {renderTaskLanguageField()}
-            {Object.keys(designTimeParams).length > 0 && renderDesignTimeParamsFields()}
+            {Object.keys(designTimeParams).length > 0 && renderDesignTimeParamsFields}
           </>
         )}
 
@@ -274,7 +296,7 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
 
           {taskParameters && taskParameters.length > 0 ? (
             <div className="space-y-4">
-              {taskParameters.map((param) => (
+              {taskParameters.map((param: RuntimeParameter) => (
                 <div
                   key={param.parameter_id}
                   className="grid grid-cols-2 gap-4 p-4 border rounded-lg"
