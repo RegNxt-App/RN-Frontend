@@ -533,3 +533,27 @@ export interface WorkflowRunColumn {
     completed_at: string | null;
   }>;
 }
+export interface ConnectionType {
+  type_id: number;
+  code: string;
+  name: string;
+  description: string;
+  connection_properties: Record<string, any>;
+}
+
+export interface Connection {
+  id: number;
+  type_id: number;
+  name: string;
+  type_name: string;
+  connection_string: string;
+  is_system_generated: boolean;
+  created_at: string;
+  created_by: string | null;
+}
+
+export interface ConnectionFormData {
+  name: string;
+  type: string;
+  properties: Record<string, any>;
+}

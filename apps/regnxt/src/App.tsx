@@ -14,6 +14,8 @@ import {BackendProvider} from './contexts/BackendContext';
 import {WorkflowProvider} from './contexts/WorkflowContext';
 import DefaultLayout from './layout/DefaultLayout';
 import ApplicationSettings from './pages/Orchestra/ApplicationSettings';
+import Connections from './pages/Orchestra/Connections/Connections';
+import CreateConnection from './pages/Orchestra/Connections/CreateConnection';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
 import UserSettings from './pages/Orchestra/UserSettings';
 import WorkflowManager from './pages/Orchestra/workflows/Workflows';
@@ -40,7 +42,6 @@ const Template = lazy(() => import('./pages/Configuration/Template'));
 const RegulatoryCalender = lazy(() => import('./pages/Configuration/RegulatoryCalender'));
 const Validation = lazy(() => import('./pages/Configuration/Validation'));
 
-const Connections = lazy(() => import('./pages/Orchestra/Connections'));
 const Variables = lazy(() => import('./pages/Orchestra/Variables'));
 const Datasets = lazy(() => import('./pages/Orchestra/Datasets'));
 const Dataviews = lazy(() => import('./pages/Orchestra/Dataviews'));
@@ -99,6 +100,7 @@ const routeConfig = {
       title: 'Orchestra',
     },
     {path: '/orchestra/connections', component: Connections, title: 'Orchestra'},
+    {path: '/orchestra/connections/new', component: CreateConnection, title: 'Orchestra'},
     {path: '/orchestra/variables', component: Variables, title: 'Orchestra'},
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},
