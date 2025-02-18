@@ -81,18 +81,6 @@ const Connections: React.FC = () => {
     }
   };
 
-  const handleEditConnection = async (id: number) => {
-    try {
-      console.log('Editing connection:', id);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to edit connection',
-        variant: 'destructive',
-      });
-    }
-  };
-
   if (typesError || connectionsError) {
     return (
       <div className="p-6 text-center text-red-500">
@@ -137,7 +125,6 @@ const Connections: React.FC = () => {
         <CardContent>
           <ConnectionTable
             connections={connectionsData?.results || []}
-            onEdit={handleEditConnection}
             onDeleteClick={handleDeleteClick}
           />
         </CardContent>

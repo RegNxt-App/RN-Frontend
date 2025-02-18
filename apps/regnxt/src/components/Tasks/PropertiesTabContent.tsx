@@ -7,7 +7,7 @@ import {Label} from '@rn/ui/components/ui/label';
 import {TabsContent} from '@rn/ui/components/ui/tabs';
 import {Textarea} from '@rn/ui/components/ui/textarea';
 
-import {TooltipWrapper} from './TooltipWrapper';
+import {TooltipWrapper} from '../TooltipWrapper';
 
 interface PropertiesTabContentProps {
   task: Task;

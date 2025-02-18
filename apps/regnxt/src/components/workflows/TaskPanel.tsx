@@ -2,7 +2,7 @@ import React, {useCallback, useState} from 'react';
 
 import {useBackend} from '@/contexts/BackendContext';
 import {Task} from '@/types/databaseTypes';
-import {Loader2} from 'lucide-react';
+import {Loader2, SearchX} from 'lucide-react';
 import useSWR from 'swr';
 
 import {Input} from '@rn/ui/components/ui/input';
@@ -37,20 +37,27 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({className}) => {
     event.dataTransfer.effectAllowed = 'move';
   }, []);
 
+  const hasNoResults = !isLoading && tasksResponse?.results.length === 0;
+
   return (
-    <div className={`w-74 overflow-y-auto ${className}`}>
+    <div className={`w-96 overflow-y-auto p-4 bg-white rounded-lg border ${className}`}>
       <h3 className="font-semibold mb-4">Available Tasks</h3>
       <Input
         placeholder="Search tasks..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="mb-4"
+        className="mb-4 w-full"
       />
       {error ? (
         <div className="text-sm text-red-500 p-4">Error loading tasks. Please try again.</div>
       ) : isLoading ? (
         <div className="flex justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      ) : hasNoResults ? (
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+          <SearchX className="h-12 w-12 mb-4" />
+          <p className="text-sm">No tasks found matching {searchTerm && `"${searchTerm}"`}</p>
         </div>
       ) : (
         <TasksList

@@ -22,8 +22,8 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn
 import {TabsContent} from '@rn/ui/components/ui/tabs';
 import {Textarea} from '@rn/ui/components/ui/textarea';
 
+import {TooltipWrapper} from '../TooltipWrapper';
 import Loader from '../loader';
-import {TooltipWrapper} from './TooltipWrapper';
 
 interface ConfigurationsTabContentProps {
   task: Task;
