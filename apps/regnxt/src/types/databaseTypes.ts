@@ -396,6 +396,8 @@ export interface Workflow {
   label: string;
   description: string;
   engine: string;
+  active: string;
+  last_deployed: string;
 }
 
 export interface NodeData extends Record<string, unknown> {

@@ -16,6 +16,7 @@ import DefaultLayout from './layout/DefaultLayout';
 import ApplicationSettings from './pages/Orchestra/ApplicationSettings';
 import Connections from './pages/Orchestra/Connections/Connections';
 import CreateConnection from './pages/Orchestra/Connections/CreateConnection';
+import EditConnection from './pages/Orchestra/Connections/EditConnection';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
 import UserSettings from './pages/Orchestra/UserSettings';
 import WorkflowManager from './pages/Orchestra/workflows/Workflows';
@@ -101,6 +102,7 @@ const routeConfig = {
     },
     {path: '/orchestra/connections', component: Connections, title: 'Orchestra'},
     {path: '/orchestra/connections/new', component: CreateConnection, title: 'Orchestra'},
+    {path: '/orchestra/connections/edit/:id', component: EditConnection, title: 'Orchestra'},
     {path: '/orchestra/variables', component: Variables, title: 'Orchestra'},
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},

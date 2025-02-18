@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 import {Connection} from '@/types/databaseTypes';
 import {
@@ -11,21 +12,26 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import {ArrowUpDown, Edit, Trash2} from 'lucide-react';
+import {ArrowUpDown, ChevronLeft, ChevronRight, Edit, Trash2} from 'lucide-react';
 
 import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
+
+import {TooltipWrapper} from '../TooltipWrapper';
+import ActionButtons from './ActionButtons';
 
 interface ConnectionTableProps {
   connections: Connection[];
-  onEdit: (id: number) => void;
   onDeleteClick: (connection: {id: number; name: string}) => void;
 }
 
-const ConnectionTable: React.FC<ConnectionTableProps> = ({connections, onEdit, onDeleteClick}) => {
+const ConnectionTable: React.FC<ConnectionTableProps> = ({connections, onDeleteClick}) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [pageSize, setPageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(0);
 
   const columns: ColumnDef<Connection>[] = [
     {
@@ -68,29 +74,12 @@ const ConnectionTable: React.FC<ConnectionTableProps> = ({connections, onEdit, o
     {
       id: 'actions',
       header: 'Actions',
-      cell: ({row}) => {
-        const connection = row.original;
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onEdit(connection.id)}
-              className="h-8 w-8"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDeleteClick({id: connection.id, name: connection.name})}
-              className="h-8 w-8 text-destructive hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        );
-      },
+      cell: ({row}) => (
+        <ActionButtons
+          connection={row.original}
+          onDeleteClick={onDeleteClick}
+        />
+      ),
     },
   ];
 
@@ -105,8 +94,30 @@ const ConnectionTable: React.FC<ConnectionTableProps> = ({connections, onEdit, o
     state: {
       sorting,
       columnVisibility,
+      pagination: {
+        pageIndex,
+        pageSize,
+      },
     },
+    onPaginationChange: (updater) => {
+      if (typeof updater === 'function') {
+        const newState = updater({
+          pageIndex,
+          pageSize,
+        });
+        setPageIndex(newState.pageIndex);
+        setPageSize(newState.pageSize);
+      } else {
+        setPageIndex(updater.pageIndex);
+        setPageSize(updater.pageSize);
+      }
+    },
+    pageCount: Math.ceil(connections.length / pageSize),
   });
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPageIndex(0);
+  };
 
   return (
     <div className="w-full">
@@ -148,6 +159,54 @@ const ConnectionTable: React.FC<ConnectionTableProps> = ({connections, onEdit, o
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm font-medium">Rows per page</p>
+          <Select
+            value={`${pageSize}`}
+            onValueChange={(value) => handlePageSizeChange(Number(value))}
+          >
+            <SelectTrigger className="h-8 w-[70px]">
+              <SelectValue placeholder={pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {[5, 10, 20, 30, 40, 50].map((size) => (
+                <SelectItem
+                  key={size}
+                  value={`${size}`}
+                >
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          <div className="flex items-center gap-1 text-sm font-medium">
+            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

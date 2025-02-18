@@ -1,6 +1,8 @@
 import {useMemo, useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
+import {TooltipWrapper} from '@/components/TooltipWrapper';
+import WorkflowStats from '@/components/workflows/WorkflowStats';
 import {useBackend} from '@/contexts/BackendContext';
 import {useWorkflow} from '@/contexts/WorkflowContext';
 import {toast} from '@/hooks/use-toast';
@@ -9,6 +11,7 @@ import {ColumnDef} from '@tanstack/react-table';
 import {Clock, Edit, Loader2, Play} from 'lucide-react';
 import useSWR, {mutate} from 'swr';
 
+import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
@@ -29,7 +32,6 @@ const WorkflowManager = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
   const [isWorkflowDialogOpen, setIsWorkflowDialogOpen] = useState(false);
-  const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
 
   const columns = useMemo<ColumnDef<Workflow>[]>(
     () => [
@@ -43,36 +45,63 @@ const WorkflowManager = () => {
         header: 'Workflow',
       },
       {
+        accessorKey: 'last_deployed',
+        header: 'Status',
+        cell: ({row}) => {
+          const isDeployed = row.original.last_deployed !== null;
+          return (
+            <Badge
+              variant={isDeployed ? 'default' : 'secondary'}
+              className={
+                isDeployed ? 'bg-green-100 text-green-800 hover:text-white' : 'bg-gray-100 text-gray-800'
+              }
+            >
+              {isDeployed ? 'Deployed' : 'Not Deployed'}
+            </Badge>
+          );
+        },
+      },
+      {
         id: 'actions',
         header: 'Actions',
-        cell: ({row}) => (
-          <div className="flex space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handlePlayClick(row.original)}
-              title="Start Workflow"
-            >
-              <Play className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleClockClick(row.original)}
-              title="View History"
-            >
-              <Clock className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleEditWorkflow(row.original)}
-              title="Edit Workflow"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </div>
-        ),
+        cell: ({row}) => {
+          const workflow = row.original;
+          const isDeployed = workflow.last_deployed !== null;
+
+          return (
+            <div className="flex space-x-2">
+              <TooltipWrapper
+                disabled={!isDeployed}
+                disabledMessage="Workflow must be deployed before running"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handlePlayClick(row.original)}
+                  disabled={!isDeployed}
+                >
+                  <Play className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleClockClick(row.original)}
+                title="View History"
+              >
+                <Clock className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleEditWorkflow(row.original)}
+                title="Edit Workflow"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+          );
+        },
       },
     ],
     []
@@ -86,17 +115,10 @@ const WorkflowManager = () => {
     count: number;
     num_pages: number;
     results: Workflow[];
-  }>(WORKFLOWS_ENDPOINT, async (url: string) => {
-    const response = await backendInstance.get(url);
-    return response.data;
-  });
-
+  }>(WORKFLOWS_ENDPOINT, (url: string) => backendInstance.get(url).then((r) => r.data));
   const {data: workflowParameters = [], isLoading: isLoadingParameters} = useSWR<WorkflowParameter[]>(
     selectedWorkflow ? `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/parameters/` : null,
-    async (url: string) => {
-      const response = await backendInstance.get(url);
-      return response.data;
-    }
+    (url: string) => backendInstance.get(url).then((r) => r.data)
   );
   const workflows = workflowsResponse?.results || [];
 
@@ -122,10 +144,10 @@ const WorkflowManager = () => {
   };
 
   const handleClockClick = async (workflow: Workflow) => {
+    setIsRunsDialogOpen(true);
     try {
       const response = await backendInstance.get(`${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`);
       setWorkflowRuns(response.data);
-      setIsRunsDialogOpen(true);
     } catch (error) {
       toast({
         title: 'Error',
@@ -172,7 +194,7 @@ const WorkflowManager = () => {
   };
 
   const formatDateTime = (dateTimeString: string | null) => {
-    if (!dateTimeString) return 'N/A';
+    if (!dateTimeString || dateTimeString === 'N/A') return 'N/A';
     try {
       const date = new Date(dateTimeString);
       return date.toLocaleString();
@@ -235,6 +257,42 @@ const WorkflowManager = () => {
     ],
     [getStatusColor]
   );
+  const stats = useMemo(() => {
+    if (!workflowsResponse?.results) {
+      return {
+        total: 0,
+        active: 0,
+        configured: 0,
+        inactive: 0,
+      };
+    }
+
+    const workflows = workflowsResponse.results;
+    const total = workflows.length;
+
+    const statusCounts = workflows.reduce(
+      (acc, workflow) => {
+        if (workflow.active && workflow.last_deployed) {
+          acc.active++;
+        } else if (workflow.active && !workflow.last_deployed) {
+          acc.configured++;
+        } else if (!workflow.active) {
+          acc.inactive++;
+        }
+        return acc;
+      },
+      {
+        active: 0,
+        configured: 0,
+        inactive: 0,
+      }
+    );
+
+    return {
+      total,
+      ...statusCounts,
+    };
+  }, [workflowsResponse?.results]);
 
   const handleRefreshWorkflows = () => {
     mutate(WORKFLOWS_ENDPOINT);
@@ -253,6 +311,7 @@ const WorkflowManager = () => {
         </div>
         <Button onClick={handleCreateWorkflow}>Create Workflow</Button>
       </div>
+      <WorkflowStats stats={stats} />
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         <Card className="flex-1">
@@ -367,11 +426,19 @@ const WorkflowManager = () => {
           <DialogHeader>
             <DialogTitle>Workflow Run History</DialogTitle>
           </DialogHeader>
-          <SharedDataTable
-            data={workflowRuns}
-            columns={runColumns}
-            showPagination={true}
-          />
+          <div className="max-h-[90vh] overflow-y-auto">
+            {workflowRuns.length === 0 ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : (
+              <SharedDataTable
+                data={workflowRuns}
+                columns={runColumns}
+                showPagination={true}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
       <WorkflowDialog
