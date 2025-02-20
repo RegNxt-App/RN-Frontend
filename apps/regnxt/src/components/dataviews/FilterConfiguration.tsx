@@ -1,7 +1,6 @@
-// components/dataviews/FilterConfiguration.tsx
 import {useEffect, useState} from 'react';
 
-import {useDataView} from '@/contexts/DataViewContext';
+import {useDataView} from '@/hooks/api/use-dataview';
 import {PlusCircle, X} from 'lucide-react';
 
 import {Button} from '@rn/ui/components/ui/button';
@@ -33,7 +32,7 @@ const OPERATORS = [
 ];
 
 export function FilterConfiguration({config, updateConfig}: FilterConfigurationProps) {
-  const {fields} = useDataView();
+  const {fields = []} = useDataView();
   const [filters, setFilters] = useState<Filter[]>(config);
 
   useEffect(() => {
@@ -62,11 +61,11 @@ export function FilterConfiguration({config, updateConfig}: FilterConfigurationP
     setFilters(filters.map((filter) => (filter.id === id ? {...filter, [field]: value} : filter)));
   };
 
-  // Transform fields into options for the select
-  const fieldOptions = fields.map((field) => ({
-    value: `${field.table}.${field.name}`,
-    label: `${field.table} - ${field.label || field.name}`,
-    type: field.type,
+  // Safely transform fields into options with null checking
+  const fieldOptions = (fields || []).map((field) => ({
+    value: `${field.table || ''}.${field.name || ''}`,
+    label: `${field.table || ''} - ${field.label || field.name || ''}`,
+    type: field.type || '',
   }));
 
   return (

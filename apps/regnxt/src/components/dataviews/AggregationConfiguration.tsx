@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 
-import {useDataView} from '@/contexts/DataViewContext';
+import {useDataView} from '@/hooks/api/use-dataview';
 import {PlusCircle, X} from 'lucide-react';
 
 import {Button} from '@rn/ui/components/ui/button';

@@ -1,6 +1,6 @@
-import {Fragment, useEffect, useMemo, useState} from 'react';
+import {Fragment, useEffect, useState} from 'react';
 
-import {useDataView} from '@/contexts/DataViewContext';
+import {useDataViewContext} from '@/contexts/DataViewContext';
 import {Field} from '@/types/databaseTypes';
 
 import {Checkbox} from '@rn/ui/components/ui/checkbox';
@@ -15,47 +15,51 @@ interface FieldSelectionProps {
 }
 
 export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
-  const {fields, setFields} = useDataView();
   const [searchTerm, setSearchTerm] = useState('');
   const [showSelected, setShowSelected] = useState(false);
   const [groupByTable, setGroupByTable] = useState(true);
+  const {fields, setFields, toggleFieldSelection} = useDataViewContext();
 
   useEffect(() => {
     if (config?.length > 0) {
-      setFields(config.map((field) => ({...field, selected: true})));
+      setFields(config);
     }
-  }, []);
+  }, [config, setFields]);
 
   useEffect(() => {
     const selectedFields = fields.filter((field) => field.selected);
-    if (JSON.stringify(selectedFields) !== JSON.stringify(config)) {
-      updateConfig(selectedFields);
-    }
-  }, [fields, config, updateConfig]);
-
-  const toggleFieldSelection = (id: string) => {
-    setFields(fields.map((field) => (field.id === id ? {...field, selected: !field.selected} : field)));
-  };
+    updateConfig(selectedFields);
+  }, [fields, updateConfig]);
 
   const toggleTableFields = (tableName: string, selected: boolean) => {
-    setFields(fields.map((field) => (field.table === tableName ? {...field, selected} : field)));
+    setFields((prevFields) =>
+      prevFields.map((field) => (field.table === tableName ? {...field, selected} : field))
+    );
   };
 
-  const groupedFields = useMemo(() => {
-    const filtered = fields.filter(
-      (field) =>
-        field?.name?.toLowerCase().includes(searchTerm?.toLowerCase()) && (!showSelected || field.selected)
-    );
-
-    if (!groupByTable) return {ungrouped: filtered};
-
-    return filtered.reduce((acc, field) => {
-      const table = field.table;
-      if (!acc[table]) acc[table] = [];
-      acc[table].push(field);
-      return acc;
-    }, {} as Record<string, Field[]>);
-  }, [fields, searchTerm, showSelected, groupByTable]);
+  const groupedFields = groupByTable
+    ? fields.reduce((acc, field) => {
+        const fieldName = field.alias || field.column || '';
+        if (
+          !fieldName.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
+          (showSelected && !field.selected)
+        ) {
+          return acc;
+        }
+        const table = field.source || 'Unknown'; // Using source instead of table
+        if (!acc[table]) acc[table] = [];
+        acc[table].push(field);
+        return acc;
+      }, {} as Record<string, Field[]>)
+    : {
+        ungrouped: fields.filter((field) => {
+          const fieldName = field.alias || field.column || '';
+          return (
+            fieldName.toLowerCase().includes(searchTerm?.toLowerCase() || '') &&
+            (!showSelected || field.selected)
+          );
+        }),
+      };
 
   return (
     <div className="space-y-6">
@@ -70,17 +74,15 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
           />
           <Label className="flex items-center space-x-2 cursor-pointer">
             <Checkbox
-              id="show-selected"
               checked={showSelected}
-              onCheckedChange={(checked) => setShowSelected(checked as boolean)}
+              onCheckedChange={(checked) => setShowSelected(!!checked)}
             />
             <span>Show selected only</span>
           </Label>
           <Label className="flex items-center space-x-2 cursor-pointer">
             <Checkbox
-              id="group-by-table"
               checked={groupByTable}
-              onCheckedChange={(checked) => setGroupByTable(checked as boolean)}
+              onCheckedChange={(checked) => setGroupByTable(!!checked)}
             />
             <span>Group by table</span>
           </Label>
@@ -103,43 +105,25 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {groupByTable
-              ? Object.entries(groupedFields).map(([tableName, tableFields]) => (
-                  <Fragment key={tableName}>
-                    <TableRow className="bg-muted/50">
-                      <TableCell>
-                        <Checkbox
-                          checked={tableFields.every((f) => f.selected)}
-                          onCheckedChange={(checked) => toggleTableFields(tableName, !!checked)}
-                        />
-                      </TableCell>
-                      <TableCell
-                        colSpan={4}
-                        className="font-medium"
-                      >
-                        {tableName} ({tableFields.length} fields)
-                      </TableCell>
-                    </TableRow>
-                    {tableFields.map((field) => (
-                      <TableRow key={field.id}>
-                        <TableCell>
-                          <Checkbox
-                            id={`field-${field.id}`}
-                            checked={field.selected}
-                            onCheckedChange={() => toggleFieldSelection(field.id)}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Label htmlFor={`field-${field.id}`}>{field.label || field.name}</Label>
-                        </TableCell>
-                        <TableCell>{field.table}</TableCell>
-                        <TableCell>{field.type}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{field.description}</TableCell>
-                      </TableRow>
-                    ))}
-                  </Fragment>
-                ))
-              : groupedFields.ungrouped.map((field) => (
+            {Object.entries(groupedFields).map(([tableName, tableFields]) => (
+              <Fragment key={tableName}>
+                {groupByTable && (
+                  <TableRow className="bg-muted/50">
+                    <TableCell>
+                      <Checkbox
+                        checked={tableFields.every((f) => f.selected)}
+                        onCheckedChange={(checked) => toggleTableFields(tableName, !!checked)}
+                      />
+                    </TableCell>
+                    <TableCell
+                      colSpan={4}
+                      className="font-medium"
+                    >
+                      {tableName} ({tableFields.length} fields)
+                    </TableCell>
+                  </TableRow>
+                )}
+                {tableFields.map((field) => (
                   <TableRow key={field.id}>
                     <TableCell>
                       <Checkbox
@@ -149,13 +133,17 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
                       />
                     </TableCell>
                     <TableCell>
-                      <Label htmlFor={`field-${field.id}`}>{field.label || field.name}</Label>
+                      <Label htmlFor={`field-${field.id}`}>{field.alias || field.column}</Label>
                     </TableCell>
-                    <TableCell>{field.table}</TableCell>
-                    <TableCell>{field.type}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{field.description}</TableCell>
+                    <TableCell>{field.source}</TableCell>
+                    <TableCell>{field.type || '-'}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {field.description || '-'}
+                    </TableCell>
                   </TableRow>
                 ))}
+              </Fragment>
+            ))}
           </TableBody>
         </Table>
       </ScrollArea>

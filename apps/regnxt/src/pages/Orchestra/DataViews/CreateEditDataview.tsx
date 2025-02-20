@@ -13,9 +13,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {DataViewProvider} from '@/contexts/DataViewContext';
 import {useDataView} from '@/hooks/api/use-dataview';
 import {toast} from '@/hooks/use-toast';
-import {orchestraBackendInstance} from '@/lib/axios';
 import {ArrowLeft, CheckCircle2, ChevronRight, Loader2} from 'lucide-react';
-import useSWR from 'swr';
 
 interface DataViewConfig {
   identification: {
@@ -88,10 +86,6 @@ export function CreateEditDataview() {
     filters: [],
     aggregations: [],
   });
-
-  const apiEndpoint = '/api/v1/dataviews/available-objects/';
-
-  const {data: dataCollection} = useSWR<DataView>(apiEndpoint, orchestraBackendInstance);
 
   useEffect(() => {
     if (dataview) {
@@ -303,9 +297,9 @@ export function CreateEditDataview() {
               )}
               {currentStep === 1 && (
                 <ObjectSelection
-                  dataCollection={dataCollection}
                   config={dataViewConfig.objects}
                   updateConfig={(data) => updateConfig('objects', data)}
+                  framework={dataViewConfig.identification.framework}
                 />
               )}
               {currentStep === 2 && (

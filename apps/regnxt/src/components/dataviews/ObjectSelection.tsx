@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
-import {useDataView} from '@/contexts/DataViewContext';
+import {useDataViewContext} from '@/contexts/DataViewContext';
+import {useDataView} from '@/hooks/api/use-dataview';
 import {DataViewObject} from '@/types/databaseTypes';
 import {DragHandleDots2Icon} from '@radix-ui/react-icons';
 import {Loader2} from 'lucide-react';
@@ -9,6 +9,7 @@ import {Loader2} from 'lucide-react';
 import {Button} from '@rn/ui/components/ui/button';
 import {Input} from '@rn/ui/components/ui/input';
 import {ScrollArea} from '@rn/ui/components/ui/scroll-area';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
 
 interface ObjectSelectionProps {
   config: DataViewObject[];
@@ -16,11 +17,13 @@ interface ObjectSelectionProps {
   framework?: string;
 }
 
-export function ObjectSelection({config, updateConfig, framework}: ObjectSelectionProps) {
+export function ObjectSelection({config = [], updateConfig, framework}: ObjectSelectionProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
-  const {selectedObjects, setSelectedObjects, fetchFieldsForObjects, useAvailableObjects} = useDataView();
-  const {data, error, isLoading} = useAvailableObjects(page, searchTerm, framework);
+  const {selectedObjects, setSelectedObjects} = useDataViewContext();
+  const {useAvailableObjects} = useDataView();
+
+  const {data: response, error, isLoading} = useAvailableObjects(page, searchTerm);
 
   useEffect(() => {
     if (config?.length > 0) {
@@ -38,9 +41,7 @@ export function ObjectSelection({config, updateConfig, framework}: ObjectSelecti
       [obj.id]: obj,
     };
     setSelectedObjects(newSelected);
-    const selectedArray = Object.values(newSelected);
-    updateConfig(selectedArray);
-    await fetchFieldsForObjects(selectedArray);
+    updateConfig(Object.values(newSelected));
   };
 
   const handleRemove = (objId: string) => {
@@ -70,7 +71,7 @@ export function ObjectSelection({config, updateConfig, framework}: ObjectSelecti
               </div>
             ) : error ? (
               <div className="text-center p-4 text-destructive">Error loading objects</div>
-            ) : data?.results?.length === 0 ? (
+            ) : response?.results?.length === 0 ? (
               <div className="text-center p-4 text-muted-foreground">No objects found</div>
             ) : (
               <Table>
@@ -83,7 +84,7 @@ export function ObjectSelection({config, updateConfig, framework}: ObjectSelecti
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.results?.map((obj: Record<string, string>) => (
+                  {response?.results?.map((obj) => (
                     <TableRow key={obj.id}>
                       <TableCell>{obj.name}</TableCell>
                       <TableCell className="capitalize">{obj.type}</TableCell>
@@ -116,7 +117,7 @@ export function ObjectSelection({config, updateConfig, framework}: ObjectSelecti
           </ScrollArea>
         </div>
 
-        {data && data.total_pages > 1 && (
+        {response && response.total_pages > 1 && (
           <div className="flex items-center justify-between mt-4">
             <Button
               variant="outline"
@@ -127,13 +128,13 @@ export function ObjectSelection({config, updateConfig, framework}: ObjectSelecti
               Previous
             </Button>
             <span className="text-sm text-muted-foreground">
-              Page {page} of {data.total_pages}
+              Page {page} of {response.total_pages}
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setPage(page + 1)}
-              disabled={page === data.total_pages}
+              disabled={page === response.total_pages}
             >
               Next
             </Button>

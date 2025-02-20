@@ -164,6 +164,7 @@ export function useDataView(dataviewId?: string | number) {
     dataview: response?.data,
     error,
     isLoading,
+    fields: fields || [],
     createDataView,
     updateDataView,
     deleteDataView,

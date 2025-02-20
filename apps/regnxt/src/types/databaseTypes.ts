@@ -456,12 +456,6 @@ export interface AvailableParameter {
   data_type: string;
 }
 
-export interface Field {
-  name: string;
-  type: string;
-  label: string;
-}
-
 export interface RuntimeParam {
   id: string;
   name: string;
@@ -660,27 +654,27 @@ export interface TooltipWrapperProps {
   enabled?: boolean;
 }
 
+interface Field {
+  id: string;
+  alias: string;
+  column: string;
+  source: string;
+  type?: string;
+  description?: string;
+  selected?: boolean;
+}
+
 export interface DataViewObject {
   id: string;
   name: string;
   type: string;
-  description: string;
+  description?: string;
   framework?: string;
   object_type?: string;
   version?: {
     id: number;
     number: number;
   };
-}
-
-export interface Field {
-  id: string;
-  name: string;
-  table: string;
-  type: string;
-  label: string;
-  description?: string;
-  selected: boolean;
 }
 
 export interface ApiResponse<T> {
