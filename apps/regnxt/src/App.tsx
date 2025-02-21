@@ -55,6 +55,7 @@ const Processing = lazy(() => import('./pages/Orchestra/Processing/Processing'))
 const ConfigureDataSetView = lazy(() => import('./pages/ConfigureDataSetView'));
 const DataSetView = lazy(() => import('./pages/DataSetView'));
 const Relationship = lazy(() => import('./pages/Relationship'));
+const Lineage = lazy(() => import('./pages/Lineage'));
 const ConfigureDatasets = lazy(() => import('./components/configurations/ConfigureDatasets'));
 const ConfigureGrouping = lazy(() => import('./components/configurations/ConfigureGrouping'));
 
@@ -119,6 +120,7 @@ const routeConfig = {
     {path: '/bird/configuration', component: () => <ConfigureDataSetView />, title: 'Bird'},
     {path: '/bird/data', component: () => <DataSetView />, title: 'Bird'},
     {path: '/bird/relationships', component: () => <Relationship />, title: 'Bird'},
+    {path: '/bird/lineage', component: () => <Lineage />, title: 'Bird'},
     {path: '/bird/configuration/dataset', component: () => <ConfigureDatasets />, title: 'Bird'},
     {path: '/bird/configuration/groups', component: () => <ConfigureGrouping />, title: 'Bird'},
   ],

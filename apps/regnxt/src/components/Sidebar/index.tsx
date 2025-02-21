@@ -169,6 +169,7 @@ const navigationConfig: NavigationConfig = {
           },
           {path: '/bird/data', icon: 'Database', label: 'Data'},
           {path: '/bird/relationships', icon: 'GitBranch', label: 'Relationships'},
+          {path: '/bird/lineage', icon: 'GitPullRequestCreateArrow', label: 'Lineage'},
         ],
       },
     ],
