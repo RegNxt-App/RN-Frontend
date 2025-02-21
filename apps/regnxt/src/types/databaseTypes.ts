@@ -559,3 +559,24 @@ export interface ConnectionFormData {
   type: string;
   properties: Record<string, any>;
 }
+
+export type LineageDirection = 'source-to-destination' | 'destination-to-source';
+
+export interface Layer {
+  layer: string;
+  datasets: string[];
+}
+
+export interface LineageConnection {
+  logical_transformation_rule_id: string;
+  source_dataset: string;
+  destination_dataset: string;
+}
+
+export interface TransformationDetail {
+  logical_transformation_rule_id: string;
+  source_dataset: string;
+  source_column: string;
+  destination_dataset: string;
+  destination_column: string;
+}
