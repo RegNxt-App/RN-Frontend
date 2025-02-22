@@ -1,6 +1,6 @@
 import {useMemo, useState} from 'react';
 
-import {CategoryIcons, EditingStates, GroupedSettings, UserSetting} from '@/types/databaseTypes';
+import {UserSetting} from '@/types/databaseTypes';
 import {
   Bell,
   ChevronDown,
@@ -19,6 +19,16 @@ import {Button} from '@rn/ui/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
 import {Input} from '@rn/ui/components/ui/input';
 import {ScrollArea} from '@rn/ui/components/ui/scroll-area';
+
+interface CategoryIcons {
+  [key: string]: LucideIcon;
+}
+interface EditingStates {
+  [key: number]: boolean;
+}
+interface GroupedSettings {
+  [key: string]: UserSetting[];
+}
 
 const initialSettings: UserSetting[] = [
   {

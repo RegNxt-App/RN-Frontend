@@ -1,16 +1,19 @@
 import React from 'react';
 
-import {TooltipWrapperProps} from '@/types/databaseTypes';
-
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@rn/ui/components/ui/tooltip';
+
+interface TooltipWrapperProps {
+  children: React.ReactNode;
+  disabled?: boolean;
+  disabledMessage?: string;
+}
 
 export const TooltipWrapper: React.FC<TooltipWrapperProps> = ({
   children,
   disabled = false,
   disabledMessage = 'You cannot edit this field as it is system generated',
-  enabled = true,
 }) => {
-  if (!enabled || !disabled) {
+  if (!disabled) {
     return <>{children}</>;
   }
 

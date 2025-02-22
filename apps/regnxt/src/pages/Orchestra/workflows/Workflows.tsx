@@ -1,26 +1,30 @@
 import {useMemo, useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
+import {TooltipWrapper} from '@/components/TooltipWrapper';
+import WorkflowStats from '@/components/workflows/WorkflowStats';
+import {useBackend} from '@/contexts/BackendContext';
 import {useWorkflow} from '@/contexts/WorkflowContext';
 import {toast} from '@/hooks/use-toast';
-import {orchestraBackendInstance} from '@/lib/axios';
 import {Workflow, WorkflowParameter, WorkflowRun} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
 import {Clock, Edit, Loader2, Play} from 'lucide-react';
-import useSWR from 'swr';
+import useSWR, {mutate} from 'swr';
 
+import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@rn/ui/components/ui/dialog';
 import {Input} from '@rn/ui/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
 
 import {WorkflowDialog} from '../../../components/workflows/WorkflowDialog';
 
 const WORKFLOWS_ENDPOINT = '/api/v1/workflows/';
 
 const WorkflowManager = () => {
+  const {backendInstance} = useBackend();
+
   const {workflow, isEditing, setWorkflow, setIsEditing} = useWorkflow();
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [parameters, setParameters] = useState<Record<string, string>>({});
@@ -28,7 +32,6 @@ const WorkflowManager = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([]);
   const [isWorkflowDialogOpen, setIsWorkflowDialogOpen] = useState(false);
-  const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
 
   const columns = useMemo<ColumnDef<Workflow>[]>(
     () => [
@@ -42,36 +45,63 @@ const WorkflowManager = () => {
         header: 'Workflow',
       },
       {
+        accessorKey: 'last_deployed',
+        header: 'Status',
+        cell: ({row}) => {
+          const isDeployed = row.original.last_deployed !== null;
+          return (
+            <Badge
+              variant={isDeployed ? 'default' : 'secondary'}
+              className={
+                isDeployed ? 'bg-green-100 text-green-800 hover:text-white' : 'bg-gray-100 text-gray-800'
+              }
+            >
+              {isDeployed ? 'Deployed' : 'Not Deployed'}
+            </Badge>
+          );
+        },
+      },
+      {
         id: 'actions',
         header: 'Actions',
-        cell: ({row}) => (
-          <div className="flex space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handlePlayClick(row.original)}
-              title="Start Workflow"
-            >
-              <Play className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleClockClick(row.original)}
-              title="View History"
-            >
-              <Clock className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleEditWorkflow(row.original)}
-              title="Edit Workflow"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </div>
-        ),
+        cell: ({row}) => {
+          const workflow = row.original;
+          const isDeployed = workflow.last_deployed !== null;
+
+          return (
+            <div className="flex space-x-2">
+              <TooltipWrapper
+                disabled={!isDeployed}
+                disabledMessage="Workflow must be deployed before running"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handlePlayClick(row.original)}
+                  disabled={!isDeployed}
+                >
+                  <Play className="h-4 w-4" />
+                </Button>
+              </TooltipWrapper>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleClockClick(row.original)}
+                title="View History"
+              >
+                <Clock className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleEditWorkflow(row.original)}
+                title="Edit Workflow"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </div>
+          );
+        },
       },
     ],
     []
@@ -85,36 +115,39 @@ const WorkflowManager = () => {
     count: number;
     num_pages: number;
     results: Workflow[];
-  }>(WORKFLOWS_ENDPOINT, async (url: string) => {
-    const response = await orchestraBackendInstance.get(url);
-    return response.data;
-  });
-
+  }>(WORKFLOWS_ENDPOINT, (url: string) => backendInstance.get(url).then((r) => r.data));
   const {data: workflowParameters = [], isLoading: isLoadingParameters} = useSWR<WorkflowParameter[]>(
     selectedWorkflow ? `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/parameters/` : null,
-    async (url: string) => {
-      const response = await orchestraBackendInstance.get(url);
-      return response.data;
-    }
+    (url: string) => backendInstance.get(url).then((r) => r.data)
   );
   const workflows = workflowsResponse?.results || [];
+
   const handlePlayClick = async (workflow: Workflow) => {
-    setSelectedWorkflow(workflow);
-    const initialParameters = workflowParameters.reduce((acc, param) => {
-      acc[param.name] = param.default_value || '';
-      return acc;
-    }, {} as Record<string, string>);
-    setParameters(initialParameters);
+    try {
+      const response = await backendInstance.get(`${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/parameters/`);
+      const parameters: WorkflowParameter[] = response.data;
+
+      const initialParameters = parameters.reduce<Record<string, string>>((acc, param: WorkflowParameter) => {
+        acc[param.name] = param.default_value || '';
+        return acc;
+      }, {});
+
+      setSelectedWorkflow(workflow);
+      setParameters(initialParameters);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch workflow parameters',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleClockClick = async (workflow: Workflow) => {
+    setIsRunsDialogOpen(true);
     try {
-      const response = await orchestraBackendInstance.get(
-        `${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`,
-        {params: {page: 1, page_size: 50, search: ''}}
-      );
+      const response = await backendInstance.get(`${WORKFLOWS_ENDPOINT}${workflow.workflow_id}/runs/`);
       setWorkflowRuns(response.data);
-      setIsRunsDialogOpen(true);
     } catch (error) {
       toast({
         title: 'Error',
@@ -129,10 +162,7 @@ const WorkflowManager = () => {
 
     setIsSubmitting(true);
     try {
-      await orchestraBackendInstance.post(
-        `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/start/`,
-        parameters
-      );
+      await backendInstance.post(`${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/start/`, parameters);
 
       toast({
         title: 'Success',
@@ -164,7 +194,7 @@ const WorkflowManager = () => {
   };
 
   const formatDateTime = (dateTimeString: string | null) => {
-    if (!dateTimeString) return 'N/A';
+    if (!dateTimeString || dateTimeString === 'N/A') return 'N/A';
     try {
       const date = new Date(dateTimeString);
       return date.toLocaleString();
@@ -181,23 +211,92 @@ const WorkflowManager = () => {
     return runtime;
   };
 
-  const getStatusColor = useMemo(
-    () => (status: string) => {
-      switch (status.toLowerCase()) {
-        case 'completed':
-          return 'text-green-600';
-        case 'failed':
-          return 'text-red-600';
-        case 'running':
-          return 'text-blue-600';
-        case 'cancelled':
-          return 'text-orange-600';
-        default:
-          return 'text-gray-600';
-      }
-    },
-    []
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'text-green-600';
+      case 'failed':
+        return 'text-red-600';
+      case 'running':
+        return 'text-blue-600';
+      case 'cancelled':
+        return 'text-orange-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+  const runColumns = useMemo<ColumnDef<WorkflowRun>[]>(
+    () => [
+      {
+        accessorKey: 'run_id',
+        header: 'Run ID',
+        cell: ({row}) => <div className="font-medium">{row.getValue('run_id')}</div>,
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({row}) => (
+          <div className={getStatusColor(row.getValue('status'))}>{row.getValue('status')}</div>
+        ),
+      },
+      {
+        accessorKey: 'started_at',
+        header: 'Started At',
+        cell: ({row}) => formatDateTime(row.getValue('started_at')),
+      },
+      {
+        accessorKey: 'completed_at',
+        header: 'Completed At',
+        cell: ({row}) => formatDateTime(row.getValue('completed_at')),
+      },
+      {
+        accessorKey: 'total_runtime_seconds',
+        header: 'Runtime (s)',
+        cell: ({row}) => formatRuntime(row.getValue('total_runtime_seconds')),
+      },
+    ],
+    [getStatusColor]
   );
+  const stats = useMemo(() => {
+    if (!workflowsResponse?.results) {
+      return {
+        total: 0,
+        active: 0,
+        configured: 0,
+        inactive: 0,
+      };
+    }
+
+    const workflows = workflowsResponse.results;
+    const total = workflows.length;
+
+    const statusCounts = workflows.reduce(
+      (acc, workflow) => {
+        if (workflow.active && workflow.last_deployed) {
+          acc.active++;
+        } else if (workflow.active && !workflow.last_deployed) {
+          acc.configured++;
+        } else if (!workflow.active) {
+          acc.inactive++;
+        }
+        return acc;
+      },
+      {
+        active: 0,
+        configured: 0,
+        inactive: 0,
+      }
+    );
+
+    return {
+      total,
+      ...statusCounts,
+    };
+  }, [workflowsResponse?.results]);
+
+  const handleRefreshWorkflows = () => {
+    mutate(WORKFLOWS_ENDPOINT);
+  };
 
   if (error) {
     return <div className="text-red-500 p-4 text-center">Error loading workflows: {error.message}</div>;
@@ -212,6 +311,7 @@ const WorkflowManager = () => {
         </div>
         <Button onClick={handleCreateWorkflow}>Create Workflow</Button>
       </div>
+      <WorkflowStats stats={stats} />
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         <Card className="flex-1">
@@ -222,7 +322,6 @@ const WorkflowManager = () => {
             <SharedDataTable
               data={workflows}
               columns={columns}
-              onRowClick={(item) => console.log(item)}
               showPagination={true}
             />
           </CardContent>
@@ -327,45 +426,26 @@ const WorkflowManager = () => {
           <DialogHeader>
             <DialogTitle>Workflow Run History</DialogTitle>
           </DialogHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Run ID</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Started At</TableHead>
-                <TableHead>Completed At</TableHead>
-                <TableHead>Runtime (s)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {workflowRuns.length > 0 ? (
-                workflowRuns.map((run) => (
-                  <TableRow key={run['Run ID']}>
-                    <TableCell className="font-medium">{run['Run ID']}</TableCell>
-                    <TableCell className={getStatusColor(run.Status)}>{run.Status}</TableCell>
-                    <TableCell>{formatDateTime(run['Started At'])}</TableCell>
-                    <TableCell>{formatDateTime(run['Completed At'])}</TableCell>
-                    <TableCell>{formatRuntime(run['Total Runtime (seconds)'])}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center py-4 text-gray-500"
-                  >
-                    No run history available
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <div className="max-h-[90vh] overflow-y-auto">
+            {workflowRuns.length === 0 ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : (
+              <SharedDataTable
+                data={workflowRuns}
+                columns={runColumns}
+                showPagination={true}
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
       <WorkflowDialog
         open={isWorkflowDialogOpen}
         onOpenChange={setIsWorkflowDialogOpen}
         workflow={workflow}
+        onRefresh={handleRefreshWorkflows}
       />
     </div>
   );
