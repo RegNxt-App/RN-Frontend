@@ -1,7 +1,9 @@
 import {Fragment, useEffect, useState} from 'react';
 
 import {useDataViewContext} from '@/contexts/DataViewContext';
+import {useDataView} from '@/hooks/api/use-dataview';
 import {Field} from '@/types/databaseTypes';
+import {Loader2} from 'lucide-react';
 
 import {Checkbox} from '@rn/ui/components/ui/checkbox';
 import {Input} from '@rn/ui/components/ui/input';
@@ -18,13 +20,28 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showSelected, setShowSelected] = useState(false);
   const [groupByTable, setGroupByTable] = useState(true);
-  const {fields, setFields, toggleFieldSelection} = useDataViewContext();
+
+  const {selectedObjects, fields, setFields, toggleFieldSelection} = useDataViewContext();
+  const {useObjectFields} = useDataView();
+
+  const {data: fieldsData, error, isLoading} = useObjectFields(selectedObjects);
 
   useEffect(() => {
-    if (config?.length > 0) {
-      setFields(config);
+    if (fieldsData?.results) {
+      const transformedFields = fieldsData.results.flatMap((tableInfo) =>
+        tableInfo.fields.map((field) => ({
+          id: `${field.id}`,
+          source: tableInfo.table_name,
+          column: field.name,
+          alias: field.name,
+          type: field.type,
+          description: field.description,
+          selected: false,
+        }))
+      );
+      setFields(transformedFields);
     }
-  }, [config, setFields]);
+  }, [fieldsData, setFields]);
 
   useEffect(() => {
     const selectedFields = fields.filter((field) => field.selected);
@@ -33,7 +50,7 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
 
   const toggleTableFields = (tableName: string, selected: boolean) => {
     setFields((prevFields) =>
-      prevFields.map((field) => (field.table === tableName ? {...field, selected} : field))
+      prevFields.map((field) => (field.source === tableName ? {...field, selected} : field))
     );
   };
 
@@ -46,7 +63,7 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
         ) {
           return acc;
         }
-        const table = field.source || 'Unknown'; // Using source instead of table
+        const table = field.source || 'Unknown';
         if (!acc[table]) acc[table] = [];
         acc[table].push(field);
         return acc;
@@ -60,6 +77,30 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
           );
         }),
       };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-[400px] items-center justify-center text-destructive">
+        <p>Error loading fields. Please try again.</p>
+      </div>
+    );
+  }
+
+  if (fields.length === 0) {
+    return (
+      <div className="flex h-[400px] items-center justify-center text-muted-foreground">
+        <p>No fields available. Please select objects first.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -92,7 +133,6 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
           {fields.filter((f) => f.selected).length} of {fields.length} fields selected
         </div>
       </div>
-
       <ScrollArea className="h-[400px] border rounded-md">
         <Table>
           <TableHeader>

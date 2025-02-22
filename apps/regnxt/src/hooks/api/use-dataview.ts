@@ -141,6 +141,23 @@ export function useDataView(dataviewId?: string | number) {
     );
   };
 
+  const useObjectFields = (selectedObjects: Record<string, DataViewObject>) => {
+    const objectsArray = Object.values(selectedObjects);
+
+    return useSWR(
+      objectsArray.length > 0 ? [`${apiEndpoint}object-fields/`, objectsArray] : null,
+      async ([url, objects]) => {
+        const response = await orchestraBackendInstance.post(url, {
+          objects: objects.map((obj) => ({
+            id: obj.id,
+            type: obj.type,
+          })),
+        });
+        return response.data;
+      }
+    );
+  };
+
   const deleteDataView = useCallback(async () => {
     if (!dataviewId) return;
 
@@ -164,11 +181,12 @@ export function useDataView(dataviewId?: string | number) {
     dataview: response?.data,
     error,
     isLoading,
-    fields: fields || [],
+    fields: [],
     createDataView,
     updateDataView,
     deleteDataView,
     previewDataView,
     useAvailableObjects,
+    useObjectFields,
   };
 }
