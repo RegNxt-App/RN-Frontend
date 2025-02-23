@@ -1,4 +1,3 @@
-// components/dataviews/PreviewMode.tsx
 import {useCallback, useEffect, useState} from 'react';
 
 import {Button} from '@/components/ui/button';
@@ -86,32 +85,45 @@ export function PreviewMode({config, previewData, isLoading, onRefresh}: Preview
   const [error, setError] = useState<string | null>(null);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
 
+  // At the beginning of generateSqlQuery, add safety checks
   const generateSqlQuery = useCallback((config: DataViewConfig): string => {
     try {
-      // Build SELECT clause
+      // Ensure all config arrays exist and are arrays
+      const safeConfig = {
+        ...config,
+        fields: Array.isArray(config.fields) ? config.fields : [],
+        objects: Array.isArray(config.objects) ? config.objects : [],
+        joins: Array.isArray(config.joins) ? config.joins : [],
+        filters: Array.isArray(config.filters) ? config.filters : [],
+        aggregations: Array.isArray(config.aggregations) ? config.aggregations : [],
+      };
+
       const selectItems = [
-        ...config.fields.map((field) => {
-          const column = `${field.source}.${field.name}`;
+        ...safeConfig.fields.map((field) => {
+          const object = safeConfig.objects.find((obj) => obj.name === field.source);
+          const tableName = object?.alias || field.source;
+          const column = `${tableName}.${field.name}`;
           return field.alias ? `${column} AS "${field.alias}"` : column;
         }),
-        ...config.aggregations.map((agg) => {
-          const column = `${agg.function}(${agg.source}.${agg.field})`;
+        ...safeConfig.aggregations.map((agg) => {
+          const object = safeConfig.objects.find((obj) => obj.name === agg.source);
+          const tableName = object?.alias || agg.source;
+          const column = `${agg.function}(${tableName}.${agg.field})`;
           return agg.alias ? `${column} AS "${agg.alias}"` : column;
         }),
       ];
 
       const selectClause = `SELECT\n  ${selectItems.length ? selectItems.join(',\n  ') : '*'}`;
 
-      // Build FROM clause
-      const baseObject = config.objects[0];
+      if (!safeConfig.objects.length) {
+        throw new Error('No tables selected');
+      }
+      const baseObject = safeConfig.objects[0];
       const fromClause = `FROM ${baseObject.name}${baseObject.alias ? ` AS ${baseObject.alias}` : ''}`;
-
-      // Build JOIN clause
-      const joinClauses = config.joins.map((join) => {
+      const joinClauses = safeConfig.joins.map((join) => {
         const conditions = join.conditions
           .map((condition) => {
             let {leftOperand, operator, rightOperand} = condition;
-            // Properly format the operands and operator
             operator = SQL_OPERATORS[operator as keyof typeof SQL_OPERATORS] || operator;
 
             if (operator === 'IN' || operator === 'NOT IN') {
@@ -125,7 +137,6 @@ export function PreviewMode({config, previewData, isLoading, onRefresh}: Preview
         return `${join.type.toUpperCase()} JOIN ${join.target} ON ${conditions}`;
       });
 
-      // Build WHERE clause
       const whereConditions = config.filters.map((filter, index) => {
         const operator = SQL_OPERATORS[filter.operator as keyof typeof SQL_OPERATORS] || filter.operator;
         let condition = `${filter.field} ${operator} `;
@@ -143,15 +154,12 @@ export function PreviewMode({config, previewData, isLoading, onRefresh}: Preview
 
       const whereClause = whereConditions.length ? `WHERE ${whereConditions.join(' ')}` : '';
 
-      // Build GROUP BY clause
       const groupByFields = config.fields
         .filter((field) => !field.is_aggregated)
         .map((field) => `${field.source}.${field.name}`);
 
       const groupByClause =
         config.aggregations.length && groupByFields.length ? `GROUP BY ${groupByFields.join(', ')}` : '';
-
-      // Combine all parts
       const query = [selectClause, fromClause, ...joinClauses, whereClause, groupByClause]
         .filter(Boolean)
         .join('\n');

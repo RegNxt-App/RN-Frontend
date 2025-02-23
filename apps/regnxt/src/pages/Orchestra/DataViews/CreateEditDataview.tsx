@@ -317,16 +317,19 @@ export function CreateEditDataview() {
               )}
               {currentStep === 4 && (
                 <FilterConfiguration
+                  selectedObjects={dataViewConfig.objects}
                   config={dataViewConfig.filters}
                   updateConfig={(data) => updateConfig('filters', data)}
                 />
               )}
               {currentStep === 5 && (
                 <AggregationConfiguration
+                  selectedObjects={dataViewConfig.objects}
                   config={dataViewConfig.aggregations}
                   updateConfig={(data) => updateConfig('aggregations', data)}
                 />
               )}
+
               {currentStep === 6 && (
                 <PreviewMode
                   config={dataViewConfig}

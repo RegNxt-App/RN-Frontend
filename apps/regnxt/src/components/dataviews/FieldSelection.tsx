@@ -26,22 +26,55 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
 
   const {data: fieldsData, error, isLoading} = useObjectFields(selectedObjects);
 
+  // Add this effect before the fieldsData effect
+  useEffect(() => {
+    if (config.length > 0 && fields.length === 0) {
+      setFields((prev) => {
+        const newFields = [...prev];
+        config.forEach((configField) => {
+          const fieldIndex = newFields.findIndex(
+            (f) =>
+              f.source === configField.source &&
+              (f.column === configField.column || f.alias === configField.column)
+          );
+          if (fieldIndex !== -1) {
+            newFields[fieldIndex] = {
+              ...newFields[fieldIndex],
+              selected: true,
+            };
+          }
+        });
+        return newFields;
+      });
+    }
+  }, [config, fields.length, setFields]);
   useEffect(() => {
     if (fieldsData?.results) {
       const transformedFields = fieldsData.results.flatMap((tableInfo) =>
-        tableInfo.fields.map((field) => ({
-          id: `${field.id}`,
-          source: tableInfo.table_name,
-          column: field.name,
-          alias: field.name,
-          type: field.type,
-          description: field.description,
-          selected: false,
-        }))
+        tableInfo.fields.map((field) => {
+          // Create the field ID in the same format as used in config
+          const fieldId = `${field.id}`;
+
+          // Check if this field was previously selected in config
+          const existingField = config.find(
+            (f) => f.source === tableInfo.table_name && (f.column === field.name || f.alias === field.name)
+          );
+
+          return {
+            id: fieldId,
+            source: tableInfo.table_name,
+            column: field.name,
+            alias: field.name,
+            type: field.type,
+            description: field.description,
+            // Preserve selected state from config if it exists
+            selected: !!existingField,
+          };
+        })
       );
       setFields(transformedFields);
     }
-  }, [fieldsData, setFields]);
+  }, [fieldsData, setFields, config]); // Added config to dependencies
 
   useEffect(() => {
     const selectedFields = fields.filter((field) => field.selected);

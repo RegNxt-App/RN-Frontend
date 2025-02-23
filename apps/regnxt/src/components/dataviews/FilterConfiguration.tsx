@@ -1,11 +1,22 @@
 import {useEffect, useState} from 'react';
 
 import {useDataView} from '@/hooks/api/use-dataview';
-import {PlusCircle, X} from 'lucide-react';
+import {Loader2, PlusCircle, X} from 'lucide-react';
 
+import {Alert, AlertDescription} from '@rn/ui/components/ui/alert';
 import {Button} from '@rn/ui/components/ui/button';
 import {Input} from '@rn/ui/components/ui/input';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
+
+interface SelectedObject {
+  id: string;
+  name: string;
+  type: string;
+  version: {
+    id: number;
+    number: number;
+  };
+}
 
 interface Filter {
   id: string;
@@ -15,6 +26,7 @@ interface Filter {
 }
 
 interface FilterConfigurationProps {
+  selectedObjects: SelectedObject[];
   config: Filter[];
   updateConfig: (filters: Filter[]) => void;
 }
@@ -31,9 +43,16 @@ const OPERATORS = [
   {value: 'not_in', label: 'Not In'},
 ];
 
-export function FilterConfiguration({config, updateConfig}: FilterConfigurationProps) {
-  const {fields = []} = useDataView();
+export function FilterConfiguration({selectedObjects, config, updateConfig}: FilterConfigurationProps) {
   const [filters, setFilters] = useState<Filter[]>(config);
+  const {useObjectColumns} = useDataView();
+
+  // Fetch columns data using the updated hook
+  const {
+    data: columnsData,
+    isLoading: isLoadingColumns,
+    error: columnsError,
+  } = useObjectColumns(selectedObjects.filter((obj) => obj.version?.id));
 
   useEffect(() => {
     if (JSON.stringify(filters) !== JSON.stringify(config)) {
@@ -61,12 +80,42 @@ export function FilterConfiguration({config, updateConfig}: FilterConfigurationP
     setFilters(filters.map((filter) => (filter.id === id ? {...filter, [field]: value} : filter)));
   };
 
-  // Safely transform fields into options with null checking
-  const fieldOptions = (fields || []).map((field) => ({
-    value: `${field.table || ''}.${field.name || ''}`,
-    label: `${field.table || ''} - ${field.label || field.name || ''}`,
-    type: field.type || '',
-  }));
+  // Transform the column data into field options
+  const fieldOptions =
+    columnsData?.flatMap((table) =>
+      table.columns.map((column) => ({
+        value: `${table.name}.${column.name}`,
+        label: `${table.name} - ${column.label}`,
+        type: column.type,
+      }))
+    ) || [];
+
+  // Loading state
+  if (isLoadingColumns) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (columnsError) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>Failed to load columns. Please try again.</AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Empty state
+  if (!selectedObjects.length) {
+    return (
+      <Alert>
+        <AlertDescription>Please select objects to configure filters</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">

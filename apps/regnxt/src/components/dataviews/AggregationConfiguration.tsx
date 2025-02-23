@@ -1,11 +1,30 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 
-import {useDataView} from '@/hooks/api/use-dataview';
-import {PlusCircle, X} from 'lucide-react';
 
-import {Button} from '@rn/ui/components/ui/button';
-import {Input} from '@rn/ui/components/ui/input';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
+
+import { useDataView } from '@/hooks/api/use-dataview';
+import { Loader2, PlusCircle, X } from 'lucide-react';
+
+
+
+import { Alert, AlertDescription } from '@rn/ui/components/ui/alert';
+import { Button } from '@rn/ui/components/ui/button';
+import { Input } from '@rn/ui/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@rn/ui/components/ui/select';
+
+
+
+
+
+interface SelectedObject {
+  id: string;
+  name: string;
+  type: string;
+  version: {
+    id: number;
+    number: number;
+  };
+}
 
 interface Aggregation {
   id: string;
@@ -15,6 +34,7 @@ interface Aggregation {
 }
 
 interface AggregationConfigurationProps {
+  selectedObjects: SelectedObject[];
   config: Aggregation[];
   updateConfig: (aggregations: Aggregation[]) => void;
 }
@@ -28,9 +48,32 @@ const AGGREGATION_FUNCTIONS = [
   {value: 'count_distinct', label: 'Count Distinct'},
 ];
 
-export function AggregationConfiguration({config, updateConfig}: AggregationConfigurationProps) {
-  const {fields} = useDataView();
+const NUMERIC_TYPES = [
+  'number',
+  'integer',
+  'decimal',
+  'monetary',
+  'int',
+  'float',
+  'double',
+  'numeric',
+  'int4',
+  'int8',
+];
+
+export function AggregationConfiguration({
+  selectedObjects,
+  config,
+  updateConfig,
+}: AggregationConfigurationProps) {
   const [aggregations, setAggregations] = useState<Aggregation[]>(config);
+  const {useObjectColumns} = useDataView();
+
+  const {
+    data: columnsData,
+    isLoading: isLoadingColumns,
+    error: columnsError,
+  } = useObjectColumns(selectedObjects.filter((obj) => obj.version?.id));
 
   useEffect(() => {
     if (JSON.stringify(aggregations) !== JSON.stringify(config)) {
@@ -58,13 +101,41 @@ export function AggregationConfiguration({config, updateConfig}: AggregationConf
     setAggregations(aggregations.map((agg) => (agg.id === id ? {...agg, [field]: value} : agg)));
   };
 
-  // Filter numeric fields for aggregation
-  const numericFields = fields
-    .filter((field) => ['number', 'integer', 'decimal', 'monetary'].includes(field.type.toLowerCase()))
-    .map((field) => ({
-      value: `${field.table}.${field.name}`,
-      label: `${field.table} - ${field.label || field.name}`,
-    }));
+  // Transform the column data into field options with type filtering
+  const fieldOptions =
+    columnsData?.flatMap((table) =>
+      table.columns
+        .filter((column) => NUMERIC_TYPES.includes(column.type.toLowerCase()))
+        .map((column) => ({
+          value: `${table.name}.${column.name}`,
+          label: `${table.name} - ${column.label || column.name}`,
+          type: column.type,
+        }))
+    ) || [];
+
+  if (isLoadingColumns) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (columnsError) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>Failed to load columns. Please try again.</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!selectedObjects.length) {
+    return (
+      <Alert>
+        <AlertDescription>Please select objects to configure aggregations</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -101,7 +172,7 @@ export function AggregationConfiguration({config, updateConfig}: AggregationConf
                 <SelectValue placeholder="Select field" />
               </SelectTrigger>
               <SelectContent>
-                {numericFields.map((field) => (
+                {fieldOptions.map((field) => (
                   <SelectItem
                     key={field.value}
                     value={field.value}

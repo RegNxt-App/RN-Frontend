@@ -151,6 +151,7 @@ export function ObjectSelection({config = [], updateConfig, framework}: ObjectSe
                 <TableRow>
                   <TableHead></TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>Alias</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead className="w-[100px]"></TableHead>
                 </TableRow>
@@ -162,6 +163,24 @@ export function ObjectSelection({config = [], updateConfig, framework}: ObjectSe
                       <DragHandleDots2Icon className="h-4 w-4" />
                     </TableCell>
                     <TableCell>{obj.name}</TableCell>
+                    <TableCell>
+                      <Input
+                        placeholder="Enter alias"
+                        value={obj.alias || ''}
+                        onChange={(e) => {
+                          const newSelected = {
+                            ...selectedObjects,
+                            [obj.id]: {
+                              ...obj,
+                              alias: e.target.value,
+                            },
+                          };
+                          setSelectedObjects(newSelected);
+                          updateConfig(Object.values(newSelected));
+                        }}
+                        className="h-8 w-[150px]"
+                      />
+                    </TableCell>
                     <TableCell className="capitalize">{obj.type}</TableCell>
                     <TableCell>
                       <Button

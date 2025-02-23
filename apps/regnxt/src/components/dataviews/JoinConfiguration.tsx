@@ -1,10 +1,12 @@
-'use client';
+import {useEffect, useState} from 'react';
 
-import {useState} from 'react';
+import {useDataView} from '@/hooks/api/use-dataview';
+import {Loader2} from 'lucide-react';
 
 import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@rn/ui/components/ui/tabs';
 
+import {Alert, AlertDescription} from '../ui/alert';
 import {SqlEditor} from './DataViewWizard/SQLEditor';
 import {VisualJoinEditor} from './VisualJoinEditor';
 
@@ -33,41 +35,55 @@ interface JoinConfigurationProps {
 }
 
 export function JoinConfiguration({selectedObjects, config, updateConfig}: JoinConfigurationProps) {
-  // Convert selected objects to tables with initial positions and mock columns
-  const initialTables: Table[] = selectedObjects.map((obj) => ({
-    id: obj.id,
-    name: obj.name,
-    columns: [
-      {name: 'id', type: 'int'},
-      {name: 'name', type: 'varchar'},
-      {name: 'created_at', type: 'timestamp'},
-    ],
-  }));
+  const {useObjectColumns} = useDataView();
+  const {
+    data: columnsData,
+    isLoading: isLoadingColumns,
+    error: columnsError,
+  } = useObjectColumns(selectedObjects.filter((obj) => obj.version?.id));
+  const initialTables: Table[] =
+    columnsData?.map((tableData) => ({
+      id: tableData.id,
+      name: tableData.name,
+      columns: tableData.columns.map((col) => ({
+        name: col.name,
+        type: col.type,
+      })),
+    })) || [];
 
-  // Initialize joins based on config or empty array
   const initialJoins: Join[] = config.joins || [];
-
-  const [tables] = useState<Table[]>(initialTables);
+  const [tables, setTables] = useState<Table[]>(initialTables);
   const [joins, setJoins] = useState<Join[]>(initialJoins);
   const [sqlQuery, setSqlQuery] = useState<string>(generateSqlFromJoins(initialTables, initialJoins));
 
-  // Generate SQL from joins
+  useEffect(() => {
+    if (columnsData) {
+      setTables(
+        columnsData.map((tableData) => ({
+          id: tableData.id,
+          name: tableData.name,
+          columns: tableData.columns.map((col) => ({
+            name: col.name,
+            type: col.type,
+          })),
+        }))
+      );
+    }
+  }, [columnsData]);
+
   function generateSqlFromJoins(tables: Table[], joins: Join[]): string {
     if (tables.length === 0) return '';
 
     let sql = 'SELECT\n  ';
 
-    // Add columns from all tables
     const columns = tables
       .map((table) => table.columns.map((col) => `${table.name}.${col.name}`).join(',\n  '))
       .join(',\n  ');
 
     sql += columns;
 
-    // Add FROM clause with first table
     sql += `\nFROM ${tables[0].name}`;
 
-    // Add JOINs
     joins.forEach((join) => {
       const sourceTable = tables.find((t) => t.id === join.sourceId);
       const targetTable = tables.find((t) => t.id === join.targetId);
@@ -75,7 +91,6 @@ export function JoinConfiguration({selectedObjects, config, updateConfig}: JoinC
       if (sourceTable && targetTable) {
         sql += `\n${join.type.toUpperCase()} JOIN ${targetTable.name}`;
 
-        // Add join conditions
         if (join.conditions.length > 0) {
           sql +=
             ' ON ' +
@@ -93,11 +108,9 @@ export function JoinConfiguration({selectedObjects, config, updateConfig}: JoinC
     return sql;
   }
 
-  // Parse SQL to update joins
   function parseJoinsFromSql(sql: string): Join[] {
     const newJoins: Join[] = [];
 
-    // Simple regex-based parsing (for demonstration)
     const joinRegex =
       /(INNER|LEFT|RIGHT|FULL)\s+JOIN\s+(\w+)\s+ON\s+([^)]+?)(?=\s+(?:INNER|LEFT|RIGHT|FULL)\s+JOIN|\s*$)/gi;
     let match;
@@ -105,7 +118,6 @@ export function JoinConfiguration({selectedObjects, config, updateConfig}: JoinC
     while ((match = joinRegex.exec(sql)) !== null) {
       const [_, type, targetTable, conditions] = match;
 
-      // Parse conditions
       const parsedConditions: {leftColumn: string; operator: string; rightColumn: string}[] = [];
       const conditionRegex = /(\w+)\.(\w+)\s*(=|!=|>|>=|<|<=)\s*(\w+)\.(\w+)/g;
       let conditionMatch;
@@ -149,13 +161,28 @@ export function JoinConfiguration({selectedObjects, config, updateConfig}: JoinC
     }
   };
 
-  // Update SQL when visual joins change
   const handleJoinUpdate = (newJoins: Join[]) => {
     setJoins(newJoins);
     const sql = generateSqlFromJoins(tables, newJoins);
     setSqlQuery(sql);
     updateConfig({...config, joins: newJoins, customSql: sql});
   };
+
+  if (isLoadingColumns) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (columnsError) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>Failed to load table columns. Please try again.</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <Tabs
@@ -164,7 +191,12 @@ export function JoinConfiguration({selectedObjects, config, updateConfig}: JoinC
     >
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="visual">Visual Editor</TabsTrigger>
-        <TabsTrigger value="advanced">SQL Editor</TabsTrigger>
+        <TabsTrigger
+          disabled
+          value="advanced"
+        >
+          SQL Editor
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent

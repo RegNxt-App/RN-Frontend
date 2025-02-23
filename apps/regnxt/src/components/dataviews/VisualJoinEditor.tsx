@@ -102,9 +102,7 @@ export function VisualJoinEditor({tables, joins, onJoinUpdate}: VisualJoinEditor
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [selectedJoin, setSelectedJoin] = useState<Join | null>(null);
 
-  // Form state for configurable join editor
   const [formState, setFormState] = useState({
     leftTable: '',
     rightTable: '',
@@ -253,13 +251,273 @@ export function VisualJoinEditor({tables, joins, onJoinUpdate}: VisualJoinEditor
   return (
     <Card className="p-4">
       <Tabs
-        defaultValue="diagram"
+        defaultValue="form"
         className="w-full"
       >
         <TabsList className="mb-4">
-          <TabsTrigger value="diagram">Diagram Editor</TabsTrigger>
+          <TabsTrigger
+            disabled
+            value="diagram"
+          >
+            Diagram Editor
+          </TabsTrigger>
           <TabsTrigger value="form">Form Editor</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="form">
+          <div className="space-y-6">
+            {/* Existing Joins */}
+            {joins.length > 0 && (
+              <div className="space-y-4 border rounded-lg p-4">
+                <h3 className="font-medium">Existing Joins</h3>
+                <div className="space-y-4">
+                  {joins.map((join) => {
+                    const sourceTable = tables.find((t) => t.id === join.sourceId);
+                    const targetTable = tables.find((t) => t.id === join.targetId);
+
+                    return (
+                      <div
+                        key={join.id}
+                        className="bg-muted/50 rounded-lg p-4 space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{sourceTable?.name}</span>
+                            <span className="text-muted-foreground">{join.type.toUpperCase()} JOIN</span>
+                            <span className="font-medium">{targetTable?.name}</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEdgesDelete([{id: join.id}])}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="space-y-1">
+                          {join.conditions.map((condition, idx) => (
+                            <div
+                              key={idx}
+                              className="text-sm text-muted-foreground flex items-center gap-2"
+                            >
+                              <span>
+                                {sourceTable?.name}.{condition.leftColumn}
+                              </span>
+                              <span>{condition.operator}</span>
+                              <span>
+                                {targetTable?.name}.{condition.rightColumn}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <Select
+                          value={join.type}
+                          onValueChange={(value: Join['type']) => updateJoinType(join.id, value)}
+                        >
+                          <SelectTrigger className="w-[150px]">
+                            <SelectValue placeholder="Join type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="inner">Inner Join</SelectItem>
+                            <SelectItem value="left">Left Join</SelectItem>
+                            <SelectItem value="right">Right Join</SelectItem>
+                            <SelectItem value="full">Full Join</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Create New Join Form */}
+            <div className="border-t pt-4">
+              <h3 className="font-medium mb-4">Create New Join</h3>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <Select
+                    value={formState.leftTable}
+                    onValueChange={(value) => setFormState((prev) => ({...prev, leftTable: value}))}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select left table" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tables.map((table) => (
+                        <SelectItem
+                          key={table.id}
+                          value={table.id}
+                        >
+                          {table.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={formState.joinType}
+                    onValueChange={(value: Join['type']) =>
+                      setFormState((prev) => ({...prev, joinType: value}))
+                    }
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select join type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="inner">Inner Join</SelectItem>
+                      <SelectItem value="left">Left Join</SelectItem>
+                      <SelectItem value="right">Right Join</SelectItem>
+                      <SelectItem value="full">Full Join</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={formState.rightTable}
+                    onValueChange={(value) => setFormState((prev) => ({...prev, rightTable: value}))}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select right table" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tables.map((table) => (
+                        <SelectItem
+                          key={table.id}
+                          value={table.id}
+                        >
+                          {table.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-medium">Join Conditions</h3>
+                  {formState.conditions.map((condition, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-4 items-center"
+                    >
+                      <Select
+                        value={condition.leftColumn}
+                        onValueChange={(value) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            conditions: prev.conditions.map((c, i) =>
+                              i === index ? {...c, leftColumn: value} : c
+                            ),
+                          }))
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Select left column" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tables
+                            .find((t) => t.id === formState.leftTable)
+                            ?.columns.map((column) => (
+                              <SelectItem
+                                key={column.name}
+                                value={column.name}
+                              >
+                                {column.name} ({column.type})
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+
+                      <Select
+                        value={condition.operator}
+                        onValueChange={(value) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            conditions: prev.conditions.map((c, i) =>
+                              i === index ? {...c, operator: value} : c
+                            ),
+                          }))
+                        }
+                      >
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue placeholder="Operator" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="=">=</SelectItem>
+                          <SelectItem value="!=">!=</SelectItem>
+                          <SelectItem value=">">&gt;</SelectItem>
+                          <SelectItem value=">=">&gt;=</SelectItem>
+                          <SelectItem value="<">&lt;</SelectItem>
+                          <SelectItem value="<=">&lt;=</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <Select
+                        value={condition.rightColumn}
+                        onValueChange={(value) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            conditions: prev.conditions.map((c, i) =>
+                              i === index ? {...c, rightColumn: value} : c
+                            ),
+                          }))
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Select right column" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tables
+                            .find((t) => t.id === formState.rightTable)
+                            ?.columns.map((column) => (
+                              <SelectItem
+                                key={column.name}
+                                value={column.name}
+                              >
+                                {column.name} ({column.type})
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeJoinCondition(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+
+                  <Button
+                    variant="outline"
+                    onClick={addJoinCondition}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Condition
+                  </Button>
+                </div>
+
+                <Button
+                  onClick={handleFormSubmit}
+                  disabled={
+                    !formState.leftTable ||
+                    !formState.rightTable ||
+                    !formState.conditions[0].leftColumn ||
+                    !formState.conditions[0].rightColumn
+                  }
+                  className="w-full"
+                >
+                  Add Join
+                </Button>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
 
         <TabsContent
           value="diagram"
@@ -288,185 +546,6 @@ export function VisualJoinEditor({tables, joins, onJoinUpdate}: VisualJoinEditor
             <Background />
             <Controls />
           </ReactFlow>
-        </TabsContent>
-
-        <TabsContent value="form">
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <Select
-                value={formState.leftTable}
-                onValueChange={(value) => setFormState((prev) => ({...prev, leftTable: value}))}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select left table" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tables.map((table) => (
-                    <SelectItem
-                      key={table.id}
-                      value={table.id}
-                    >
-                      {table.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={formState.joinType}
-                onValueChange={(value: Join['type']) => setFormState((prev) => ({...prev, joinType: value}))}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select join type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="inner">Inner Join</SelectItem>
-                  <SelectItem value="left">Left Join</SelectItem>
-                  <SelectItem value="right">Right Join</SelectItem>
-                  <SelectItem value="full">Full Join</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={formState.rightTable}
-                onValueChange={(value) => setFormState((prev) => ({...prev, rightTable: value}))}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select right table" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tables.map((table) => (
-                    <SelectItem
-                      key={table.id}
-                      value={table.id}
-                    >
-                      {table.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="font-medium">Join Conditions</h3>
-              {formState.conditions.map((condition, index) => (
-                <div
-                  key={index}
-                  className="flex gap-4 items-center"
-                >
-                  <Select
-                    value={condition.leftColumn}
-                    onValueChange={(value) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        conditions: prev.conditions.map((c, i) =>
-                          i === index ? {...c, leftColumn: value} : c
-                        ),
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select left column" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tables
-                        .find((t) => t.id === formState.leftTable)
-                        ?.columns.map((column) => (
-                          <SelectItem
-                            key={column.name}
-                            value={column.name}
-                          >
-                            {column.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={condition.operator}
-                    onValueChange={(value) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        conditions: prev.conditions.map((c, i) =>
-                          i === index ? {...c, operator: value} : c
-                        ),
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="w-[100px]">
-                      <SelectValue placeholder="Operator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="=">=</SelectItem>
-                      <SelectItem value="!=">!=</SelectItem>
-                      <SelectItem value=">">&gt;</SelectItem>
-                      <SelectItem value=">=">&gt;=</SelectItem>
-                      <SelectItem value="<">&lt;</SelectItem>
-                      <SelectItem value="<=">&lt;=</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={condition.rightColumn}
-                    onValueChange={(value) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        conditions: prev.conditions.map((c, i) =>
-                          i === index ? {...c, rightColumn: value} : c
-                        ),
-                      }))
-                    }
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select right column" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tables
-                        .find((t) => t.id === formState.rightTable)
-                        ?.columns.map((column) => (
-                          <SelectItem
-                            key={column.name}
-                            value={column.name}
-                          >
-                            {column.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeJoinCondition(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-
-              <Button
-                variant="outline"
-                onClick={addJoinCondition}
-                className="w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Condition
-              </Button>
-            </div>
-
-            <Button
-              onClick={handleFormSubmit}
-              disabled={
-                !formState.leftTable ||
-                !formState.rightTable ||
-                !formState.conditions[0].leftColumn ||
-                !formState.conditions[0].rightColumn
-              }
-              className="w-full"
-            >
-              Add Join
-            </Button>
-          </div>
         </TabsContent>
       </Tabs>
     </Card>

@@ -177,6 +177,70 @@ export function useDataView(dataviewId?: string | number) {
       throw error;
     }
   }, [dataviewId, toast]);
+
+  const useObjectColumns = (
+    selectedObjects: Array<{
+      id: string;
+      type: string;
+      version: {id: number};
+    }>
+  ) => {
+    // Create array of keys for column fetching
+    const keys = selectedObjects
+      .filter((obj) => obj.version?.id)
+      .map((obj) => {
+        const [type, objId] = obj.id.split('_');
+        return {
+          url: `${apiEndpoint}columns/`,
+          params: {
+            object_type: type,
+            object_id: objId,
+            version_id: obj.version.id,
+          },
+        };
+      });
+
+    return useSWR(
+      keys.length ? keys : null,
+      async (keys) => {
+        try {
+          const responses = await Promise.all(
+            keys.map((key) => orchestraBackendInstance.get(key.url, {params: key.params}))
+          );
+
+          // Transform the responses into a consistent format
+          return responses.map((response, index) => ({
+            id: selectedObjects[index].id,
+            name: selectedObjects[index].name || selectedObjects[index].id,
+            columns: response.data.results,
+          }));
+        } catch (error) {
+          console.error('Error fetching columns:', error);
+          throw new Error('Failed to fetch columns data');
+        }
+      },
+      {
+        revalidateOnFocus: false,
+        shouldRetryOnError: false,
+      }
+    );
+  };
+
+  // Hook for validating aggregation columns
+  const validateAggregationColumns = async (columns: string[], objectType: string, versionId: number) => {
+    try {
+      const response = await orchestraBackendInstance.post(`${apiEndpoint}validate-aggregation/`, {
+        columns,
+        object_type: objectType,
+        version_id: versionId,
+      });
+      return response.data.results;
+    } catch (error) {
+      console.error('Error validating aggregation columns:', error);
+      throw error;
+    }
+  };
+
   return {
     dataview: response?.data,
     error,
@@ -188,5 +252,7 @@ export function useDataView(dataviewId?: string | number) {
     previewDataView,
     useAvailableObjects,
     useObjectFields,
+    validateAggregationColumns,
+    useObjectColumns,
   };
 }
