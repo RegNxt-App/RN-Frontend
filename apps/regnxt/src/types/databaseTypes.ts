@@ -1,5 +1,4 @@
-import {Connection, Edge, Node, Position} from '@xyflow/react';
-import {LucideIcon} from 'lucide-react';
+import {Edge, Node, Position} from '@xyflow/react';
 
 export interface TableColumn {
   id?: string;
@@ -618,4 +617,37 @@ export interface GenerationDetails {
     col_name: string;
     filter_statement: string;
   }>;
+}
+
+export interface Field {
+  id: string;
+  alias: string;
+  column: string;
+  source: string;
+  type: string;
+  description?: string;
+  selected?: boolean;
+}
+
+export interface DataViewObject {
+  id: string;
+  name: string;
+  type: string;
+  description?: string;
+  framework?: string;
+  object_type?: string;
+  version?: {
+    id: number;
+    number: number;
+  };
+}
+
+export interface ApiResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+  page: number;
+  page_size: number;
+  total_pages: number;
 }
