@@ -1,12 +1,10 @@
-import React, {useMemo, useState} from 'react';
+import React, {useState} from 'react';
 
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {TransformationDetail} from '@/types/databaseTypes';
-import {ArrowRight, FileJson, Loader2} from 'lucide-react';
+import {DerivationDetails, GenerationDetails} from '@/types/databaseTypes';
+import {ColumnDef} from '@tanstack/react-table';
+import {Loader2} from 'lucide-react';
 
 import {Badge} from '@rn/ui/components/ui/badge';
-import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -15,48 +13,47 @@ import {
   DialogTitle,
 } from '@rn/ui/components/ui/dialog';
 
+import {DerivationRuleContent} from './DerivationRuleContent';
+import {GenerationRuleContent} from './GenerationRuleContent';
+
+type TransformationDetail = DerivationDetails | GenerationDetails;
+
 interface TransformationDetailsDialogProps {
-  details: TransformationDetail[];
+  details: TransformationDetail | null;
   isOpen: boolean;
   onClose: () => void;
   isLoading: boolean;
 }
-
+type ReportingCell = {
+  row_name: string;
+  col_name: string;
+  reporting_cell: string;
+  filter_statement: string;
+};
 const TransformationDetailsDialog: React.FC<TransformationDetailsDialogProps> = ({
   details,
   isOpen,
   onClose,
   isLoading = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<string>('mapping');
-
-  const transformationInfo = useMemo(
-    () =>
-      details && details.length > 0
-        ? {
-            id: details[0].logical_transformation_rule_id,
-            sourceDataset: details[0].source_dataset,
-            destinationDataset: details[0].destination_dataset,
-          }
-        : null,
-    [details]
-  );
-
-  const mappingsBySource = useMemo(
-    () =>
-      details && details.length > 0
-        ? details.reduce((acc, detail) => {
-            const key = detail.source_column || '(null)';
-            if (!acc[key]) {
-              acc[key] = [];
-            }
-            acc[key].push(detail);
-            return acc;
-          }, {} as Record<string, typeof details>)
-        : {},
-    [details]
-  );
-
+  const [selectedRow, setSelectedRow] = useState(0);
+  const columns: ColumnDef<ReportingCell>[] = [
+    {
+      accessorKey: 'row_name',
+      header: 'Row Name',
+      cell: ({row}) => <div className="text-xs">{row.getValue('row_name')}</div>,
+    },
+    {
+      accessorKey: 'col_name',
+      header: 'Column Name',
+      cell: ({row}) => <div className="text-xs">{row.getValue('col_name')}</div>,
+    },
+    {
+      accessorKey: 'reporting_cell',
+      header: 'Reporting Cell',
+      cell: ({row}) => <div className="text-xs">{row.getValue('reporting_cell')}</div>,
+    },
+  ];
   return (
     <Dialog
       open={isOpen}
@@ -66,9 +63,11 @@ const TransformationDetailsDialog: React.FC<TransformationDetailsDialogProps> = 
     >
       <DialogContent className="max-w-5xl max-h-[98vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center">Transformation Rule Details</DialogTitle>
-          <DialogDescription className="font-mono text-xs break-all">
-            {transformationInfo?.id || ''}
+          <DialogTitle className="flex items-center">
+            {details?.type === 'derivation' ? 'Derivation' : 'Generation'} Rule Details
+          </DialogTitle>
+          <DialogDescription className="text-xs break-all">
+            {details?.base_details.logical_transformation_rule_id || ''}
           </DialogDescription>
         </DialogHeader>
 
@@ -77,105 +76,26 @@ const TransformationDetailsDialog: React.FC<TransformationDetailsDialogProps> = 
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             <span>Loading transformation details...</span>
           </div>
-        ) : transformationInfo ? (
+        ) : details ? (
           <>
             <div className="flex items-center justify-center space-x-2 my-2">
               <Badge
                 variant="outline"
                 className="px-3 py-1"
               >
-                {transformationInfo.sourceDataset}
-              </Badge>
-              <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <Badge
-                variant="outline"
-                className="px-3 py-1"
-              >
-                {transformationInfo.destinationDataset}
+                {details.base_details.destination_dataset}
               </Badge>
             </div>
-
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="mapping">Column Mapping</TabsTrigger>
-                <TabsTrigger value="json">JSON View</TabsTrigger>
-              </TabsList>
-
-              <TabsContent
-                value="mapping"
-                className="mt-2"
-              >
-                <Card>
-                  <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Source Column</TableHead>
-                          <TableHead>Destination Column</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {details.map((detail, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-mono text-xs">
-                              {detail.source_column || (
-                                <span className="text-muted-foreground italic">(null)</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="font-mono text-xs">
-                              {detail.destination_column || (
-                                <span className="text-muted-foreground italic">(null)</span>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-
-                <div className="mt-4">
-                  <div className="text-sm font-medium">Statistics</div>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="text-2xl font-bold">{details.length}</div>
-                        <div className="text-xs text-muted-foreground">Total Columns Mapped</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="text-2xl font-bold">{Object.keys(mappingsBySource).length}</div>
-                        <div className="text-xs text-muted-foreground">Source Columns</div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent
-                value="json"
-                className="mt-2"
-              >
-                <Card>
-                  <CardHeader className="pb-0">
-                    <CardTitle className="text-sm flex items-center">
-                      <FileJson className="h-4 w-4 mr-2" />
-                      Transformation JSON
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="p-4 bg-muted rounded-md text-xs overflow-auto max-h-96">
-                      {JSON.stringify(details, null, 2)}
-                    </pre>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+            {details.type === 'derivation' ? (
+              <DerivationRuleContent details={details} />
+            ) : (
+              <GenerationRuleContent
+                details={details}
+                selectedRow={selectedRow}
+                setSelectedRow={setSelectedRow}
+                columns={columns}
+              />
+            )}
           </>
         ) : (
           <div className="py-4 text-center text-muted-foreground">No transformation details available</div>

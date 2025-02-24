@@ -580,3 +580,42 @@ export interface TransformationDetail {
   destination_dataset: string;
   destination_column: string;
 }
+export interface DerivationDetails {
+  type: 'derivation';
+  base_details: {
+    logical_transformation_rule_id: string;
+    destination_dataset: string;
+    destination_column: string;
+    dataview_statement: string;
+    transformation_statement: string;
+  };
+  column_mappings: Array<{
+    source_column: string | null;
+    destination_column: string | null;
+    destination_column_label: string;
+    source_dataset: string;
+    destination_dataset: string;
+  }>;
+}
+
+export interface GenerationDetails {
+  type: 'generation';
+  base_details: {
+    logical_transformation_rule_id: string;
+    destination_dataset: string;
+    dataview_statement: string;
+  };
+  column_mappings: Array<{
+    source_column: string | null;
+    destination_column: string | null;
+    destination_column_label: string;
+    source_dataset: string;
+    destination_dataset: string;
+  }>;
+  reporting_cells: Array<{
+    reporting_cell: string;
+    row_name: string;
+    col_name: string;
+    filter_statement: string;
+  }>;
+}
