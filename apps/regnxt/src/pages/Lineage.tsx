@@ -47,7 +47,7 @@ const DataLineageExplorer: React.FC = () => {
   );
 
   const {data: transformationApiData, isLoading: isLineageLoadingRules} = useSWR<
-    ApiResponse<TransformationDetail[]>
+    ApiResponse<TransformationDetail>
   >(
     selectedTransformation ? `/api/v1/lineage/transformation-rule/?rule_id=${selectedTransformation}` : null,
     birdBackendInstance,
@@ -60,8 +60,7 @@ const DataLineageExplorer: React.FC = () => {
   );
 
   const lineageData = useMemo(() => lineageApiData?.data || [], [lineageApiData]);
-  const transformationDetails = useMemo(() => transformationApiData?.data || [], [transformationApiData]);
-
+  const transformationDetails = useMemo(() => transformationApiData?.data || null, [transformationApiData]);
   const lineageStats = useMemo(() => {
     const uniqueDatasets = new Set<string>();
     layersData.forEach((layer) => {
