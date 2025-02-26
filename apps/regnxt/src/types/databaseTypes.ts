@@ -617,6 +617,7 @@ export interface GenerationDetails {
     col_name: string;
     filter_statement: string;
   }>;
+  highlight_source_dataset: string;
 }
 
 export interface Field {
