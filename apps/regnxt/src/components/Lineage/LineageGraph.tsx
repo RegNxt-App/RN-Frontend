@@ -23,7 +23,7 @@ import DatasetNodeComponent from './DatasetNode';
 export interface LineageGraphProps {
   lineageData: LineageConnection[];
   direction: LineageDirection;
-  onEdgeClick: (ruleId: string) => void;
+  onEdgeClick: (ruleId: string, sourceDataset: string) => void;
   selectedTransformationId: string | null;
 }
 
@@ -169,7 +169,7 @@ const LineageGraphContent: React.FC<LineageGraphProps> = ({
       const transformationId = edge.data?.transformationId;
       if (transformationId) {
         document.body.style.cursor = 'wait';
-        onEdgeClick(transformationId as string);
+        onEdgeClick(transformationId as string, edge.source);
         setTimeout(() => {
           document.body.style.cursor = 'default';
         }, 150);

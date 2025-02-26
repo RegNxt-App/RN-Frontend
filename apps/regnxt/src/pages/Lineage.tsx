@@ -25,20 +25,21 @@ const DataLineageExplorer: React.FC = () => {
   const [selectedDataset, setSelectedDataset] = useState<string | null>(null);
   const [selectedTransformation, setSelectedTransformation] = useState<string | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [selectedSourceDataset, setSelectedSourceDataset] = useState<string | null>(null);
 
   const {data: destinationToSrc, isLoading} = useSWR<ApiResponse<Layer[]>>(
-    `/api/v1/lineage/layers/destination-to-source/`,
+    `/api/v1/lineage/destination-to-source-layers/`,
     birdBackendInstance,
     swrCallOptions
   );
   const {data: srcToDestination} = useSWR<ApiResponse<Layer[]>>(
-    `/api/v1/lineage/layers/source-to-destination/`,
+    `/api/v1/lineage/source-to-destination-layers/`,
     birdBackendInstance,
     swrCallOptions
   );
   const {data: lineageApiData, isLoading: isLineageLoading} = useSWR<ApiResponse<LineageConnection[]>>(
     selectedDataset
-      ? `/api/v1/lineage/path/${direction}/?${
+      ? `/api/v1/lineage/${direction}-path/?${
           direction === 'source-to-destination' ? 'source_dataset' : 'destination_dataset'
         }=${selectedDataset}`
       : null,
@@ -49,7 +50,9 @@ const DataLineageExplorer: React.FC = () => {
   const {data: transformationApiData, isLoading: isLineageLoadingRules} = useSWR<
     ApiResponse<TransformationDetail>
   >(
-    selectedTransformation ? `/api/v1/lineage/transformation-rule/?rule_id=${selectedTransformation}` : null,
+    selectedTransformation && selectedSourceDataset
+      ? `/api/v1/lineage/transformation-rule/?rule_id=${selectedTransformation}&source_dataset=${selectedSourceDataset}`
+      : null,
     birdBackendInstance,
     swrCallOptions
   );
@@ -95,8 +98,9 @@ const DataLineageExplorer: React.FC = () => {
     setSelectedTransformation(null);
   }, []);
 
-  const handleTransformationSelect = useCallback((ruleId: string) => {
+  const handleTransformationSelect = useCallback((ruleId: string, sourceDataset: string) => {
     setSelectedTransformation(ruleId);
+    setSelectedSourceDataset(sourceDataset);
     setIsDetailsDialogOpen(true);
   }, []);
 

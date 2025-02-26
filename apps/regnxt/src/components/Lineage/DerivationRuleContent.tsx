@@ -14,12 +14,12 @@ export const DerivationRuleContent: React.FC<DerivationRuleContentProps> = ({det
       <Card>
         <CardContent className="p-4">
           <div className="mb-4">
-            <h4 className="font-medium mb-2">
+            <h4 className="font-medium mb-2 break-words">
               Calculation of field
               <span> {details.base_details.destination_column}</span> (
               {details.column_mappings[0]?.destination_column_label})
             </h4>
-            <p className="text-xs">
+            <p className="text-xs break-words">
               {details.column_mappings[0]?.source_dataset} {'->'}{' '}
               {details.column_mappings[0]?.destination_dataset}
             </p>
@@ -29,8 +29,8 @@ export const DerivationRuleContent: React.FC<DerivationRuleContentProps> = ({det
 
       <Card>
         <CardContent className="p-4">
-          <h4 className="font-medium mb-2">Source</h4>
-          <pre className="p-4 bg-muted rounded-md text-xs overflow-auto whitespace-pre-wrap">
+          <h4 className="font-medium mb-2">Data Selection</h4>
+          <pre className="p-4 bg-muted rounded-md text-xs overflow-y-auto whitespace-pre-wrap break-words w-full">
             {details.base_details.dataview_statement}
           </pre>
         </CardContent>
@@ -39,7 +39,7 @@ export const DerivationRuleContent: React.FC<DerivationRuleContentProps> = ({det
       <Card>
         <CardContent className="p-4">
           <h4 className="font-medium mb-2">Calculation</h4>
-          <pre className="p-4 bg-muted rounded-md text-xs overflow-auto whitespace-pre-wrap">
+          <pre className="p-4 bg-muted rounded-md text-xs overflow-y-auto whitespace-pre-wrap break-words w-full">
             {details.base_details.transformation_statement}
           </pre>
         </CardContent>

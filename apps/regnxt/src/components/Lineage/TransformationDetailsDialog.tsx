@@ -51,7 +51,7 @@ const TransformationDetailsDialog: React.FC<TransformationDetailsDialogProps> = 
     {
       accessorKey: 'reporting_cell',
       header: 'Reporting Cell',
-      cell: ({row}) => <div className="text-xs">{row.getValue('reporting_cell')}</div>,
+      cell: ({row}) => <div className="text-xs break-words">{row.getValue('reporting_cell')}</div>,
     },
   ];
   return (
@@ -61,12 +61,12 @@ const TransformationDetailsDialog: React.FC<TransformationDetailsDialogProps> = 
         if (!open) onClose();
       }}
     >
-      <DialogContent className="max-w-5xl max-h-[98vh] overflow-auto">
+      <DialogContent className="max-w-5xl max-h-[98vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             {details?.type === 'derivation' ? 'Derivation' : 'Generation'} Rule Details
           </DialogTitle>
-          <DialogDescription className="text-xs break-all">
+          <DialogDescription className="text-xs break-words">
             {details?.base_details.logical_transformation_rule_id || ''}
           </DialogDescription>
         </DialogHeader>
