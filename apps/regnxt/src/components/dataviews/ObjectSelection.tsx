@@ -26,14 +26,14 @@ export function ObjectSelection({config = [], updateConfig, framework}: ObjectSe
   const {data: response, error, isLoading} = useAvailableObjects(page, searchTerm);
 
   useEffect(() => {
-    if (config?.length > 0) {
-      const initialSelected = config.reduce((acc, obj) => {
+    if (config?.length > 0 && Object.keys(selectedObjects).length === 0) {
+      const objectsMap = config.reduce((acc: Record<string, DataViewObject>, obj: DataViewObject) => {
         acc[obj.id] = obj;
         return acc;
-      }, {} as Record<string, DataViewObject>);
-      setSelectedObjects(initialSelected);
+      }, {});
+      setSelectedObjects(objectsMap);
     }
-  }, [config, setSelectedObjects]);
+  }, [config, selectedObjects, setSelectedObjects]);
 
   const handleAdd = async (obj: DataViewObject) => {
     const newSelected = {

@@ -26,40 +26,11 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
 
   const {data: fieldsData, error, isLoading} = useObjectFields(selectedObjects);
 
-  // Add this effect before the fieldsData effect
-  useEffect(() => {
-    if (config.length > 0 && fields.length === 0) {
-      setFields((prev) => {
-        const newFields = [...prev];
-        config.forEach((configField) => {
-          const fieldIndex = newFields.findIndex(
-            (f) =>
-              f.source === configField.source &&
-              (f.column === configField.column || f.alias === configField.column)
-          );
-          if (fieldIndex !== -1) {
-            newFields[fieldIndex] = {
-              ...newFields[fieldIndex],
-              selected: true,
-            };
-          }
-        });
-        return newFields;
-      });
-    }
-  }, [config, fields.length, setFields]);
   useEffect(() => {
     if (fieldsData?.results) {
       const transformedFields = fieldsData.results.flatMap((tableInfo) =>
         tableInfo.fields.map((field) => {
-          // Create the field ID in the same format as used in config
           const fieldId = `${field.id}`;
-
-          // Check if this field was previously selected in config
-          const existingField = config.find(
-            (f) => f.source === tableInfo.table_name && (f.column === field.name || f.alias === field.name)
-          );
-
           return {
             id: fieldId,
             source: tableInfo.table_name,
@@ -67,18 +38,31 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
             alias: field.name,
             type: field.type,
             description: field.description,
-            // Preserve selected state from config if it exists
-            selected: !!existingField,
+            selected: false,
           };
         })
       );
       setFields(transformedFields);
     }
-  }, [fieldsData, setFields, config]); // Added config to dependencies
+  }, [fieldsData, setFields]);
 
   useEffect(() => {
-    const selectedFields = fields.filter((field) => field.selected);
-    updateConfig(selectedFields);
+    if (config?.length > 0 && fields.length > 0) {
+      const selectedFieldIds = new Set(config.map((f) => f.id));
+      setFields((prevFields) =>
+        prevFields.map((field) => ({
+          ...field,
+          selected: selectedFieldIds.has(field.id),
+        }))
+      );
+    }
+  }, [config, fields.length]);
+
+  useEffect(() => {
+    if (fields.length > 0) {
+      const selectedFields = fields.filter((field) => field.selected);
+      updateConfig(selectedFields);
+    }
   }, [fields, updateConfig]);
 
   const toggleTableFields = (tableName: string, selected: boolean) => {
