@@ -1,19 +1,25 @@
-import {useCallback, useEffect, useState} from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import {AggregationConfiguration} from '@/components/dataviews/AggregationConfiguration';
-import {FieldSelection} from '@/components/dataviews/FieldSelection';
-import {FilterConfiguration} from '@/components/dataviews/FilterConfiguration';
-import {IdentificationForm} from '@/components/dataviews/IdentificationForm';
-import {JoinConfiguration} from '@/components/dataviews/JoinConfiguration';
-import {ObjectSelection} from '@/components/dataviews/ObjectSelection';
-import {PreviewMode} from '@/components/dataviews/PreviewMode';
-import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {DataViewProvider} from '@/contexts/DataViewContext';
-import {useDataView} from '@/hooks/api/use-dataview';
-import {toast} from '@/hooks/use-toast';
-import {ArrowLeft, CheckCircle2, ChevronRight, Loader2} from 'lucide-react';
+
+
+import { AggregationConfiguration } from '@/components/dataviews/AggregationConfiguration';
+import { FieldSelection } from '@/components/dataviews/FieldSelection';
+import { FilterConfiguration } from '@/components/dataviews/FilterConfiguration';
+import { IdentificationForm } from '@/components/dataviews/IdentificationForm';
+import { JoinConfiguration } from '@/components/dataviews/JoinConfiguration';
+import { ObjectSelection } from '@/components/dataviews/ObjectSelection';
+import { PreviewMode } from '@/components/dataviews/PreviewMode';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DataViewProvider } from '@/contexts/DataViewContext';
+import { useDataView } from '@/hooks/api/use-dataview';
+import { toast } from '@/hooks/use-toast';
+import { ArrowLeft, CheckCircle2, ChevronRight, Loader2 } from 'lucide-react';
+
+
+
+
 
 interface DataViewConfig {
   identification: {
@@ -73,6 +79,7 @@ export function CreateEditDataview() {
   const navigate = useNavigate();
   const {id} = useParams();
   const {dataview, isLoading, error, createDataView, updateDataView, previewDataView} = useDataView(id);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewData, setPreviewData] = useState<any[] | null>(null);
@@ -88,8 +95,8 @@ export function CreateEditDataview() {
   });
 
   useEffect(() => {
-    if (dataview) {
-      setDataViewConfig({
+    if (dataview && !isInitialized) {
+      const initialConfig = {
         identification: {
           code: dataview.code,
           label: dataview.label,
@@ -103,9 +110,13 @@ export function CreateEditDataview() {
         fields: dataview.data_fields || [],
         filters: dataview.data_filters || [],
         aggregations: dataview.data_aggregations || [],
-      });
+      };
+
+      setDataViewConfig(initialConfig);
+      setIsInitialized(true);
     }
-  }, [dataview]);
+  }, [dataview, isInitialized]);
+
   const updateConfig = useCallback((step: keyof DataViewConfig, data: any) => {
     setDataViewConfig((prev) => ({
       ...prev,
@@ -179,17 +190,19 @@ export function CreateEditDataview() {
     try {
       setIsSubmitting(true);
 
-      const payload = {
+      let payload = {
         ...dataViewConfig.identification,
         data_objects: dataViewConfig.objects,
         data_joins: dataViewConfig.joins,
         data_fields: dataViewConfig.fields,
         data_filters: dataViewConfig.filters,
         data_aggregations: dataViewConfig.aggregations,
+        type: dataViewConfig.identification.type || 'standard',
       };
 
       if (id) {
-        await updateDataView(payload);
+        const {code, ...updatePayload} = payload;
+        await updateDataView(updatePayload);
         toast({
           title: 'Success',
           description: 'Data view updated successfully',
@@ -228,7 +241,7 @@ export function CreateEditDataview() {
   }
 
   return (
-    <DataViewProvider>
+    <DataViewProvider initialData={dataview}>
       <div className="container max-w-5xl py-10">
         <div className="mb-8 flex items-center justify-between">
           <div>

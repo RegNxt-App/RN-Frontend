@@ -1,18 +1,25 @@
-import React, {Dispatch, SetStateAction, createContext, useContext, useState} from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 
 import {DataViewObject, Field} from '@/types/databaseTypes';
 
 interface DataViewContextType {
   selectedObjects: Record<string, DataViewObject>;
   fields: Field[];
-  setSelectedObjects: Dispatch<SetStateAction<Record<string, DataViewObject>>>;
-  setFields: Dispatch<SetStateAction<Field[]>>;
+  setSelectedObjects: React.Dispatch<React.SetStateAction<Record<string, DataViewObject>>>;
+  setFields: React.Dispatch<React.SetStateAction<Field[]>>;
   toggleFieldSelection: (fieldId: string) => void;
+  initializeContext: (data: any) => void;
 }
 
 const DataViewContext = createContext<DataViewContextType | undefined>(undefined);
 
-export function DataViewProvider({children}: {children: React.ReactNode}) {
+export function DataViewProvider({
+  children,
+  initialData = null,
+}: {
+  children: React.ReactNode;
+  initialData?: any;
+}) {
   const [selectedObjects, setSelectedObjects] = useState<Record<string, DataViewObject>>({});
   const [fields, setFields] = useState<Field[]>([]);
 
@@ -21,12 +28,45 @@ export function DataViewProvider({children}: {children: React.ReactNode}) {
       prevFields.map((field) => (field.id === fieldId ? {...field, selected: !field.selected} : field))
     );
   };
+
+  const initializeContext = (data: any) => {
+    if (!data) return;
+
+    if (data.data_objects) {
+      const objectsMap = data.data_objects.reduce(
+        (acc: Record<string, DataViewObject>, obj: DataViewObject) => {
+          acc[obj.id] = obj;
+          return acc;
+        },
+        {}
+      );
+      setSelectedObjects(objectsMap);
+    }
+
+    if (data.data_fields) {
+      const selectedFieldIds = new Set(data.data_fields.map((f: any) => f.id));
+      setFields((prevFields) =>
+        prevFields.map((field) => ({
+          ...field,
+          selected: selectedFieldIds.has(field.id),
+        }))
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (initialData) {
+      initializeContext(initialData);
+    }
+  }, [initialData]);
+
   const value = {
     selectedObjects,
     setSelectedObjects,
     fields,
     setFields,
     toggleFieldSelection,
+    initializeContext,
   };
 
   return <DataViewContext.Provider value={value}>{children}</DataViewContext.Provider>;
