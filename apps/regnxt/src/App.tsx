@@ -20,6 +20,7 @@ import EditConnection from './pages/Orchestra/Connections/EditConnection';
 import {CreateEditDataview} from './pages/Orchestra/DataViews/CreateEditDataview';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
 import UserSettings from './pages/Orchestra/UserSettings';
+import Variables from './pages/Orchestra/Variables/Variables';
 import WorkflowManager from './pages/Orchestra/workflows/Workflows';
 
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
@@ -44,7 +45,6 @@ const Template = lazy(() => import('./pages/Configuration/Template'));
 const RegulatoryCalender = lazy(() => import('./pages/Configuration/RegulatoryCalender'));
 const Validation = lazy(() => import('./pages/Configuration/Validation'));
 
-const Variables = lazy(() => import('./pages/Orchestra/Variables'));
 const Datasets = lazy(() => import('./pages/Orchestra/Datasets'));
 const Dataviews = lazy(() => import('./pages/Orchestra/DataViews/Dataviews'));
 const Workflows = lazy(() => import('./pages/Orchestra/workflows/Workflows'));

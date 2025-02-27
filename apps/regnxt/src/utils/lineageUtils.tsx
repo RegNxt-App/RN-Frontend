@@ -1,5 +1,20 @@
 import React from 'react';
 
+export const TRANSFORMATION_COLORS = {
+  COPY: '#6EC4CC',
+  DER: '#A8D5BA',
+  GEN: '#F9E79F',
+  ALLOC: '#C6A5E8',
+  DEFAULT: '#64748b',
+};
+export const getTransformationType = (ruleId: string) => {
+  if (ruleId.startsWith('COPY')) return 'COPY';
+  if (ruleId.startsWith('DER')) return 'DER';
+  if (ruleId.startsWith('GEN')) return 'GEN';
+  if (ruleId.startsWith('ALLOC')) return 'ALLOC';
+  return 'DEFAULT';
+};
+
 export const getTableAlias = (text: string, datasetName: string) => {
   if (!text || !datasetName) return null;
   const regex = new RegExp(`${datasetName}\\s+(t\\d+)`, 'i');

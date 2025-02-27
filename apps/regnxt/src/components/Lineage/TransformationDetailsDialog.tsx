@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-import {DerivationDetails, GenerationDetails} from '@/types/databaseTypes';
+import {CopyDetails, DerivationDetails, GenerationDetails} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
 import {Loader2} from 'lucide-react';
 
@@ -13,10 +13,11 @@ import {
   DialogTitle,
 } from '@rn/ui/components/ui/dialog';
 
+import {CopyRuleContent} from './CopyRuleContent';
 import {DerivationRuleContent} from './DerivationRuleContent';
 import {GenerationRuleContent} from './GenerationRuleContent';
 
-type TransformationDetail = DerivationDetails | GenerationDetails;
+type TransformationDetail = DerivationDetails | GenerationDetails | CopyDetails;
 
 interface TransformationDetailsDialogProps {
   details: TransformationDetail | null;
@@ -64,7 +65,14 @@ const TransformationDetailsDialog: React.FC<TransformationDetailsDialogProps> = 
       <DialogContent className="max-w-5xl max-h-[98vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center">
-            {details?.type === 'derivation' ? 'Derivation' : 'Generation'} Rule Details
+            {details?.type === 'derivation'
+              ? 'Derivation'
+              : details?.type === 'generation'
+              ? 'Generation'
+              : details?.type === 'copy'
+              ? 'Copy'
+              : 'Transformation'}{' '}
+            Rule Details
           </DialogTitle>
           <DialogDescription className="text-xs break-words">
             {details?.base_details.logical_transformation_rule_id || ''}
@@ -88,13 +96,15 @@ const TransformationDetailsDialog: React.FC<TransformationDetailsDialogProps> = 
             </div>
             {details.type === 'derivation' ? (
               <DerivationRuleContent details={details} />
-            ) : (
+            ) : details.type === 'generation' ? (
               <GenerationRuleContent
                 details={details}
                 selectedRow={selectedRow}
                 setSelectedRow={setSelectedRow}
                 columns={columns}
               />
+            ) : (
+              <CopyRuleContent details={details} />
             )}
           </>
         ) : (
