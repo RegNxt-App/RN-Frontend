@@ -192,7 +192,14 @@ export default function Dataviews() {
             }}
             isLoading={isLoading}
             onPageChange={(page) => setSearchParams((prev) => ({...prev, page}))}
-            onSearch={(search) => setSearchParams((prev) => ({...prev, search, page: 1}))}
+            onSearch={(search) => {
+              // Reset the page when search changes
+              setSearchParams((prev) => ({
+                ...prev, 
+                search,
+                page: 1
+              }));
+            }}
             onFilterChange={(filters) =>
               setSearchParams((prev) => ({
                 ...prev,

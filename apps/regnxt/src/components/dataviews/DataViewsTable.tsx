@@ -1,6 +1,5 @@
-import {useState} from 'react';
+import {useEffect, useState, useCallback} from 'react';
 
-import {SharedColumnFilters} from '@/components/SharedFilters';
 import {
   ColumnDef,
   SortingState,
@@ -14,6 +13,23 @@ import {
 } from '@tanstack/react-table';
 import {ArrowUpDown, MoreHorizontal} from 'lucide-react';
 
+// Custom hook for debouncing values
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
 import {
@@ -24,6 +40,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@rn/ui/components/ui/dropdown-menu';
+import {Input} from '@rn/ui/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Skeleton} from '@rn/ui/components/ui/skeleton';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
 
@@ -96,8 +114,8 @@ export const columns: ColumnDef<ApiDataView>[] = [
     id: 'actions',
     cell: ({row, table}) => {
       const dataView = row.original;
-      const { onDelete } = table.options.meta || {};
-      
+      const {onDelete} = table.options.meta || {};
+
       const handleDelete = async () => {
         if (onDelete && typeof onDelete === 'function') {
           try {
@@ -107,7 +125,7 @@ export const columns: ColumnDef<ApiDataView>[] = [
           }
         }
       };
-      
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -132,7 +150,7 @@ export const columns: ColumnDef<ApiDataView>[] = [
             {dataView.is_visible && <DropdownMenuItem>Archive</DropdownMenuItem>}
             <DropdownMenuSeparator />
             {!dataView.is_system_generated && (
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="text-destructive"
                 onClick={handleDelete}
               >
@@ -146,12 +164,113 @@ export const columns: ColumnDef<ApiDataView>[] = [
   },
 ];
 
+interface DataViewColumnFiltersProps {
+  filters: {
+    code: string;
+    label: string;
+    type: string;
+    framework: string;
+    description: string;
+  };
+  setFilter: (key: string, value: string) => void;
+}
+
+const DataViewColumnFilters: React.FC<DataViewColumnFiltersProps> = ({filters, setFilter}) => {
+  // Internal state for immediate UI feedback
+  const [localFilters, setLocalFilters] = useState({
+    code: filters.code || '',
+    label: filters.label || '',
+    description: filters.description || '',
+  });
+
+  // Debounce the text filter values with a 500ms delay
+  const debouncedCode = useDebounce(localFilters.code, 500);
+  const debouncedLabel = useDebounce(localFilters.label, 500);
+  const debouncedDescription = useDebounce(localFilters.description, 500);
+
+  // Update parent filters when debounced values change
+  useEffect(() => {
+    if (debouncedCode !== filters.code) {
+      setFilter('code', debouncedCode);
+    }
+  }, [debouncedCode, filters.code, setFilter]);
+
+  useEffect(() => {
+    if (debouncedLabel !== filters.label) {
+      setFilter('label', debouncedLabel);
+    }
+  }, [debouncedLabel, filters.label, setFilter]);
+
+  useEffect(() => {
+    if (debouncedDescription !== filters.description) {
+      setFilter('description', debouncedDescription);
+    }
+  }, [debouncedDescription, filters.description, setFilter]);
+
+  // Handle local input changes
+  const handleInputChange = (key: string, value: string) => {
+    setLocalFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  return (
+    <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
+      <Input
+        placeholder="Filter by Code"
+        value={localFilters.code}
+        onChange={(e) => handleInputChange('code', e.target.value)}
+        className="max-w-sm"
+      />
+      <Input
+        placeholder="Filter by Name"
+        value={localFilters.label}
+        onChange={(e) => handleInputChange('label', e.target.value)}
+        className="max-w-sm"
+      />
+      <Select
+        value={filters.framework || 'all'}
+        onValueChange={(value) => setFilter('framework', value === 'all' ? '' : value)}
+      >
+        <SelectTrigger className="max-w-sm">
+          <SelectValue placeholder="Filter by Framework" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Frameworks</SelectItem>
+          <SelectItem value="framework1">Framework 1</SelectItem>
+          <SelectItem value="framework2">Framework 2</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select
+        value={filters.type || 'all'}
+        onValueChange={(value) => setFilter('type', value === 'all' ? '' : value)}
+      >
+        <SelectTrigger className="max-w-sm">
+          <SelectValue placeholder="Filter by Type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Types</SelectItem>
+          <SelectItem value="standard">Standard</SelectItem>
+          <SelectItem value="aggregation">Aggregation</SelectItem>
+        </SelectContent>
+      </Select>
+      <Input
+        placeholder="Filter by Description"
+        value={localFilters.description}
+        onChange={(e) => handleInputChange('description', e.target.value)}
+        className="max-w-sm"
+      />
+    </div>
+  );
+};
+
 const DataViewsTableSkeleton = () => {
   return (
     <div className="w-full space-y-6">
       {/* Filters skeleton */}
       <div className="flex gap-4">
-        {[...Array(3)].map((_, i) => (
+        {[...Array(5)].map((_, i) => (
           <Skeleton
             key={i}
             className="h-10 w-[200px]"
@@ -259,8 +378,8 @@ export function DataViewsTable({
     manualPagination: true,
     pageCount: pagination?.pageCount ?? 0,
     meta: {
-      onDelete: onDelete
-    }
+      onDelete: onDelete,
+    },
   });
 
   if (isLoading) {
@@ -270,13 +389,18 @@ export function DataViewsTable({
   return (
     <div className="w-full">
       <div className="flex flex-col gap-4 py-4">
-        <SharedColumnFilters
+        <DataViewColumnFilters
           filters={columnFilters}
           setFilter={(key, value) => {
             setColumnFilters((prev) => ({...prev, [key]: value}));
+
+            // Handle different filter types
             if (key === 'type' || key === 'framework') {
+              // For type and framework, send as backend filter parameters
               onFilterChange({[key]: value});
-            } else {
+            } else if (key === 'code' || key === 'label' || key === 'description') {
+              // For searchable fields, use the search parameter
+              // Only use the value from the current filter being changed
               onSearch(value);
             }
           }}
