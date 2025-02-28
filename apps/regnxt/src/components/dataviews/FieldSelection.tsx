@@ -28,23 +28,41 @@ export function FieldSelection({config, updateConfig}: FieldSelectionProps) {
 
   useEffect(() => {
     if (fieldsData?.results) {
+      // First create a map of existing selected fields for quick lookup
+      const selectedFieldsMap = fields.reduce((acc, field) => {
+        if (field.selected) {
+          acc[field.id] = field;
+        }
+        return acc;
+      }, {} as Record<string, Field>);
+      
+      // Create a map of config fields by ID
+      const configFieldsMap = config.reduce((acc, field) => {
+        acc[field.id] = field;
+        return acc;
+      }, {} as Record<string, Field>);
+      
       const transformedFields = fieldsData.results.flatMap((tableInfo) =>
         tableInfo.fields.map((field) => {
           const fieldId = `${field.id}`;
+          // Check if this field exists in the config or was previously selected
+          const existingField = configFieldsMap[fieldId] || selectedFieldsMap[fieldId];
+          
           return {
             id: fieldId,
             source: tableInfo.table_name,
             column: field.name,
-            alias: field.name,
+            alias: existingField?.alias || field.name,
             type: field.type,
             description: field.description,
-            selected: false,
+            selected: !!existingField?.selected || configFieldsMap[fieldId] !== undefined,
           };
         })
       );
+      
       setFields(transformedFields);
     }
-  }, [fieldsData, setFields]);
+  }, [fieldsData, setFields, fields, config]);
 
   useEffect(() => {
     if (config?.length > 0 && fields.length > 0) {

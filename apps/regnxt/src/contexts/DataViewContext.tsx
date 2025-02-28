@@ -44,13 +44,34 @@ export function DataViewProvider({
     }
 
     if (data.data_fields) {
-      const selectedFieldIds = new Set(data.data_fields.map((f: any) => f.id));
-      setFields((prevFields) =>
-        prevFields.map((field) => ({
+      // Store the original fields data to maintain references while adding selections
+      const originalFields = [...data.data_fields];
+      
+      // Create a map of fields by ID for easy reference
+      const fieldsById = originalFields.reduce((acc: Record<string, any>, field: any) => {
+        acc[field.id] = field;
+        return acc;
+      }, {});
+      
+      // Update the fields with selection state
+      setFields((prevFields) => {
+        // If we already have fields, update their selection state
+        if (prevFields.length > 0) {
+          return prevFields.map((field) => ({
+            ...field,
+            selected: field.id in fieldsById,
+            // If this field exists in the original data, use its alias
+            alias: fieldsById[field.id]?.alias || field.alias || field.column,
+          }));
+        }
+        
+        // If we don't have fields yet, initialize with the original data
+        // (will be replaced when object fields are loaded)
+        return originalFields.map((field: any) => ({
           ...field,
-          selected: selectedFieldIds.has(field.id),
-        }))
-      );
+          selected: true,
+        }));
+      });
     }
   };
 

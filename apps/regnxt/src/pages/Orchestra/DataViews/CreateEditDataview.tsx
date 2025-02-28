@@ -1,25 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import {useCallback, useEffect, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
 
-
-
-import { AggregationConfiguration } from '@/components/dataviews/AggregationConfiguration';
-import { FieldSelection } from '@/components/dataviews/FieldSelection';
-import { FilterConfiguration } from '@/components/dataviews/FilterConfiguration';
-import { IdentificationForm } from '@/components/dataviews/IdentificationForm';
-import { JoinConfiguration } from '@/components/dataviews/JoinConfiguration';
-import { ObjectSelection } from '@/components/dataviews/ObjectSelection';
-import { PreviewMode } from '@/components/dataviews/PreviewMode';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DataViewProvider } from '@/contexts/DataViewContext';
-import { useDataView } from '@/hooks/api/use-dataview';
-import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, CheckCircle2, ChevronRight, Loader2 } from 'lucide-react';
-
-
-
-
+import {AggregationConfiguration} from '@/components/dataviews/AggregationConfiguration';
+import {FieldSelection} from '@/components/dataviews/FieldSelection';
+import {FilterConfiguration} from '@/components/dataviews/FilterConfiguration';
+import {IdentificationForm} from '@/components/dataviews/IdentificationForm';
+import {JoinConfiguration} from '@/components/dataviews/JoinConfiguration';
+import {ObjectSelection} from '@/components/dataviews/ObjectSelection';
+import {PreviewMode} from '@/components/dataviews/PreviewMode';
+import {Button} from '@/components/ui/button';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import {DataViewProvider} from '@/contexts/DataViewContext';
+import {useDataView} from '@/hooks/api/use-dataview';
+import {toast} from '@/hooks/use-toast';
+import {ArrowLeft, CheckCircle2, ChevronRight, Loader2} from 'lucide-react';
 
 interface DataViewConfig {
   identification: {
@@ -95,15 +89,15 @@ export function CreateEditDataview() {
   });
 
   useEffect(() => {
-    if (dataview && !isInitialized) {
+    if (dataview) {
       const initialConfig = {
         identification: {
-          code: dataview.code,
-          label: dataview.label,
-          description: dataview.description,
-          framework: dataview.framework,
-          type: dataview.type,
-          visible: dataview.is_visible,
+          code: dataview.code || '',
+          label: dataview.label || '',
+          description: dataview.description || '',
+          framework: dataview.framework || '',
+          type: dataview.type || '',
+          visible: dataview.is_visible !== undefined ? dataview.is_visible : true,
         },
         objects: dataview.data_objects || [],
         joins: dataview.data_joins || [],
@@ -115,7 +109,7 @@ export function CreateEditDataview() {
       setDataViewConfig(initialConfig);
       setIsInitialized(true);
     }
-  }, [dataview, isInitialized]);
+  }, [dataview]);
 
   const updateConfig = useCallback((step: keyof DataViewConfig, data: any) => {
     setDataViewConfig((prev) => ({
