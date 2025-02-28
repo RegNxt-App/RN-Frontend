@@ -6,6 +6,7 @@ import VariableStats from '@/components/Variables/VariableStats';
 import VariableTable from '@/components/Variables/VariableTable';
 import {useBackend} from '@/contexts/BackendContext';
 import {toast} from '@/hooks/use-toast';
+import {Variable} from '@/types/databaseTypes';
 import useSWR from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
@@ -13,26 +14,10 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@rn/ui/
 
 const VARIABLES_ENDPOINT = '/api/v1/variables/';
 const DATA_TYPES_ENDPOINT = '/api/v1/variables/data-types/';
-
 interface VariablesResponse {
   count: number;
   num_pages: number;
-  results: Array<{
-    variable_id: number;
-    name: string;
-    label: string;
-    description: string;
-    data_type: string;
-    min_value: string | number | null;
-    max_value: string | number | null;
-    allowed_values: string | null;
-    regex_pattern: string | null;
-    default_value: string | null;
-    is_active: boolean;
-    created_at: string;
-    updated_at: string;
-    created_by: string | null;
-  }>;
+  results: Variable[];
 }
 
 const Variables: React.FC = () => {
@@ -100,7 +85,9 @@ const Variables: React.FC = () => {
     if (!variablesData?.results) return {total: 0, active: 0, withDependencies: 0};
 
     const variables = variablesData.results;
-    const withDependencies = 0;
+    const withDependencies = variables.reduce((count, variable) => {
+      return count + (variable.dependency_count > 0 ? 1 : 0);
+    }, 0);
 
     return {
       total: variables.length,

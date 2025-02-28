@@ -681,4 +681,5 @@ export interface Variable {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  dependency_count: number;
 }

@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
+import {Variable} from '@/types/databaseTypes';
 import {
   ColumnDef,
   SortingState,
@@ -17,23 +18,6 @@ import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
-
-interface Variable {
-  variable_id: number;
-  name: string;
-  label: string;
-  description: string;
-  data_type: string;
-  min_value: string | number | null;
-  max_value: string | number | null;
-  allowed_values: string | null;
-  regex_pattern: string | null;
-  default_value: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  created_by: string | null;
-}
 
 interface VariableTableProps {
   variables: Variable[];
@@ -114,8 +98,8 @@ const VariableTable: React.FC<VariableTableProps> = ({variables, onDeleteClick})
     {
       id: 'dependencies',
       header: 'Dependencies',
-      cell: () => {
-        const count = Math.floor(Math.random() * 3);
+      cell: ({row}) => {
+        const count = row.original.dependency_count || 0;
         return (
           <div className="flex items-center gap-1">
             <Network className="h-4 w-4 text-muted-foreground" />
