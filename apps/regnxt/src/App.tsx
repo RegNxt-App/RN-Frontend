@@ -20,6 +20,7 @@ import EditConnection from './pages/Orchestra/Connections/EditConnection';
 import {CreateEditDataview} from './pages/Orchestra/DataViews/CreateEditDataview';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
 import UserSettings from './pages/Orchestra/UserSettings';
+import VariableForm from './pages/Orchestra/Variables/VariableForm';
 import Variables from './pages/Orchestra/Variables/Variables';
 import WorkflowManager from './pages/Orchestra/workflows/Workflows';
 
@@ -106,6 +107,8 @@ const routeConfig = {
     {path: '/orchestra/connections/new', component: CreateConnection, title: 'Orchestra'},
     {path: '/orchestra/connections/edit/:id', component: EditConnection, title: 'Orchestra'},
     {path: '/orchestra/variables', component: Variables, title: 'Orchestra'},
+    {path: '/orchestra/variables/create', component: VariableForm, title: 'Orchestra'},
+    {path: '/orchestra/variables/:variableId/edit', component: VariableForm, title: 'Orchestra'},
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},
     {path: '/orchestra/dataviews/create', component: CreateEditDataview, title: 'Orchestra'},
