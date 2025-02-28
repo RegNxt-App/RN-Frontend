@@ -94,8 +94,20 @@ export const columns: ColumnDef<ApiDataView>[] = [
   },
   {
     id: 'actions',
-    cell: ({row}) => {
+    cell: ({row, table}) => {
       const dataView = row.original;
+      const { onDelete } = table.options.meta || {};
+      
+      const handleDelete = async () => {
+        if (onDelete && typeof onDelete === 'function') {
+          try {
+            await onDelete(dataView.dataview_id);
+          } catch (error) {
+            console.error('Failed to delete dataview:', error);
+          }
+        }
+      };
+      
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -120,7 +132,12 @@ export const columns: ColumnDef<ApiDataView>[] = [
             {dataView.is_visible && <DropdownMenuItem>Archive</DropdownMenuItem>}
             <DropdownMenuSeparator />
             {!dataView.is_system_generated && (
-              <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+              <DropdownMenuItem 
+                className="text-destructive"
+                onClick={handleDelete}
+              >
+                Delete
+              </DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -199,6 +216,7 @@ interface DataViewsTableProps {
   onPageChange: (page: number) => void;
   onSearch: (search: string) => void;
   onFilterChange: (filters: {framework?: string; type?: string}) => void;
+  onDelete?: (id: number) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -208,6 +226,7 @@ export function DataViewsTable({
   onPageChange,
   onSearch,
   onFilterChange,
+  onDelete,
   isLoading = false,
 }: DataViewsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -239,6 +258,9 @@ export function DataViewsTable({
     },
     manualPagination: true,
     pageCount: pagination?.pageCount ?? 0,
+    meta: {
+      onDelete: onDelete
+    }
   });
 
   if (isLoading) {
