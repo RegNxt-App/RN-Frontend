@@ -350,7 +350,7 @@ const WorkflowManager = () => {
                           {param.label}
                           <span className="text-xs text-gray-500 ml-1">({param.name})</span>
                         </label>
-                        {param.is_enum ? (
+                        {param.data_type === 'enum' ? (
                           <Select
                             value={parameters[param.name] || param.default_value || ''}
                             onValueChange={(value) =>

@@ -328,8 +328,8 @@ export interface WorkflowParameter {
   name: string;
   label: string;
   description: string;
-  statement: string;
-  is_enum: boolean;
+  allowed_values: string;
+  data_type: 'string' | 'number' | 'boolean' | 'enum' | 'date';
   options: Array<{
     value: number | string;
     label: string;
@@ -579,7 +579,60 @@ export interface TransformationDetail {
   destination_dataset: string;
   destination_column: string;
 }
+export interface DerivationDetails {
+  type: 'derivation';
+  base_details: {
+    logical_transformation_rule_id: string;
+    destination_dataset: string;
+    destination_column: string;
+    dataview_statement: string;
+    transformation_statement: string;
+  };
+  column_mappings: Array<{
+    source_column: string | null;
+    destination_column: string | null;
+    destination_column_label: string;
+    source_dataset: string;
+    destination_dataset: string;
+  }>;
+}
 
+export interface GenerationDetails {
+  type: 'generation';
+  base_details: {
+    logical_transformation_rule_id: string;
+    destination_dataset: string;
+    dataview_statement: string;
+  };
+  column_mappings: Array<{
+    source_column: string | null;
+    destination_column: string | null;
+    destination_column_label: string;
+    source_dataset: string;
+    destination_dataset: string;
+  }>;
+  reporting_cells: Array<{
+    reporting_cell: string;
+    row_name: string;
+    col_name: string;
+    filter_statement: string;
+  }>;
+  highlight_source_dataset: string;
+}
+export interface CopyDetails {
+  type: 'copy';
+  base_details: {
+    logical_transformation_rule_id: string;
+    source_dataset: string;
+    destination_dataset: string;
+  };
+  column_mappings: Array<{
+    source_column: string;
+    destination_column: string;
+    destination_column_label: string;
+  }>;
+  highlight_source_dataset: string;
+}
 export interface Field {
   id: string;
   alias: string;
@@ -611,4 +664,22 @@ export interface ApiResponse<T> {
   page: number;
   page_size: number;
   total_pages: number;
+}
+
+export interface Variable {
+  variable_id: number;
+  name: string;
+  label: string;
+  description: string;
+  data_type: string;
+  min_value: string | number | null;
+  max_value: string | number | null;
+  allowed_values: string | null;
+  regex_pattern: string | null;
+  default_value: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+  dependency_count: number;
 }

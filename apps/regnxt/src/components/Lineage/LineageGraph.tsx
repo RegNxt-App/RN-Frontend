@@ -17,13 +17,15 @@ import dagre from 'dagre';
 import '@xyflow/react/dist/style.css';
 
 import {LineageConnection, LineageDirection} from '@/types/databaseTypes';
+import {TRANSFORMATION_COLORS, getTransformationType} from '@/utils/lineageUtils';
 
 import DatasetNodeComponent from './DatasetNode';
+import LineageLegend from './LineageLegend';
 
 export interface LineageGraphProps {
   lineageData: LineageConnection[];
   direction: LineageDirection;
-  onEdgeClick: (ruleId: string) => void;
+  onEdgeClick: (ruleId: string, sourceDataset: string) => void;
   selectedTransformationId: string | null;
 }
 
@@ -116,6 +118,8 @@ const LineageGraphContent: React.FC<LineageGraphProps> = ({
     return lineageData.map((connection) => {
       const isSelected = connection.logical_transformation_rule_id === selectedTransformationId;
       const edgeId = `${connection.source_dataset}-${connection.destination_dataset}-${connection.logical_transformation_rule_id}`;
+      const transformationType = getTransformationType(connection.logical_transformation_rule_id);
+      const color = TRANSFORMATION_COLORS[transformationType] || TRANSFORMATION_COLORS.DEFAULT;
 
       return {
         id: edgeId,
@@ -123,6 +127,7 @@ const LineageGraphContent: React.FC<LineageGraphProps> = ({
         target: connection.destination_dataset,
         data: {
           transformationId: connection.logical_transformation_rule_id,
+          transformationType: transformationType,
         },
         animated: false,
         type: 'default',
@@ -130,11 +135,11 @@ const LineageGraphContent: React.FC<LineageGraphProps> = ({
           type: MarkerType.ArrowClosed,
           width: 15,
           height: 15,
-          color: isSelected ? '#0091ff' : '#64748b',
+          color: isSelected ? '#0091ff' : color,
         },
         style: {
           strokeWidth: isSelected ? 3 : 1.5,
-          stroke: isSelected ? '#0091ff' : '#64748b',
+          stroke: isSelected ? '#0091ff' : color,
           cursor: 'pointer',
         },
         label: connection.logical_transformation_rule_id.substring(0, 8) + '...',
@@ -169,7 +174,7 @@ const LineageGraphContent: React.FC<LineageGraphProps> = ({
       const transformationId = edge.data?.transformationId;
       if (transformationId) {
         document.body.style.cursor = 'wait';
-        onEdgeClick(transformationId as string);
+        onEdgeClick(transformationId as string, edge.source);
         setTimeout(() => {
           document.body.style.cursor = 'default';
         }, 150);
@@ -193,6 +198,7 @@ const LineageGraphContent: React.FC<LineageGraphProps> = ({
     >
       <Background />
       <Controls showInteractive={false} />
+      <LineageLegend />
     </ReactFlow>
   );
 };
