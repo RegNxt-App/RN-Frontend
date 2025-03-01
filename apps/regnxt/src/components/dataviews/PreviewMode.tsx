@@ -8,7 +8,6 @@ import {Loader2, RefreshCw} from 'lucide-react';
 
 import {ScrollArea} from '@rn/ui/components/ui/scroll-area';
 
-// Types
 interface Field {
   source: string;
   name: string;
@@ -85,10 +84,8 @@ export function PreviewMode({config, previewData, isLoading, onRefresh}: Preview
   const [error, setError] = useState<string | null>(null);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
 
-  // At the beginning of generateSqlQuery, add safety checks
   const generateSqlQuery = useCallback((config: DataViewConfig): string => {
     try {
-      // Ensure all config arrays exist and are arrays
       const safeConfig = {
         ...config,
         fields: Array.isArray(config.fields) ? config.fields : [],
@@ -99,18 +96,56 @@ export function PreviewMode({config, previewData, isLoading, onRefresh}: Preview
       };
 
       const selectItems = [
-        ...safeConfig.fields.map((field) => {
-          const object = safeConfig.objects.find((obj) => obj.name === field.source);
-          const tableName = object?.alias || field.source;
-          const column = `${tableName}.${field.name}`;
-          return field.alias ? `${column} AS "${field.alias}"` : column;
-        }),
-        ...safeConfig.aggregations.map((agg) => {
-          const object = safeConfig.objects.find((obj) => obj.name === agg.source);
-          const tableName = object?.alias || agg.source;
-          const column = `${agg.function}(${tableName}.${agg.field})`;
-          return agg.alias ? `${column} AS "${agg.alias}"` : column;
-        }),
+        ...safeConfig.fields
+          .map((field) => {
+            if (!field.source || !field.column) {
+              console.warn('Field is missing required properties:', field);
+              return '';
+            }
+
+            const object = safeConfig.objects.find((obj) => obj.name === field.source);
+            const tableName = object?.alias || field.source;
+            const column = `${tableName}.${field.column}`;
+            return field.alias ? `${column} AS "${field.alias}"` : column;
+          })
+          .filter(Boolean),
+        ...safeConfig.aggregations
+          .map((agg) => {
+            if (!agg.function || !agg.field) {
+              console.warn('Aggregation is missing required properties:', agg);
+              return '';
+            }
+            if (agg.field.includes('.')) {
+              const parts = agg.field.split('.');
+              if (parts.length === 2) {
+                const tableName = parts[0];
+                const column = parts[1];
+                const object = safeConfig.objects.find(
+                  (obj) => obj.name === tableName || obj.alias === tableName
+                );
+                const sourceRef = object?.alias || tableName;
+                const fullColumn = `${agg.function}(${sourceRef}.${column})`;
+                return agg.alias ? `${fullColumn} AS "${agg.alias}"` : fullColumn;
+              }
+            }
+            const sourceObj = agg.source ? safeConfig.objects.find((obj) => obj.name === agg.source) : null;
+            const object = sourceObj || safeConfig.objects.find((obj) => obj.alias === agg.source);
+
+            if (!object && !agg.source) {
+              console.warn('Cannot resolve table for aggregation:', agg);
+              return '';
+            }
+
+            const tableName = (object?.alias || agg.source || '').trim();
+            if (!tableName) {
+              console.warn('Empty table name for aggregation:', agg);
+              return '';
+            }
+
+            const column = `${agg.function}(${tableName}.${agg.field})`;
+            return agg.alias ? `${column} AS "${agg.alias}"` : column;
+          })
+          .filter(Boolean),
       ];
 
       const selectClause = `SELECT\n  ${selectItems.length ? selectItems.join(',\n  ') : '*'}`;
@@ -121,8 +156,8 @@ export function PreviewMode({config, previewData, isLoading, onRefresh}: Preview
       const baseObject = safeConfig.objects[0];
       const fromClause = `FROM ${baseObject.name}${baseObject.alias ? ` AS ${baseObject.alias}` : ''}`;
       const joinClauses = safeConfig.joins.map((join) => {
-        const conditions = join.conditions
-          .map((condition) => {
+        const conditions = join?.conditions
+          ?.map((condition) => {
             let {leftOperand, operator, rightOperand} = condition;
             operator = SQL_OPERATORS[operator as keyof typeof SQL_OPERATORS] || operator;
 
@@ -137,26 +172,62 @@ export function PreviewMode({config, previewData, isLoading, onRefresh}: Preview
         return `${join.type.toUpperCase()} JOIN ${join.target} ON ${conditions}`;
       });
 
-      const whereConditions = config.filters.map((filter, index) => {
-        const operator = SQL_OPERATORS[filter.operator as keyof typeof SQL_OPERATORS] || filter.operator;
-        let condition = `${filter.field} ${operator} `;
-
-        if (operator === 'IS NULL' || operator === 'IS NOT NULL') {
-          condition = `${filter.field} ${operator}`;
-        } else if (typeof filter.value === 'string') {
-          condition += operator.toLowerCase().includes('like') ? `'%${filter.value}%'` : `'${filter.value}'`;
-        } else {
-          condition += filter.value;
-        }
-
-        return index > 0 && filter.logicalOperator ? `${filter.logicalOperator} ${condition}` : condition;
-      });
+      const whereConditions = safeConfig.filters
+        .filter((filter) => {
+          if (!filter.field || !filter.operator) {
+            console.warn('Filter missing required properties:', filter);
+            return false;
+          }
+          return true;
+        })
+        ?.map((filter, index) => {
+          const operator = SQL_OPERATORS[filter.operator as keyof typeof SQL_OPERATORS] || filter.operator;
+          let fieldRef = filter.field;
+          if (fieldRef.includes('.')) {
+            const parts = fieldRef.split('.');
+            if (parts.length === 2) {
+              const tableName = parts[0];
+              const columnName = parts[1];
+              const object = safeConfig.objects.find(
+                (obj) => obj.name === tableName || obj.alias === tableName
+              );
+              const sourceRef = object?.alias || tableName;
+              fieldRef = `${sourceRef}.${columnName}`;
+            }
+          }
+          let condition = `${fieldRef} ${operator} `;
+          if (operator === 'IS NULL' || operator === 'IS NOT NULL') {
+            condition = `${fieldRef} ${operator}`;
+          } else if (typeof filter.value === 'string') {
+            condition += operator.toLowerCase().includes('like')
+              ? `'%${filter.value}%'`
+              : `'${filter.value}'`;
+          } else if (filter.value !== undefined && filter.value !== null) {
+            condition += filter.value;
+          } else {
+            console.warn('Filter has no value:', filter);
+            return '';
+          }
+          return index > 0 && filter.logicalOperator ? `${filter.logicalOperator} ${condition}` : condition;
+        })
+        .filter(Boolean);
 
       const whereClause = whereConditions.length ? `WHERE ${whereConditions.join(' ')}` : '';
 
-      const groupByFields = config.fields
-        .filter((field) => !field.is_aggregated)
-        .map((field) => `${field.source}.${field.name}`);
+      const groupByFields = safeConfig.fields
+        .filter((field) => {
+          if (field.is_aggregated) return false;
+          if (!field.source || !field.column) {
+            console.warn('Field missing required properties for GROUP BY:', field);
+            return false;
+          }
+          return true;
+        })
+        ?.map((field) => {
+          const object = safeConfig.objects.find((obj) => obj.name === field.source);
+          const tableName = object?.alias || field.source;
+          return `${tableName}.${field.column}`;
+        });
 
       const groupByClause =
         config.aggregations.length && groupByFields.length ? `GROUP BY ${groupByFields.join(', ')}` : '';
@@ -221,7 +292,7 @@ export function PreviewMode({config, previewData, isLoading, onRefresh}: Preview
       <Table>
         <TableHeader>
           <TableRow>
-            {columns.map((column) => (
+            {columns?.map((column) => (
               <TableHead
                 key={column}
                 className="whitespace-nowrap"
@@ -233,9 +304,9 @@ export function PreviewMode({config, previewData, isLoading, onRefresh}: Preview
           </TableRow>
         </TableHeader>
         <TableBody>
-          {previewData.map((row, rowIndex) => (
+          {previewData?.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
-              {columns.map((column) => {
+              {columns?.map((column) => {
                 const field = config.fields.find(
                   (f) => f.alias === column || `${f.source}.${f.name}` === column
                 );
