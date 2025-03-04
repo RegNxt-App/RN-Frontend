@@ -48,10 +48,7 @@ export const useVariableForm = () => {
     data: dataTypes,
     error: typesError,
     isLoading: isLoadingTypes,
-  } = useSWR<string[]>(DATA_TYPES_ENDPOINT, async (url: string) => {
-    const response = await backendInstance.get(url);
-    return response.data;
-  });
+  } = useSWR<string[]>(DATA_TYPES_ENDPOINT, (url: string) => backendInstance.get(url).then((r) => r.data));
 
   const {
     data: variableDetails,
@@ -60,15 +57,7 @@ export const useVariableForm = () => {
     mutate: refreshVariableDetails,
   } = useSWR<VariableDetails>(
     isEditMode ? `${VARIABLES_ENDPOINT}${variableId}/` : null,
-    async (url: string) => {
-      try {
-        const response = await backendInstance.get(url);
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching variable details:', error);
-        throw error;
-      }
-    },
+    (url: string) => backendInstance.get(url).then((r) => r.data),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,

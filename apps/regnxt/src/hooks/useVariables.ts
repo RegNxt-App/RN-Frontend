@@ -33,7 +33,9 @@ export const useVariables = (): UseVariablesReturn => {
     data: variablesData,
     error,
     isLoading,
-  } = useSWR<VariablesResponse>(VARIABLES_ENDPOINT, backendInstance);
+  } = useSWR<VariablesResponse>(VARIABLES_ENDPOINT, (url: string) =>
+    backendInstance.get(url).then((r) => r.data)
+  );
 
   const refreshVariables = async (): Promise<void> => {
     await mutate(VARIABLES_ENDPOINT);
@@ -41,8 +43,7 @@ export const useVariables = (): UseVariablesReturn => {
 
   const getVariable = async (id: number): Promise<Variable | null> => {
     try {
-      const response = await backendInstance.get(`${VARIABLES_ENDPOINT}${id}/`);
-      return response.data;
+      return await backendInstance.get(`${VARIABLES_ENDPOINT}${id}/`).then((r) => r.data);
     } catch (error) {
       console.error('Error fetching variable:', error);
       return null;
@@ -54,13 +55,15 @@ export const useVariables = (): UseVariablesReturn => {
       let response;
 
       if (id) {
-        response = await backendInstance.put(`${VARIABLES_ENDPOINT}${id}/`, data);
+        response = await backendInstance.put(`${VARIABLES_ENDPOINT}${id}/`, data).then((r) => r.data);
       } else {
-        response = await backendInstance.post(`${VARIABLES_ENDPOINT}create-variable/`, data);
+        response = await backendInstance
+          .post(`${VARIABLES_ENDPOINT}create-variable/`, data)
+          .then((r) => r.data);
       }
 
       await refreshVariables();
-      return response.data;
+      return response;
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'An error occurred while saving the variable';
       toast({
@@ -97,6 +100,8 @@ export const useVariables = (): UseVariablesReturn => {
         variable_id: variableId,
         dependent_variable_ids: dependentVariableIds,
       });
+      await refreshVariables();
+      await mutate(`${VARIABLES_ENDPOINT}${variableId}/`);
       return true;
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to update dependencies';
