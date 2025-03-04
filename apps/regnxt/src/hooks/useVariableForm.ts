@@ -20,7 +20,9 @@ export interface VariableDetails extends Variable {
   dependencies?: any[];
   dependent_variables?: any[];
 }
-
+type VariableCreateRequest = VariableFormData & {
+  dependencies?: number[];
+};
 export const useVariableForm = () => {
   const {variableId} = useParams<{variableId: string}>();
   const isEditMode = !!variableId;
@@ -29,7 +31,8 @@ export const useVariableForm = () => {
   const [selectedType, setSelectedType] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {toast} = useToast();
-  const {saveVariable, getVariable} = useVariables();
+  const {saveVariable, updateDependencies} = useVariables();
+  const [dependencies, setDependencies] = useState<number[]>([]);
 
   const form = useForm<VariableFormData>({
     defaultValues: {
@@ -99,8 +102,6 @@ export const useVariableForm = () => {
 
   useEffect(() => {
     if (variableDetails && isEditMode) {
-      console.log('Variable type from API:', variableDetails.data_type);
-
       form.reset({
         name: variableDetails.name || '',
         label: variableDetails.label || '',
@@ -113,7 +114,9 @@ export const useVariableForm = () => {
         default_value: variableDetails.default_value,
         is_active: variableDetails.is_active || false,
       });
-
+      if (variableDetails.dependencies) {
+        setDependencies(variableDetails.dependencies.map((d) => d.variable_id));
+      }
       setSelectedType(variableDetails.data_type);
     }
   }, [variableDetails, isEditMode, form]);
@@ -122,16 +125,13 @@ export const useVariableForm = () => {
     try {
       setIsSubmitting(true);
 
-      let formattedData = {...data};
+      const formattedData = {...data};
 
       if (data.data_type === 'number' || data.data_type === 'integer') {
-        if (data.min_value !== undefined && data.min_value !== null) {
-          formattedData.min_value = Number(data.min_value);
-        }
-        if (data.max_value !== undefined && data.max_value !== null) {
-          formattedData.max_value = Number(data.max_value);
-        }
-        if (data.default_value !== undefined && data.default_value !== null && data.default_value !== '') {
+        formattedData.min_value = data.min_value != null ? Number(data.min_value) : null;
+        formattedData.max_value = data.max_value != null ? Number(data.max_value) : null;
+
+        if (data.default_value) {
           formattedData.default_value = Number(data.default_value).toString();
         }
       } else if (data.data_type === 'date') {
@@ -143,12 +143,26 @@ export const useVariableForm = () => {
         formattedData.default_value = data.default_value.toLowerCase();
       }
 
-      await saveVariable(formattedData, isEditMode ? Number(variableId) : undefined);
+      if (!isEditMode) {
+        await saveVariable({
+          ...formattedData,
+          dependencies: dependencies,
+        } as VariableCreateRequest);
 
-      toast({
-        title: 'Success',
-        description: `Variable ${isEditMode ? 'updated' : 'created'} successfully.`,
-      });
+        toast({
+          title: 'Success',
+          description: 'Variable created successfully.',
+        });
+      } else if (variableId) {
+        await saveVariable(formattedData, Number(variableId));
+
+        await updateDependencies(Number(variableId), dependencies);
+
+        toast({
+          title: 'Success',
+          description: 'Variable updated successfully.',
+        });
+      }
 
       navigate('/orchestra/variables');
     } catch (error: any) {
@@ -167,7 +181,9 @@ export const useVariableForm = () => {
   const handleTypeChange = (value: string) => {
     setSelectedType(value);
   };
-
+  const handleDependenciesChange = (deps: number[]) => {
+    setDependencies(deps);
+  };
   const error = typesError || (isEditMode && variableError);
   const isLoading = isLoadingTypes || (isEditMode && isLoadingVariable);
 
@@ -185,6 +201,8 @@ export const useVariableForm = () => {
     onSubmit,
     handleTypeChange,
     navigate,
+    dependencies,
+    handleDependenciesChange,
   };
 };
 
