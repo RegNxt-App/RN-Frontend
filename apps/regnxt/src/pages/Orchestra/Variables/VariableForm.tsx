@@ -1,7 +1,9 @@
-import React, {useEffect} from 'react';
+import React from 'react';
+import {useParams} from 'react-router-dom';
 
 import Loader from '@/common/Loader';
 import BasicFields from '@/components/Variables/FormComponents/BasicFields';
+import DependencySelector from '@/components/Variables/FormComponents/DependencySelector';
 import VariableError from '@/components/Variables/FormComponents/ErrorDisplay';
 import TypeFields from '@/components/Variables/FormComponents/TypeFields';
 import useVariableForm from '@/hooks/useVariableForm';
@@ -11,6 +13,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@rn/ui/
 import {Form} from '@rn/ui/components/ui/form';
 
 const VariableForm: React.FC = () => {
+  const {variableId} = useParams<{variableId: string}>();
   const {
     form,
     isEditMode,
@@ -23,10 +26,9 @@ const VariableForm: React.FC = () => {
     onSubmit,
     handleTypeChange,
     navigate,
+    variableDetails,
+    handleDependenciesChange,
   } = useVariableForm();
-  useEffect(() => {
-    console.log('Current selectedType:', selectedType);
-  }, [selectedType]);
 
   if (error) {
     return <VariableError message={error.message || 'An error occurred'} />;
@@ -59,7 +61,7 @@ const VariableForm: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>{isEditMode ? 'Variable Details' : 'New Variable'}</CardTitle>
+          <CardTitle>Variable Details</CardTitle>
           <CardDescription>
             {isEditMode
               ? 'Edit the variable properties below'
@@ -87,7 +89,11 @@ const VariableForm: React.FC = () => {
                   control={form.control}
                 />
               )}
-
+              <DependencySelector
+                variableId={isEditMode ? Number(variableId) : undefined}
+                onDependenciesChange={handleDependenciesChange}
+                initialDependencies={variableDetails?.dependencies?.map((d) => d.variable_id) || []}
+              />
               <div className="flex justify-end gap-4 mt-6">
                 <Button
                   type="button"

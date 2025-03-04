@@ -75,7 +75,6 @@ const BasicFields: React.FC<BasicFieldsProps> = ({
                   field.onChange(value);
                   onTypeChange(value);
                 }}
-                disabled={isEditMode}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select data type" />
