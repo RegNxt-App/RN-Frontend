@@ -1,10 +1,11 @@
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
 import {SharedDataTable} from '@/components/SharedDataTable';
 import {TooltipWrapper} from '@/components/TooltipWrapper';
 import WorkflowStats from '@/components/workflows/WorkflowStats';
 import {useBackend} from '@/contexts/BackendContext';
 import {useWorkflow} from '@/contexts/WorkflowContext';
+import {useDebounce} from '@/hooks/use-debounce';
 import {toast} from '@/hooks/use-toast';
 import {DependencyParameter, Workflow, WorkflowParameter, WorkflowRun} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
@@ -297,7 +298,52 @@ const WorkflowManager = () => {
   const handleRefreshWorkflows = () => {
     mutate(WORKFLOWS_ENDPOINT);
   };
+  const debouncedParameters = useDebounce(parameters, 300);
 
+  useEffect(() => {
+    if (selectedWorkflow && Object.keys(debouncedParameters).length > 0) {
+      const hasParametersWithDependencies = workflowParameters.some(
+        (param) => param.dependencies && param.dependencies.length > 0
+      );
+      if (hasParametersWithDependencies) {
+        const fetchDependentOptions = async () => {
+          try {
+            const response = await backendInstance.post(
+              `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/dependent-options/`,
+              {parameters: debouncedParameters}
+            );
+
+            if (response.data) {
+              const updatedParameters = workflowParameters.map((param) => {
+                if (response.data[param.name]) {
+                  return {
+                    ...param,
+                    options: response.data[param.name],
+                  };
+                }
+                return param;
+              });
+
+              mutate(
+                `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/parameters/`,
+                updatedParameters,
+                false
+              );
+            }
+          } catch (error) {
+            console.error('Error fetching dependent options:', error);
+            toast({
+              title: 'Error',
+              description: 'Failed to fetch parameter options',
+              variant: 'destructive',
+            });
+          }
+        };
+
+        fetchDependentOptions();
+      }
+    }
+  }, [debouncedParameters, selectedWorkflow, workflowParameters]);
   if (error) {
     return <div className="text-red-500 p-4 text-center">Error loading workflows: {error.message}</div>;
   }
