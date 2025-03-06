@@ -46,6 +46,8 @@ export function IdentificationForm({
 }: IdentificationFormProps) {
   const {
     register,
+    handleSubmit,
+    control,
     watch,
     setValue,
     formState: {errors},
@@ -53,42 +55,46 @@ export function IdentificationForm({
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      code: '',
-      label: '',
-      description: '',
-      framework: '',
-      visible: true,
+      code: config.code || '',
+      label: config.label || '',
+      description: config.description || '',
+      framework: config.framework || '',
+      visible: config.visible ?? true,
     },
+    mode: 'onChange'
   });
 
-  // Initialize form with config values when in edit mode or when config changes
+  // Initialize form with config values when component mounts or config changes
   useEffect(() => {
     if (config) {
-      // Reset form with config values, preserving validation state
-      reset(
-        {
-          code: config.code || '',
-          label: config.label || '',
-          description: config.description || '',
-          framework: config.framework || '',
-          visible: config.visible ?? true,
-        },
-        {
-          keepDirty: false,
-          keepErrors: false,
-        }
-      );
+      const formValues = {
+        code: config.code || '',
+        label: config.label || '',
+        description: config.description || '',
+        framework: config.framework || '',
+        visible: config.visible ?? true,
+      };
+      
+      reset(formValues);
     }
   }, [config, reset]);
 
-  // Watch form values and update parent
-  const formValues = watch();
-  useEffect(() => {
-    // Only update if we have valid required fields
-    if (formValues.code && formValues.label && formValues.framework) {
-      updateConfig(formValues);
-    }
-  }, [formValues, updateConfig]);
+  // Function to handle form changes
+  const onFormChange = handleSubmit((data) => {
+    updateConfig(data);
+  });
+
+  // Handle individual field changes to ensure inputs are responsive
+  const handleFieldChange = (field: keyof FormData, value: any) => {
+    setValue(field, value, { 
+      shouldDirty: true, 
+      shouldTouch: true,
+      shouldValidate: true 
+    });
+    
+    // Trigger form validation and update
+    setTimeout(() => onFormChange(), 0);
+  };
 
   return (
     <div className="space-y-6">
@@ -100,7 +106,8 @@ export function IdentificationForm({
         <Input
           id="code"
           placeholder="Enter unique code"
-          {...register('code')}
+          value={watch('code')}
+          onChange={(e) => handleFieldChange('code', e.target.value)}
           disabled={isEdit}
           className={errors.code ? 'border-destructive' : ''}
         />
@@ -115,7 +122,8 @@ export function IdentificationForm({
         <Input
           id="label"
           placeholder="Enter label"
-          {...register('label')}
+          value={watch('label')}
+          onChange={(e) => handleFieldChange('label', e.target.value)}
           className={errors.label ? 'border-destructive' : ''}
         />
         {errors.label && <span className="text-sm text-destructive">{errors.label.message}</span>}
@@ -126,7 +134,8 @@ export function IdentificationForm({
         <Textarea
           id="description"
           placeholder="Enter description"
-          {...register('description')}
+          value={watch('description') || ''}
+          onChange={(e) => handleFieldChange('description', e.target.value)}
           className={errors.description ? 'border-destructive' : ''}
         />
         {errors.description && <span className="text-sm text-destructive">{errors.description.message}</span>}
@@ -138,8 +147,8 @@ export function IdentificationForm({
           <span className="text-destructive">*</span>
         </Label>
         <Select
-          value={formValues.framework}
-          onValueChange={(value) => setValue('framework', value, {shouldDirty: true})}
+          value={watch('framework')}
+          onValueChange={(value) => handleFieldChange('framework', value)}
         >
           <SelectTrigger
             id="framework"
@@ -168,8 +177,8 @@ export function IdentificationForm({
         </div>
         <Switch
           id="visible"
-          checked={formValues.visible}
-          onCheckedChange={(checked) => setValue('visible', checked, {shouldDirty: true})}
+          checked={watch('visible')}
+          onCheckedChange={(checked) => handleFieldChange('visible', checked)}
         />
       </div>
 

@@ -1,10 +1,11 @@
-import {useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {DataViewsTable} from '@/components/dataviews/DataViewsTable';
 import {useBackend} from '@/contexts/BackendContext';
+import {useToast} from '@/hooks/use-toast';
 import {ArrowUpRight, BarChart3, Database, FileText, PlusCircle} from 'lucide-react';
-import useSWR from 'swr';
+import useSWR, {mutate} from 'swr';
 
 import {Button} from '@rn/ui/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
@@ -45,6 +46,7 @@ interface DataViewsResponse {
 export default function Dataviews() {
   const navigate = useNavigate();
   const {backendInstance} = useBackend();
+  const {toast} = useToast();
   const [searchParams, setSearchParams] = useState({
     page: 1,
     page_size: 10,
@@ -52,6 +54,34 @@ export default function Dataviews() {
     framework: '',
     type: '',
   });
+
+  const handleDelete = useCallback(
+    async (id: number) => {
+      try {
+        await backendInstance.delete(`/api/v1/dataviews/${id}/`);
+
+        await mutate(
+          `/api/v1/dataviews/?page=${searchParams.page}&page_size=${searchParams.page_size}${
+            searchParams.search ? `&search=${searchParams.search}` : ''
+          }${searchParams.framework ? `&framework=${searchParams.framework}` : ''}${
+            searchParams.type ? `&type=${searchParams.type}` : ''
+          }`
+        );
+
+        toast({
+          title: 'Success',
+          description: 'Data view deleted successfully',
+        });
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error.response?.data?.error || 'Failed to delete data view',
+          variant: 'destructive',
+        });
+      }
+    },
+    [backendInstance, searchParams, toast]
+  );
 
   const {
     data: viewsData,
@@ -162,7 +192,14 @@ export default function Dataviews() {
             }}
             isLoading={isLoading}
             onPageChange={(page) => setSearchParams((prev) => ({...prev, page}))}
-            onSearch={(search) => setSearchParams((prev) => ({...prev, search, page: 1}))}
+            onSearch={(search) => {
+              // Reset the page when search changes
+              setSearchParams((prev) => ({
+                ...prev, 
+                search,
+                page: 1
+              }));
+            }}
             onFilterChange={(filters) =>
               setSearchParams((prev) => ({
                 ...prev,
@@ -170,6 +207,7 @@ export default function Dataviews() {
                 page: 1,
               }))
             }
+            onDelete={handleDelete}
           />
         </CardContent>
       </Card>
