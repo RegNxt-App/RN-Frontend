@@ -29,11 +29,11 @@ export const useTaskVariables = (
 
   const inputStatement = variablesResponse?.find(
     (v) => v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
-  )?.statement;
+  )?.allowed_values;
 
   const outputStatement = variablesResponse?.find(
     (v) => v.name.toLowerCase().includes('output') && v.name.toLowerCase().includes('dataset')
-  )?.statement;
+  )?.allowed_values;
 
   const {data: inputOptionsResponse} = useSWR<ApiResponse<(DatasetOption | DataviewOption)[]>>(
     inputStatement ? `/api/v1/tasks/execute-sql/?statement=${encodeURIComponent(inputStatement)}` : null,

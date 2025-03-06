@@ -322,6 +322,20 @@ export interface TaskSubtypeParameter {
   id: number;
   name: string;
 }
+export interface DependencyParameter {
+  variable_id: number;
+  name: string;
+  label: string;
+  description: string;
+  data_type: 'string' | 'number' | 'boolean' | 'enum' | 'date' | 'integer';
+  allowed_values: string | null;
+  min_value: number | null;
+  max_value: number | null;
+  options?: Array<{
+    value: number | string;
+    label: string;
+  }>;
+}
 export interface WorkflowParameter {
   task_id: number;
   default_value: string | null;
@@ -334,6 +348,7 @@ export interface WorkflowParameter {
     value: number | string;
     label: string;
   }>;
+  dependencies?: DependencyParameter[];
 }
 
 export interface Field {
@@ -455,7 +470,7 @@ export interface VariableResponse {
   description: string;
   data_type: string;
   is_enum: boolean;
-  statement: string;
+  allowed_values: string;
   min_value: null | number;
   max_value: null | number;
 }
