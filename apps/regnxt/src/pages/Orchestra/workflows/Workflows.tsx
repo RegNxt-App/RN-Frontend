@@ -6,7 +6,7 @@ import WorkflowStats from '@/components/workflows/WorkflowStats';
 import {useBackend} from '@/contexts/BackendContext';
 import {useWorkflow} from '@/contexts/WorkflowContext';
 import {toast} from '@/hooks/use-toast';
-import {Workflow, WorkflowParameter, WorkflowRun} from '@/types/databaseTypes';
+import {DependencyParameter, Workflow, WorkflowParameter, WorkflowRun} from '@/types/databaseTypes';
 import {ColumnDef} from '@tanstack/react-table';
 import {Clock, Edit, Loader2, Play} from 'lucide-react';
 import useSWR, {mutate} from 'swr';
@@ -350,7 +350,129 @@ const WorkflowManager = () => {
                           {param.label}
                           <span className="text-xs text-gray-500 ml-1">({param.name})</span>
                         </label>
-                        {param.data_type === 'enum' ? (
+
+                        {param.dependencies ? (
+                          <div className="space-y-3 border p-3 rounded-md">
+                            <div className="text-xs text-gray-500">This parameter depends on:</div>
+
+                            {param.dependencies.map((dep: DependencyParameter) => (
+                              <div
+                                key={dep.name}
+                                className="ml-2 space-y-1"
+                              >
+                                <label className="text-xs font-medium">
+                                  {dep.label}
+                                  <span className="text-xs text-gray-500 ml-1">({dep.name})</span>
+                                </label>
+
+                                {dep.data_type === 'enum' ? (
+                                  <Select
+                                    value={parameters[dep.name] || ''}
+                                    onValueChange={(value) =>
+                                      setParameters((prev) => ({...prev, [dep.name]: value}))
+                                    }
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select value" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {dep.options && dep.options.length > 0 ? (
+                                        dep.options.map((option: {value: number | string; label: string}) => (
+                                          <SelectItem
+                                            key={option.value}
+                                            value={String(option.value)}
+                                          >
+                                            {option.label}
+                                          </SelectItem>
+                                        ))
+                                      ) : (
+                                        <SelectItem
+                                          disabled
+                                          value="none"
+                                        >
+                                          No options available
+                                        </SelectItem>
+                                      )}
+                                    </SelectContent>
+                                  </Select>
+                                ) : dep.data_type === 'date' ? (
+                                  <Input
+                                    type="date"
+                                    value={parameters[dep.name] || ''}
+                                    onChange={(e) =>
+                                      setParameters((prev) => ({
+                                        ...prev,
+                                        [dep.name]: e.target.value,
+                                      }))
+                                    }
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                                  />
+                                ) : (
+                                  <Input
+                                    value={parameters[dep.name] || ''}
+                                    onChange={(e) =>
+                                      setParameters((prev) => ({
+                                        ...prev,
+                                        [dep.name]: e.target.value,
+                                      }))
+                                    }
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                                  />
+                                )}
+                              </div>
+                            ))}
+
+                            <div className="mt-3 pt-3 border-t">
+                              <label className="text-xs font-medium">
+                                {param.label}
+                                <span className="text-xs text-gray-500 ml-1">({param.name})</span>
+                              </label>
+                              {param.data_type === 'enum' ? (
+                                <Select
+                                  value={parameters[param.name] || param.default_value || ''}
+                                  onValueChange={(value) =>
+                                    setParameters((prev) => ({...prev, [param.name]: value}))
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder={`Select ${param.label}`} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {param.options?.length > 0 ? (
+                                      param.options.map((option) => (
+                                        <SelectItem
+                                          key={option.value}
+                                          value={String(option.value)}
+                                        >
+                                          {option.label}
+                                        </SelectItem>
+                                      ))
+                                    ) : (
+                                      <SelectItem
+                                        disabled
+                                        value="none"
+                                      >
+                                        No options available
+                                      </SelectItem>
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <Input
+                                  value={parameters[param.name] || param.default_value || ''}
+                                  onChange={(e) =>
+                                    setParameters((prev) => ({
+                                      ...prev,
+                                      [param.name]: e.target.value,
+                                    }))
+                                  }
+                                  placeholder={`Enter ${param.label}`}
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        ) : param.data_type === 'enum' ? (
                           <Select
                             value={parameters[param.name] || param.default_value || ''}
                             onValueChange={(value) =>

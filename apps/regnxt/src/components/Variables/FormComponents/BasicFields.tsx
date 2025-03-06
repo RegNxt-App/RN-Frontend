@@ -93,7 +93,6 @@ const BasicFields: React.FC<BasicFieldsProps> = ({
             )}
           />
         ) : null}
-        {isEditMode && <FormDescription>Data type cannot be changed after creation</FormDescription>}
       </FormItem>
 
       <FormField
@@ -102,7 +101,7 @@ const BasicFields: React.FC<BasicFieldsProps> = ({
         render={({field}) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
             <div className="space-y-0.5">
-              <FormLabel>Active Status</FormLabel>
+              <FormLabel>Status</FormLabel>
               <FormDescription>Enable or disable this variable</FormDescription>
             </div>
             <FormControl>
