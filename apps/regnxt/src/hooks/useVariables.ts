@@ -6,21 +6,11 @@ import {Variable} from '@/types/databaseTypes';
 import useSWR, {mutate} from 'swr';
 
 const VARIABLES_ENDPOINT = '/api/v1/variables/';
-const DEPENDENCIES_ENDPOINT = '/api/v1/variables/{id}/dependencies/';
 
 interface VariablesResponse {
   count: number;
   num_pages: number;
   results: Variable[];
-}
-
-interface VariableDependency {
-  variable_id: number;
-  name: string;
-  label: string;
-  data_type: string;
-  default_value: string | null;
-  is_active: boolean;
 }
 
 interface UseVariablesReturn {
@@ -31,9 +21,6 @@ interface UseVariablesReturn {
   saveVariable: (data: Partial<Variable>, id?: number) => Promise<Variable>;
   deleteVariable: (id: number) => Promise<boolean>;
   refreshVariables: () => Promise<void>;
-  getDependencies: (id: number) => Promise<VariableDependency[]>;
-  addDependency: (variableId: number, dependentVariableId: number) => Promise<boolean>;
-  removeDependency: (variableId: number, dependentVariableId: number) => Promise<boolean>;
   updateDependencies: (variableId: number, dependentVariableIds: number[]) => Promise<boolean>;
 }
 
@@ -46,10 +33,9 @@ export const useVariables = (): UseVariablesReturn => {
     data: variablesData,
     error,
     isLoading,
-  } = useSWR<VariablesResponse>(VARIABLES_ENDPOINT, async (url: string) => {
-    const response = await backendInstance.get(url);
-    return response.data;
-  });
+  } = useSWR<VariablesResponse>(VARIABLES_ENDPOINT, (url: string) =>
+    backendInstance.get(url).then((r) => r.data)
+  );
 
   const refreshVariables = async (): Promise<void> => {
     await mutate(VARIABLES_ENDPOINT);
@@ -57,8 +43,7 @@ export const useVariables = (): UseVariablesReturn => {
 
   const getVariable = async (id: number): Promise<Variable | null> => {
     try {
-      const response = await backendInstance.get(`${VARIABLES_ENDPOINT}${id}/`);
-      return response.data;
+      return await backendInstance.get(`${VARIABLES_ENDPOINT}${id}/`).then((r) => r.data);
     } catch (error) {
       console.error('Error fetching variable:', error);
       return null;
@@ -70,13 +55,15 @@ export const useVariables = (): UseVariablesReturn => {
       let response;
 
       if (id) {
-        response = await backendInstance.put(`${VARIABLES_ENDPOINT}${id}/`, data);
+        response = await backendInstance.put(`${VARIABLES_ENDPOINT}${id}/`, data).then((r) => r.data);
       } else {
-        response = await backendInstance.post(`${VARIABLES_ENDPOINT}create-variable/`, data);
+        response = await backendInstance
+          .post(`${VARIABLES_ENDPOINT}create-variable/`, data)
+          .then((r) => r.data);
       }
 
       await refreshVariables();
-      return response.data;
+      return response;
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'An error occurred while saving the variable';
       toast({
@@ -107,57 +94,14 @@ export const useVariables = (): UseVariablesReturn => {
     }
   };
 
-  const getDependencies = async (id: number): Promise<VariableDependency[]> => {
-    try {
-      const url = DEPENDENCIES_ENDPOINT.replace('{id}', id.toString());
-      const response = await backendInstance.get(url);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching dependencies:', error);
-      return [];
-    }
-  };
-
-  const addDependency = async (variableId: number, dependentVariableId: number): Promise<boolean> => {
-    try {
-      await backendInstance.post(`${VARIABLES_ENDPOINT}${variableId}/add-dependency/`, {
-        dependent_variable_id: dependentVariableId,
-      });
-      return true;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to add dependency';
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
-  const removeDependency = async (variableId: number, dependentVariableId: number): Promise<boolean> => {
-    try {
-      await backendInstance.post(`${VARIABLES_ENDPOINT}${variableId}/remove-dependency/`, {
-        dependent_variable_id: dependentVariableId,
-      });
-      return true;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to remove dependency';
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
   const updateDependencies = async (variableId: number, dependentVariableIds: number[]): Promise<boolean> => {
     try {
-      await backendInstance.post(`${VARIABLES_ENDPOINT}batch-update-dependencies/`, {
+      await backendInstance.post(`${VARIABLES_ENDPOINT}update-dependencies/`, {
         variable_id: variableId,
         dependent_variable_ids: dependentVariableIds,
       });
+      await refreshVariables();
+      await mutate(`${VARIABLES_ENDPOINT}${variableId}/`);
       return true;
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to update dependencies';
@@ -178,9 +122,6 @@ export const useVariables = (): UseVariablesReturn => {
     saveVariable,
     deleteVariable,
     refreshVariables,
-    getDependencies,
-    addDependency,
-    removeDependency,
     updateDependencies,
   };
 };
