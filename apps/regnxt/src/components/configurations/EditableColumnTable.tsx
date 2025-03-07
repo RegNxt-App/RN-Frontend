@@ -136,7 +136,6 @@ export const EditableColumnTable: React.FC<EditableColumnTableProps> = ({
   }, [columnToDelete, datasetId, versionId, toast, mutateColumns]);
 
   const filteredColumns = useMemo(() => {
-    console.log('columns: ', columns);
     return (
       columns &&
       columns?.data?.filter(

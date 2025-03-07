@@ -1,8 +1,16 @@
-import {SystemVariable, VariableCardProps} from '@/types/databaseTypes';
+import {SystemVariable} from '@/types/databaseTypes';
 import {FileText, Tag} from 'lucide-react';
 
 import {Button} from '@rn/ui/components/ui/button';
 import {Input} from '@rn/ui/components/ui/input';
+
+interface VariableCardProps {
+  selectedVariable: SystemVariable;
+  isEditing: boolean;
+  onEdit: () => void;
+  onSave: (variable: SystemVariable) => void;
+  onChange: (variable: SystemVariable) => void;
+}
 
 export function VariableCard({selectedVariable, isEditing, onEdit, onSave, onChange}: VariableCardProps) {
   return (

@@ -3,7 +3,15 @@ import {Link, useLocation, useNavigate} from 'react-router-dom';
 
 import {useAuth} from '@/contexts/AuthContext';
 import {motion} from 'framer-motion';
-import {Database, GitBranch, LogOut, LucideIcon, Settings, User} from 'lucide-react';
+import {
+  Database,
+  GitBranch,
+  GitPullRequestCreateArrow,
+  LogOut,
+  LucideIcon,
+  Settings,
+  User,
+} from 'lucide-react';
 
 import {Avatar, AvatarFallback, AvatarImage} from '@rn/ui/components/ui/avatar';
 import {Button} from '@rn/ui/components/ui/button';
@@ -70,6 +78,12 @@ const CollapsibleSidebar: React.FC<SidebarProps> = ({isExpanded, setIsExpanded})
       href: '/relationships/',
       name: 'Relationships',
       current: currentPath.startsWith('/relationships'),
+    },
+    {
+      icon: GitPullRequestCreateArrow,
+      href: '/lineage/',
+      name: 'Lineage',
+      current: currentPath.startsWith('/lineage'),
     },
   ];
 

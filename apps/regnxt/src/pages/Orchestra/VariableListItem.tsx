@@ -1,6 +1,11 @@
-import {SystemVariable, VariableListItemProps} from '@/types/databaseTypes';
+import {SystemVariable} from '@/types/databaseTypes';
 import {FileText} from 'lucide-react';
 
+interface VariableListItemProps {
+  variable: SystemVariable;
+  isSelected: boolean;
+  onSelect: (variable: SystemVariable) => void;
+}
 export function VariableListItem({variable, isSelected, onSelect}: VariableListItemProps) {
   return (
     <div

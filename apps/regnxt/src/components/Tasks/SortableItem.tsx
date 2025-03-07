@@ -1,7 +1,15 @@
-import {SortableItemProps} from '@/types/databaseTypes';
 import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {GripVertical} from 'lucide-react';
+
+interface SortableItemProps {
+  id: string;
+  label: string;
+  description: string;
+  selected?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+}
 
 export function SortableItem({id, label, selected, disabled, onClick}: SortableItemProps) {
   const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({id, disabled});

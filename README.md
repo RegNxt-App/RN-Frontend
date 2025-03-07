@@ -177,4 +177,3 @@ For support, email abdullahmujahidali1@gmail.com or join our [Slack channel](htt
 <div align="center">
   Made with ❤️ by the RegNxt Team
 </div>
-
