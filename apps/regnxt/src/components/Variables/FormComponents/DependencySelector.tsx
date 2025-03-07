@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import useVariables from '@/hooks/useVariables';
 import {Variable} from '@/types/databaseTypes';
@@ -20,28 +20,31 @@ interface DependencySelectorProps {
 const DependencySelector = React.memo(
   ({variableId, onDependenciesChange, initialDependencies = []}: DependencySelectorProps) => {
     const {variables} = useVariables();
+    const hasInitializedRef = useRef(false);
     const [selectedDependencies, setSelectedDependencies] = useState<Record<number, Variable>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all');
-    const [initialized, setInitialized] = useState(false);
     const [page, setPage] = useState(1);
     const [pageSize] = useState(5);
 
     useEffect(() => {
-      if (initialized || !variables?.length) return;
+      if (!variables?.length || hasInitializedRef.current) return;
 
       if (initialDependencies.length > 0) {
-        const depsMap = initialDependencies.reduce((acc, depId) => {
-          const variable = variables.find((v) => v.variable_id === depId);
-          if (variable) acc[depId] = variable;
-          return acc;
-        }, {} as Record<number, Variable>);
+        const depsMap = Object.fromEntries(
+          initialDependencies
+            .map((depId) => {
+              const variable = variables.find((v) => v.variable_id === depId);
+              return variable ? [depId, variable] : null;
+            })
+            .filter(Boolean)
+            .map((entry) => entry as [number, Variable])
+        );
 
         setSelectedDependencies(depsMap);
       }
-
-      setInitialized(true);
-    }, [variables, initialDependencies, initialized]);
+      hasInitializedRef.current = true;
+    }, [variables, initialDependencies]);
 
     useEffect(() => {
       const dependencyIds = Object.keys(selectedDependencies).map(Number);
@@ -50,22 +53,34 @@ const DependencySelector = React.memo(
 
     const filteredVariables = useMemo(() => {
       if (!variables) return [];
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      if (searchTerm === '' && filterType === 'all') {
+        return variables.filter((v) => v.variable_id !== variableId);
+      }
 
       return variables.filter(
         (v) =>
-          (v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            v.label.toLowerCase().includes(searchTerm.toLowerCase())) &&
+          (v.name.toLowerCase().includes(lowerSearchTerm) ||
+            v.label.toLowerCase().includes(lowerSearchTerm)) &&
           (filterType === 'all' || v.data_type === filterType) &&
           v.variable_id !== variableId
       );
     }, [variables, searchTerm, filterType, variableId]);
 
-    const totalPages = Math.ceil(filteredVariables.length / pageSize);
-    const currentPageVariables = filteredVariables.slice((page - 1) * pageSize, page * pageSize);
+    const {totalPages, currentPageVariables} = useMemo(() => {
+      const total = Math.max(1, Math.ceil(filteredVariables.length / pageSize));
+      const safePage = Math.min(page, total || 1);
+      const current = filteredVariables.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+      return {
+        totalPages: total,
+        currentPageVariables: current,
+      };
+    }, [filteredVariables, pageSize, page]);
 
     const uniqueDataTypes = useMemo(() => {
       if (!variables) return [];
-      return [...new Set(variables.map((v) => v.data_type))];
+      return Array.from(new Set(variables.map((v) => v.data_type)));
     }, [variables]);
 
     const handleAdd = useCallback((variable: Variable, e: React.MouseEvent) => {
