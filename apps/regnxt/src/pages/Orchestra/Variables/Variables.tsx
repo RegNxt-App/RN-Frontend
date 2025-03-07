@@ -13,7 +13,6 @@ import {Button} from '@rn/ui/components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
 
 const VARIABLES_ENDPOINT = '/api/v1/variables/';
-const DATA_TYPES_ENDPOINT = '/api/v1/variables/data-types/';
 interface VariablesResponse {
   count: number;
   num_pages: number;
@@ -23,7 +22,6 @@ interface VariablesResponse {
 const Variables: React.FC = () => {
   const {backendInstance} = useBackend();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('variables');
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
     variable: {variable_id: number; name: string} | null;
@@ -31,10 +29,6 @@ const Variables: React.FC = () => {
     isOpen: false,
     variable: null,
   });
-
-  const {data: dataTypes, error: typesError} = useSWR<string[]>(DATA_TYPES_ENDPOINT, (url: string) =>
-    backendInstance.get(url).then((r) => r.data)
-  );
 
   const {
     data: variablesData,
@@ -72,14 +66,6 @@ const Variables: React.FC = () => {
       setDeleteDialog({isOpen: false, variable: null});
     }
   };
-
-  if (typesError || variablesError) {
-    return (
-      <div className="p-6 text-center text-red-500">
-        Error loading data: {typesError?.message || variablesError?.message}
-      </div>
-    );
-  }
 
   const stats = useMemo(() => {
     if (!variablesData?.results) return {total: 0, active: 0, withDependencies: 0};

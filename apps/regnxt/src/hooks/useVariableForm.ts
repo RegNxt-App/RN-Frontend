@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {useNavigate, useParams} from 'react-router-dom';
 
@@ -170,9 +170,9 @@ export const useVariableForm = () => {
   const handleTypeChange = (value: string) => {
     setSelectedType(value);
   };
-  const handleDependenciesChange = (deps: number[]) => {
+  const handleDependenciesChange = useCallback((deps: number[]) => {
     setDependencies(deps);
-  };
+  }, []);
   const error = typesError || (isEditMode && variableError);
   const isLoading = isLoadingTypes || (isEditMode && isLoadingVariable);
 
