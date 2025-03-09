@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import {
   ApiResponse,
@@ -51,6 +51,8 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
   variablesResponse,
   subtypeParamsResponse,
 }) => {
+  const [runtimeParams, setRuntimeParams] = useState<{[key: string]: string}>({});
+
   const inputVariableId = variablesResponse?.find(
     (v) => v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
   )?.variable_id;
@@ -97,6 +99,10 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
     updateDesignTimeParams();
   }, [updateDesignTimeParams]);
 
+  const handleRuntimeParamsChange = useCallback((params: {[key: string]: string}) => {
+    setRuntimeParams(params);
+  }, []);
+
   if (!task) {
     return null;
   }
@@ -134,7 +140,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={onSave}
+                    onClick={() => onSave(runtimeParams)}
                     disabled={task?.is_predefined || isSaving}
                   >
                     Save Changes
@@ -203,6 +209,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
           inputOptionsResponse={inputOptionsResponse}
           outputOptionsResponse={outputOptionsResponse}
           subtypeParamsResponse={subtypeParamsResponse}
+          onRuntimeParamsChange={handleRuntimeParamsChange}
         />
 
         {task.task_type_code === 'transform' && (

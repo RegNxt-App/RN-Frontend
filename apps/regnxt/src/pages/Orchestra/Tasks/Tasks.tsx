@@ -103,10 +103,24 @@ export const TaskAccordion: React.FC = () => {
       };
     });
   };
-  const handleSaveChanges = async () => {
+  const handleSaveChanges = async (runtimeParams?: {[key: string]: string}) => {
     if (!selectedTask) return;
 
     setIsSaving(true);
+    if (runtimeParams && Object.keys(runtimeParams).length > 0) {
+      try {
+        const runtimeParamPromises = Object.entries(runtimeParams).map(([paramId, value]) => {
+          return backendInstance.put(`/api/v1/tasks/${selectedTask.task_id}/parameters/${paramId}/`, {
+            default_value: value,
+          });
+        });
+
+        await Promise.all(runtimeParamPromises);
+        console.log('Runtime parameters updated successfully');
+      } catch (error) {
+        console.error('Error updating runtime parameters:', error);
+      }
+    }
     const parameters = [];
 
     const inputVariableId = variablesResponse?.find(
