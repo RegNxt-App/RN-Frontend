@@ -22,6 +22,7 @@ interface VariablesResponse {
 const Variables: React.FC = () => {
   const {backendInstance} = useBackend();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
     variable: {variable_id: number; name: string} | null;
@@ -81,6 +82,22 @@ const Variables: React.FC = () => {
       withDependencies: withDependencies,
     };
   }, [variablesData?.results]);
+  const filteredVariables = useMemo(() => {
+    if (!variablesData?.results || !searchQuery.trim()) {
+      return variablesData?.results || [];
+    }
+
+    const query = searchQuery.toLowerCase();
+    return variablesData.results.filter(
+      (variable) =>
+        variable.name.toLowerCase().includes(query) ||
+        variable.label.toLowerCase().includes(query) ||
+        variable.data_type.toLowerCase().includes(query) ||
+        (variable.default_value !== null &&
+          variable.default_value !== undefined &&
+          String(variable.default_value).toLowerCase().includes(query))
+    );
+  }, [variablesData?.results, searchQuery]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -107,8 +124,10 @@ const Variables: React.FC = () => {
         </CardHeader>
         <CardContent>
           <VariableTable
-            variables={variablesData?.results || []}
+            variables={filteredVariables}
             onDeleteClick={handleDeleteClick}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
         </CardContent>
       </Card>
