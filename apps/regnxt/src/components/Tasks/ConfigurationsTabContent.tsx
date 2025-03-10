@@ -89,10 +89,10 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
 
   useEffect(() => {
     if (taskParameters) {
-      const initialValues = taskParameters.reduce((acc, param) => {
+      const initialValues = taskParameters.reduce((acc: {[key: number]: string}, param: RuntimeParameter) => {
         acc[param.parameter_id] = param.default_value || '';
         return acc;
-      }, {} as {[key: string]: string});
+      }, {});
       setEditedRuntimeParams(initialValues);
     }
   }, [taskParameters]);
@@ -103,7 +103,6 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
     }
   }, [editedRuntimeParams, onRuntimeParamsChange]);
 
-  // Handle runtime parameter changes
   const handleRuntimeParamChange = (parameterId: number, value: string) => {
     setEditedRuntimeParams((prev) => ({
       ...prev,

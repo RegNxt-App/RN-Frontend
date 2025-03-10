@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 
+import {useTask} from '@/contexts/TaskContext';
 import {
   ApiResponse,
   DatasetOption,
@@ -21,36 +22,30 @@ import {PropertiesTabContent} from './PropertiesTabContent';
 import {TransformationTab} from './TransformationTab';
 
 interface TaskDetailTabsProps {
-  task: Task | null;
-  currentTab: string;
-  setCurrentTab: (tab: string) => void;
-  isSaving: boolean;
-  designTimeParams: DesignTimeParams;
-  setDesignTimeParams: React.Dispatch<React.SetStateAction<DesignTimeParams>>;
-  onSave: () => Promise<void>;
-  onDelete: () => void;
-  onTaskChange: (field: keyof Task, value: string) => void;
   inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
   outputOptionsResponse?: ApiResponse<DatasetOption[]>;
-  variablesResponse?: VariableResponse[];
   subtypeParamsResponse?: SubtypeParamsResponse[];
+  onDelete: (task: Task) => void;
 }
 
 export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
-  task,
-  currentTab,
-  setCurrentTab,
-  isSaving,
-  designTimeParams,
-  setDesignTimeParams,
-  onSave,
-  onDelete,
-  onTaskChange,
   inputOptionsResponse,
   outputOptionsResponse,
-  variablesResponse,
   subtypeParamsResponse,
+  onDelete,
 }) => {
+  const {
+    selectedTask: task,
+    currentTab,
+    setCurrentTab,
+    isSaving,
+    designTimeParams,
+    setDesignTimeParams,
+    handleTaskChange,
+    handleSaveChanges,
+    mapTaskToDetails,
+    variablesResponse,
+  } = useTask();
   const [runtimeParams, setRuntimeParams] = useState<{[key: string]: string}>({});
 
   const inputVariableId = variablesResponse?.find(
@@ -106,11 +101,12 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
   if (!task) {
     return null;
   }
+  const mappedTask = mapTaskToDetails(task);
 
   return (
     <div className="space-y-4 lg:space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-2">
-        <h2 className="text-xl font-semibold">{task?.label}</h2>
+        <h2 className="text-xl font-semibold">{mappedTask?.label}</h2>
         <div className="flex gap-2 w-full sm:w-auto">
           <TooltipProvider>
             <Tooltip>
@@ -119,7 +115,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={onDelete}
+                    onClick={() => onDelete(task)}
                     disabled={task?.is_predefined || isSaving}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -140,8 +136,8 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={() => onSave(runtimeParams)}
-                    disabled={task?.is_predefined || isSaving}
+                    onClick={() => handleSaveChanges(runtimeParams)}
+                    disabled={mappedTask?.is_predefined || isSaving}
                   >
                     Save Changes
                   </Button>
@@ -198,11 +194,11 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
 
         <PropertiesTabContent
           task={task}
-          onTaskChange={onTaskChange}
+          onTaskChange={handleTaskChange}
         />
         <ConfigurationsTabContent
-          task={task}
-          onTaskChange={onTaskChange}
+          task={mappedTask}
+          onTaskChange={handleTaskChange}
           designTimeParams={designTimeParams}
           setDesignTimeParams={setDesignTimeParams}
           variablesResponse={variablesResponse}
@@ -216,7 +212,7 @@ export const TaskDetailTabs: React.FC<TaskDetailTabsProps> = ({
           <TabsContent value="transformation">
             <TransformationTab
               disabled={task.is_predefined}
-              onSave={onSave}
+              onSave={() => handleSaveChanges(runtimeParams)}
               task={task}
             />
           </TabsContent>
