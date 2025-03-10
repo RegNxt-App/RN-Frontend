@@ -22,7 +22,7 @@ const WorkflowManager = () => {
   const [isRunsDialogOpen, setIsRunsDialogOpen] = useState(false);
   const [isWorkflowDialogOpen, setIsWorkflowDialogOpen] = useState(false);
   const [selectedWorkflowForRuns, setSelectedWorkflowForRuns] = useState<number | null>(null);
-
+  const [searchQuery, setSearchQuery] = useState('');
   const {
     data: workflowsResponse,
     error,
@@ -39,6 +39,19 @@ const WorkflowManager = () => {
   );
 
   const workflows = workflowsResponse?.results || [];
+  const filteredWorkflows = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return workflows;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return workflows.filter(
+      (workflow) =>
+        workflow.label?.toLowerCase().includes(query) ||
+        workflow.code?.toLowerCase().includes(query) ||
+        workflow.description?.toLowerCase().includes(query)
+    );
+  }, [workflows, searchQuery]);
 
   const handlePlayClick = async (workflow: Workflow) => {
     try {
@@ -132,10 +145,12 @@ const WorkflowManager = () => {
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         <WorkflowTable
-          workflows={workflows}
+          workflows={filteredWorkflows}
           onPlayClick={handlePlayClick}
           onClockClick={handleClockClick}
           onEditClick={handleEditWorkflow}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
         <StartWorkflow
           selectedWorkflow={selectedWorkflow}

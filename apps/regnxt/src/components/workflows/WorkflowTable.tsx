@@ -10,14 +10,25 @@ import {Badge} from '@rn/ui/components/ui/badge';
 import {Button} from '@rn/ui/components/ui/button';
 import {Card, CardContent, CardHeader, CardTitle} from '@rn/ui/components/ui/card';
 
+import {WorkflowSearch} from './WorkflowSearch';
+
 interface WorkflowTableProps {
   workflows: Workflow[];
   onPlayClick: (workflow: Workflow) => void;
   onClockClick: (workflow: Workflow) => void;
   onEditClick: (workflow: Workflow) => void;
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
 }
 
-const WorkflowTable: React.FC<WorkflowTableProps> = ({workflows, onPlayClick, onClockClick, onEditClick}) => {
+const WorkflowTable: React.FC<WorkflowTableProps> = ({
+  workflows,
+  onPlayClick,
+  onClockClick,
+  onEditClick,
+  searchQuery,
+  onSearchChange,
+}) => {
   const columns = useMemo<ColumnDef<Workflow>[]>(
     () => [
       {
@@ -98,6 +109,12 @@ const WorkflowTable: React.FC<WorkflowTableProps> = ({workflows, onPlayClick, on
         <CardTitle>Workflows</CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="mb-4">
+          <WorkflowSearch
+            value={searchQuery}
+            onChange={onSearchChange}
+          />
+        </div>
         <SharedDataTable
           data={workflows}
           columns={columns}

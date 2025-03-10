@@ -7,6 +7,7 @@ import {TaskList} from '@/components/Tasks/TaskList';
 import {TaskStats} from '@/components/Tasks/TaskStats';
 import {useBackend} from '@/contexts/BackendContext';
 import {TaskConfigurationProvider} from '@/contexts/TaskConfigurationContext';
+import {TaskProvider, useTask} from '@/contexts/TaskContext';
 import {toast} from '@/hooks/use-toast';
 import {useTaskCategories} from '@/hooks/useTaskCategories';
 import {useTaskVariables} from '@/hooks/useTaskVariables';
@@ -35,15 +36,8 @@ export const TaskAccordion: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [taskSubTypes, setTaskSubTypes] = useState<TaskSubType[]>([]);
   const [expandedSubtypes, setExpandedSubtypes] = useState<string[]>([]);
-  const [currentTab, setCurrentTab] = useState('properties');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
-  const [designTimeParams, setDesignTimeParams] = useState<DesignTimeParams>({
-    sourceId: null,
-    sourceType: null,
-    destinationId: null,
-  });
 
   const TASKS_ENDPOINT = '/api/v1/tasks/';
   const TASK_TYPES_ENDPOINT = '/api/v1/tasks/task-type-list/';
@@ -94,85 +88,6 @@ export const TaskAccordion: React.FC = () => {
     setSelectedTask(null);
   };
 
-  const handleTaskChange = (field: keyof Task, value: string) => {
-    setSelectedTask((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        [field]: value,
-      };
-    });
-  };
-  const handleSaveChanges = async () => {
-    if (!selectedTask) return;
-
-    setIsSaving(true);
-    const parameters = [];
-
-    const inputVariableId = variablesResponse?.find(
-      (v) => v.name.toLowerCase().includes('input') && v.name.toLowerCase().includes('dataset')
-    )?.variable_id;
-
-    const outputVariableId = variablesResponse?.find(
-      (v) => v.name.toLowerCase().includes('output') && v.name.toLowerCase().includes('dataset')
-    )?.variable_id;
-
-    let parameterCount = 1;
-    if (inputVariableId) {
-      parameters.push({
-        id: parameterCount++,
-        parameter_id: inputVariableId,
-        source: designTimeParams.sourceType || 'dataset',
-        default_value: designTimeParams.sourceId,
-      });
-    }
-    if (outputVariableId) {
-      parameters.push({
-        id: parameterCount++,
-        parameter_id: outputVariableId,
-        source: 'dataset',
-        default_value: designTimeParams.destinationId,
-      });
-    }
-
-    try {
-      const payload = {
-        task_type_id: selectedTask.task_type_id,
-        label: selectedTask.label,
-        description: selectedTask.description,
-        context: selectedTask.context,
-        task_language: selectedTask.task_language,
-        task_code: selectedTask.task_code,
-        parameters: getParametersPayload(designTimeParams),
-      };
-
-      const {data} = await backendInstance.put(`/api/v1/tasks/${selectedTask.task_id}/`, payload);
-
-      setSelectedTask((prev) =>
-        prev
-          ? {
-              ...prev,
-              ...data,
-            }
-          : null
-      );
-
-      toast({
-        title: 'Success',
-        description: 'Task updated successfully',
-      });
-
-      setIsSaving(false);
-    } catch (error) {
-      console.error('Error updating task:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update task',
-        variant: 'destructive',
-      });
-      setIsSaving(false);
-    }
-  };
   const fetchAllSubtypes = async () => {
     try {
       if (!taskTypes.length) return;
@@ -225,25 +140,6 @@ export const TaskAccordion: React.FC = () => {
     }
   }, [taskTypes]);
 
-  const mapTaskToDetails = (task: Task): Task => {
-    return {
-      task_id: task.task_id,
-      code: task.code,
-      label: task.label,
-      description: task.description,
-      task_type_label: task.task_type_label,
-      is_predefined: task.is_predefined || false,
-      task_language: task.task_language,
-      task_code: task.task_code,
-      context: task.context,
-      task_type_id: task.task_type_id,
-      task_type_code: task.task_type_code,
-      task_subtype_id: task.task_subtype_id,
-      parameters: task.parameters || [],
-      upstream_tasks: null,
-    };
-  };
-
   const toggleSubtype = useCallback((subtypeKey: string) => {
     setExpandedSubtypes((prev) =>
       prev.includes(subtypeKey) ? prev.filter((key) => key !== subtypeKey) : [...prev, subtypeKey]
@@ -261,72 +157,73 @@ export const TaskAccordion: React.FC = () => {
       taskConfigurations={taskConfigurations}
       isLoading={isConfigLoading}
     >
-      <div className="p-4 lg:p-6 max-w-screen-2xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 lg:mb-8 space-y-4 md:space-y-0">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold mb-1">Task Management</h1>
-            <p className="text-sm">Configure and manage your data processing tasks</p>
+      <TaskProvider
+        getParametersPayload={getParametersPayload}
+        variablesResponse={variablesResponse}
+        subtypeParamsResponse={subtypeParamsResponse}
+        inputOptionsResponse={inputOptionsResponse}
+        outputOptionsResponse={outputOptionsResponse}
+        initialTask={selectedTask}
+        onTaskSelect={setSelectedTask}
+      >
+        <div className="p-4 lg:p-6 max-w-screen-2xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 lg:mb-8 space-y-4 md:space-y-0">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-1">Task Management</h1>
+              <p className="text-sm">Configure and manage your data processing tasks</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+              <Button onClick={() => setIsAddDialogOpen(true)}>Create a Task</Button>
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-            <Button onClick={() => setIsAddDialogOpen(true)}>Create a Task</Button>
+          <TaskStats tasks={tasks} />
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+            <TaskList
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              categories={filteredCategories}
+              expandedCategories={expandedCategories}
+              expandedSubtypes={expandedSubtypes}
+              onCategoryToggle={(category) => toggleCategory(category)}
+              onSubtypeToggle={(subtypeKey) => toggleSubtype(subtypeKey)}
+              onTaskSelect={(task) => setSelectedTask(task)}
+            />
+
+            <Card className="flex-1 p-4 lg:p-6">
+              {selectedTask ? (
+                <TaskDetailTabs
+                  inputOptionsResponse={inputOptionsResponse}
+                  outputOptionsResponse={outputOptionsResponse}
+                  subtypeParamsResponse={subtypeParamsResponse}
+                  onDelete={handleDeleteClick}
+                />
+              ) : (
+                <div className="h-[calc(100vh-16rem)] flex items-center justify-center">
+                  <div className="text-center">
+                    <FileText className="w-12 h-12 mx-auto mb-4" />
+                    <h3 className="text-3xl font-bold mb-2">No Task Selected</h3>
+                    <p>Select a task from the task browser to view and edit its details</p>
+                  </div>
+                </div>
+              )}
+            </Card>
           </div>
-        </div>
-        <TaskStats tasks={tasks} />
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-          <TaskList
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            categories={filteredCategories}
-            expandedCategories={expandedCategories}
-            expandedSubtypes={expandedSubtypes}
-            onCategoryToggle={(category) => toggleCategory(category)}
-            onSubtypeToggle={(subtypeKey) => toggleSubtype(subtypeKey)}
-            onTaskSelect={(task) => setSelectedTask(task)}
+          <AddTaskDialog
+            isOpen={isAddDialogOpen}
+            onOpenChange={setIsAddDialogOpen}
+            taskTypes={taskTypes}
+            taskSubTypes={taskSubTypes}
+            taskConfigurations={taskConfigurations}
           />
 
-          <Card className="flex-1 p-4 lg:p-6">
-            {selectedTask ? (
-              <TaskDetailTabs
-                task={selectedTask ? mapTaskToDetails(selectedTask) : null}
-                currentTab={currentTab}
-                setCurrentTab={setCurrentTab}
-                isSaving={isSaving}
-                designTimeParams={designTimeParams}
-                setDesignTimeParams={setDesignTimeParams}
-                onSave={handleSaveChanges}
-                onDelete={() => handleDeleteClick(selectedTask)}
-                inputOptionsResponse={inputOptionsResponse}
-                outputOptionsResponse={outputOptionsResponse}
-                variablesResponse={variablesResponse}
-                onTaskChange={handleTaskChange}
-                subtypeParamsResponse={subtypeParamsResponse}
-              />
-            ) : (
-              <div className="h-[calc(100vh-16rem)] flex items-center justify-center">
-                <div className="text-center">
-                  <FileText className="w-12 h-12 mx-auto mb-4" />
-                  <h3 className="text-3xl font-bold mb-2">No Task Selected</h3>
-                  <p>Select a task from the task browser to view and edit its details</p>
-                </div>
-              </div>
-            )}
-          </Card>
+          <DeleteTaskDialog
+            isOpen={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+            taskToDelete={taskToDelete}
+            onSuccess={handleDeleteSuccess}
+          />
         </div>
-        <AddTaskDialog
-          isOpen={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
-          taskTypes={taskTypes}
-          taskSubTypes={taskSubTypes}
-          taskConfigurations={taskConfigurations}
-        />
-
-        <DeleteTaskDialog
-          isOpen={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-          taskToDelete={taskToDelete}
-          onSuccess={handleDeleteSuccess}
-        />
-      </div>
+      </TaskProvider>
     </TaskConfigurationProvider>
   );
 };

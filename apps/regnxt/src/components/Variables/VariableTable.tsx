@@ -8,6 +8,7 @@ import {
   VisibilityState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -19,12 +20,21 @@ import {Button} from '@rn/ui/components/ui/button';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@rn/ui/components/ui/select';
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@rn/ui/components/ui/table';
 
+import {VariableSearch} from './VariableSearch';
+
 interface VariableTableProps {
   variables: Variable[];
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
   onDeleteClick: (variable: {variable_id: number; name: string}) => void;
 }
 
-const VariableTable: React.FC<VariableTableProps> = ({variables, onDeleteClick}) => {
+const VariableTable: React.FC<VariableTableProps> = ({
+  variables,
+  onDeleteClick,
+  searchQuery,
+  onSearchChange,
+}) => {
   const navigate = useNavigate();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -154,6 +164,7 @@ const VariableTable: React.FC<VariableTableProps> = ({variables, onDeleteClick})
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
@@ -162,6 +173,14 @@ const VariableTable: React.FC<VariableTableProps> = ({variables, onDeleteClick})
         pageIndex,
         pageSize,
       },
+      globalFilter: searchQuery,
+    },
+    onGlobalFilterChange: onSearchChange,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const value = row.getValue(columnId);
+      return value !== undefined && value !== null
+        ? String(value).toLowerCase().includes(filterValue.toLowerCase())
+        : false;
     },
     onPaginationChange: (updater) => {
       if (typeof updater === 'function') {
@@ -185,7 +204,11 @@ const VariableTable: React.FC<VariableTableProps> = ({variables, onDeleteClick})
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
+      <VariableSearch
+        value={searchQuery}
+        onChange={onSearchChange}
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader>

@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 
 import {AddRuntimeParameterDialog} from '@/components/AddRuntimeParameterDialog';
 import {useBackend} from '@/contexts/BackendContext';
@@ -34,6 +34,7 @@ interface ConfigurationsTabContentProps {
   inputOptionsResponse?: ApiResponse<(DatasetOption | DataviewOption)[]>;
   outputOptionsResponse?: ApiResponse<DatasetOption[]>;
   subtypeParamsResponse?: SubtypeParamsResponse[];
+  onRuntimeParamsChange?: (params: {[key: string]: string}) => void;
 }
 
 export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> = ({
@@ -45,10 +46,12 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
   inputOptionsResponse,
   outputOptionsResponse,
   subtypeParamsResponse,
+  onRuntimeParamsChange,
 }) => {
   const {backendInstance} = useBackend();
 
   const {taskConfigurations, isLoading} = useTaskConfiguration();
+  const [editedRuntimeParams, setEditedRuntimeParams] = useState<{[key: string]: string}>({});
 
   const {
     data,
@@ -84,6 +87,28 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
     };
   }, [taskConfigurations?.taskTypes, task?.task_type_code, task?.task_subtype_id]);
 
+  useEffect(() => {
+    if (taskParameters) {
+      const initialValues = taskParameters.reduce((acc: {[key: number]: string}, param: RuntimeParameter) => {
+        acc[param.parameter_id] = param.default_value || '';
+        return acc;
+      }, {});
+      setEditedRuntimeParams(initialValues);
+    }
+  }, [taskParameters]);
+
+  useEffect(() => {
+    if (onRuntimeParamsChange && Object.keys(editedRuntimeParams).length > 0) {
+      onRuntimeParamsChange(editedRuntimeParams);
+    }
+  }, [editedRuntimeParams, onRuntimeParamsChange]);
+
+  const handleRuntimeParamChange = (parameterId: number, value: string) => {
+    setEditedRuntimeParams((prev) => ({
+      ...prev,
+      [parameterId]: value,
+    }));
+  };
   const handleParameterAdd = () => {
     mutateParams();
   };
@@ -317,10 +342,16 @@ export const ConfigurationsTabContent: React.FC<ConfigurationsTabContentProps> =
                   </div>
                   <div className="space-y-2">
                     <Label>Default Value</Label>
-                    <Input
-                      value={param.default_value || ''}
-                      disabled
-                    />
+                    <TooltipWrapper
+                      disabled={task.is_predefined}
+                      disabledMessage="You cannot modify a system-generated task"
+                    >
+                      <Input
+                        value={editedRuntimeParams[param.parameter_id] || ''}
+                        onChange={(e) => handleRuntimeParamChange(param.parameter_id, e.target.value)}
+                        disabled={task.is_predefined}
+                      />
+                    </TooltipWrapper>
                   </div>
                   <div className="space-y-2">
                     <Label>Description</Label>
