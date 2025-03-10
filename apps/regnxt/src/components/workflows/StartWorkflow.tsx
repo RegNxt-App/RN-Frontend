@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 import {useBackend} from '@/contexts/BackendContext';
 import {useDebounce} from '@/hooks/use-debounce';
@@ -31,6 +31,7 @@ const StartWorkflow: React.FC<StartWorkflowProps> = ({
   const [parameters, setParameters] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const debouncedParameters = useDebounce(parameters, 300);
+  const previousParametersRef = useRef({});
 
   useEffect(() => {
     if (selectedWorkflow && workflowParameters) {
@@ -52,49 +53,77 @@ const StartWorkflow: React.FC<StartWorkflowProps> = ({
   }, [selectedWorkflow, workflowParameters]);
 
   useEffect(() => {
-    if (selectedWorkflow && Object.keys(debouncedParameters).length > 0) {
-      const hasParametersWithDependencies = workflowParameters.some(
-        (param) => param.dependencies && param.dependencies.length > 0
-      );
+    if (!selectedWorkflow || !Object.keys(debouncedParameters).length) return;
 
-      if (hasParametersWithDependencies) {
-        const fetchDependentOptions = async () => {
-          try {
-            const response = await backendInstance.post(
-              `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/dependent-options/`,
-              {parameters: debouncedParameters}
-            );
+    const hasParametersWithDependencies = workflowParameters.some(
+      (param) => param.dependencies && param.dependencies.length > 0
+    );
 
-            if (response.data) {
-              const updatedParameters = workflowParameters.map((param) => {
-                if (response.data[param.name]) {
-                  return {
-                    ...param,
-                    options: response.data[param.name],
-                  };
-                }
-                return param;
-              });
+    const hasChanged = JSON.stringify(previousParametersRef.current) !== JSON.stringify(debouncedParameters);
 
-              mutate(
-                `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/parameters/`,
-                updatedParameters,
-                false
-              );
-            }
-          } catch (error) {
-            console.error('Error fetching dependent options:', error);
-            toast({
-              title: 'Error',
-              description: 'Failed to fetch parameter options',
-              variant: 'destructive',
-            });
+    if (!hasParametersWithDependencies || !hasChanged) return;
+
+    previousParametersRef.current = {...debouncedParameters};
+
+    const fetchDependentOptions = async () => {
+      try {
+        const response = await backendInstance.post(
+          `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/dependent-options/`,
+          {parameters: debouncedParameters}
+        );
+
+        if (!response.data) return;
+
+        const updatedParameters = [...workflowParameters];
+        let hasUpdates = false;
+        let parameterUpdates: Record<string, string> = {};
+
+        for (const param of updatedParameters) {
+          const newOptions = response.data[param.name];
+
+          if (!newOptions || !Array.isArray(newOptions)) continue;
+
+          const oldOptionsJson = JSON.stringify(param.options || []);
+          const newOptionsJson = JSON.stringify(newOptions);
+
+          if (oldOptionsJson === newOptionsJson) continue;
+
+          param.options = newOptions;
+          hasUpdates = true;
+
+          const currentValue = parameters[param.name];
+          const valueExists =
+            currentValue && newOptions.some((opt) => String(opt.value) === String(currentValue));
+
+          if (currentValue && !valueExists) {
+            parameterUpdates[param.name] = newOptions.length ? String(newOptions[0].value) : '';
+          } else if (!currentValue && newOptions.length) {
+            parameterUpdates[param.name] = String(newOptions[0].value);
           }
-        };
+        }
 
-        fetchDependentOptions();
+        if (Object.keys(parameterUpdates).length) {
+          setParameters((prev) => ({...prev, ...parameterUpdates}));
+        }
+
+        if (hasUpdates) {
+          mutate(
+            `${WORKFLOWS_ENDPOINT}${selectedWorkflow.workflow_id}/parameters/`,
+            updatedParameters,
+            false
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching dependent options:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch parameter options',
+          variant: 'destructive',
+        });
       }
-    }
+    };
+
+    fetchDependentOptions();
   }, [debouncedParameters, selectedWorkflow, workflowParameters]);
   const handleStartWorkflow = async () => {
     if (!selectedWorkflow) return;
