@@ -14,8 +14,14 @@ import {BackendProvider} from './contexts/BackendContext';
 import {WorkflowProvider} from './contexts/WorkflowContext';
 import DefaultLayout from './layout/DefaultLayout';
 import ApplicationSettings from './pages/Orchestra/ApplicationSettings';
+import Connections from './pages/Orchestra/Connections/Connections';
+import CreateConnection from './pages/Orchestra/Connections/CreateConnection';
+import EditConnection from './pages/Orchestra/Connections/EditConnection';
+import {CreateEditDataview} from './pages/Orchestra/DataViews/CreateEditDataview';
 import {TaskAccordion} from './pages/Orchestra/Tasks/Tasks';
 import UserSettings from './pages/Orchestra/UserSettings';
+import VariableForm from './pages/Orchestra/Variables/VariableForm';
+import Variables from './pages/Orchestra/Variables/Variables';
 import WorkflowManager from './pages/Orchestra/workflows/Workflows';
 
 const SignIn = lazy(() => import('./pages/Authentication/SignIn'));
@@ -40,10 +46,8 @@ const Template = lazy(() => import('./pages/Configuration/Template'));
 const RegulatoryCalender = lazy(() => import('./pages/Configuration/RegulatoryCalender'));
 const Validation = lazy(() => import('./pages/Configuration/Validation'));
 
-const Connections = lazy(() => import('./pages/Orchestra/Connections'));
-const Variables = lazy(() => import('./pages/Orchestra/Variables'));
 const Datasets = lazy(() => import('./pages/Orchestra/Datasets'));
-const Dataviews = lazy(() => import('./pages/Orchestra/Dataviews'));
+const Dataviews = lazy(() => import('./pages/Orchestra/DataViews/Dataviews'));
 const Workflows = lazy(() => import('./pages/Orchestra/workflows/Workflows'));
 const Monitoring = lazy(() => import('./pages/Orchestra/Monitoring'));
 const Data = lazy(() => import('./pages/Orchestra/Data/Data'));
@@ -53,6 +57,7 @@ const Processing = lazy(() => import('./pages/Orchestra/Processing/Processing'))
 const ConfigureDataSetView = lazy(() => import('./pages/ConfigureDataSetView'));
 const DataSetView = lazy(() => import('./pages/DataSetView'));
 const Relationship = lazy(() => import('./pages/Relationship'));
+const Lineage = lazy(() => import('./pages/Lineage'));
 const ConfigureDatasets = lazy(() => import('./components/configurations/ConfigureDatasets'));
 const ConfigureGrouping = lazy(() => import('./components/configurations/ConfigureGrouping'));
 
@@ -99,9 +104,15 @@ const routeConfig = {
       title: 'Orchestra',
     },
     {path: '/orchestra/connections', component: Connections, title: 'Orchestra'},
+    {path: '/orchestra/connections/new', component: CreateConnection, title: 'Orchestra'},
+    {path: '/orchestra/connections/edit/:id', component: EditConnection, title: 'Orchestra'},
     {path: '/orchestra/variables', component: Variables, title: 'Orchestra'},
+    {path: '/orchestra/variables/create', component: VariableForm, title: 'Orchestra'},
+    {path: '/orchestra/variables/:variableId/edit', component: VariableForm, title: 'Orchestra'},
     {path: '/orchestra/datasets', component: Datasets, title: 'Orchestra'},
     {path: '/orchestra/dataviews', component: Dataviews, title: 'Orchestra'},
+    {path: '/orchestra/dataviews/create', component: CreateEditDataview, title: 'Orchestra'},
+    {path: '/orchestra/dataviews/:id/edit', component: CreateEditDataview, title: 'Orchestra'},
     {path: '/orchestra/tasks', component: TaskAccordion, title: 'Orchestra'},
     {path: '/orchestra/workflows', component: WorkflowsWithProvider, title: 'Orchestra'},
     {path: '/orchestra/monitoring', component: Monitoring, title: 'Orchestra'},
@@ -115,6 +126,7 @@ const routeConfig = {
     {path: '/bird/configuration', component: () => <ConfigureDataSetView />, title: 'Bird'},
     {path: '/bird/data', component: () => <DataSetView />, title: 'Bird'},
     {path: '/bird/relationships', component: () => <Relationship />, title: 'Bird'},
+    {path: '/bird/lineage', component: () => <Lineage />, title: 'Bird'},
     {path: '/bird/configuration/dataset', component: () => <ConfigureDatasets />, title: 'Bird'},
     {path: '/bird/configuration/groups', component: () => <ConfigureGrouping />, title: 'Bird'},
   ],
@@ -123,7 +135,6 @@ const routeConfig = {
 const ProtectedRoute = ({component: Component, title}: {component: React.ComponentType; title: string}) => {
   const {user, loading, refreshUserSession} = useAuth();
   const location = useLocation();
-  console.log('test commit');
   useEffect(() => {
     if (!user) {
       refreshUserSession();

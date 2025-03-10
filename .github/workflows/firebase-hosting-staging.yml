@@ -5,8 +5,15 @@ on:
       - main
     types: [opened, synchronize, reopened]
 
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+  deployments: write
+
 jobs:
   build_and_preview:
+    # Only run if PR is from staging branch to main
     if: github.head_ref == 'staging'
     runs-on: ubuntu-latest
     steps:
