@@ -29,27 +29,52 @@ interface Join {
 }
 
 interface JoinConfigurationProps {
-  selectedObjects: {id: string; name: string}[];
+  selectedObjects: any[]; // Use a more permissive type to handle different object formats
   config: any;
   updateConfig: (config: any) => void;
 }
 
 export function JoinConfiguration({selectedObjects, config, updateConfig}: JoinConfigurationProps) {
   const {useObjectColumns} = useDataView();
+  
+  console.log('JoinConfiguration - Selected Objects:', selectedObjects);
+  // Ensure objects are properly formatted for the API call
+  const normalizedObjects = selectedObjects.map(obj => {
+    // Handle different possible object structures
+    const id = obj.id || '';
+    // For type, try to extract from id if not directly available
+    const type = obj.type || (id.includes('_') ? id.split('_')[0] : '');
+    // Use version from original object or create a default one
+    const version = obj.version || { id: obj.version_id || 1 };
+    // For name, try different possible fields or fallback to id
+    const name = obj.name || obj.label || id;
+    
+    const normalized = { id, type, version, name };
+    console.log('Normalized object:', normalized);
+    return normalized;
+  }).filter(obj => obj.id && obj.type);
+
   const {
     data: columnsData,
     isLoading: isLoadingColumns,
     error: columnsError,
-  } = useObjectColumns(selectedObjects.filter((obj) => obj.version?.id));
+  } = useObjectColumns(normalizedObjects);
+  console.log('API Response - columnsData:', columnsData);
+
   const initialTables: Table[] =
-    columnsData?.map((tableData) => ({
-      id: tableData.id,
-      name: tableData.name,
-      columns: tableData.columns.map((col) => ({
-        name: col.name,
-        type: col.type,
-      })),
-    })) || [];
+    columnsData?.map((tableData) => {
+      console.log('Processing table data:', tableData);
+      return {
+        id: tableData.id,
+        name: tableData.name,
+        columns: Array.isArray(tableData.columns) 
+          ? tableData.columns.map((col) => ({
+              name: col.name,
+              type: col.type,
+            }))
+          : []
+      };
+    }) || [];
 
   const initialJoins: Join[] = config.joins || [];
   const [tables, setTables] = useState<Table[]>(initialTables);
@@ -57,17 +82,22 @@ export function JoinConfiguration({selectedObjects, config, updateConfig}: JoinC
   const [sqlQuery, setSqlQuery] = useState<string>(generateSqlFromJoins(initialTables, initialJoins));
 
   useEffect(() => {
-    if (columnsData) {
-      setTables(
-        columnsData.map((tableData) => ({
-          id: tableData.id,
-          name: tableData.name,
-          columns: tableData.columns.map((col) => ({
-            name: col.name,
-            type: col.type,
-          })),
-        }))
-      );
+    if (columnsData && Array.isArray(columnsData) && columnsData.length > 0) {
+      console.log('Updating tables from useEffect with columnsData:', columnsData);
+      
+      const updatedTables = columnsData.map((tableData) => ({
+        id: tableData.id,
+        name: tableData.name,
+        columns: Array.isArray(tableData.columns) 
+          ? tableData.columns.map((col) => ({
+              name: col.name || 'Unknown',
+              type: col.type || 'string',
+            }))
+          : []
+      }));
+      
+      console.log('Updated tables:', updatedTables);
+      setTables(updatedTables);
     }
   }, [columnsData]);
 

@@ -130,7 +130,7 @@ export function useDataView(dataviewId?: string | number) {
       async ([url]) => {
         const params = new URLSearchParams({
           page: String(page),
-          page_size: '10',
+          page_size: '50',
           ...(searchTerm && {search: searchTerm}),
           ...(framework && {framework}),
         });
@@ -182,38 +182,75 @@ export function useDataView(dataviewId?: string | number) {
     selectedObjects: Array<{
       id: string;
       type: string;
-      version: {id: number};
+      version?: {id: number} | null;
+      name?: string;
     }>
   ) => {
+    // Log input for debugging
+    console.log('useObjectColumns - Input objects:', selectedObjects);
+    
     // Create array of keys for column fetching
     const keys = selectedObjects
-      .filter((obj) => obj.version?.id)
+      .filter((obj) => {
+        // Check if object has required properties
+        const hasVersion = obj.version && typeof obj.version.id === 'number';
+        const hasId = typeof obj.id === 'string' && obj.id.length > 0;
+        if (!hasVersion || !hasId) {
+          console.warn('Skipping object due to missing properties:', obj);
+        }
+        return hasVersion && hasId;
+      })
       .map((obj) => {
-        const [type, objId] = obj.id.split('_');
+        // Extract object_type and object_id from the composite id if needed
+        let type = obj.type;
+        let objId;
+        
+        if (obj.id.includes('_')) {
+          const parts = obj.id.split('_');
+          // If type wasn't provided, use the first part of the id
+          if (!type) type = parts[0];
+          objId = parts[1];
+        } else {
+          objId = obj.id;
+        }
+        
+        console.log('Creating API params for object:', {
+          objectType: type, 
+          objectId: objId,
+          versionId: obj.version?.id
+        });
+        
         return {
           url: `${apiEndpoint}columns/`,
           params: {
             object_type: type,
             object_id: objId,
-            version_id: obj.version.id,
+            version_id: obj.version?.id,
           },
+          origObj: obj, // Keep reference to original object
         };
       });
 
     return useSWR(
       keys.length ? keys : null,
       async (keys) => {
+        console.log('Fetching columns for keys:', keys);
         try {
           const responses = await Promise.all(
             keys.map((key) => orchestraBackendInstance.get(key.url, {params: key.params}))
           );
 
+          console.log('API responses:', responses.map(r => r.data));
+
           // Transform the responses into a consistent format
-          return responses.map((response, index) => ({
-            id: selectedObjects[index].id,
-            name: selectedObjects[index].name || selectedObjects[index].id,
-            columns: response.data.results,
-          }));
+          return responses.map((response, index) => {
+            const origObj = keys[index].origObj;
+            return {
+              id: origObj.id,
+              name: origObj.name || origObj.id,
+              columns: response.data.results || [],
+            };
+          });
         } catch (error) {
           console.error('Error fetching columns:', error);
           throw new Error('Failed to fetch columns data');

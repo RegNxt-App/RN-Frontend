@@ -80,7 +80,7 @@ export function ObjectSelection({config = [], updateConfig, framework}: ObjectSe
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Description</TableHead>
+                    <TableHead>Framework</TableHead>
                     <TableHead className="w-[100px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -89,7 +89,7 @@ export function ObjectSelection({config = [], updateConfig, framework}: ObjectSe
                     <TableRow key={obj.id}>
                       <TableCell>{obj.name}</TableCell>
                       <TableCell className="capitalize">{obj.type}</TableCell>
-                      <TableCell>{obj.description}</TableCell>
+                      <TableCell>{obj.framework}</TableCell>
                       <TableCell>
                         {obj.id in selectedObjects ? (
                           <Button

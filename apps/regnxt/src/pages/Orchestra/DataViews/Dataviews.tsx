@@ -111,8 +111,6 @@ export default function Dataviews() {
     };
   }, [viewsData]);
 
-  console.log("console.log('Table Data:', data);: ", viewsData);
-
   if (error) {
     return <div>Error loading data views: {error.message}</div>;
   }

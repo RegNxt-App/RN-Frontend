@@ -1,4 +1,4 @@
-import {useEffect, useState, useCallback} from 'react';
+import {useEffect, useState} from 'react';
 
 import {
   ColumnDef,
@@ -13,7 +13,6 @@ import {
 } from '@tanstack/react-table';
 import {ArrowUpDown, MoreHorizontal} from 'lucide-react';
 
-// Custom hook for debouncing values
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 

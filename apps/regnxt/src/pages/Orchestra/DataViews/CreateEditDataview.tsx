@@ -313,7 +313,14 @@ export function CreateEditDataview() {
                 <JoinConfiguration
                   config={dataViewConfig.joins}
                   updateConfig={(data) => updateConfig('joins', data)}
-                  selectedObjects={dataViewConfig.objects}
+                  selectedObjects={dataViewConfig.objects.map(obj => ({
+                    ...obj,
+                    // Ensure consistent structure for each object
+                    id: obj.id,
+                    type: obj.type,
+                    name: obj.name || obj.label || obj.id,
+                    version: obj.version || { id: obj.version_id || 1 }
+                  }))}
                 />
               )}
               {currentStep === 3 && (
